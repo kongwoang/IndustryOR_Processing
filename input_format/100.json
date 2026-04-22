@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    "string"
+  ],
+  "bandwidth_matrix": [
+    [
+      "number"
+    ]
+  ],
+  "source": "string",
+  "target": "string",
+  "must_pass_through": [
+    "string"
+  ]
+}

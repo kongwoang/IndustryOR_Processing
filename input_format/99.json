@@ -1,0 +1,19 @@
+{
+  "components": [
+    "string"
+  ],
+  "max_spares_per_component": "integer",
+  "reliability_by_component_and_spares": {
+    "component_id": [
+      "number indexed by spare count from 0 to max_spares_per_component"
+    ]
+  },
+  "unit_price_yuan": {
+    "component_id": "number"
+  },
+  "unit_weight_kg": {
+    "component_id": "number"
+  },
+  "budget_limit_yuan": "number",
+  "weight_limit_kg": "number"
+}

@@ -1,0 +1,11 @@
+{
+  "selected_spares": {
+    "component_id": "integer"
+  },
+  "component_reliabilities": {
+    "component_id": "number"
+  },
+  "total_cost_yuan": "number",
+  "total_weight_kg": "number",
+  "system_reliability": "number"
+}
