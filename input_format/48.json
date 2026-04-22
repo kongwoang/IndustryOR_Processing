@@ -1,0 +1,42 @@
+{
+  "products": [
+    "string"
+  ],
+  "processes": {
+    "I": {
+      "hours_per_unit": {
+        "A": "number",
+        "B": "number"
+      },
+      "weekly_capacity": "number"
+    },
+    "II": {
+      "hours_per_unit": {
+        "A": "number",
+        "B": "number"
+      },
+      "weekly_capacity": "number",
+      "max_overtime": "number"
+    }
+  },
+  "regular_profit_per_unit": {
+    "A": "number",
+    "B": "number"
+  },
+  "overtime_profit_reduction_per_unit": {
+    "A": "number",
+    "B": "number"
+  },
+  "goals": {
+    "min_weekly_profit": "number",
+    "min_weekly_production": {
+      "A": "number",
+      "B": "number"
+    },
+    "process_I_target_hours": "number",
+    "process_II_regular_target_hours": "number"
+  },
+  "priority_order": [
+    "string"
+  ]
+}

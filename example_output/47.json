@@ -1,0 +1,22 @@
+{
+  "crop_plan_hectares": {
+    "soybean": 0,
+    "corn": 39,
+    "wheat": 0
+  },
+  "livestock_plan": {
+    "dairy_cows": 21,
+    "chickens": 50
+  },
+  "external_work_person_days": {
+    "autumn_winter": 5,
+    "spring_summer": 10
+  },
+  "resource_usage": {
+    "land_hectares_used": 70.5,
+    "funds_yuan_used": 8550,
+    "autumn_winter_person_days_used": 3495,
+    "spring_summer_person_days_used": 3990
+  },
+  "total_annual_net_income_yuan": 20230
+}

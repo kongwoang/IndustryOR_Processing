@@ -1,0 +1,22 @@
+{
+  "regular_nurses_by_start_time": {
+    "02:00": 0,
+    "06:00": 15,
+    "10:00": 10,
+    "14:00": 10,
+    "18:00": 8,
+    "22:00": 10
+  },
+  "contract_nurses_by_start_time": {
+    "02:00": 0,
+    "06:00": 0,
+    "10:00": 0,
+    "14:00": 0,
+    "18:00": 0,
+    "22:00": 0
+  },
+  "total_regular_nurses": 53,
+  "total_contract_nurses": 0,
+  "hire_contract_nurses": false,
+  "total_cost_yuan": 4240
+}

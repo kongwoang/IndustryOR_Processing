@@ -1,0 +1,21 @@
+{
+  "time_periods": [
+    {
+      "start": "string (HH:MM)",
+      "end": "string (HH:MM)",
+      "required_nurses": "integer"
+    }
+  ],
+  "shift_start_times": [
+    "string (HH:MM)"
+  ],
+  "shift_length_hours": "integer",
+  "nurse_types": {
+    "regular": {
+      "hourly_pay": "number"
+    },
+    "contract": {
+      "hourly_pay": "number"
+    }
+  }
+}

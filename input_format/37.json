@@ -1,0 +1,18 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "profit_per_unit": "number",
+      "process_hours": {
+        "I": "number",
+        "II": "number"
+      },
+      "minimum_units": "number"
+    }
+  ],
+  "process_capacities": {
+    "I": "number",
+    "II": "number"
+  },
+  "minimum_total_profit": "number"
+}

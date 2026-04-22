@@ -1,0 +1,17 @@
+{
+  "open_stations": [
+    {
+      "station_id": "int",
+      "used": "0_or_1",
+      "throughput": "number"
+    }
+  ],
+  "shipments": [
+    {
+      "from_production": "int",
+      "via_station": "int",
+      "to_demand": "int",
+      "quantity": "number"
+    }
+  ]
+}

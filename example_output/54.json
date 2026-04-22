@@ -1,0 +1,18 @@
+{
+  "production_plan": {
+    "I": 22.533333,
+    "II": 23.2,
+    "III": 7.333333
+  },
+  "equipment_usage_hours": {
+    "A": 300.0,
+    "B": 400.0,
+    "C": 420.0
+  },
+  "unused_capacity_hours": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0
+  },
+  "max_profit_thousand_yuan": 135.266667
+}

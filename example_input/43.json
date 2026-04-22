@@ -1,0 +1,21 @@
+{
+  "requirements": {
+    "raw_material_A_min_pieces": 240,
+    "raw_material_B_min_kg": 80,
+    "raw_material_C_min_tons": 120
+  },
+  "warehouses": {
+    "A": {
+      "raw_material_A_per_truck": 4,
+      "raw_material_B_per_truck": 2,
+      "raw_material_C_per_truck": 6,
+      "cost_per_truck": 200
+    },
+    "B": {
+      "raw_material_A_per_truck": 7,
+      "raw_material_B_per_truck": 2,
+      "raw_material_C_per_truck": 2,
+      "cost_per_truck": 160
+    }
+  }
+}

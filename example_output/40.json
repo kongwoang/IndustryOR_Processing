@@ -1,0 +1,17 @@
+{
+  "production_units": {
+    "steel": 32795.396402,
+    "engines": 39666.429511,
+    "electronic_components": 6200.027556,
+    "plastic": 5001.262588
+  },
+  "net_exports_units": {
+    "steel": 0.0,
+    "engines": 38798.48343,
+    "electronic_components": 0.0,
+    "plastic": 0.0
+  },
+  "imported_goods_cost_klunz": 21909158.108192,
+  "labor_used_person_months": 830000.0,
+  "gdp_klunz": 36288567.036946
+}

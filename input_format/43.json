@@ -1,0 +1,21 @@
+{
+  "requirements": {
+    "raw_material_A_min_pieces": "integer",
+    "raw_material_B_min_kg": "integer",
+    "raw_material_C_min_tons": "integer"
+  },
+  "warehouses": {
+    "A": {
+      "raw_material_A_per_truck": "integer",
+      "raw_material_B_per_truck": "integer",
+      "raw_material_C_per_truck": "integer",
+      "cost_per_truck": "number"
+    },
+    "B": {
+      "raw_material_A_per_truck": "integer",
+      "raw_material_B_per_truck": "integer",
+      "raw_material_C_per_truck": "integer",
+      "cost_per_truck": "number"
+    }
+  }
+}

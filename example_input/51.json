@@ -1,0 +1,51 @@
+{
+  "time_periods": [
+    {
+      "start": "02:00",
+      "end": "06:00",
+      "required_nurses": 10
+    },
+    {
+      "start": "06:00",
+      "end": "10:00",
+      "required_nurses": 15
+    },
+    {
+      "start": "10:00",
+      "end": "14:00",
+      "required_nurses": 25
+    },
+    {
+      "start": "14:00",
+      "end": "18:00",
+      "required_nurses": 20
+    },
+    {
+      "start": "18:00",
+      "end": "22:00",
+      "required_nurses": 18
+    },
+    {
+      "start": "22:00",
+      "end": "02:00",
+      "required_nurses": 12
+    }
+  ],
+  "shift_start_times": [
+    "02:00",
+    "06:00",
+    "10:00",
+    "14:00",
+    "18:00",
+    "22:00"
+  ],
+  "shift_length_hours": 8,
+  "nurse_types": {
+    "regular": {
+      "hourly_pay": 10
+    },
+    "contract": {
+      "hourly_pay": 15
+    }
+  }
+}

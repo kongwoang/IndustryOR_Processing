@@ -1,0 +1,22 @@
+{
+  "crop_plan_hectares": {
+    "soybean": "number",
+    "corn": "number",
+    "wheat": "number"
+  },
+  "livestock_plan": {
+    "dairy_cows": "integer",
+    "chickens": "integer"
+  },
+  "external_work_person_days": {
+    "autumn_winter": "integer",
+    "spring_summer": "integer"
+  },
+  "resource_usage": {
+    "land_hectares_used": "number",
+    "funds_yuan_used": "number",
+    "autumn_winter_person_days_used": "integer",
+    "spring_summer_person_days_used": "integer"
+  },
+  "total_annual_net_income_yuan": "number"
+}

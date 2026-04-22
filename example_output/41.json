@@ -1,0 +1,45 @@
+{
+  "investments": [
+    {
+      "product_id": "p1",
+      "start_year": 1,
+      "amount": 380000.0
+    },
+    {
+      "product_id": "p2",
+      "start_year": 1,
+      "amount": 120000.0
+    },
+    {
+      "product_id": "p1",
+      "start_year": 2,
+      "amount": 306000.0
+    },
+    {
+      "product_id": "p3",
+      "start_year": 2,
+      "amount": 150000.0
+    },
+    {
+      "product_id": "p1",
+      "start_year": 3,
+      "amount": 687200.0
+    },
+    {
+      "product_id": "p4",
+      "start_year": 3,
+      "amount": 100000.0
+    }
+  ],
+  "cash_carryover": [
+    {
+      "from_year_end": 1,
+      "amount": 0.0
+    },
+    {
+      "from_year_end": 2,
+      "amount": 0.0
+    }
+  ],
+  "ending_wealth": 964640.0
+}

@@ -1,0 +1,17 @@
+{
+  "production_units": {
+    "steel": "number",
+    "engines": "number",
+    "electronic_components": "number",
+    "plastic": "number"
+  },
+  "net_exports_units": {
+    "steel": "number",
+    "engines": "number",
+    "electronic_components": "number",
+    "plastic": "number"
+  },
+  "imported_goods_cost_klunz": "number",
+  "labor_used_person_months": "number",
+  "gdp_klunz": "number"
+}

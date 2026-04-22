@@ -1,0 +1,44 @@
+{
+  "initial_capital": 500000,
+  "horizon_years": 3,
+  "products": [
+    {
+      "id": "p1",
+      "available_at_start_of_years": [
+        1,
+        2,
+        3
+      ],
+      "maturity_end_of_year": 1,
+      "payoff_multiplier": 1.2,
+      "capacity": null
+    },
+    {
+      "id": "p2",
+      "available_at_start_of_years": [
+        1
+      ],
+      "maturity_end_of_year": 2,
+      "payoff_multiplier": 1.5,
+      "capacity": 120000
+    },
+    {
+      "id": "p3",
+      "available_at_start_of_years": [
+        2
+      ],
+      "maturity_end_of_year": 2,
+      "payoff_multiplier": 1.6,
+      "capacity": 150000
+    },
+    {
+      "id": "p4",
+      "available_at_start_of_years": [
+        3
+      ],
+      "maturity_end_of_year": 3,
+      "payoff_multiplier": 1.4,
+      "capacity": 100000
+    }
+  ]
+}

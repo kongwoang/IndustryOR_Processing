@@ -1,0 +1,36 @@
+{
+  "time_periods": [
+    {
+      "shift": 1,
+      "time": "6:00-10:00",
+      "required_number": 60
+    },
+    {
+      "shift": 2,
+      "time": "10:00-14:00",
+      "required_number": 70
+    },
+    {
+      "shift": 3,
+      "time": "14:00-18:00",
+      "required_number": 60
+    },
+    {
+      "shift": 4,
+      "time": "18:00-22:00",
+      "required_number": 50
+    },
+    {
+      "shift": 5,
+      "time": "22:00-2:00",
+      "required_number": 20
+    },
+    {
+      "shift": 6,
+      "time": "2:00-6:00",
+      "required_number": 30
+    }
+  ],
+  "work_hours_per_staff": 8,
+  "hours_per_time_period": 4
+}

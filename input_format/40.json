@@ -1,0 +1,21 @@
+{
+  "commodities": [
+    "string"
+  ],
+  "world_prices_klunz": {
+    "<commodity>": "number"
+  },
+  "production_requirements": {
+    "<commodity>": {
+      "inputs": {
+        "<input_commodity>": "number"
+      },
+      "imported_goods_klunz": "number",
+      "labor_person_months": "number"
+    }
+  },
+  "capacity_upper_bounds": {
+    "<commodity>": "number"
+  },
+  "total_labor_person_months": "number"
+}

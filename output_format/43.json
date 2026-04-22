@@ -1,0 +1,4 @@
+{
+  "trucks_from_warehouse_A": "integer",
+  "trucks_from_warehouse_B": "integer"
+}

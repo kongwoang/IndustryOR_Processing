@@ -1,0 +1,26 @@
+{
+  "assigned_hours": {
+    "<student_id>": {
+      "Monday": "integer",
+      "Tuesday": "integer",
+      "Wednesday": "integer",
+      "Thursday": "integer",
+      "Friday": "integer"
+    }
+  },
+  "selected_shifts": {
+    "<student_id>": [
+      "string"
+    ]
+  },
+  "total_hours_per_student": {
+    "<student_id>": "integer"
+  },
+  "students_scheduled_per_day": {
+    "Monday": "integer",
+    "Tuesday": "integer",
+    "Wednesday": "integer",
+    "Thursday": "integer",
+    "Friday": "integer"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "minimum_total_staff": "integer",
+  "staff_starting_each_shift": [
+    {
+      "shift": "integer",
+      "time": "string",
+      "count": "integer"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "production": {
+    "A": 12,
+    "B": 17
+  },
+  "process_time_used": {
+    "I": 150,
+    "II": 70
+  },
+  "total_profit": 11250
+}

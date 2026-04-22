@@ -1,0 +1,81 @@
+{
+  "resources": {
+    "technical_preparation_hours": 100,
+    "labor_hours": 700,
+    "materials_kg": 400
+  },
+  "products": {
+    "A": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": 1,
+        "labor_hours": 10,
+        "materials_kg": 3
+      },
+      "profit_tiers": [
+        {
+          "min_units": 0,
+          "max_units": 40,
+          "unit_profit": 10
+        },
+        {
+          "min_units": 40,
+          "max_units": 100,
+          "unit_profit": 9
+        },
+        {
+          "min_units": 100,
+          "max_units": 150,
+          "unit_profit": 8
+        },
+        {
+          "min_units": 150,
+          "max_units": null,
+          "unit_profit": 7
+        }
+      ]
+    },
+    "B": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": 2,
+        "labor_hours": 4,
+        "materials_kg": 2
+      },
+      "profit_tiers": [
+        {
+          "min_units": 0,
+          "max_units": 50,
+          "unit_profit": 6
+        },
+        {
+          "min_units": 50,
+          "max_units": 100,
+          "unit_profit": 4
+        },
+        {
+          "min_units": 100,
+          "max_units": null,
+          "unit_profit": 3
+        }
+      ]
+    },
+    "C": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": 1,
+        "labor_hours": 5,
+        "materials_kg": 1
+      },
+      "profit_tiers": [
+        {
+          "min_units": 0,
+          "max_units": 100,
+          "unit_profit": 5
+        },
+        {
+          "min_units": 100,
+          "max_units": null,
+          "unit_profit": 4
+        }
+      ]
+    }
+  }
+}

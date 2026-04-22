@@ -1,0 +1,35 @@
+{
+  "minimum_total_staff": 150,
+  "staff_starting_each_shift": [
+    {
+      "shift": 1,
+      "time": "6:00-10:00",
+      "count": 60
+    },
+    {
+      "shift": 2,
+      "time": "10:00-14:00",
+      "count": 10
+    },
+    {
+      "shift": 3,
+      "time": "14:00-18:00",
+      "count": 50
+    },
+    {
+      "shift": 4,
+      "time": "18:00-22:00",
+      "count": 0
+    },
+    {
+      "shift": 5,
+      "time": "22:00-2:00",
+      "count": 30
+    },
+    {
+      "shift": 6,
+      "time": "2:00-6:00",
+      "count": 0
+    }
+  ]
+}

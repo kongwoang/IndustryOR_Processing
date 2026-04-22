@@ -1,0 +1,12 @@
+{
+  "production_quantities": {
+    "A": "integer",
+    "B": "integer",
+    "C": "integer"
+  },
+  "selected_profit_tiers": {
+    "A": "string or null",
+    "B": "string or null",
+    "C": "string or null"
+  }
+}

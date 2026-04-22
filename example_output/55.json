@@ -1,0 +1,9 @@
+{
+  "minimum_number_of_courses": 4,
+  "selected_courses": [
+    "Calculus",
+    "Operations Research",
+    "Computer Simulation",
+    "Computer Programming"
+  ]
+}

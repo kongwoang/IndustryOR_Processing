@@ -1,0 +1,14 @@
+{
+  "months": [
+    "string"
+  ],
+  "buy_prices": [
+    "number"
+  ],
+  "sell_prices": [
+    "number"
+  ],
+  "initial_inventory": "number",
+  "warehouse_capacity": "number",
+  "purchases_at_beginning_of_month": "boolean"
+}

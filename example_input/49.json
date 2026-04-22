@@ -1,0 +1,43 @@
+{
+  "months": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "required_area_sqm": {
+    "1": 1500,
+    "2": 1000,
+    "3": 2000,
+    "4": 1200
+  },
+  "contract_options": [
+    {
+      "length_months": 1,
+      "rental_fee_per_100sqm_yuan": 4000
+    },
+    {
+      "length_months": 2,
+      "rental_fee_per_100sqm_yuan": 7500
+    },
+    {
+      "length_months": 3,
+      "rental_fee_per_100sqm_yuan": 10500
+    },
+    {
+      "length_months": 4,
+      "rental_fee_per_100sqm_yuan": 13000
+    }
+  ],
+  "area_unit_sqm": 100,
+  "rules": {
+    "allow_parallel_contracts": true,
+    "min_distinct_contract_lengths": 2,
+    "max_distinct_contract_lengths": 3,
+    "mutual_exclusion_lengths": [
+      1,
+      4
+    ],
+    "exact_monthly_satisfaction": true
+  }
+}

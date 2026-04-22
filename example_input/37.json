@@ -1,0 +1,27 @@
+{
+  "products": [
+    {
+      "name": "A",
+      "profit_per_unit": 300,
+      "process_hours": {
+        "I": 4,
+        "II": 3
+      },
+      "minimum_units": 10
+    },
+    {
+      "name": "B",
+      "profit_per_unit": 450,
+      "process_hours": {
+        "I": 6,
+        "II": 2
+      },
+      "minimum_units": 15
+    }
+  ],
+  "process_capacities": {
+    "I": 150,
+    "II": 70
+  },
+  "minimum_total_profit": 10000
+}

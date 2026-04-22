@@ -1,0 +1,11 @@
+{
+  "time_periods": [
+    {
+      "shift": "integer",
+      "time": "string",
+      "required_number": "integer"
+    }
+  ],
+  "work_hours_per_staff": "integer",
+  "hours_per_time_period": "integer"
+}

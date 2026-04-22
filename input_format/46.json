@@ -1,0 +1,29 @@
+{
+  "students": [
+    {
+      "id": "integer",
+      "type": "string",
+      "wage": "number",
+      "availability_hours": {
+        "Monday": "integer",
+        "Tuesday": "integer",
+        "Wednesday": "integer",
+        "Thursday": "integer",
+        "Friday": "integer"
+      },
+      "min_weekly_hours": "integer",
+      "max_weekly_shifts": "integer"
+    }
+  ],
+  "days": [
+    "string"
+  ],
+  "daily_required_hours": {
+    "Monday": "integer",
+    "Tuesday": "integer",
+    "Wednesday": "integer",
+    "Thursday": "integer",
+    "Friday": "integer"
+  },
+  "max_students_per_day": "integer"
+}

@@ -1,0 +1,19 @@
+{
+  "product_order": [
+    "integer"
+  ],
+  "makespan": "integer",
+  "schedule": [
+    {
+      "position": "integer",
+      "product": "integer",
+      "machine_times": [
+        {
+          "machine": "integer",
+          "start": "integer",
+          "end": "integer"
+        }
+      ]
+    }
+  ]
+}

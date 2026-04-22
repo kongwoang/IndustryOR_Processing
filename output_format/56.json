@@ -1,0 +1,25 @@
+{
+  "purchase_plan": {
+    "month_1": "number",
+    "month_2": "number",
+    "month_3": "number"
+  },
+  "sales_plan": {
+    "month_1": "number",
+    "month_2": "number",
+    "month_3": "number"
+  },
+  "ending_inventory_by_month": {
+    "month_1": "number",
+    "month_2": "number",
+    "month_3": "number"
+  },
+  "ending_cash_by_month": {
+    "month_1": "number",
+    "month_2": "number",
+    "month_3": "number"
+  },
+  "total_sales_revenue": "number",
+  "total_purchase_cost": "number",
+  "final_cash": "number"
+}

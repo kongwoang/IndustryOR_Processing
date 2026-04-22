@@ -1,0 +1,15 @@
+{
+  "initial_capital": "number",
+  "horizon_years": "integer",
+  "products": [
+    {
+      "id": "string",
+      "available_at_start_of_years": [
+        "integer"
+      ],
+      "maturity_end_of_year": "integer",
+      "payoff_multiplier": "number",
+      "capacity": "number|null"
+    }
+  ]
+}

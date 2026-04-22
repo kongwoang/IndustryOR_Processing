@@ -1,0 +1,44 @@
+{
+  "minimum_total_rental_cost_yuan": 208000,
+  "used_contract_lengths_months": [
+    1,
+    2,
+    3
+  ],
+  "contracts": [
+    {
+      "start_month": 1,
+      "length_months": 1,
+      "units_of_100sqm": 7,
+      "area_sqm": 700,
+      "cost_yuan": 28000
+    },
+    {
+      "start_month": 1,
+      "length_months": 3,
+      "units_of_100sqm": 8,
+      "area_sqm": 800,
+      "cost_yuan": 84000
+    },
+    {
+      "start_month": 2,
+      "length_months": 3,
+      "units_of_100sqm": 2,
+      "area_sqm": 200,
+      "cost_yuan": 21000
+    },
+    {
+      "start_month": 3,
+      "length_months": 2,
+      "units_of_100sqm": 10,
+      "area_sqm": 1000,
+      "cost_yuan": 75000
+    }
+  ],
+  "monthly_covered_area_sqm": {
+    "1": 1500,
+    "2": 1000,
+    "3": 2000,
+    "4": 1200
+  }
+}

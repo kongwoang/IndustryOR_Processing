@@ -1,0 +1,21 @@
+{
+  "minimum_total_rental_cost_yuan": "number",
+  "used_contract_lengths_months": [
+    "integer"
+  ],
+  "contracts": [
+    {
+      "start_month": "integer",
+      "length_months": "integer",
+      "units_of_100sqm": "integer",
+      "area_sqm": "integer",
+      "cost_yuan": "integer"
+    }
+  ],
+  "monthly_covered_area_sqm": {
+    "1": "integer",
+    "2": "integer",
+    "3": "integer",
+    "4": "integer"
+  }
+}

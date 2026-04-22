@@ -1,0 +1,38 @@
+{
+  "regular_production": {
+    "A": "number",
+    "B": "number"
+  },
+  "overtime_production": {
+    "A": "number",
+    "B": "number"
+  },
+  "total_production": {
+    "A": "number",
+    "B": "number"
+  },
+  "profit": {
+    "gross_before_overtime_reduction": "number",
+    "overtime_reduction": "number",
+    "net": "number"
+  },
+  "process_hours": {
+    "I_total": "number",
+    "II_regular": "number",
+    "II_overtime": "number",
+    "II_total": "number"
+  },
+  "goal_deviations": {
+    "profit_shortfall": "number",
+    "A_contract_shortfall": "number",
+    "B_contract_shortfall": "number",
+    "process_I_underutilization": "number",
+    "process_II_regular_underutilization": "number"
+  },
+  "priority_objectives": {
+    "p1": "number",
+    "p2": "number",
+    "p3": "number",
+    "p4": "number"
+  }
+}

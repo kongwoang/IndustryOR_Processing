@@ -1,0 +1,18 @@
+{
+  "production_plan": {
+    "I": "number",
+    "II": "number",
+    "III": "number"
+  },
+  "equipment_usage_hours": {
+    "A": "number",
+    "B": "number",
+    "C": "number"
+  },
+  "unused_capacity_hours": {
+    "A": "number",
+    "B": "number",
+    "C": "number"
+  },
+  "max_profit_thousand_yuan": "number"
+}

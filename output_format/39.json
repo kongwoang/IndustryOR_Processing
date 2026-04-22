@@ -1,0 +1,11 @@
+{
+  "selected_methods": [
+    "string"
+  ],
+  "trips": {
+    "method_name": "integer"
+  },
+  "total_trips": "integer",
+  "total_capacity": "number",
+  "total_pollution": "number"
+}

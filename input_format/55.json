@@ -1,0 +1,18 @@
+{
+  "requirements": {
+    "Mathematics": "integer",
+    "Operations Research": "integer",
+    "Computer Science": "integer"
+  },
+  "courses": [
+    {
+      "name": "string",
+      "categories": [
+        "string"
+      ],
+      "prerequisites": [
+        "string"
+      ]
+    }
+  ]
+}

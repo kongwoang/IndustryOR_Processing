@@ -1,0 +1,23 @@
+{
+  "production_points": [
+    {
+      "id": "int",
+      "supply": "number"
+    }
+  ],
+  "demand_points": [
+    {
+      "id": "int",
+      "demand": "number"
+    }
+  ],
+  "stations": [
+    {
+      "id": "int",
+      "fixed_cost": "number",
+      "capacity": "number"
+    }
+  ],
+  "cost_source_to_station": "number matrix of shape m x p",
+  "cost_station_to_demand": "number matrix of shape p x n"
+}

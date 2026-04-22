@@ -1,0 +1,16 @@
+{
+  "investments": [
+    {
+      "product_id": "string",
+      "start_year": "integer",
+      "amount": "number"
+    }
+  ],
+  "cash_carryover": [
+    {
+      "from_year_end": "integer",
+      "amount": "number"
+    }
+  ],
+  "ending_wealth": "number"
+}

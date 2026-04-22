@@ -1,0 +1,15 @@
+{
+  "methods": [
+    {
+      "name": "string",
+      "pollution_per_trip": "number",
+      "capacity_per_trip": "number",
+      "max_trips": "integer|null"
+    }
+  ],
+  "selected_methods_count": "integer",
+  "require_selected_methods_to_be_used": "boolean",
+  "min_total_capacity": "number",
+  "max_total_trips": "integer",
+  "objective": "string"
+}

@@ -1,0 +1,13 @@
+{
+  "products": [
+    "integer"
+  ],
+  "machines": [
+    "integer"
+  ],
+  "processing_times": [
+    [
+      "integer"
+    ]
+  ]
+}

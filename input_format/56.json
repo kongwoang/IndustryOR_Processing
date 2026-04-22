@@ -1,0 +1,19 @@
+{
+  "warehouse_capacity": "number",
+  "initial_inventory": "number",
+  "initial_funds": "number",
+  "target_ending_inventory": "number",
+  "months": [
+    "integer"
+  ],
+  "purchase_prices": {
+    "1": "number",
+    "2": "number",
+    "3": "number"
+  },
+  "selling_prices": {
+    "1": "number",
+    "2": "number",
+    "3": "number"
+  }
+}

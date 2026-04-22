@@ -1,0 +1,15 @@
+{
+  "method_allocations": [
+    {
+      "name": "method_1",
+      "runs": 3
+    },
+    {
+      "name": "method_2",
+      "runs": 0
+    }
+  ],
+  "total_furnace_hours_used": 6,
+  "total_steel_tons": 30,
+  "total_fuel_cost": 150
+}

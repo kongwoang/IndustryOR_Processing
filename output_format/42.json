@@ -1,0 +1,11 @@
+{
+  "method_allocations": [
+    {
+      "name": "string, method identifier",
+      "runs": "number, optimal number of runs allocated to the method"
+    }
+  ],
+  "total_furnace_hours_used": "number",
+  "total_steel_tons": "number",
+  "total_fuel_cost": "number"
+}

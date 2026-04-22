@@ -1,0 +1,12 @@
+{
+  "regular_nurses_by_start_time": {
+    "HH:MM": "integer"
+  },
+  "contract_nurses_by_start_time": {
+    "HH:MM": "integer"
+  },
+  "total_regular_nurses": "integer",
+  "total_contract_nurses": "integer",
+  "hire_contract_nurses": "boolean",
+  "total_cost_yuan": "number"
+}

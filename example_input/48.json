@@ -1,0 +1,46 @@
+{
+  "products": [
+    "A",
+    "B"
+  ],
+  "processes": {
+    "I": {
+      "hours_per_unit": {
+        "A": 4,
+        "B": 6
+      },
+      "weekly_capacity": 150
+    },
+    "II": {
+      "hours_per_unit": {
+        "A": 3,
+        "B": 2
+      },
+      "weekly_capacity": 70,
+      "max_overtime": 30
+    }
+  },
+  "regular_profit_per_unit": {
+    "A": 300,
+    "B": 450
+  },
+  "overtime_profit_reduction_per_unit": {
+    "A": 20,
+    "B": 25
+  },
+  "goals": {
+    "min_weekly_profit": 10000,
+    "min_weekly_production": {
+      "A": 10,
+      "B": 15
+    },
+    "process_I_target_hours": 150,
+    "process_II_regular_target_hours": 70
+  },
+  "priority_order": [
+    "minimize_profit_shortfall",
+    "minimize_contract_shortfall",
+    "minimize_underutilization_of_process_I_and_regular_process_II",
+    "minimize_overtime_profit_reduction"
+  ]
+}

@@ -1,0 +1,24 @@
+# Ignore everything by default
+/*
+
+# Keep git settings file
+!.gitignore
+
+# Allow only requested files/folders
+!answers.csv
+!industryor.jsonl
+
+!example_input/
+!example_input/**
+
+!example_output/
+!example_output/**
+
+!input_format/
+!input_format/**
+
+!output_format/
+!output_format/**
+
+!questions_txt/
+!questions_txt/**

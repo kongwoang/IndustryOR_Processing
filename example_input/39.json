@@ -1,0 +1,27 @@
+{
+  "methods": [
+    {
+      "name": "motorcycle",
+      "pollution_per_trip": 40,
+      "capacity_per_trip": 10,
+      "max_trips": 8
+    },
+    {
+      "name": "small_truck",
+      "pollution_per_trip": 70,
+      "capacity_per_trip": 20,
+      "max_trips": null
+    },
+    {
+      "name": "large_truck",
+      "pollution_per_trip": 100,
+      "capacity_per_trip": 50,
+      "max_trips": null
+    }
+  ],
+  "selected_methods_count": 2,
+  "require_selected_methods_to_be_used": true,
+  "min_total_capacity": 300,
+  "max_total_trips": 20,
+  "objective": "minimize_total_pollution"
+}

@@ -1,0 +1,12 @@
+{
+  "production_quantities": {
+    "A": 40,
+    "B": 0,
+    "C": 60
+  },
+  "selected_profit_tiers": {
+    "A": "0-40",
+    "B": "0-50",
+    "C": "0-100"
+  }
+}

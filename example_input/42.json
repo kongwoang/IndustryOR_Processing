@@ -1,0 +1,19 @@
+{
+  "num_furnaces": 2,
+  "time_limit_hours_per_furnace": 12,
+  "methods": [
+    {
+      "name": "method_1",
+      "time_hours_per_run": 2,
+      "fuel_cost_per_run": 50,
+      "steel_tons_per_run": 10
+    },
+    {
+      "name": "method_2",
+      "time_hours_per_run": 3,
+      "fuel_cost_per_run": 70,
+      "steel_tons_per_run": 10
+    }
+  ],
+  "min_total_steel_tons": 30
+}

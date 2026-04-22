@@ -1,0 +1,36 @@
+{
+  "products": [
+    {
+      "name": "I",
+      "unit_profit_thousand_yuan": 3,
+      "equipment_hours": {
+        "A": 8,
+        "B": 10,
+        "C": 2
+      }
+    },
+    {
+      "name": "II",
+      "unit_profit_thousand_yuan": 2,
+      "equipment_hours": {
+        "A": 2,
+        "B": 5,
+        "C": 13
+      }
+    },
+    {
+      "name": "III",
+      "unit_profit_thousand_yuan": 2.9,
+      "equipment_hours": {
+        "A": 10,
+        "B": 8,
+        "C": 10
+      }
+    }
+  ],
+  "equipment_capacity_hours": {
+    "A": 300,
+    "B": 400,
+    "C": 420
+  }
+}

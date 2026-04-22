@@ -1,0 +1,51 @@
+{
+  "resources": {
+    "technical_preparation_hours": "number",
+    "labor_hours": "number",
+    "materials_kg": "number"
+  },
+  "products": {
+    "A": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": "number",
+        "labor_hours": "number",
+        "materials_kg": "number"
+      },
+      "profit_tiers": [
+        {
+          "min_units": "integer",
+          "max_units": "integer or null",
+          "unit_profit": "number"
+        }
+      ]
+    },
+    "B": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": "number",
+        "labor_hours": "number",
+        "materials_kg": "number"
+      },
+      "profit_tiers": [
+        {
+          "min_units": "integer",
+          "max_units": "integer or null",
+          "unit_profit": "number"
+        }
+      ]
+    },
+    "C": {
+      "resource_usage_per_unit": {
+        "technical_preparation_hours": "number",
+        "labor_hours": "number",
+        "materials_kg": "number"
+      },
+      "profit_tiers": [
+        {
+          "min_units": "integer",
+          "max_units": "integer or null",
+          "unit_profit": "number"
+        }
+      ]
+    }
+  }
+}

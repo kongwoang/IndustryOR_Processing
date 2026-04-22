@@ -1,0 +1,13 @@
+{
+  "num_furnaces": "integer, number of furnaces available",
+  "time_limit_hours_per_furnace": "number, available operating hours for each furnace",
+  "methods": [
+    {
+      "name": "string, method identifier",
+      "time_hours_per_run": "number, furnace-hours required for one run of the method",
+      "fuel_cost_per_run": "number, fuel expense for one run of the method",
+      "steel_tons_per_run": "number, steel output from one run of the method"
+    }
+  ],
+  "min_total_steel_tons": "number, minimum required steel production"
+}

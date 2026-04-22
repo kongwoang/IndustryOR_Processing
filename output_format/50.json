@@ -1,0 +1,14 @@
+{
+  "months": [
+    "string"
+  ],
+  "purchase": [
+    "number"
+  ],
+  "sales": [
+    "number"
+  ],
+  "ending_inventory": [
+    "number"
+  ]
+}
