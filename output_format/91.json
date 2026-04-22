@@ -1,0 +1,7 @@
+{
+  "production": {
+    "A": "number",
+    "B": "number"
+  },
+  "total_profit": "number"
+}

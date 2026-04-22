@@ -1,0 +1,19 @@
+{
+  "products": [
+    {
+      "name": "A",
+      "profit_per_unit": 3,
+      "assembly_time_minutes": 12
+    },
+    {
+      "name": "B",
+      "profit_per_unit": 5,
+      "assembly_time_minutes": 25
+    }
+  ],
+  "weekly_machine_time_hours": 30,
+  "min_B_per_A_ratio": {
+    "B_units": 2,
+    "A_units": 5
+  }
+}

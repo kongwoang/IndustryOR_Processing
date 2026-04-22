@@ -1,0 +1,14 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "profit_per_unit": "number",
+      "assembly_time_minutes": "number"
+    }
+  ],
+  "weekly_machine_time_hours": "number",
+  "min_B_per_A_ratio": {
+    "B_units": "number",
+    "A_units": "number"
+  }
+}
