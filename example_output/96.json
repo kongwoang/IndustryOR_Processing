@@ -1,0 +1,57 @@
+{
+  "selected_patterns": [
+    {
+      "rank": 1,
+      "pattern_id": 8,
+      "times_used": 14,
+      "pieces_per_raw_pipe": {
+        "290": 1,
+        "315": 2,
+        "350": 0,
+        "455": 2
+      },
+      "leftover_mm_per_raw_pipe": 20,
+      "cost_per_raw_pipe_in_raw_pipe_value_units": 1.1
+    },
+    {
+      "rank": 2,
+      "pattern_id": 2,
+      "times_used": 4,
+      "pieces_per_raw_pipe": {
+        "290": 0,
+        "315": 0,
+        "350": 5,
+        "455": 0
+      },
+      "leftover_mm_per_raw_pipe": 100,
+      "cost_per_raw_pipe_in_raw_pipe_value_units": 1.2
+    },
+    {
+      "rank": 3,
+      "pattern_id": 9,
+      "times_used": 1,
+      "pieces_per_raw_pipe": {
+        "290": 2,
+        "315": 0,
+        "350": 1,
+        "455": 2
+      },
+      "leftover_mm_per_raw_pipe": 10,
+      "cost_per_raw_pipe_in_raw_pipe_value_units": 1.3
+    }
+  ],
+  "total_raw_pipes": 19,
+  "produced_quantities": {
+    "290": 16,
+    "315": 28,
+    "350": 21,
+    "455": 30
+  },
+  "overproduction": {
+    "290": 1,
+    "315": 0,
+    "350": 0,
+    "455": 0
+  },
+  "total_leftover_mm": 690
+}

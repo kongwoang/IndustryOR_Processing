@@ -1,0 +1,31 @@
+{
+  "products": [
+    "string"
+  ],
+  "machines": {
+    "A": {
+      "machine_name": {
+        "available_time": "number",
+        "hourly_cost": "number",
+        "processing_time": {
+          "product_name": "number"
+        }
+      }
+    },
+    "B": {
+      "machine_name": {
+        "available_time": "number",
+        "hourly_cost": "number",
+        "processing_time": {
+          "product_name": "number"
+        }
+      }
+    }
+  },
+  "raw_material_cost": {
+    "product_name": "number"
+  },
+  "unit_price": {
+    "product_name": "number"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "production_plan": {
+    "A": 15,
+    "B": 9
+  },
+  "resource_usage": {
+    "steel_kg": 198,
+    "aluminum_kg": 300,
+    "labor_hours": 381,
+    "overtime_hours": 81
+  },
+  "profit_breakdown": {
+    "gross_profit_yuan": 174000,
+    "overtime_cost_yuan": 8100,
+    "net_profit_yuan": 165900
+  }
+}

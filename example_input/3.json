@@ -1,0 +1,35 @@
+{
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June"
+  ],
+  "demand": {
+    "January": 20000,
+    "February": 40000,
+    "March": 42000,
+    "April": 35000,
+    "May": 19000,
+    "June": 18500
+  },
+  "initial_workforce": 1000,
+  "initial_inventory": 15000,
+  "initial_backorder": 0,
+  "ending_inventory_min": 10000,
+  "ending_backorder_required": 0,
+  "sales_price_per_unit": 300,
+  "raw_material_cost_per_inhouse_unit": 90,
+  "outsourcing_cost_per_unit": 200,
+  "inventory_holding_cost_per_unit_month": 15,
+  "backorder_cost_per_unit_month": 35,
+  "labor_hours_per_unit": 5,
+  "regular_hours_per_worker_month": 160,
+  "regular_wage_per_hour": 30,
+  "max_overtime_hours_per_worker_month": 20,
+  "overtime_wage_per_hour": 40,
+  "hire_cost_per_worker": 5000,
+  "fire_cost_per_worker": 8000
+}

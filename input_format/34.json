@@ -1,0 +1,39 @@
+{
+  "container": {
+    "max_weight_tons": "number",
+    "min_weight_tons": "number"
+  },
+  "goods": {
+    "A": {
+      "quantity": "integer",
+      "weight_tons": "number"
+    },
+    "B": {
+      "quantity": "integer",
+      "weight_tons": "number"
+    },
+    "C": {
+      "quantity": "integer",
+      "weight_tons": "number"
+    },
+    "D": {
+      "quantity": "integer",
+      "weight_tons": "number"
+    },
+    "E": {
+      "quantity": "integer",
+      "weight_tons": "number"
+    }
+  },
+  "per_used_container_requirements": {
+    "D_min_units": "integer"
+  },
+  "packaging_requirements": [
+    {
+      "base_good": "string",
+      "paired_good": "string",
+      "min_paired_units_per_base_unit": "integer"
+    }
+  ],
+  "objective": "string"
+}

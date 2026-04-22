@@ -1,0 +1,16 @@
+{
+  "total_profit": "number",
+  "product_quantities": {
+    "product_name": "number"
+  },
+  "stage_A_allocation": {
+    "machine_name": {
+      "product_name": "number"
+    }
+  },
+  "stage_B_allocation": {
+    "machine_name": {
+      "product_name": "number"
+    }
+  }
+}

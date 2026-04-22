@@ -1,0 +1,27 @@
+{
+  "animal_types": [
+    "cows",
+    "sheep",
+    "chickens"
+  ],
+  "selling_price": {
+    "cows": 500,
+    "sheep": 200,
+    "chickens": 8
+  },
+  "feed_cost": {
+    "cows": 100,
+    "sheep": 80,
+    "chickens": 5
+  },
+  "manure_per_day": {
+    "cows": 10,
+    "sheep": 5,
+    "chickens": 3
+  },
+  "max_manure": 800,
+  "max_chickens": 50,
+  "min_cows": 10,
+  "min_sheep": 20,
+  "max_total_animals": 100
+}

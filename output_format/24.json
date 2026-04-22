@@ -1,0 +1,8 @@
+{
+  "truck_trips": "int",
+  "van_trips": "int",
+  "motorcycle_trips": "int",
+  "electric_vehicle_trips": "int",
+  "total_delivered_units": "int",
+  "total_pollution": "int"
+}

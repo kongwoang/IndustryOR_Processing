@@ -1,0 +1,41 @@
+{
+  "container_types": [
+    {
+      "code": 1,
+      "volume_cm3": 1500,
+      "demand_units": 500,
+      "variable_cost_per_unit": 5.0
+    },
+    {
+      "code": 2,
+      "volume_cm3": 2500,
+      "demand_units": 550,
+      "variable_cost_per_unit": 8.0
+    },
+    {
+      "code": 3,
+      "volume_cm3": 4000,
+      "demand_units": 700,
+      "variable_cost_per_unit": 10.0
+    },
+    {
+      "code": 4,
+      "volume_cm3": 6000,
+      "demand_units": 900,
+      "variable_cost_per_unit": 12.0
+    },
+    {
+      "code": 5,
+      "volume_cm3": 9000,
+      "demand_units": 400,
+      "variable_cost_per_unit": 16.0
+    },
+    {
+      "code": 6,
+      "volume_cm3": 12000,
+      "demand_units": 300,
+      "variable_cost_per_unit": 18.0
+    }
+  ],
+  "fixed_setup_cost": 1200.0
+}

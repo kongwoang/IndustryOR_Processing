@@ -1,0 +1,17 @@
+{
+  "production_plan": {
+    "A": "integer",
+    "B": "integer"
+  },
+  "resource_usage": {
+    "steel_kg": "number",
+    "aluminum_kg": "number",
+    "labor_hours": "number",
+    "overtime_hours": "number"
+  },
+  "profit_breakdown": {
+    "gross_profit_yuan": "number",
+    "overtime_cost_yuan": "number",
+    "net_profit_yuan": "number"
+  }
+}

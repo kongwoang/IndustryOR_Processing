@@ -1,0 +1,21 @@
+{
+  "warehouses": [
+    "string"
+  ],
+  "ports": [
+    "string"
+  ],
+  "supply": {
+    "warehouse_name": "integer"
+  },
+  "demand": {
+    "port_name": "integer"
+  },
+  "distance_km": {
+    "warehouse_name": {
+      "port_name": "number"
+    }
+  },
+  "truck_capacity_containers": "integer",
+  "truck_cost_eur_per_km": "number"
+}

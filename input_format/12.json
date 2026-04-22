@@ -1,0 +1,11 @@
+{
+  "container_types": [
+    {
+      "code": "int",
+      "volume_cm3": "int",
+      "demand_units": "int",
+      "variable_cost_per_unit": "float"
+    }
+  ],
+  "fixed_setup_cost": "float"
+}

@@ -1,0 +1,31 @@
+{
+  "production_quantity": {
+    "I": "number",
+    "II": "number",
+    "III": "number"
+  },
+  "route_allocation": {
+    "I": {
+      "A1-B1": "number",
+      "A1-B2": "number",
+      "A1-B3": "number",
+      "A2-B1": "number",
+      "A2-B2": "number",
+      "A2-B3": "number"
+    },
+    "II": {
+      "A1-B1": "number",
+      "A2-B1": "number"
+    },
+    "III": {
+      "A2-B2": "number"
+    }
+  },
+  "machine_usage": {
+    "A1": "number",
+    "A2": "number",
+    "B1": "number",
+    "B2": "number",
+    "B3": "number"
+  }
+}

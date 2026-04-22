@@ -1,0 +1,15 @@
+{
+  "shipments_containers": {
+    "warehouse_name": {
+      "port_name": "integer"
+    }
+  },
+  "shipments_trucks": {
+    "warehouse_name": {
+      "port_name": "integer"
+    }
+  },
+  "unused_containers": {
+    "warehouse_name": "integer"
+  }
+}

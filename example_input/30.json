@@ -1,0 +1,44 @@
+{
+  "requirements": {
+    "protein_g_min": 700,
+    "minerals_g_min": 30,
+    "vitamins_mg_min": 100
+  },
+  "feeds": [
+    {
+      "feed_id": 1,
+      "protein_g_per_kg": 3,
+      "minerals_g_per_kg": 1,
+      "vitamins_mg_per_kg": 0.5,
+      "price_yen_per_kg": 0.2
+    },
+    {
+      "feed_id": 2,
+      "protein_g_per_kg": 2,
+      "minerals_g_per_kg": 0.5,
+      "vitamins_mg_per_kg": 1,
+      "price_yen_per_kg": 0.7
+    },
+    {
+      "feed_id": 3,
+      "protein_g_per_kg": 1,
+      "minerals_g_per_kg": 0.2,
+      "vitamins_mg_per_kg": 0.2,
+      "price_yen_per_kg": 0.4
+    },
+    {
+      "feed_id": 4,
+      "protein_g_per_kg": 6,
+      "minerals_g_per_kg": 2,
+      "vitamins_mg_per_kg": 2,
+      "price_yen_per_kg": 0.3
+    },
+    {
+      "feed_id": 5,
+      "protein_g_per_kg": 18,
+      "minerals_g_per_kg": 0.5,
+      "vitamins_mg_per_kg": 0.8,
+      "price_yen_per_kg": 0.8
+    }
+  ]
+}

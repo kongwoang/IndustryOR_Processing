@@ -1,0 +1,36 @@
+{
+  "completed_products": 2924.137931,
+  "hours_allocated": {
+    "A": {
+      "Component 1": 0.0,
+      "Component 2": 100.0,
+      "Component 3": 0.0
+    },
+    "B": {
+      "Component 1": 88.275862,
+      "Component 2": 61.724138,
+      "Component 3": 0.0
+    },
+    "C": {
+      "Component 1": 80.0,
+      "Component 2": 0.0,
+      "Component 3": 0.0
+    },
+    "D": {
+      "Component 1": 0.0,
+      "Component 2": 53.793103,
+      "Component 3": 146.206897
+    }
+  },
+  "component_units_produced": {
+    "Component 1": 2924.137931,
+    "Component 2": 2924.137931,
+    "Component 3": 2924.137931
+  },
+  "hours_used_by_workshop": {
+    "A": 100.0,
+    "B": 150.0,
+    "C": 80.0,
+    "D": 200.0
+  }
+}

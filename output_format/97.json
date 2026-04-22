@@ -1,0 +1,21 @@
+{
+  "product_output_tons": {
+    "product_A": "number",
+    "product_B": "number"
+  },
+  "raw_allocation_tons": {
+    "product_A": {
+      "raw_A": "number",
+      "raw_B": "number",
+      "raw_C": "number",
+      "raw_D": "number"
+    },
+    "product_B": {
+      "raw_A": "number",
+      "raw_B": "number",
+      "raw_C": "number",
+      "raw_D": "number"
+    }
+  },
+  "total_profit_thousand_yuan": "number"
+}

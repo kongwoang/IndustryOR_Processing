@@ -1,0 +1,24 @@
+{
+  "raw_materials": [
+    {
+      "name": "string",
+      "sulfur_fraction": "number",
+      "purchase_cost_thousand_yuan_per_ton": "number",
+      "max_supply_tons": "number_or_null"
+    }
+  ],
+  "products": [
+    {
+      "name": "string",
+      "max_sulfur_fraction": "number",
+      "selling_price_thousand_yuan_per_ton": "number",
+      "max_demand_tons": "number"
+    }
+  ],
+  "process": {
+    "first_stage_mix": [
+      "string"
+    ],
+    "second_stage_added_raw": "string"
+  }
+}

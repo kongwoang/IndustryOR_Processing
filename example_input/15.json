@@ -1,0 +1,24 @@
+{
+  "n": 10,
+  "requirements": [
+    3,
+    5,
+    2,
+    4,
+    6,
+    5,
+    4,
+    3,
+    2,
+    1
+  ],
+  "costs": {
+    "buy_new": 10,
+    "slow_repair": 1,
+    "fast_repair": 3
+  },
+  "repair_times": {
+    "slow": 3,
+    "fast": 1
+  }
+}

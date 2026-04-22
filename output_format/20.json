@@ -1,0 +1,14 @@
+{
+  "production_quantities": {
+    "robots": "integer",
+    "model_cars": "integer",
+    "building_blocks": "integer",
+    "dolls": "integer"
+  },
+  "manufactured_types": {
+    "robots": "0_or_1",
+    "model_cars": "0_or_1",
+    "building_blocks": "0_or_1",
+    "dolls": "0_or_1"
+  }
+}

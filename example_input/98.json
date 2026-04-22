@@ -1,0 +1,24 @@
+{
+  "products": [
+    {
+      "name": "A",
+      "steel_kg_per_unit": 6,
+      "aluminum_kg_per_unit": 8,
+      "labor_hours_per_unit": 11,
+      "profit_yuan_per_unit": 5000
+    },
+    {
+      "name": "B",
+      "steel_kg_per_unit": 12,
+      "aluminum_kg_per_unit": 20,
+      "labor_hours_per_unit": 24,
+      "profit_yuan_per_unit": 11000
+    }
+  ],
+  "resources": {
+    "steel_kg": 200,
+    "aluminum_kg": 300,
+    "regular_labor_hours": 300
+  },
+  "overtime_cost_yuan_per_hour": 100
+}

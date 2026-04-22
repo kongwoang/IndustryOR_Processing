@@ -1,0 +1,10 @@
+{
+  "production_plan": [
+    {
+      "week": "integer",
+      "production_1000_boxes": "number",
+      "ending_inventory_1000_boxes": "number"
+    }
+  ],
+  "total_cost_1000_yuan": "number"
+}

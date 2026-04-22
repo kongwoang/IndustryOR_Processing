@@ -1,0 +1,10 @@
+{
+  "candidate_areas": [
+    "string"
+  ],
+  "coverage": {
+    "area_code": [
+      "string"
+    ]
+  }
+}

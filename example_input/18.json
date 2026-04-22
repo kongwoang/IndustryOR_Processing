@@ -1,0 +1,24 @@
+{
+  "regular_hours_per_week": 110,
+  "overtime_limit_hours_per_week": 10,
+  "products": [
+    {
+      "name": "curtain",
+      "production_rate_meters_per_hour": 1000,
+      "minimum_weekly_sales_meters": 70000,
+      "profit_per_meter_yuan": 2.5
+    },
+    {
+      "name": "clothing",
+      "production_rate_meters_per_hour": 1000,
+      "minimum_weekly_sales_meters": 45000,
+      "profit_per_meter_yuan": 1.5
+    }
+  ],
+  "priority_order": [
+    "fully_use_regular_time",
+    "keep_overtime_within_10_hours",
+    "meet_minimum_weekly_sales",
+    "minimize_overtime"
+  ]
+}

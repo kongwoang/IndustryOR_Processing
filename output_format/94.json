@@ -1,0 +1,18 @@
+{
+  "purchase_A_by_tier_t": {
+    "tier_1_up_to_500": "number",
+    "tier_2_500_to_1000": "number",
+    "tier_3_1000_to_1500": "number"
+  },
+  "total_purchase_A_t": "number",
+  "allocation_t": {
+    "A_to_type_I": "number",
+    "B_to_type_I": "number",
+    "A_to_type_II": "number",
+    "B_to_type_II": "number"
+  },
+  "gasoline_output_t": {
+    "type_I": "number",
+    "type_II": "number"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "orders": {
+    "A": "integer",
+    "B": "integer",
+    "C": "integer"
+  },
+  "tables": {
+    "A": "integer",
+    "B": "integer",
+    "C": "integer",
+    "total": "integer"
+  },
+  "total_cost": "number"
+}

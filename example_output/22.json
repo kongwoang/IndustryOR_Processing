@@ -1,0 +1,18 @@
+{
+  "production_units": {
+    "A1": 0,
+    "A2": 4500,
+    "A3": 5400
+  },
+  "activate": {
+    "A1": 0,
+    "A2": 1,
+    "A3": 1
+  },
+  "days_used": 19.81818181818182,
+  "days_unused": 2.18181818181818,
+  "total_sales_revenue": 1111500,
+  "total_variable_cost": 591210.0,
+  "total_fixed_activation_cost": 250000,
+  "net_profit": 270290.0
+}

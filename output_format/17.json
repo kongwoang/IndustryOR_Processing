@@ -1,0 +1,15 @@
+{
+  "plan_by_target": [
+    {
+      "target_id": "int",
+      "heavy_bombs": "int",
+      "light_bombs": "int",
+      "fuel_used_liters": "float",
+      "destroy_probability": "float"
+    }
+  ],
+  "total_heavy_bombs_used": "int",
+  "total_light_bombs_used": "int",
+  "total_fuel_used_liters": "float",
+  "success_probability_at_least_2_destroyed": "float"
+}

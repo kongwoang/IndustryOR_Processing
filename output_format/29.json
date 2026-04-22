@@ -1,0 +1,8 @@
+{
+  "total_recruited": "integer",
+  "max_preferred_specialty_people_under_p1": "integer",
+  "p2_shortfall": "integer",
+  "max_preferred_city_people_under_p1_and_best_p2": "integer",
+  "p3_shortfall": "integer",
+  "recruited_people_not_in_preferred_city": "integer"
+}

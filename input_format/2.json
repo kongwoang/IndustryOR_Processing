@@ -1,0 +1,5 @@
+{
+  "years": "array of integers",
+  "production_by_year": "object mapping year string to integer",
+  "pilots_trained_per_training_jet_per_year": "integer"
+}

@@ -1,0 +1,31 @@
+{
+  "selected_patterns": [
+    {
+      "rank": "integer",
+      "pattern_id": "integer",
+      "times_used": "integer",
+      "pieces_per_raw_pipe": {
+        "290": "integer",
+        "315": "integer",
+        "350": "integer",
+        "455": "integer"
+      },
+      "leftover_mm_per_raw_pipe": "integer",
+      "cost_per_raw_pipe_in_raw_pipe_value_units": "number"
+    }
+  ],
+  "total_raw_pipes": "integer",
+  "produced_quantities": {
+    "290": "integer",
+    "315": "integer",
+    "350": "integer",
+    "455": "integer"
+  },
+  "overproduction": {
+    "290": "integer",
+    "315": "integer",
+    "350": "integer",
+    "455": "integer"
+  },
+  "total_leftover_mm": "integer"
+}

@@ -1,0 +1,18 @@
+{
+  "production_meters": {
+    "curtain": "number",
+    "clothing": "number"
+  },
+  "hours": {
+    "regular": "number",
+    "overtime": "number",
+    "total": "number"
+  },
+  "profit_yuan": "number",
+  "goal_achievement": {
+    "unused_regular_hours": "number",
+    "overtime_excess_over_10_hours": "number",
+    "curtain_sales_shortfall_meters": "number",
+    "clothing_sales_shortfall_meters": "number"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "protein_amounts_100g": {
+    "chicken": "number",
+    "salmon": "number",
+    "tofu": "number"
+  },
+  "vegetable_packs": {
+    "broccoli": "integer",
+    "carrots": "integer",
+    "spinach": "integer",
+    "bell_pepper": "integer",
+    "mushrooms": "integer"
+  },
+  "total_cost": "number",
+  "total_weight_g": "number",
+  "total_protein_g": "number"
+}

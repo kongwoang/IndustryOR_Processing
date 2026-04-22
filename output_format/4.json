@@ -1,0 +1,5 @@
+{
+  "cows": "integer",
+  "sheep": "integer",
+  "chickens": "integer"
+}

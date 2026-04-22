@@ -1,0 +1,22 @@
+{
+  "protein_options": [
+    {
+      "name": "string",
+      "protein_per_100g": "number",
+      "cost_per_100g": "number"
+    }
+  ],
+  "vegetable_options": [
+    {
+      "name": "string",
+      "protein_per_pack": "number",
+      "cost_per_pack": "number",
+      "weight_per_pack_g": "number"
+    }
+  ],
+  "constraints": {
+    "budget_max": "number",
+    "weight_max_g": "number",
+    "min_distinct_vegetables": "integer"
+  }
+}

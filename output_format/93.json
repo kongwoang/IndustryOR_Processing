@@ -1,0 +1,10 @@
+{
+  "production_barrels": {
+    "A1": "number",
+    "A2": "number"
+  },
+  "production_kg": {
+    "A1": "number",
+    "A2": "number"
+  }
+}

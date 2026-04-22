@@ -1,0 +1,14 @@
+{
+  "completed_products": "number",
+  "hours_allocated": {
+    "<workshop_name>": {
+      "<component_name>": "number"
+    }
+  },
+  "component_units_produced": {
+    "<component_name>": "number"
+  },
+  "hours_used_by_workshop": {
+    "<workshop_name>": "number"
+  }
+}

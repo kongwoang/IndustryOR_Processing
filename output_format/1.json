@@ -1,0 +1,28 @@
+{
+  "training_starts": [
+    {
+      "week": "int",
+      "new_workers_started_training": "int",
+      "skilled_trainers_assigned": "int"
+    }
+  ],
+  "weekly_plan": [
+    {
+      "week": "int",
+      "overtime_skilled_workers": "int",
+      "trained_workers_available_for_production": "int",
+      "production_kg": {
+        "I": "number",
+        "II": "number"
+      },
+      "ending_inventory_kg": {
+        "I": "number",
+        "II": "number"
+      },
+      "ending_backlog_kg": {
+        "I": "number",
+        "II": "number"
+      }
+    }
+  ]
+}

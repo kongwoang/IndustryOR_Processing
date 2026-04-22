@@ -1,0 +1,21 @@
+{
+  "inventory": {
+    "shirts": "integer",
+    "pants": "integer"
+  },
+  "packages": {
+    "A": {
+      "shirts": "integer",
+      "pants": "integer",
+      "price": "number",
+      "minimum_to_sell": "integer"
+    },
+    "B": {
+      "shirts": "integer",
+      "pants": "integer",
+      "price": "number",
+      "minimum_to_sell": "integer"
+    }
+  },
+  "objective": "string"
+}

@@ -1,0 +1,31 @@
+{
+  "selling_prices_yuan_per_t": {
+    "type_I": 4800,
+    "type_II": 5600
+  },
+  "min_proportion_A": {
+    "type_I": 0.5,
+    "type_II": 0.6
+  },
+  "inventory_t": {
+    "crude_A": 500,
+    "crude_B": 1000
+  },
+  "purchase_tiers_for_A": [
+    {
+      "name": "tier_1_up_to_500",
+      "max_qty_t": 500,
+      "unit_price_yuan_per_t": 10000
+    },
+    {
+      "name": "tier_2_500_to_1000",
+      "max_qty_t": 500,
+      "unit_price_yuan_per_t": 8000
+    },
+    {
+      "name": "tier_3_1000_to_1500",
+      "max_qty_t": 500,
+      "unit_price_yuan_per_t": 6000
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "selected_protein": "string",
+  "food_quantities_grams": {
+    "<food_name>": "integer"
+  },
+  "total_cost": "number",
+  "total_fiber_grams": "number"
+}

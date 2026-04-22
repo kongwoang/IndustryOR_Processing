@@ -1,0 +1,44 @@
+{
+  "initial_fund": 300000,
+  "horizon_years": 3,
+  "projects": [
+    {
+      "name": "project_1",
+      "allowed_start_years": [
+        1,
+        2,
+        3
+      ],
+      "duration_years": 1,
+      "return_multiplier": 1.2,
+      "max_investment": null
+    },
+    {
+      "name": "project_2",
+      "allowed_start_years": [
+        1
+      ],
+      "duration_years": 2,
+      "return_multiplier": 1.5,
+      "max_investment": 150000
+    },
+    {
+      "name": "project_3",
+      "allowed_start_years": [
+        2
+      ],
+      "duration_years": 2,
+      "return_multiplier": 1.6,
+      "max_investment": 200000
+    },
+    {
+      "name": "project_4",
+      "allowed_start_years": [
+        3
+      ],
+      "duration_years": 1,
+      "return_multiplier": 1.4,
+      "max_investment": 100000
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "total_acres": "number",
+  "profit_per_acre": {
+    "corn": "number",
+    "wheat": "number",
+    "soybeans": "number",
+    "sorghum": "number"
+  },
+  "constraints": {
+    "corn_min_times_wheat": "number",
+    "soybeans_min_fraction_of_sorghum": "number",
+    "wheat_equals_times_sorghum": "number"
+  }
+}

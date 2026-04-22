@@ -1,0 +1,69 @@
+{
+  "items": [
+    {
+      "id": "painting_caillebotte",
+      "description": "Painting by Caillebotte",
+      "value": 25000
+    },
+    {
+      "id": "bust_diocletian",
+      "description": "Bust of Diocletian",
+      "value": 5000
+    },
+    {
+      "id": "vase_yuan_dynasty",
+      "description": "Yuan dynasty Chinese vase",
+      "value": 20000
+    },
+    {
+      "id": "porsche_911",
+      "description": "911 Porsche",
+      "value": 40000
+    },
+    {
+      "id": "diamond_1",
+      "description": "Diamond 1",
+      "value": 12000
+    },
+    {
+      "id": "diamond_2",
+      "description": "Diamond 2",
+      "value": 12000
+    },
+    {
+      "id": "diamond_3",
+      "description": "Diamond 3",
+      "value": 12000
+    },
+    {
+      "id": "sofa_louis_xv",
+      "description": "Louis XV sofa",
+      "value": 3000
+    },
+    {
+      "id": "jack_russell_dogs_pair",
+      "description": "Two Jack Russell racing dogs (must stay together)",
+      "value": 6000
+    },
+    {
+      "id": "sculpture_200_ad",
+      "description": "Sculpture from 200 AD",
+      "value": 10000
+    },
+    {
+      "id": "sailing_boat",
+      "description": "Sailing boat",
+      "value": 15000
+    },
+    {
+      "id": "harley_davidson",
+      "description": "Harley Davidson motorcycle",
+      "value": 10000
+    },
+    {
+      "id": "cavour_furniture",
+      "description": "Piece of furniture once belonging to Cavour",
+      "value": 13000
+    }
+  ]
+}

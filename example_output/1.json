@@ -1,0 +1,177 @@
+{
+  "training_starts": [
+    {
+      "week": 1,
+      "new_workers_started_training": 24,
+      "skilled_trainers_assigned": 8
+    },
+    {
+      "week": 2,
+      "new_workers_started_training": 3,
+      "skilled_trainers_assigned": 1
+    },
+    {
+      "week": 3,
+      "new_workers_started_training": 12,
+      "skilled_trainers_assigned": 4
+    },
+    {
+      "week": 4,
+      "new_workers_started_training": 6,
+      "skilled_trainers_assigned": 2
+    },
+    {
+      "week": 5,
+      "new_workers_started_training": 2,
+      "skilled_trainers_assigned": 1
+    },
+    {
+      "week": 6,
+      "new_workers_started_training": 3,
+      "skilled_trainers_assigned": 1
+    },
+    {
+      "week": 7,
+      "new_workers_started_training": 0,
+      "skilled_trainers_assigned": 0
+    }
+  ],
+  "weekly_plan": [
+    {
+      "week": 1,
+      "overtime_skilled_workers": 42,
+      "trained_workers_available_for_production": 0,
+      "production_kg": {
+        "I": 10000.0,
+        "II": 9120.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 3120.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 2,
+      "overtime_skilled_workers": 2,
+      "trained_workers_available_for_production": 0,
+      "production_kg": {
+        "I": 10000.0,
+        "II": 4080.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 0.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 3,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 24,
+      "production_kg": {
+        "I": 12000.0,
+        "II": 9360.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 960.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 4,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 27,
+      "production_kg": {
+        "I": 12000.0,
+        "II": 9840.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 0.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 5,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 39,
+      "production_kg": {
+        "I": 16000.0,
+        "II": 11040.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 240.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 6,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 45,
+      "production_kg": {
+        "I": 16000.0,
+        "II": 12720.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 960.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 7,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 47,
+      "production_kg": {
+        "I": 20000.0,
+        "II": 11040.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 0.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    },
+    {
+      "week": 8,
+      "overtime_skilled_workers": 0,
+      "trained_workers_available_for_production": 50,
+      "production_kg": {
+        "I": 20000.0,
+        "II": 12000.0
+      },
+      "ending_inventory_kg": {
+        "I": 0.0,
+        "II": 0.0
+      },
+      "ending_backlog_kg": {
+        "I": 0.0,
+        "II": 0.0
+      }
+    }
+  ]
+}

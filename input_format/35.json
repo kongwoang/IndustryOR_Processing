@@ -1,0 +1,5 @@
+{
+  "batches": "list[int]",
+  "vats": "list[int]",
+  "processing_times": "list[list[float]]"
+}

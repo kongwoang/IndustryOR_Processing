@@ -1,0 +1,25 @@
+{
+  "months": [
+    "string"
+  ],
+  "demand": {
+    "month": "number"
+  },
+  "initial_workforce": "number",
+  "initial_inventory": "number",
+  "initial_backorder": "number",
+  "ending_inventory_min": "number",
+  "ending_backorder_required": "number",
+  "sales_price_per_unit": "number",
+  "raw_material_cost_per_inhouse_unit": "number",
+  "outsourcing_cost_per_unit": "number",
+  "inventory_holding_cost_per_unit_month": "number",
+  "backorder_cost_per_unit_month": "number",
+  "labor_hours_per_unit": "number",
+  "regular_hours_per_worker_month": "number",
+  "regular_wage_per_hour": "number",
+  "max_overtime_hours_per_worker_month": "number",
+  "overtime_wage_per_hour": "number",
+  "hire_cost_per_worker": "number",
+  "fire_cost_per_worker": "number"
+}

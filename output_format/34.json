@@ -1,0 +1,16 @@
+{
+  "container_count": "integer",
+  "containers": [
+    {
+      "container_id": "integer",
+      "loads": {
+        "A": "integer",
+        "B": "integer",
+        "C": "integer",
+        "D": "integer",
+        "E": "integer"
+      },
+      "total_weight_tons": "number"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "products": [
+    "string",
+    "..."
+  ],
+  "quarters": [
+    "integer",
+    "..."
+  ],
+  "demand": {
+    "product_name": [
+      "integer",
+      "..."
+    ]
+  },
+  "initial_inventory": {
+    "product_name": "integer"
+  },
+  "required_ending_inventory": {
+    "product_name": "integer"
+  },
+  "production_hours_per_quarter": "integer",
+  "hours_per_unit": {
+    "product_name": "integer"
+  },
+  "production_forbidden": [
+    {
+      "product": "string",
+      "quarter": "integer"
+    }
+  ],
+  "delay_penalty_per_unit_per_quarter": {
+    "product_name": "integer"
+  },
+  "inventory_cost_per_unit_per_quarter": "integer"
+}

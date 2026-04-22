@@ -1,0 +1,31 @@
+{
+  "profits": {
+    "trucks": "int",
+    "airplanes": "int",
+    "boats": "int",
+    "trains": "int"
+  },
+  "resources": {
+    "wood_available": "int",
+    "steel_available": "int"
+  },
+  "resource_requirements": {
+    "wood": {
+      "trucks": "int",
+      "airplanes": "int",
+      "boats": "int",
+      "trains": "int"
+    },
+    "steel": {
+      "trucks": "int",
+      "airplanes": "int",
+      "boats": "int",
+      "trains": "int"
+    }
+  },
+  "logic_constraints": {
+    "if_trucks_then_no_trains": "bool",
+    "if_boats_then_also_airplanes": "bool",
+    "boats_cannot_exceed_trains": "bool"
+  }
+}

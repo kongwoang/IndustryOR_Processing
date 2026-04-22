@@ -1,0 +1,7 @@
+{
+  "buses_used": "integer",
+  "minibuses_used": "integer",
+  "total_seats": "integer",
+  "drivers_used": "integer",
+  "total_cost": "number"
+}

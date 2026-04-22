@@ -1,0 +1,21 @@
+{
+  "products": [
+    {
+      "name": "A1",
+      "kg_per_barrel": 3,
+      "hours_per_barrel": 12,
+      "profit_per_kg": 24,
+      "daily_max_kg": 100
+    },
+    {
+      "name": "A2",
+      "kg_per_barrel": 4,
+      "hours_per_barrel": 8,
+      "profit_per_kg": 16,
+      "daily_max_kg": null
+    }
+  ],
+  "milk_supply_barrels_per_day": 50,
+  "labor_hours_per_day": 480,
+  "objective": "maximize_daily_profit"
+}

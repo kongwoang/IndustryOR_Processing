@@ -1,0 +1,13 @@
+{
+  "months": [
+    "integer"
+  ],
+  "initial_inventory": "number",
+  "warehouse_capacity": "number",
+  "purchase_price": [
+    "number"
+  ],
+  "selling_price": [
+    "number"
+  ]
+}

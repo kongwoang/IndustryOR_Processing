@@ -1,0 +1,25 @@
+{
+  "feed_amounts_kg": [
+    {
+      "feed_id": 1,
+      "amount_kg": 0.0
+    },
+    {
+      "feed_id": 2,
+      "amount_kg": 0.0
+    },
+    {
+      "feed_id": 3,
+      "amount_kg": 0.0
+    },
+    {
+      "feed_id": 4,
+      "amount_kg": 39.74359
+    },
+    {
+      "feed_id": 5,
+      "amount_kg": 25.641026
+    }
+  ],
+  "total_cost_yen": 32.435897
+}

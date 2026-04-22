@@ -1,0 +1,8 @@
+{
+  "truck_trips": 10,
+  "van_trips": 0,
+  "motorcycle_trips": 0,
+  "electric_vehicle_trips": 14,
+  "total_delivered_units": 1840,
+  "total_pollution": 1000
+}

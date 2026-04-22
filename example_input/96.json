@@ -1,0 +1,31 @@
+{
+  "raw_pipe_length_mm": 1850,
+  "raw_pipe_cost_in_raw_pipe_value_units": 1.0,
+  "max_patterns_used": 4,
+  "max_pieces_per_pattern": 5,
+  "max_leftover_mm": 100,
+  "rank_extra_cost_per_pipe_in_raw_pipe_value_units": [
+    0.1,
+    0.2,
+    0.3,
+    0.4
+  ],
+  "items": [
+    {
+      "length_mm": 290,
+      "demand": 15
+    },
+    {
+      "length_mm": 315,
+      "demand": 28
+    },
+    {
+      "length_mm": 350,
+      "demand": 21
+    },
+    {
+      "length_mm": 455,
+      "demand": 30
+    }
+  ]
+}

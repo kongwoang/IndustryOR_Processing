@@ -1,0 +1,19 @@
+{
+  "routes": [
+    {
+      "vehicle_id": "integer",
+      "stops": [
+        "integer"
+      ],
+      "load": "number",
+      "distance": "number",
+      "arrival_times": [
+        "number"
+      ],
+      "service_start_times": [
+        "number"
+      ]
+    }
+  ],
+  "total_distance": "number"
+}

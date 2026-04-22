@@ -1,0 +1,14 @@
+{
+  "production_units": {
+    "product_name": "integer"
+  },
+  "activate": {
+    "product_name": "integer"
+  },
+  "days_used": "number",
+  "days_unused": "number",
+  "total_sales_revenue": "number",
+  "total_variable_cost": "number",
+  "total_fixed_activation_cost": "number",
+  "net_profit": "number"
+}

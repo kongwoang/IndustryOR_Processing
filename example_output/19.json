@@ -1,0 +1,9 @@
+{
+  "orders": {
+    "A": 0,
+    "B": 0,
+    "C": 10
+  },
+  "total_chairs": 100,
+  "total_cost": 4000.0
+}

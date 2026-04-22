@@ -1,0 +1,17 @@
+{
+  "protein_amounts_100g": {
+    "chicken": 5.0,
+    "salmon": 0.0,
+    "tofu": 0.0
+  },
+  "vegetable_packs": {
+    "broccoli": 1,
+    "carrots": 0,
+    "spinach": 1,
+    "bell_pepper": 0,
+    "mushrooms": 1
+  },
+  "total_cost": 19.7,
+  "total_weight_g": 800.0,
+  "total_protein_g": 123.8
+}

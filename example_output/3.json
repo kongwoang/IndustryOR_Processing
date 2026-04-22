@@ -1,0 +1,99 @@
+{
+  "monthly_plan": [
+    {
+      "month": "January",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 844,
+      "inhouse_production": 4992,
+      "outsourcing": 8,
+      "overtime_hours": 0.0,
+      "ending_inventory": 0,
+      "ending_backorder": 0,
+      "units_sold": 20000,
+      "monthly_revenue": 6000000.0,
+      "monthly_cost": 7951680.0,
+      "monthly_profit": -1951680.0
+    },
+    {
+      "month": "February",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 0,
+      "inhouse_production": 4992,
+      "outsourcing": 35008,
+      "overtime_hours": 0.0,
+      "ending_inventory": 0,
+      "ending_backorder": 0,
+      "units_sold": 40000,
+      "monthly_revenue": 12000000.0,
+      "monthly_cost": 8199680.0,
+      "monthly_profit": 3800320.0
+    },
+    {
+      "month": "March",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 0,
+      "inhouse_production": 4992,
+      "outsourcing": 37008,
+      "overtime_hours": 0.0,
+      "ending_inventory": 0,
+      "ending_backorder": 0,
+      "units_sold": 42000,
+      "monthly_revenue": 12600000.0,
+      "monthly_cost": 8599680.0,
+      "monthly_profit": 4000320.0
+    },
+    {
+      "month": "April",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 0,
+      "inhouse_production": 4992,
+      "outsourcing": 30008,
+      "overtime_hours": 0.0,
+      "ending_inventory": 0,
+      "ending_backorder": 0,
+      "units_sold": 35000,
+      "monthly_revenue": 10500000.0,
+      "monthly_cost": 7199680.0,
+      "monthly_profit": 3300320.0
+    },
+    {
+      "month": "May",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 0,
+      "inhouse_production": 4992,
+      "outsourcing": 14008,
+      "overtime_hours": 0.0,
+      "ending_inventory": 0,
+      "ending_backorder": 0,
+      "units_sold": 19000,
+      "monthly_revenue": 5700000.0,
+      "monthly_cost": 3999680.0,
+      "monthly_profit": 1700320.0
+    },
+    {
+      "month": "June",
+      "workforce": 156,
+      "hires": 0,
+      "fires": 0,
+      "inhouse_production": 4992,
+      "outsourcing": 23508,
+      "overtime_hours": 0.0,
+      "ending_inventory": 10000,
+      "ending_backorder": 0,
+      "units_sold": 18500,
+      "monthly_revenue": 5550000.0,
+      "monthly_cost": 6049680.0,
+      "monthly_profit": -499680.0
+    }
+  ],
+  "totals": {
+    "total_revenue": 52350000.0,
+    "total_cost": 42000080.0,
+    "net_profit": 10349920.0
+  }
+}

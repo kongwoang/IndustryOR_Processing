@@ -1,0 +1,42 @@
+{
+  "products": [
+    "A",
+    "B"
+  ],
+  "processes": [
+    "manufacturing",
+    "assembly",
+    "inspection"
+  ],
+  "time_per_unit": {
+    "A": {
+      "manufacturing": 20,
+      "assembly": 5,
+      "inspection": 3
+    },
+    "B": {
+      "manufacturing": 0,
+      "assembly": 7,
+      "inspection": 6
+    }
+  },
+  "weekly_capacity": {
+    "manufacturing": 120,
+    "assembly": 80,
+    "inspection": 40
+  },
+  "process_cost_per_hour": {
+    "manufacturing": 12,
+    "assembly": 8,
+    "inspection": 10
+  },
+  "selling_price": {
+    "A": 650,
+    "B": 725
+  },
+  "goals": {
+    "min_weekly_profit": 3000,
+    "min_type_A_units": 5,
+    "minimize_weighted_idle_time": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "demand_units": "int",
+  "modes": [
+    "string"
+  ],
+  "capacities_per_trip": {
+    "truck": "int",
+    "van": "int",
+    "motorcycle": "int",
+    "electric_vehicle": "int"
+  },
+  "pollution_per_trip": {
+    "truck": "int",
+    "van": "int",
+    "motorcycle": "int",
+    "electric_vehicle": "int"
+  },
+  "min_truck_trips": "int",
+  "max_total_pollution": "int",
+  "mutually_exclusive_modes": [
+    "string",
+    "string"
+  ]
+}

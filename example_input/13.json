@@ -1,0 +1,14 @@
+{
+  "total_acres": 100,
+  "profit_per_acre": {
+    "corn": 1500,
+    "wheat": 1200,
+    "soybeans": 1800,
+    "sorghum": 1600
+  },
+  "constraints": {
+    "corn_min_times_wheat": 2,
+    "soybeans_min_fraction_of_sorghum": 0.5,
+    "wheat_equals_times_sorghum": 3
+  }
+}

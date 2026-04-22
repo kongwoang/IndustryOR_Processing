@@ -1,0 +1,56 @@
+{
+  "production_units": {
+    "1": "int",
+    "2": "int",
+    "3": "int",
+    "4": "int",
+    "5": "int",
+    "6": "int"
+  },
+  "equipment_activated": {
+    "1": "int",
+    "2": "int",
+    "3": "int",
+    "4": "int",
+    "5": "int",
+    "6": "int"
+  },
+  "allocation_units": {
+    "1": {
+      "1": "int"
+    },
+    "2": {
+      "1": "int",
+      "2": "int"
+    },
+    "3": {
+      "1": "int",
+      "2": "int",
+      "3": "int"
+    },
+    "4": {
+      "1": "int",
+      "2": "int",
+      "3": "int",
+      "4": "int"
+    },
+    "5": {
+      "1": "int",
+      "2": "int",
+      "3": "int",
+      "4": "int",
+      "5": "int"
+    },
+    "6": {
+      "1": "int",
+      "2": "int",
+      "3": "int",
+      "4": "int",
+      "5": "int",
+      "6": "int"
+    }
+  },
+  "total_variable_cost": "float",
+  "total_fixed_cost": "float",
+  "total_cost": "float"
+}

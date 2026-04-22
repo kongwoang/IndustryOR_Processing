@@ -1,0 +1,18 @@
+{
+  "cost_per_chair": {
+    "A": "number",
+    "B": "number",
+    "C": "number"
+  },
+  "chairs_per_order": {
+    "A": "integer",
+    "B": "integer",
+    "C": "integer"
+  },
+  "min_total_chairs": "integer",
+  "max_total_chairs": "integer",
+  "logic": {
+    "if_A_then_at_least_one_B_order": "boolean",
+    "if_B_then_at_least_one_C_order": "boolean"
+  }
+}

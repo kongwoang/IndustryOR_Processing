@@ -1,0 +1,25 @@
+{
+  "products": [
+    "string"
+  ],
+  "days_available": "number",
+  "max_demand": {
+    "product_name": "integer"
+  },
+  "selling_price": {
+    "product_name": "number"
+  },
+  "production_cost": {
+    "product_name": "number"
+  },
+  "daily_quota": {
+    "product_name": "integer"
+  },
+  "activation_cost": {
+    "product_name": "number"
+  },
+  "minimum_batch": {
+    "product_name": "integer"
+  },
+  "unit": "string"
+}

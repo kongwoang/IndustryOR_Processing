@@ -1,0 +1,19 @@
+{
+  "months": [
+    1,
+    2,
+    3
+  ],
+  "initial_inventory": 200,
+  "warehouse_capacity": 500,
+  "purchase_price": [
+    8,
+    6,
+    9
+  ],
+  "selling_price": [
+    9,
+    8,
+    10
+  ]
+}

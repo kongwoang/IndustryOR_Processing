@@ -1,0 +1,25 @@
+{
+  "production_plan": [
+    {
+      "week": 1,
+      "production_1000_boxes": 15,
+      "ending_inventory_1000_boxes": 0
+    },
+    {
+      "week": 2,
+      "production_1000_boxes": 40,
+      "ending_inventory_1000_boxes": 15
+    },
+    {
+      "week": 3,
+      "production_1000_boxes": 25,
+      "ending_inventory_1000_boxes": 5
+    },
+    {
+      "week": 4,
+      "production_1000_boxes": 20,
+      "ending_inventory_1000_boxes": 0
+    }
+  ],
+  "total_cost_1000_yuan": 528
+}

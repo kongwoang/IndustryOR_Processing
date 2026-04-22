@@ -1,0 +1,9 @@
+{
+  "feed_amounts_kg": [
+    {
+      "feed_id": "integer",
+      "amount_kg": "number"
+    }
+  ],
+  "total_cost_yen": "number"
+}

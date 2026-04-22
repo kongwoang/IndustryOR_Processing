@@ -1,0 +1,15 @@
+{
+  "n": "int",
+  "requirements": [
+    "int"
+  ],
+  "costs": {
+    "buy_new": "float",
+    "slow_repair": "float",
+    "fast_repair": "float"
+  },
+  "repair_times": {
+    "slow": "int",
+    "fast": "int"
+  }
+}

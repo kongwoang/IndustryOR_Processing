@@ -1,0 +1,25 @@
+{
+  "animal_types": [
+    "string"
+  ],
+  "selling_price": {
+    "cows": "number",
+    "sheep": "number",
+    "chickens": "number"
+  },
+  "feed_cost": {
+    "cows": "number",
+    "sheep": "number",
+    "chickens": "number"
+  },
+  "manure_per_day": {
+    "cows": "number",
+    "sheep": "number",
+    "chickens": "number"
+  },
+  "max_manure": "number",
+  "max_chickens": "integer",
+  "min_cows": "integer",
+  "min_sheep": "integer",
+  "max_total_animals": "integer"
+}

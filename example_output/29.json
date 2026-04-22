@@ -1,0 +1,8 @@
+{
+  "total_recruited": 8500,
+  "max_preferred_specialty_people_under_p1": 7000,
+  "p2_shortfall": 1000,
+  "max_preferred_city_people_under_p1_and_best_p2": 5500,
+  "p3_shortfall": 2500,
+  "recruited_people_not_in_preferred_city": 3000
+}

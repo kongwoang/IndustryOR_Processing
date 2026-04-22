@@ -1,0 +1,12 @@
+{
+  "purchase_plan": [
+    "number"
+  ],
+  "sales_plan": [
+    "number"
+  ],
+  "ending_inventory": [
+    "number"
+  ],
+  "total_profit": "number"
+}

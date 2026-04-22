@@ -1,0 +1,61 @@
+{
+  "products": [
+    "I",
+    "II",
+    "III"
+  ],
+  "quarters": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "demand": {
+    "I": [
+      1500,
+      1000,
+      2000,
+      1200
+    ],
+    "II": [
+      1500,
+      1500,
+      1200,
+      1500
+    ],
+    "III": [
+      1000,
+      2000,
+      1500,
+      2500
+    ]
+  },
+  "initial_inventory": {
+    "I": 0,
+    "II": 0,
+    "III": 0
+  },
+  "required_ending_inventory": {
+    "I": 150,
+    "II": 150,
+    "III": 150
+  },
+  "production_hours_per_quarter": 15000,
+  "hours_per_unit": {
+    "I": 2,
+    "II": 4,
+    "III": 3
+  },
+  "production_forbidden": [
+    {
+      "product": "I",
+      "quarter": 2
+    }
+  ],
+  "delay_penalty_per_unit_per_quarter": {
+    "I": 20,
+    "II": 20,
+    "III": 10
+  },
+  "inventory_cost_per_unit_per_quarter": 5
+}

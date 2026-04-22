@@ -1,0 +1,14 @@
+{
+  "time_periods": [
+    {
+      "start": "string",
+      "end": "string",
+      "required_salespeople": "int"
+    }
+  ],
+  "shift_starts": [
+    "string"
+  ],
+  "shift_length_hours": "int",
+  "period_length_hours": "int"
+}

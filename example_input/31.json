@@ -1,0 +1,63 @@
+{
+  "products": [
+    "I",
+    "II",
+    "III"
+  ],
+  "machines": {
+    "A": {
+      "A1": {
+        "available_time": 6000,
+        "hourly_cost": 0.05,
+        "processing_time": {
+          "I": 5,
+          "II": 10
+        }
+      },
+      "A2": {
+        "available_time": 10000,
+        "hourly_cost": 0.03,
+        "processing_time": {
+          "I": 7,
+          "II": 9,
+          "III": 12
+        }
+      }
+    },
+    "B": {
+      "B1": {
+        "available_time": 4000,
+        "hourly_cost": 0.06,
+        "processing_time": {
+          "I": 6,
+          "II": 8
+        }
+      },
+      "B2": {
+        "available_time": 7000,
+        "hourly_cost": 0.11,
+        "processing_time": {
+          "I": 4,
+          "III": 11
+        }
+      },
+      "B3": {
+        "available_time": 4000,
+        "hourly_cost": 0.05,
+        "processing_time": {
+          "I": 7
+        }
+      }
+    }
+  },
+  "raw_material_cost": {
+    "I": 0.25,
+    "II": 0.35,
+    "III": 0.5
+  },
+  "unit_price": {
+    "I": 1.25,
+    "II": 2.0,
+    "III": 2.8
+  }
+}

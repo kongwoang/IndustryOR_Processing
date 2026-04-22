@@ -1,0 +1,15 @@
+{
+  "initial_fund": "number",
+  "horizon_years": "integer",
+  "projects": [
+    {
+      "name": "string",
+      "allowed_start_years": [
+        "integer"
+      ],
+      "duration_years": "integer",
+      "return_multiplier": "number",
+      "max_investment": "number|null"
+    }
+  ]
+}

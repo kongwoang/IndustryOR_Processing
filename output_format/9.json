@@ -1,0 +1,8 @@
+{
+  "production_quantities": {
+    "trucks": "int",
+    "airplanes": "int",
+    "boats": "int",
+    "trains": "int"
+  }
+}

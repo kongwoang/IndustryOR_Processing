@@ -1,0 +1,31 @@
+{
+  "cities": [
+    "string"
+  ],
+  "specialties": [
+    "integer"
+  ],
+  "demands": [
+    {
+      "city": "string",
+      "specialty": "integer",
+      "demand": "integer"
+    }
+  ],
+  "applicant_types": [
+    {
+      "type": "integer",
+      "available": "integer",
+      "suitable_specialties": [
+        "integer"
+      ],
+      "preferred_specialty": "integer",
+      "preferred_city": "string"
+    }
+  ],
+  "priority_goals": {
+    "p1": "string",
+    "p2_preferred_specialty_target": "integer",
+    "p3_preferred_city_target": "integer"
+  }
+}

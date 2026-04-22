@@ -1,0 +1,24 @@
+{
+  "monthly_plan": [
+    {
+      "month": "string",
+      "workforce": "number",
+      "hires": "number",
+      "fires": "number",
+      "inhouse_production": "number",
+      "outsourcing": "number",
+      "overtime_hours": "number",
+      "ending_inventory": "number",
+      "ending_backorder": "number",
+      "units_sold": "number",
+      "monthly_revenue": "number",
+      "monthly_cost": "number",
+      "monthly_profit": "number"
+    }
+  ],
+  "totals": {
+    "total_revenue": "number",
+    "total_cost": "number",
+    "net_profit": "number"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "students": "integer",
+  "drivers_available": "integer",
+  "vehicles": {
+    "bus": {
+      "available": "integer",
+      "seats": "integer",
+      "rental_cost": "number"
+    },
+    "minibus": {
+      "available": "integer",
+      "seats": "integer",
+      "rental_cost": "number"
+    }
+  }
+}

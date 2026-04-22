@@ -1,0 +1,20 @@
+{
+  "workshops": [
+    {
+      "name": "string",
+      "capacity_hours": "number",
+      "production_rates": {
+        "Component 1": "number",
+        "Component 2": "number",
+        "Component 3": "number"
+      }
+    }
+  ],
+  "components": [
+    "string"
+  ],
+  "required_units_per_product": {
+    "<component_name>": "number"
+  },
+  "objective": "string"
+}

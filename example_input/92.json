@@ -1,0 +1,16 @@
+{
+  "students": 400,
+  "drivers_available": 9,
+  "vehicles": {
+    "bus": {
+      "available": 10,
+      "seats": 50,
+      "rental_cost": 800
+    },
+    "minibus": {
+      "available": 8,
+      "seats": 40,
+      "rental_cost": 600
+    }
+  }
+}

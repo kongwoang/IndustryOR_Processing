@@ -1,0 +1,15 @@
+{
+  "buy": [
+    "int"
+  ],
+  "slow_repair": [
+    "int"
+  ],
+  "fast_repair": [
+    "int"
+  ],
+  "available": [
+    "int"
+  ],
+  "ending_inventory": "int"
+}

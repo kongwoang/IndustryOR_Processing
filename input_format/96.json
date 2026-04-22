@@ -1,0 +1,16 @@
+{
+  "raw_pipe_length_mm": "integer",
+  "raw_pipe_cost_in_raw_pipe_value_units": "number",
+  "max_patterns_used": "integer",
+  "max_pieces_per_pattern": "integer",
+  "max_leftover_mm": "integer",
+  "rank_extra_cost_per_pipe_in_raw_pipe_value_units": [
+    "number"
+  ],
+  "items": [
+    {
+      "length_mm": "integer",
+      "demand": "integer"
+    }
+  ]
+}

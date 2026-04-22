@@ -1,0 +1,12 @@
+{
+  "initial_inventory_1000_boxes": "number",
+  "storage_cost_1000_yuan_per_1000_boxes_per_week": "number",
+  "weeks": [
+    {
+      "week": "integer",
+      "demand_1000_boxes": "number",
+      "production_capacity_1000_boxes": "number",
+      "production_cost_1000_yuan_per_1000_boxes": "number"
+    }
+  ]
+}

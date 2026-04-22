@@ -1,0 +1,16 @@
+{
+  "requirements": {
+    "protein_g_min": "number",
+    "minerals_g_min": "number",
+    "vitamins_mg_min": "number"
+  },
+  "feeds": [
+    {
+      "feed_id": "integer",
+      "protein_g_per_kg": "number",
+      "minerals_g_per_kg": "number",
+      "vitamins_mg_per_kg": "number",
+      "price_yen_per_kg": "number"
+    }
+  ]
+}

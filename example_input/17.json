@@ -1,0 +1,41 @@
+{
+  "targets": [
+    {
+      "target_id": 1,
+      "distance_km": 450,
+      "p_destroy_per_heavy_bomb": 0.03,
+      "p_destroy_per_light_bomb": 0.08
+    },
+    {
+      "target_id": 2,
+      "distance_km": 480,
+      "p_destroy_per_heavy_bomb": 0.1,
+      "p_destroy_per_light_bomb": 0.11
+    },
+    {
+      "target_id": 3,
+      "distance_km": 540,
+      "p_destroy_per_heavy_bomb": 0.05,
+      "p_destroy_per_light_bomb": 0.12
+    },
+    {
+      "target_id": 4,
+      "distance_km": 600,
+      "p_destroy_per_heavy_bomb": 0.05,
+      "p_destroy_per_light_bomb": 0.09
+    }
+  ],
+  "resources": {
+    "max_heavy_bombs": 28,
+    "max_light_bombs": 12,
+    "max_fuel_liters": 10000
+  },
+  "fuel_rules": {
+    "km_per_liter_loaded": {
+      "heavy": 2,
+      "light": 3
+    },
+    "km_per_liter_empty": 4,
+    "takeoff_landing_fuel_per_trip_liters": 100
+  }
+}

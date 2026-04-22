@@ -1,0 +1,29 @@
+{
+  "depot": {
+    "id": "integer",
+    "x": "number",
+    "y": "number",
+    "time_window": [
+      "number",
+      "number"
+    ]
+  },
+  "customers": [
+    {
+      "id": "integer",
+      "x": "number",
+      "y": "number",
+      "demand": "number",
+      "time_window": [
+        "number",
+        "number"
+      ],
+      "service_duration": "number"
+    }
+  ],
+  "vehicle_count_max": "integer",
+  "vehicle_capacity": "number",
+  "objective": "string",
+  "distance_metric": "string",
+  "travel_time_equals_distance": "boolean"
+}

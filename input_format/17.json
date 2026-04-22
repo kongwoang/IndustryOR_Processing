@@ -1,0 +1,23 @@
+{
+  "targets": [
+    {
+      "target_id": "int",
+      "distance_km": "float",
+      "p_destroy_per_heavy_bomb": "float",
+      "p_destroy_per_light_bomb": "float"
+    }
+  ],
+  "resources": {
+    "max_heavy_bombs": "int",
+    "max_light_bombs": "int",
+    "max_fuel_liters": "float"
+  },
+  "fuel_rules": {
+    "km_per_liter_loaded": {
+      "heavy": "float",
+      "light": "float"
+    },
+    "km_per_liter_empty": "float",
+    "takeoff_landing_fuel_per_trip_liters": "float"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "products": {
+    "<product_name>": {
+      "profit": "number",
+      "plastic": "number",
+      "electronic_components": "number"
+    }
+  },
+  "resource_limits": {
+    "plastic": "number",
+    "electronic_components": "number"
+  },
+  "logical_constraints": {
+    "robots_and_dolls_mutually_exclusive_if_manufactured": "boolean",
+    "model_cars_imply_building_blocks_if_manufactured": "boolean",
+    "dolls_quantity_at_most_model_cars_quantity": "boolean"
+  }
+}

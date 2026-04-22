@@ -1,0 +1,26 @@
+{
+  "total_hours": 14,
+  "assignments": [
+    {
+      "worker": "II",
+      "task": "A",
+      "hours": 4
+    },
+    {
+      "worker": "I",
+      "task": "B",
+      "hours": 4
+    },
+    {
+      "worker": "IV",
+      "task": "C",
+      "hours": 2
+    },
+    {
+      "worker": "V",
+      "task": "D",
+      "hours": 4
+    }
+  ],
+  "unassigned_worker": "III"
+}

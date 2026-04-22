@@ -1,0 +1,14 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "kg_per_barrel": "number",
+      "hours_per_barrel": "number",
+      "profit_per_kg": "number",
+      "daily_max_kg": "number or null"
+    }
+  ],
+  "milk_supply_barrels_per_day": "number",
+  "labor_hours_per_day": "number",
+  "objective": "string"
+}

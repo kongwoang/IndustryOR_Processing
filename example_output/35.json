@@ -1,0 +1,95 @@
+{
+  "makespan": 14.1,
+  "vat_schedules": [
+    {
+      "vat": 1,
+      "operations": [
+        {
+          "batch": 5,
+          "start": 0.0,
+          "end": 2.1
+        },
+        {
+          "batch": 4,
+          "start": 2.1,
+          "end": 4.1
+        },
+        {
+          "batch": 2,
+          "start": 4.1,
+          "end": 6.1
+        },
+        {
+          "batch": 3,
+          "start": 6.1,
+          "end": 9.1
+        },
+        {
+          "batch": 1,
+          "start": 9.1,
+          "end": 12.1
+        }
+      ]
+    },
+    {
+      "vat": 2,
+      "operations": [
+        {
+          "batch": 5,
+          "start": 2.1,
+          "end": 4.1
+        },
+        {
+          "batch": 4,
+          "start": 5.1,
+          "end": 7.1
+        },
+        {
+          "batch": 3,
+          "start": 9.1,
+          "end": 10.3
+        },
+        {
+          "batch": 2,
+          "start": 10.3,
+          "end": 11.8
+        },
+        {
+          "batch": 1,
+          "start": 12.1,
+          "end": 13.1
+        }
+      ]
+    },
+    {
+      "vat": 3,
+      "operations": [
+        {
+          "batch": 5,
+          "start": 4.1,
+          "end": 7.1
+        },
+        {
+          "batch": 4,
+          "start": 7.1,
+          "end": 9.1
+        },
+        {
+          "batch": 3,
+          "start": 10.3,
+          "end": 11.6
+        },
+        {
+          "batch": 2,
+          "start": 11.8,
+          "end": 12.8
+        },
+        {
+          "batch": 1,
+          "start": 13.1,
+          "end": 14.1
+        }
+      ]
+    }
+  ]
+}

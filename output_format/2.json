@@ -1,0 +1,4 @@
+{
+  "training_jets_by_year": "object mapping year string to integer",
+  "total_trained_pilots_by_end_of_year_2": "integer"
+}

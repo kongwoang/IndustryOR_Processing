@@ -1,0 +1,73 @@
+{
+  "products": [
+    {
+      "name": "I",
+      "raw_material_cost": 0.25,
+      "sale_price": 1.25
+    },
+    {
+      "name": "II",
+      "raw_material_cost": 0.35,
+      "sale_price": 2.0
+    },
+    {
+      "name": "III",
+      "raw_material_cost": 0.5,
+      "sale_price": 2.8
+    }
+  ],
+  "machines": [
+    {
+      "name": "A1",
+      "stage": "A",
+      "effective_hours": 6000,
+      "full_capacity_operating_cost": 300
+    },
+    {
+      "name": "A2",
+      "stage": "A",
+      "effective_hours": 10000,
+      "full_capacity_operating_cost": 321
+    },
+    {
+      "name": "B1",
+      "stage": "B",
+      "effective_hours": 4000,
+      "full_capacity_operating_cost": 250
+    },
+    {
+      "name": "B2",
+      "stage": "B",
+      "effective_hours": 7000,
+      "full_capacity_operating_cost": 783
+    },
+    {
+      "name": "B3",
+      "stage": "B",
+      "effective_hours": 4000,
+      "full_capacity_operating_cost": 200
+    }
+  ],
+  "processing_time": {
+    "A1": {
+      "I": 5,
+      "II": 10
+    },
+    "A2": {
+      "I": 7,
+      "II": 9,
+      "III": 12
+    },
+    "B1": {
+      "I": 6,
+      "II": 8
+    },
+    "B2": {
+      "I": 4,
+      "III": 11
+    },
+    "B3": {
+      "I": 7
+    }
+  }
+}

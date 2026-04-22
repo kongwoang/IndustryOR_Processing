@@ -1,0 +1,27 @@
+{
+  "products": [
+    "string"
+  ],
+  "processes": [
+    "string"
+  ],
+  "time_per_unit": {
+    "product_name": {
+      "process_name": "number"
+    }
+  },
+  "weekly_capacity": {
+    "process_name": "number"
+  },
+  "process_cost_per_hour": {
+    "process_name": "number"
+  },
+  "selling_price": {
+    "product_name": "number"
+  },
+  "goals": {
+    "min_weekly_profit": "number",
+    "min_type_A_units": "number",
+    "minimize_weighted_idle_time": "boolean"
+  }
+}

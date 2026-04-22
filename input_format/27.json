@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "raw_material_cost": "number",
+      "sale_price": "number"
+    }
+  ],
+  "machines": [
+    {
+      "name": "string",
+      "stage": "string",
+      "effective_hours": "number",
+      "full_capacity_operating_cost": "number"
+    }
+  ],
+  "processing_time": {
+    "machine_name": {
+      "product_name": "number"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "raw_materials": [
+    {
+      "name": "raw_A",
+      "sulfur_fraction": 0.03,
+      "purchase_cost_thousand_yuan_per_ton": 6.0,
+      "max_supply_tons": null
+    },
+    {
+      "name": "raw_B",
+      "sulfur_fraction": 0.01,
+      "purchase_cost_thousand_yuan_per_ton": 16.0,
+      "max_supply_tons": null
+    },
+    {
+      "name": "raw_C",
+      "sulfur_fraction": 0.02,
+      "purchase_cost_thousand_yuan_per_ton": 10.0,
+      "max_supply_tons": null
+    },
+    {
+      "name": "raw_D",
+      "sulfur_fraction": 0.01,
+      "purchase_cost_thousand_yuan_per_ton": 15.0,
+      "max_supply_tons": 50.0
+    }
+  ],
+  "products": [
+    {
+      "name": "product_A",
+      "max_sulfur_fraction": 0.025,
+      "selling_price_thousand_yuan_per_ton": 9.15,
+      "max_demand_tons": 100.0
+    },
+    {
+      "name": "product_B",
+      "max_sulfur_fraction": 0.015,
+      "selling_price_thousand_yuan_per_ton": 9.15,
+      "max_demand_tons": 200.0
+    }
+  ],
+  "process": {
+    "first_stage_mix": [
+      "raw_A",
+      "raw_B",
+      "raw_D"
+    ],
+    "second_stage_added_raw": "raw_C"
+  }
+}

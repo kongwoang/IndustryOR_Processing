@@ -1,0 +1,13 @@
+{
+  "production_plan": [
+    {
+      "name": "string",
+      "produce": "number",
+      "is_produced": "integer"
+    }
+  ],
+  "total_revenue": "number",
+  "total_variable_cost": "number",
+  "total_fixed_cost": "number",
+  "total_profit": "number"
+}

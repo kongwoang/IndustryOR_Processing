@@ -1,0 +1,24 @@
+{
+  "suppliers": {
+    "A": {
+      "cost_per_table": "number",
+      "tables_per_order": "integer"
+    },
+    "B": {
+      "cost_per_table": "number",
+      "tables_per_order": "integer"
+    },
+    "C": {
+      "cost_per_table": "number",
+      "tables_per_order": "integer"
+    }
+  },
+  "requirements": {
+    "min_total_tables": "integer",
+    "max_total_tables": "integer"
+  },
+  "logic_constraints": {
+    "if_order_A_then_min_tables_from_B": "integer",
+    "if_order_B_then_order_C": "boolean"
+  }
+}

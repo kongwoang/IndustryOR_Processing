@@ -1,0 +1,11 @@
+{
+  "total_hours": "number",
+  "assignments": [
+    {
+      "worker": "str",
+      "task": "str",
+      "hours": "number"
+    }
+  ],
+  "unassigned_worker": "str"
+}

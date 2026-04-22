@@ -1,0 +1,11 @@
+{
+  "son_1_items": [
+    "string"
+  ],
+  "son_1_total_value": "number",
+  "son_2_items": [
+    "string"
+  ],
+  "son_2_total_value": "number",
+  "absolute_difference": "number"
+}

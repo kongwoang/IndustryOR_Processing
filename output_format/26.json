@@ -1,0 +1,6 @@
+{
+  "total_salespeople": "int",
+  "staff_starting_at": {
+    "<shift_start_time>": "int"
+  }
+}

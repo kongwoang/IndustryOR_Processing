@@ -1,0 +1,21 @@
+{
+  "selling_prices_yuan_per_t": {
+    "type_I": "number",
+    "type_II": "number"
+  },
+  "min_proportion_A": {
+    "type_I": "number",
+    "type_II": "number"
+  },
+  "inventory_t": {
+    "crude_A": "number",
+    "crude_B": "number"
+  },
+  "purchase_tiers_for_A": [
+    {
+      "name": "string",
+      "max_qty_t": "number",
+      "unit_price_yuan_per_t": "number"
+    }
+  ]
+}

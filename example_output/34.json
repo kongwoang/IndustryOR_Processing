@@ -1,0 +1,82 @@
+{
+  "container_count": 7,
+  "containers": [
+    {
+      "container_id": 1,
+      "loads": {
+        "A": 53,
+        "B": 0,
+        "C": 53,
+        "D": 12,
+        "E": 0
+      },
+      "total_weight_tons": 54.900000000000006
+    },
+    {
+      "container_id": 2,
+      "loads": {
+        "A": 37,
+        "B": 0,
+        "C": 85,
+        "D": 12,
+        "E": 0
+      },
+      "total_weight_tons": 59.7
+    },
+    {
+      "container_id": 3,
+      "loads": {
+        "A": 0,
+        "B": 0,
+        "C": 132,
+        "D": 12,
+        "E": 0
+      },
+      "total_weight_tons": 60.0
+    },
+    {
+      "container_id": 4,
+      "loads": {
+        "A": 30,
+        "B": 0,
+        "C": 30,
+        "D": 12,
+        "E": 39
+      },
+      "total_weight_tons": 59.550000000000004
+    },
+    {
+      "container_id": 5,
+      "loads": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 12,
+        "E": 81
+      },
+      "total_weight_tons": 59.849999999999994
+    },
+    {
+      "container_id": 6,
+      "loads": {
+        "A": 0,
+        "B": 38,
+        "C": 0,
+        "D": 18,
+        "E": 0
+      },
+      "total_weight_tons": 48.8
+    },
+    {
+      "container_id": 7,
+      "loads": {
+        "A": 0,
+        "B": 52,
+        "C": 0,
+        "D": 12,
+        "E": 0
+      },
+      "total_weight_tons": 59.2
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "makespan": "float",
+  "vat_schedules": [
+    {
+      "vat": "int",
+      "operations": [
+        {
+          "batch": "int",
+          "start": "float",
+          "end": "float"
+        }
+      ]
+    }
+  ]
+}

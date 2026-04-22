@@ -1,0 +1,11 @@
+{
+  "years": [
+    1,
+    2
+  ],
+  "production_by_year": {
+    "1": 10,
+    "2": 15
+  },
+  "pilots_trained_per_training_jet_per_year": 5
+}

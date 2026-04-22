@@ -1,0 +1,20 @@
+{
+  "investment_plan": {
+    "year_1": {
+      "project_1": 166666.67,
+      "project_2": 133333.33,
+      "uninvested_cash": 0.0
+    },
+    "year_2": {
+      "project_1": 0.0,
+      "project_3": 200000.0,
+      "uninvested_cash": 0.0
+    },
+    "year_3": {
+      "project_1": 100000.0,
+      "project_4": 100000.0,
+      "uninvested_cash": 0.0
+    }
+  },
+  "ending_total_principal_and_interest": 580000.0
+}

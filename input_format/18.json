@@ -1,0 +1,15 @@
+{
+  "regular_hours_per_week": "number",
+  "overtime_limit_hours_per_week": "number",
+  "products": [
+    {
+      "name": "string",
+      "production_rate_meters_per_hour": "number",
+      "minimum_weekly_sales_meters": "number",
+      "profit_per_meter_yuan": "number"
+    }
+  ],
+  "priority_order": [
+    "string"
+  ]
+}

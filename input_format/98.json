@@ -1,0 +1,17 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "steel_kg_per_unit": "number",
+      "aluminum_kg_per_unit": "number",
+      "labor_hours_per_unit": "number",
+      "profit_yuan_per_unit": "number"
+    }
+  ],
+  "resources": {
+    "steel_kg": "number",
+    "aluminum_kg": "number",
+    "regular_labor_hours": "number"
+  },
+  "overtime_cost_yuan_per_hour": "number"
+}

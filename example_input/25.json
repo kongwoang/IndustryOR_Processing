@@ -1,0 +1,23 @@
+{
+  "initial_capital": 100000,
+  "planning_horizon_years": 3,
+  "investments": {
+    "option_1": {
+      "duration_years": 1,
+      "maturity_value_per_yuan_invested": 1.7,
+      "allowed_start_years": [
+        1,
+        2,
+        3
+      ]
+    },
+    "option_2": {
+      "duration_years": 2,
+      "maturity_value_per_yuan_invested": 3.0,
+      "allowed_start_years": [
+        1,
+        2
+      ]
+    }
+  }
+}

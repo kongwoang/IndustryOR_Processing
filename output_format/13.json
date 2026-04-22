@@ -1,0 +1,6 @@
+{
+  "corn_acres": "number",
+  "wheat_acres": "number",
+  "soybeans_acres": "number",
+  "sorghum_acres": "number"
+}

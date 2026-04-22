@@ -1,0 +1,13 @@
+{
+  "decision_variables": {
+    "x_1": "number",
+    "x_2": "number"
+  },
+  "total_profit": "number",
+  "idle_time": {
+    "manufacturing": "number",
+    "assembly": "number",
+    "inspection": "number"
+  },
+  "weighted_idle_time_cost": "number"
+}

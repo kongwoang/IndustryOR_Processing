@@ -1,0 +1,35 @@
+{
+  "weeks": "int",
+  "initial_skilled_workers": "int",
+  "new_workers_to_train_by_end_of_week": "int",
+  "hours_per_week": {
+    "regular": "number",
+    "overtime": "number"
+  },
+  "training": {
+    "duration_weeks": "int",
+    "max_trainees_per_skilled_trainer": "int"
+  },
+  "production_rate_kg_per_hour": {
+    "I": "number",
+    "II": "number"
+  },
+  "weekly_wages_yuan": {
+    "skilled_regular": "number",
+    "skilled_overtime": "number",
+    "trainee_during_training": "number",
+    "trained_worker_after_training": "number"
+  },
+  "delay_penalty_yuan_per_kg_per_week": {
+    "I": "number",
+    "II": "number"
+  },
+  "demands_kg": {
+    "I": [
+      "number"
+    ],
+    "II": [
+      "number"
+    ]
+  }
+}

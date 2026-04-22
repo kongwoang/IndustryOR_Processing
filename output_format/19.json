@@ -1,0 +1,9 @@
+{
+  "orders": {
+    "A": "integer",
+    "B": "integer",
+    "C": "integer"
+  },
+  "total_chairs": "integer",
+  "total_cost": "number"
+}

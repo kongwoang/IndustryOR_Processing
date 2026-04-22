@@ -1,0 +1,13 @@
+{
+  "workers": [
+    "str"
+  ],
+  "tasks": [
+    "str"
+  ],
+  "hours": {
+    "worker_name": {
+      "task_name": "number"
+    }
+  }
+}

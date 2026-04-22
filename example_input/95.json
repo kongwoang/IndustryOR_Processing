@@ -1,0 +1,30 @@
+{
+  "initial_inventory_1000_boxes": 0,
+  "storage_cost_1000_yuan_per_1000_boxes_per_week": 0.2,
+  "weeks": [
+    {
+      "week": 1,
+      "demand_1000_boxes": 15,
+      "production_capacity_1000_boxes": 30,
+      "production_cost_1000_yuan_per_1000_boxes": 5.0
+    },
+    {
+      "week": 2,
+      "demand_1000_boxes": 25,
+      "production_capacity_1000_boxes": 40,
+      "production_cost_1000_yuan_per_1000_boxes": 5.1
+    },
+    {
+      "week": 3,
+      "demand_1000_boxes": 35,
+      "production_capacity_1000_boxes": 45,
+      "production_cost_1000_yuan_per_1000_boxes": 5.4
+    },
+    {
+      "week": 4,
+      "demand_1000_boxes": 25,
+      "production_capacity_1000_boxes": 20,
+      "production_cost_1000_yuan_per_1000_boxes": 5.5
+    }
+  ]
+}

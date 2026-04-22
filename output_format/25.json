@@ -1,0 +1,20 @@
+{
+  "investment_plan": {
+    "option_1_by_start_year": {
+      "1": "number",
+      "2": "number",
+      "3": "number"
+    },
+    "option_2_by_start_year": {
+      "1": "number",
+      "2": "number"
+    }
+  },
+  "cash_available_by_start_of_year": {
+    "1": "number",
+    "2": "number",
+    "3": "number"
+  },
+  "final_wealth_end_of_year_3": "number",
+  "total_earnings": "number"
+}

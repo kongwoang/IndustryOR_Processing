@@ -1,0 +1,18 @@
+{
+  "production_meters": {
+    "curtain": 70000,
+    "clothing": 45000
+  },
+  "hours": {
+    "regular": 110,
+    "overtime": 5,
+    "total": 115
+  },
+  "profit_yuan": 242500,
+  "goal_achievement": {
+    "unused_regular_hours": 0,
+    "overtime_excess_over_10_hours": 0,
+    "curtain_sales_shortfall_meters": 0,
+    "clothing_sales_shortfall_meters": 0
+  }
+}

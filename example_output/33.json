@@ -1,0 +1,22 @@
+{
+  "son_1_items": [
+    "bust_diocletian",
+    "vase_yuan_dynasty",
+    "porsche_911",
+    "diamond_1",
+    "diamond_3",
+    "sofa_louis_xv"
+  ],
+  "son_1_total_value": 92000,
+  "son_2_items": [
+    "painting_caillebotte",
+    "diamond_2",
+    "jack_russell_dogs_pair",
+    "sculpture_200_ad",
+    "sailing_boat",
+    "harley_davidson",
+    "cavour_furniture"
+  ],
+  "son_2_total_value": 91000,
+  "absolute_difference": 1000
+}
