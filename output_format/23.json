@@ -2,8 +2,7 @@
   "production_plan": [
     {
       "name": "string",
-      "produce": "number",
-      "is_produced": "integer"
+      "produce": "number"
     }
   ],
   "total_revenue": "number",

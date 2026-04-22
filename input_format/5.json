@@ -1,18 +1,18 @@
 {
-  "unit_size_grams": "integer, the size of one purchasable quantity unit in grams",
   "proteins": {
     "<protein_name>": {
-      "price_per_unit": "number"
+      "price_per_100g": "number"
     }
   },
   "vegetables": {
     "<vegetable_name>": {
-      "price_per_unit": "number",
-      "fiber_per_unit": "number"
+      "price_per_100g": "number",
+      "fiber_per_100g": "number"
     }
   },
   "budget": "number",
-  "total_units": "integer, total purchased quantity measured in units of unit_size_grams",
+  "total_food_grams": "number",
   "choose_exactly_one_protein": "boolean",
-  "min_selected_vegetables": "integer"
+  "min_selected_vegetables": "integer",
+  "min_grams_if_selected": "number"
 }

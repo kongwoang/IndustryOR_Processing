@@ -1,25 +1,25 @@
 {
   "purchase_plan": {
-    "month_1": 5000,
-    "month_2": 0,
-    "month_3": 2000
+    "month_1": 5000.0,
+    "month_2": 0.0,
+    "month_3": 2000.0
   },
   "sales_plan": {
-    "month_1": 1000,
-    "month_2": 5000,
-    "month_3": 0
+    "month_1": 1000.0,
+    "month_2": 5000.0,
+    "month_3": 0.0
   },
   "ending_inventory_by_month": {
-    "month_1": 5000,
-    "month_2": 0,
-    "month_3": 2000
+    "month_1": 5000.0,
+    "month_2": 0.0,
+    "month_3": 2000.0
   },
   "ending_cash_by_month": {
-    "month_1": 8850,
-    "month_2": 25100,
-    "month_3": 19300
+    "month_1": 8850.0,
+    "month_2": 25100.0,
+    "month_3": 19300.0
   },
-  "total_sales_revenue": 19350,
-  "total_purchase_cost": 20050,
-  "final_cash": 19300
+  "total_sales_revenue": 19350.0,
+  "total_purchase_cost": 20050.0,
+  "final_cash": 19300.0
 }

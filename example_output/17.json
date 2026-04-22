@@ -1,0 +1,36 @@
+{
+  "plan_by_target": [
+    {
+      "target_id": 1,
+      "heavy_bombs": 0,
+      "light_bombs": 3,
+      "fuel_used_liters": 1087.5,
+      "destroy_probability": 0.2213
+    },
+    {
+      "target_id": 2,
+      "heavy_bombs": 11,
+      "light_bombs": 0,
+      "fuel_used_liters": 5060.0,
+      "destroy_probability": 0.6861
+    },
+    {
+      "target_id": 3,
+      "heavy_bombs": 0,
+      "light_bombs": 6,
+      "fuel_used_liters": 2490.0,
+      "destroy_probability": 0.5355
+    },
+    {
+      "target_id": 4,
+      "heavy_bombs": 0,
+      "light_bombs": 3,
+      "fuel_used_liters": 1350.0,
+      "destroy_probability": 0.2464
+    }
+  ],
+  "total_heavy_bombs_used": 11,
+  "total_light_bombs_used": 12,
+  "total_fuel_used_liters": 9987.5,
+  "success_probability_at_least_2_destroyed": 0.5765
+}

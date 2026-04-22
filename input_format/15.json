@@ -4,9 +4,9 @@
     "int"
   ],
   "costs": {
-    "buy_new": "float",
-    "slow_repair": "float",
-    "fast_repair": "float"
+    "buy_new": "int",
+    "slow_repair": "int",
+    "fast_repair": "int"
   },
   "repair_times": {
     "slow": "int",

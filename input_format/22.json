@@ -4,7 +4,7 @@
   ],
   "days_available": "number",
   "max_demand": {
-    "product_name": "integer"
+    "product_name": "number"
   },
   "selling_price": {
     "product_name": "number"
@@ -13,13 +13,14 @@
     "product_name": "number"
   },
   "daily_quota": {
-    "product_name": "integer"
+    "product_name": "number"
   },
   "activation_cost": {
     "product_name": "number"
   },
   "minimum_batch": {
-    "product_name": "integer"
+    "product_name": "number"
   },
+  "all_products_must_be_produced": "boolean",
   "unit": "string"
 }

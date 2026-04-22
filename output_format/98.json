@@ -1,7 +1,7 @@
 {
   "production_plan": {
-    "A": "integer",
-    "B": "integer"
+    "A": "number",
+    "B": "number"
   },
   "resource_usage": {
     "steel_kg": "number",

@@ -1,7 +1,7 @@
 {
   "crop_plan_hectares": {
     "soybean": 0,
-    "corn": 39,
+    "corn": 39.13333333333333,
     "wheat": 0
   },
   "livestock_plan": {
@@ -9,14 +9,14 @@
     "chickens": 50
   },
   "external_work_person_days": {
-    "autumn_winter": 5,
-    "spring_summer": 10
+    "autumn_winter": 0.33333333333325754,
+    "spring_summer": 0
   },
   "resource_usage": {
-    "land_hectares_used": 70.5,
+    "land_hectares_used": 70.63333333333333,
     "funds_yuan_used": 8550,
-    "autumn_winter_person_days_used": 3495,
-    "spring_summer_person_days_used": 3990
+    "autumn_winter_person_days_used": 3499.666666666667,
+    "spring_summer_person_days_used": 4000
   },
-  "total_annual_net_income_yuan": 20230
+  "total_annual_net_income_yuan": 20240.6
 }

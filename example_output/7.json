@@ -8,16 +8,16 @@
       "Bari": 0
     },
     "Perugia": {
-      "Genoa": 6,
+      "Genoa": 7,
       "Venice": 5,
-      "Ancona": 1,
+      "Ancona": 0,
       "Naples": 0,
       "Bari": 0
     },
     "Rome": {
-      "Genoa": 14,
+      "Genoa": 13,
       "Venice": 0,
-      "Ancona": 0,
+      "Ancona": 1,
       "Naples": 6,
       "Bari": 0
     },
@@ -32,15 +32,15 @@
       "Genoa": 0,
       "Venice": 0,
       "Ancona": 0,
-      "Naples": 1,
-      "Bari": 17
+      "Naples": 0,
+      "Bari": 18
     },
     "Lamezia": {
       "Genoa": 0,
       "Venice": 0,
       "Ancona": 0,
-      "Naples": 26,
-      "Bari": 4
+      "Naples": 27,
+      "Bari": 3
     }
   },
   "shipments_trucks": {
@@ -52,16 +52,16 @@
       "Bari": 0
     },
     "Perugia": {
-      "Genoa": 3,
+      "Genoa": 4,
       "Venice": 3,
-      "Ancona": 1,
+      "Ancona": 0,
       "Naples": 0,
       "Bari": 0
     },
     "Rome": {
       "Genoa": 7,
       "Venice": 0,
-      "Ancona": 0,
+      "Ancona": 1,
       "Naples": 3,
       "Bari": 0
     },
@@ -76,14 +76,14 @@
       "Genoa": 0,
       "Venice": 0,
       "Ancona": 0,
-      "Naples": 1,
+      "Naples": 0,
       "Bari": 9
     },
     "Lamezia": {
       "Genoa": 0,
       "Venice": 0,
       "Ancona": 0,
-      "Naples": 13,
+      "Naples": 14,
       "Bari": 2
     }
   },

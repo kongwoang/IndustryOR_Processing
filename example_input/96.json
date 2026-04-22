@@ -4,7 +4,7 @@
   "max_patterns_used": 4,
   "max_pieces_per_pattern": 5,
   "max_leftover_mm": 100,
-  "rank_extra_cost_per_pipe_in_raw_pipe_value_units": [
+  "rank_extra_cost_once_in_raw_pipe_value_units": [
     0.1,
     0.2,
     0.3,

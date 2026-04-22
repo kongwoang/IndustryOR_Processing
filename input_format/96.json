@@ -4,7 +4,7 @@
   "max_patterns_used": "integer",
   "max_pieces_per_pattern": "integer",
   "max_leftover_mm": "integer",
-  "rank_extra_cost_per_pipe_in_raw_pipe_value_units": [
+  "rank_extra_cost_once_in_raw_pipe_value_units": [
     "number"
   ],
   "items": [

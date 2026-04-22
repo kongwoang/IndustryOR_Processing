@@ -2,22 +2,19 @@
   "production_plan": [
     {
       "name": "shirt",
-      "produce": -9.473903143468003e-14,
-      "is_produced": 0
+      "produce": 100.0000000000002
     },
     {
       "name": "short_sleeve",
-      "produce": -6.315935428978665e-14,
-      "is_produced": 0
+      "produce": 0.0
     },
     {
       "name": "casual_cloth",
-      "produce": 250.00000000000006,
-      "is_produced": 1
+      "produce": 199.99999999999994
     }
   ],
-  "total_revenue": 44999.99999999999,
-  "total_variable_cost": 19999.999999999996,
-  "total_fixed_cost": 1000.0,
-  "total_profit": 23999.999999999996
+  "total_revenue": 48000.000000000015,
+  "total_variable_cost": 22000.000000000007,
+  "total_fixed_cost": 4500,
+  "total_profit": 21500.000000000007
 }

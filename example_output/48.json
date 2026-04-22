@@ -12,9 +12,9 @@
     "B": 17.0
   },
   "profit": {
-    "gross_before_overtime_reduction": 11249.999993,
+    "gross_before_overtime_reduction": 11250.0,
     "overtime_reduction": 0.0,
-    "net": 11249.999993
+    "net": 11250.0
   },
   "process_hours": {
     "I_total": 150.0,

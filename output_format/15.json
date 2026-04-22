@@ -8,8 +8,10 @@
   "fast_repair": [
     "int"
   ],
-  "available": [
+  "inventory_start": [
     "int"
   ],
-  "ending_inventory": "int"
+  "inventory_after_stage": [
+    "int"
+  ]
 }

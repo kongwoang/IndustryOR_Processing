@@ -19,8 +19,7 @@
       "max_trips": null
     }
   ],
-  "selected_methods_count": 2,
-  "require_selected_methods_to_be_used": true,
+  "max_selected_methods": 2,
   "min_total_capacity": 300,
   "max_total_trips": 20,
   "objective": "minimize_total_pollution"

@@ -17,5 +17,5 @@
     }
   },
   "truck_capacity_containers": "integer",
-  "truck_cost_eur_per_km": "number"
+  "container_cost_eur_per_km": "number"
 }

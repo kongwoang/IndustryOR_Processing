@@ -1,17 +1,17 @@
 {
   "production_plan": {
-    "A": 15,
-    "B": 9
+    "A": 0.0,
+    "B": 12.500000000041666
   },
   "resource_usage": {
-    "steel_kg": 198,
-    "aluminum_kg": 300,
-    "labor_hours": 381,
-    "overtime_hours": 81
+    "steel_kg": 150.0000000005,
+    "aluminum_kg": 250.00000000083332,
+    "labor_hours": 300.000000001,
+    "overtime_hours": 1e-09
   },
   "profit_breakdown": {
-    "gross_profit_yuan": 174000,
-    "overtime_cost_yuan": 8100,
-    "net_profit_yuan": 165900
+    "gross_profit_yuan": 137500.00000045833,
+    "overtime_cost_yuan": 1.0000000000000001e-07,
+    "net_profit_yuan": 137500.00000035833
   }
 }

@@ -1,14 +1,13 @@
 {
   "selected_methods": [
-    "motorcycle",
     "large_truck"
   ],
   "trips": {
-    "motorcycle": 1,
+    "motorcycle": 0,
     "small_truck": 0,
     "large_truck": 6
   },
-  "total_trips": 7,
-  "total_capacity": 310,
-  "total_pollution": 640
+  "total_trips": 6,
+  "total_capacity": 300,
+  "total_pollution": 600
 }

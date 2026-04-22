@@ -3,7 +3,9 @@
     "string"
   ],
   "trips": {
-    "method_name": "integer"
+    "motorcycle": "integer",
+    "small_truck": "integer",
+    "large_truck": "integer"
   },
   "total_trips": "integer",
   "total_capacity": "number",

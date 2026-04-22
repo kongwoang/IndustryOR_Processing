@@ -5,12 +5,14 @@
       "labor_per_unit": "number",
       "material_per_unit": "number",
       "selling_price": "number",
-      "variable_cost": "number",
-      "fixed_cost_if_produced": "number"
+      "variable_cost": "number"
     }
   ],
   "resources": {
     "available_labor": "number",
     "available_material": "number"
-  }
+  },
+  "weekly_fixed_costs": [
+    "number"
+  ]
 }

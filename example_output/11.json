@@ -1,13 +1,17 @@
 {
   "decision_variables": {
-    "x_1": 6.0,
-    "x_2": 3.666667
+    "x_1": 6,
+    "x_2": 3
   },
-  "total_profit": 4273.0,
+  "total_profit": 3867.0,
   "idle_time": {
     "manufacturing": 0.0,
-    "assembly": 24.333333,
-    "inspection": 0.0
+    "assembly": 29.0,
+    "inspection": 4.0
   },
-  "weighted_idle_time_cost": 194.666667
+  "weighted_idle_time_cost": 272.0,
+  "goal_deviations": {
+    "profit_shortfall": 0.0,
+    "type_A_shortfall": 0.0
+  }
 }

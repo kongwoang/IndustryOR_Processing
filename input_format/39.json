@@ -7,8 +7,7 @@
       "max_trips": "integer|null"
     }
   ],
-  "selected_methods_count": "integer",
-  "require_selected_methods_to_be_used": "boolean",
+  "max_selected_methods": "integer",
   "min_total_capacity": "number",
   "max_total_trips": "integer",
   "objective": "string"

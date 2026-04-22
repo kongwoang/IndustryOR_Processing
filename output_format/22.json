@@ -1,6 +1,6 @@
 {
   "production_units": {
-    "product_name": "integer"
+    "product_name": "number"
   },
   "activate": {
     "product_name": "integer"

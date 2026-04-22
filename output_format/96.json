@@ -11,7 +11,8 @@
         "455": "integer"
       },
       "leftover_mm_per_raw_pipe": "integer",
-      "cost_per_raw_pipe_in_raw_pipe_value_units": "number"
+      "raw_pipe_cost_total_in_raw_pipe_value_units": "number",
+      "rank_extra_cost_once_in_raw_pipe_value_units": "number"
     }
   ],
   "total_raw_pipes": "integer",

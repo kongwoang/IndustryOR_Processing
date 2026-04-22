@@ -1,14 +1,14 @@
 {
   "selected_protein": "pork",
   "food_quantities_grams": {
-    "salmon": 0,
-    "beef": 0,
-    "pork": 100,
-    "okra": 400,
-    "carrots": 100,
-    "celery": 0,
-    "cabbage": 0
+    "salmon": 0.0,
+    "beef": 0.0,
+    "pork": 10.0,
+    "okra": 552.8571,
+    "carrots": 37.1429,
+    "celery": 0.0,
+    "cabbage": 0.0
   },
-  "total_cost": 13.4,
-  "total_fiber_grams": 15.5
+  "total_cost": 15.0,
+  "total_fiber_grams": 18.6943
 }

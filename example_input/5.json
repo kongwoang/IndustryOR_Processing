@@ -1,36 +1,36 @@
 {
-  "unit_size_grams": 100,
   "proteins": {
     "salmon": {
-      "price_per_unit": 4.0
+      "price_per_100g": 4.0
     },
     "beef": {
-      "price_per_unit": 3.6
+      "price_per_100g": 3.6
     },
     "pork": {
-      "price_per_unit": 1.8
+      "price_per_100g": 1.8
     }
   },
   "vegetables": {
     "okra": {
-      "price_per_unit": 2.6,
-      "fiber_per_unit": 3.2
+      "price_per_100g": 2.6,
+      "fiber_per_100g": 3.2
     },
     "carrots": {
-      "price_per_unit": 1.2,
-      "fiber_per_unit": 2.7
+      "price_per_100g": 1.2,
+      "fiber_per_100g": 2.7
     },
     "celery": {
-      "price_per_unit": 1.6,
-      "fiber_per_unit": 1.6
+      "price_per_100g": 1.6,
+      "fiber_per_100g": 1.6
     },
     "cabbage": {
-      "price_per_unit": 2.3,
-      "fiber_per_unit": 2.0
+      "price_per_100g": 2.3,
+      "fiber_per_100g": 2.0
     }
   },
   "budget": 15.0,
-  "total_units": 6,
+  "total_food_grams": 600.0,
   "choose_exactly_one_protein": true,
-  "min_selected_vegetables": 2
+  "min_selected_vegetables": 2,
+  "min_grams_if_selected": 10.0
 }
