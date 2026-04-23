@@ -1,0 +1,73 @@
+{
+  "input_format": {
+    "depot": {
+      "id": "integer",
+      "x": "number",
+      "y": "number",
+      "time_window": ["number", "number"]
+    },
+    "customers": [
+      {
+        "id": "integer",
+        "x": "number",
+        "y": "number",
+        "demand": "number",
+        "time_window": ["number", "number"],
+        "service_duration": "number"
+      }
+    ],
+    "vehicle_count_max": "integer",
+    "vehicle_capacity": "number",
+    "objective": "string",
+    "distance_metric": "string",
+    "travel_time_equals_distance": "boolean"
+  },
+  "output_format": {
+    "routes": [
+      {
+        "vehicle_id": "integer",
+        "stops": ["integer"],
+        "load": "number",
+        "distance": "number",
+        "arrival_times": ["number"],
+        "service_start_times": ["number"]
+      }
+    ],
+    "total_distance": "number"
+  },
+  "example_input": {
+    "depot": {
+      "id": 0,
+      "x": 40,
+      "y": 50,
+      "time_window": [0, 1236]
+    },
+    "customers": [
+      {"id": 1, "x": 45, "y": 68, "demand": 10, "time_window": [912, 967], "service_duration": 90},
+      {"id": 2, "x": 45, "y": 70, "demand": 30, "time_window": [825, 870], "service_duration": 90},
+      {"id": 3, "x": 42, "y": 66, "demand": 10, "time_window": [65, 146], "service_duration": 90},
+      {"id": 4, "x": 42, "y": 68, "demand": 10, "time_window": [727, 782], "service_duration": 90},
+      {"id": 5, "x": 42, "y": 65, "demand": 10, "time_window": [15, 67], "service_duration": 90},
+      {"id": 6, "x": 40, "y": 69, "demand": 20, "time_window": [621, 702], "service_duration": 90},
+      {"id": 7, "x": 40, "y": 66, "demand": 20, "time_window": [170, 225], "service_duration": 90},
+      {"id": 8, "x": 38, "y": 68, "demand": 20, "time_window": [255, 324], "service_duration": 90},
+      {"id": 9, "x": 38, "y": 70, "demand": 10, "time_window": [534, 605], "service_duration": 90},
+      {"id": 10, "x": 35, "y": 66, "demand": 10, "time_window": [357, 410], "service_duration": 90},
+      {"id": 11, "x": 35, "y": 69, "demand": 10, "time_window": [448, 505], "service_duration": 90},
+      {"id": 12, "x": 25, "y": 85, "demand": 20, "time_window": [652, 721], "service_duration": 90},
+      {"id": 13, "x": 22, "y": 75, "demand": 30, "time_window": [30, 92], "service_duration": 90},
+      {"id": 14, "x": 22, "y": 85, "demand": 10, "time_window": [567, 620], "service_duration": 90},
+      {"id": 15, "x": 20, "y": 80, "demand": 40, "time_window": [384, 429], "service_duration": 90},
+      {"id": 16, "x": 20, "y": 85, "demand": 40, "time_window": [475, 528], "service_duration": 90},
+      {"id": 17, "x": 18, "y": 75, "demand": 20, "time_window": [99, 148], "service_duration": 90},
+      {"id": 18, "x": 15, "y": 75, "demand": 20, "time_window": [179, 254], "service_duration": 90},
+      {"id": 19, "x": 15, "y": 80, "demand": 10, "time_window": [278, 345], "service_duration": 90},
+      {"id": 20, "x": 30, "y": 50, "demand": 10, "time_window": [10, 73], "service_duration": 90}
+    ],
+    "vehicle_count_max": 5,
+    "vehicle_capacity": 200,
+    "objective": "minimize_total_distance",
+    "distance_metric": "euclidean",
+    "travel_time_equals_distance": true
+  }
+}

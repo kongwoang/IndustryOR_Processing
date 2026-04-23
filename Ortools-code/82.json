@@ -1,0 +1,96 @@
+{
+  "input_format": {
+    "total_area_m2": "number",
+    "rent_ratio": "number",
+    "store_types": [
+      {
+        "code": "integer",
+        "store_type": "string",
+        "area_per_shop_m2": "number",
+        "min_shops": "integer",
+        "max_shops": "integer",
+        "annual_profit_per_shop_10k_yuan": {
+          "1": "number",
+          "2": "number",
+          "3": "number"
+        }
+      }
+    ]
+  },
+  "output_format": {
+    "store_counts": [
+      {
+        "code": "integer",
+        "store_type": "string",
+        "shops": "integer"
+      }
+    ],
+    "total_area_used_m2": "number",
+    "total_annual_profit_10k_yuan": "number",
+    "total_rent_income_10k_yuan": "number"
+  },
+  "example_input": {
+    "total_area_m2": 5000,
+    "rent_ratio": 0.2,
+    "store_types": [
+      {
+        "code": 1,
+        "store_type": "Jewelry",
+        "area_per_shop_m2": 250,
+        "min_shops": 1,
+        "max_shops": 3,
+        "annual_profit_per_shop_10k_yuan": {
+          "1": 9,
+          "2": 8,
+          "3": 7
+        }
+      },
+      {
+        "code": 2,
+        "store_type": "Shoes & Hats",
+        "area_per_shop_m2": 350,
+        "min_shops": 1,
+        "max_shops": 2,
+        "annual_profit_per_shop_10k_yuan": {
+          "1": 10,
+          "2": 9
+        }
+      },
+      {
+        "code": 3,
+        "store_type": "General Merchandise",
+        "area_per_shop_m2": 800,
+        "min_shops": 1,
+        "max_shops": 3,
+        "annual_profit_per_shop_10k_yuan": {
+          "1": 27,
+          "2": 21,
+          "3": 20
+        }
+      },
+      {
+        "code": 4,
+        "store_type": "Bookstore",
+        "area_per_shop_m2": 400,
+        "min_shops": 0,
+        "max_shops": 2,
+        "annual_profit_per_shop_10k_yuan": {
+          "1": 16,
+          "2": 10
+        }
+      },
+      {
+        "code": 5,
+        "store_type": "Catering",
+        "area_per_shop_m2": 500,
+        "min_shops": 1,
+        "max_shops": 3,
+        "annual_profit_per_shop_10k_yuan": {
+          "1": 17,
+          "2": 15,
+          "3": 12
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "input_format": {
+    "devices": [
+      {
+        "name": "string",
+        "prep_completion_cost": "number",
+        "unit_production_cost": "number",
+        "max_processing_capacity": "number"
+      }
+    ],
+    "required_production": "number"
+  },
+  "output_format": {
+    "enabled_devices": [
+      "string"
+    ],
+    "production_plan": {
+      "device_name": "number"
+    },
+    "total_cost": "number"
+  },
+  "example_input": {
+    "devices": [
+      {
+        "name": "A",
+        "prep_completion_cost": 1000,
+        "unit_production_cost": 20,
+        "max_processing_capacity": 900
+      },
+      {
+        "name": "B",
+        "prep_completion_cost": 920,
+        "unit_production_cost": 24,
+        "max_processing_capacity": 1000
+      },
+      {
+        "name": "C",
+        "prep_completion_cost": 800,
+        "unit_production_cost": 16,
+        "max_processing_capacity": 1200
+      },
+      {
+        "name": "D",
+        "prep_completion_cost": 700,
+        "unit_production_cost": 28,
+        "max_processing_capacity": 1600
+      }
+    ],
+    "required_production": 2000
+  }
+}

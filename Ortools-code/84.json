@@ -1,0 +1,75 @@
+{
+  "input_format": {
+    "candidates": [
+      {
+        "name": "string",
+        "salary": "number",
+        "degree": "string",
+        "experience": "number"
+      }
+    ],
+    "constraints": {
+      "min_hires": "integer",
+      "max_hires": "integer",
+      "budget": "number",
+      "min_total_experience": "number",
+      "require_at_least_one_master_or_doctoral": "boolean",
+      "mutually_exclusive_pairs": [
+        ["string", "string"]
+      ]
+    }
+  },
+  "output_format": {
+    "selected_candidates": ["string"],
+    "hire_decisions": {
+      "candidate_name": "integer"
+    },
+    "num_hired": "integer",
+    "total_salary": "number",
+    "total_experience": "number"
+  },
+  "example_input": {
+    "candidates": [
+      {
+        "name": "A",
+        "salary": 8100,
+        "degree": "Bachelor's",
+        "experience": 3
+      },
+      {
+        "name": "B",
+        "salary": 20000,
+        "degree": "Master's",
+        "experience": 10
+      },
+      {
+        "name": "C",
+        "salary": 21000,
+        "degree": "Doctoral",
+        "experience": 4
+      },
+      {
+        "name": "D",
+        "salary": 3000,
+        "degree": "None",
+        "experience": 3
+      },
+      {
+        "name": "E",
+        "salary": 8000,
+        "degree": "None",
+        "experience": 7
+      }
+    ],
+    "constraints": {
+      "min_hires": 2,
+      "max_hires": 3,
+      "budget": 35000,
+      "min_total_experience": 12,
+      "require_at_least_one_master_or_doctoral": true,
+      "mutually_exclusive_pairs": [
+        ["A", "E"]
+      ]
+    }
+  }
+}

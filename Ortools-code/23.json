@@ -1,0 +1,62 @@
+{
+  "input_format": {
+    "products": [
+      {
+        "name": "string",
+        "labor_per_unit": "number",
+        "material_per_unit": "number",
+        "selling_price": "number",
+        "variable_cost": "number"
+      }
+    ],
+    "resources": {
+      "available_labor": "number",
+      "available_material": "number"
+    },
+    "weekly_fixed_costs": [
+      "number"
+    ]
+  },
+  "output_format": {
+    "production_plan": [
+      {
+        "name": "string",
+        "produce": "number"
+      }
+    ],
+    "total_revenue": "number",
+    "total_variable_cost": "number",
+    "total_fixed_cost": "number",
+    "total_profit": "number"
+  },
+  "example_input": {
+    "products": [
+      {
+        "name": "shirt",
+        "labor_per_unit": 3,
+        "material_per_unit": 4,
+        "selling_price": 120,
+        "variable_cost": 60
+      },
+      {
+        "name": "short_sleeve",
+        "labor_per_unit": 2,
+        "material_per_unit": 3,
+        "selling_price": 80,
+        "variable_cost": 40
+      },
+      {
+        "name": "casual_cloth",
+        "labor_per_unit": 6,
+        "material_per_unit": 6,
+        "selling_price": 180,
+        "variable_cost": 80
+      }
+    ],
+    "resources": {
+      "available_labor": 1500,
+      "available_material": 1600
+    },
+    "weekly_fixed_costs": [2000, 1500, 1000]
+  }
+}

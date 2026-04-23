@@ -1,0 +1,27 @@
+{
+  "input_format": {
+    "period_length_hours": "integer",
+    "shift_length_hours": "integer",
+    "shift_start_times": ["integer"],
+    "time_slots": ["string"],
+    "minimum_waiters_needed": ["integer"]
+  },
+  "output_format": {
+    "total_waiters": "integer",
+    "waiters_starting_by_time": {
+      "2": "integer",
+      "6": "integer",
+      "10": "integer",
+      "14": "integer",
+      "18": "integer",
+      "22": "integer"
+    }
+  },
+  "example_input": {
+    "period_length_hours": 4,
+    "shift_length_hours": 8,
+    "shift_start_times": [2, 6, 10, 14, 18, 22],
+    "time_slots": ["2-6", "6-10", "10-14", "14-18", "18-22", "22-2"],
+    "minimum_waiters_needed": [4, 8, 10, 7, 12, 4]
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "input_format": {
+    "tasks": {
+      "task1": {
+        "required_effective_hours": "number",
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          },
+          "B": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          }
+        }
+      },
+      "task2": {
+        "required_effective_hours": "number",
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          },
+          "B": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          }
+        }
+      },
+      "task3": {
+        "required_effective_hours": "number",
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          },
+          "B": {
+            "team": {
+              "skilled": "integer",
+              "laborers": "integer"
+            },
+            "fixed_cost": "number"
+          }
+        }
+      }
+    },
+    "weekly_wage": {
+      "skilled": "number",
+      "laborers": "number"
+    },
+    "effective_hours_per_worker": {
+      "skilled": "number",
+      "laborers": "number"
+    },
+    "worker_limits": {
+      "skilled_max": "integer",
+      "laborers_max": "integer"
+    },
+    "policies": {
+      "task1_B_excludes_task3_A": "boolean",
+      "task3_B_min_skilled": "integer",
+      "skilled_at_most_fraction_of_laborers": "number"
+    }
+  },
+  "output_format": {
+    "chosen_methods": {
+      "task1": "string",
+      "task2": "string",
+      "task3": "string"
+    },
+    "hired_workers": {
+      "skilled": "integer",
+      "laborers": "integer"
+    },
+    "task_assignments": {
+      "task1": {
+        "skilled": "integer",
+        "laborers": "integer"
+      },
+      "task2": {
+        "skilled": "integer",
+        "laborers": "integer"
+      },
+      "task3": {
+        "skilled": "integer",
+        "laborers": "integer"
+      }
+    }
+  },
+  "example_input": {
+    "tasks": {
+      "task1": {
+        "required_effective_hours": 8400,
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": 1,
+              "laborers": 0
+            },
+            "fixed_cost": 0
+          },
+          "B": {
+            "team": {
+              "skilled": 1,
+              "laborers": 2
+            },
+            "fixed_cost": 500
+          }
+        }
+      },
+      "task2": {
+        "required_effective_hours": 10800,
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": 1,
+              "laborers": 0
+            },
+            "fixed_cost": 0
+          },
+          "B": {
+            "team": {
+              "skilled": 0,
+              "laborers": 1
+            },
+            "fixed_cost": 0
+          }
+        }
+      },
+      "task3": {
+        "required_effective_hours": 18000,
+        "methods": {
+          "A": {
+            "team": {
+              "skilled": 0,
+              "laborers": 5
+            },
+            "fixed_cost": 0
+          },
+          "B": {
+            "team": {
+              "skilled": 1,
+              "laborers": 3
+            },
+            "fixed_cost": 0
+          }
+        }
+      }
+    },
+    "weekly_wage": {
+      "skilled": 100,
+      "laborers": 80
+    },
+    "effective_hours_per_worker": {
+      "skilled": 42,
+      "laborers": 36
+    },
+    "worker_limits": {
+      "skilled_max": 400,
+      "laborers_max": 800
+    },
+    "policies": {
+      "task1_B_excludes_task3_A": true,
+      "task3_B_min_skilled": 20,
+      "skilled_at_most_fraction_of_laborers": 0.6
+    }
+  }
+}

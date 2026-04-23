@@ -1,0 +1,42 @@
+{
+  "input_format": {
+    "products": [
+      {
+        "name": "string",
+        "profit_per_unit": "number",
+        "assembly_time_minutes": "number"
+      }
+    ],
+    "weekly_machine_time_hours": "number",
+    "min_B_per_A_ratio": {
+      "B_units": "number",
+      "A_units": "number"
+    }
+  },
+  "output_format": {
+    "production": {
+      "A": "number",
+      "B": "number"
+    },
+    "total_profit": "number"
+  },
+  "example_input": {
+    "products": [
+      {
+        "name": "A",
+        "profit_per_unit": 3,
+        "assembly_time_minutes": 12
+      },
+      {
+        "name": "B",
+        "profit_per_unit": 5,
+        "assembly_time_minutes": 25
+      }
+    ],
+    "weekly_machine_time_hours": 30,
+    "min_B_per_A_ratio": {
+      "B_units": 2,
+      "A_units": 5
+    }
+  }
+}

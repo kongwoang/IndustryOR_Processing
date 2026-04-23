@@ -1,0 +1,121 @@
+{
+  "input_format": {
+    "products": ["string"],
+    "machines": {
+      "A": {
+        "machine_name": {
+          "available_time": "number",
+          "hourly_cost": "number",
+          "processing_time": {
+            "product_name": "number"
+          }
+        }
+      },
+      "B": {
+        "machine_name": {
+          "available_time": "number",
+          "hourly_cost": "number",
+          "processing_time": {
+            "product_name": "number"
+          }
+        }
+      }
+    },
+    "raw_material_cost": {
+      "product_name": "number"
+    },
+    "unit_price": {
+      "product_name": "number"
+    }
+  },
+  "output_format": {
+    "production_quantity": {
+      "I": "number",
+      "II": "number",
+      "III": "number"
+    },
+    "route_allocation": {
+      "I": {
+        "A1-B1": "number",
+        "A1-B2": "number",
+        "A1-B3": "number",
+        "A2-B1": "number",
+        "A2-B2": "number",
+        "A2-B3": "number"
+      },
+      "II": {
+        "A1-B1": "number",
+        "A2-B1": "number"
+      },
+      "III": {
+        "A2-B2": "number"
+      }
+    },
+    "machine_usage": {
+      "A1": "number",
+      "A2": "number",
+      "B1": "number",
+      "B2": "number",
+      "B3": "number"
+    }
+  },
+  "example_input": {
+    "products": ["I", "II", "III"],
+    "machines": {
+      "A": {
+        "A1": {
+          "available_time": 6000,
+          "hourly_cost": 0.05,
+          "processing_time": {
+            "I": 5,
+            "II": 10
+          }
+        },
+        "A2": {
+          "available_time": 10000,
+          "hourly_cost": 0.03,
+          "processing_time": {
+            "I": 7,
+            "II": 9,
+            "III": 12
+          }
+        }
+      },
+      "B": {
+        "B1": {
+          "available_time": 4000,
+          "hourly_cost": 0.06,
+          "processing_time": {
+            "I": 6,
+            "II": 8
+          }
+        },
+        "B2": {
+          "available_time": 7000,
+          "hourly_cost": 0.11,
+          "processing_time": {
+            "I": 4,
+            "III": 11
+          }
+        },
+        "B3": {
+          "available_time": 4000,
+          "hourly_cost": 0.05,
+          "processing_time": {
+            "I": 7
+          }
+        }
+      }
+    },
+    "raw_material_cost": {
+      "I": 0.25,
+      "II": 0.35,
+      "III": 0.5
+    },
+    "unit_price": {
+      "I": 1.25,
+      "II": 2.0,
+      "III": 2.8
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "input_format": {
+    "workshops": [
+      {
+        "name": "string",
+        "capacity_hours": "number",
+        "production_rates": {
+          "Component 1": "number",
+          "Component 2": "number",
+          "Component 3": "number"
+        }
+      }
+    ],
+    "components": ["string"],
+    "required_units_per_product": {
+      "<component_name>": "number"
+    },
+    "objective": "string"
+  },
+  "output_format": {
+    "completed_products": "number",
+    "hours_allocated": {
+      "<workshop_name>": {
+        "<component_name>": "number"
+      }
+    },
+    "component_units_produced": {
+      "<component_name>": "number"
+    },
+    "hours_used_by_workshop": {
+      "<workshop_name>": "number"
+    }
+  },
+  "example_input": {
+    "workshops": [
+      {
+        "name": "A",
+        "capacity_hours": 100,
+        "production_rates": {
+          "Component 1": 10,
+          "Component 2": 15,
+          "Component 3": 5
+        }
+      },
+      {
+        "name": "B",
+        "capacity_hours": 150,
+        "production_rates": {
+          "Component 1": 15,
+          "Component 2": 10,
+          "Component 3": 5
+        }
+      },
+      {
+        "name": "C",
+        "capacity_hours": 80,
+        "production_rates": {
+          "Component 1": 20,
+          "Component 2": 5,
+          "Component 3": 10
+        }
+      },
+      {
+        "name": "D",
+        "capacity_hours": 200,
+        "production_rates": {
+          "Component 1": 10,
+          "Component 2": 15,
+          "Component 3": 20
+        }
+      }
+    ],
+    "components": ["Component 1", "Component 2", "Component 3"],
+    "required_units_per_product": {
+      "Component 1": 1,
+      "Component 2": 1,
+      "Component 3": 1
+    },
+    "objective": "maximize_completed_products"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "input_format": {
+    "employee_types": [
+      {
+        "name": "string",
+        "count": "number",
+        "regular_hours_per_employee": "number",
+        "sales_pairs_per_hour": "number",
+        "regular_wage_yuan_per_hour": "number",
+        "overtime_wage_yuan_per_hour": "number"
+      }
+    ],
+    "profit_per_pair_yuan": "number",
+    "goals": {
+      "sales_target_pairs": "number",
+      "priorities": ["string"]
+    }
+  },
+  "output_format": {
+    "regular_hours_used": {
+      "full_time": "number",
+      "part_time": "number"
+    },
+    "overtime_hours": {
+      "full_time": "number",
+      "part_time": "number"
+    },
+    "sales_pairs": "number",
+    "sales_profit_yuan": "number",
+    "labor_cost_yuan": "number",
+    "goal_deviations": {
+      "sales_underachievement_pairs": "number",
+      "sales_overachievement_pairs": "number",
+      "full_time_unused_regular_hours": "number",
+      "part_time_unused_regular_hours": "number"
+    }
+  },
+  "example_input": {
+    "employee_types": [
+      {
+        "name": "full_time",
+        "count": 5,
+        "regular_hours_per_employee": 160,
+        "sales_pairs_per_hour": 5,
+        "regular_wage_yuan_per_hour": 1.0,
+        "overtime_wage_yuan_per_hour": 1.5
+      },
+      {
+        "name": "part_time",
+        "count": 4,
+        "regular_hours_per_employee": 80,
+        "sales_pairs_per_hour": 2,
+        "regular_wage_yuan_per_hour": 0.6,
+        "overtime_wage_yuan_per_hour": 0.7
+      }
+    ],
+    "profit_per_pair_yuan": 0.3,
+    "goals": {
+      "sales_target_pairs": 5500,
+      "priorities": [
+        "meet_sales_target",
+        "fully_use_regular_hours",
+        "minimize_overtime_hours"
+      ]
+    }
+  }
+}

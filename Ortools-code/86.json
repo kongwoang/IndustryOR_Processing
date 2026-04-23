@@ -1,0 +1,66 @@
+{
+  "input_format": {
+    "products": {
+      "<product_name>": {
+        "price_per_pack": "number",
+        "grains_lbs_per_pack": "number",
+        "meat_lbs_per_pack": "number",
+        "variable_cost_per_pack": "number"
+      }
+    },
+    "resources": {
+      "grains": {
+        "max_lbs": "number",
+        "cost_per_lb": "number"
+      },
+      "meat": {
+        "max_lbs": "number",
+        "cost_per_lb": "number"
+      },
+      "meaties_capacity_packs": "number"
+    }
+  },
+  "output_format": {
+    "production_packs": {
+      "Meaties": "number",
+      "Yummies": "number"
+    },
+    "resource_usage": {
+      "grains_lbs": "number",
+      "meat_lbs": "number"
+    },
+    "financials": {
+      "revenue": "number",
+      "raw_material_cost": "number",
+      "mixing_packaging_cost": "number",
+      "profit": "number"
+    }
+  },
+  "example_input": {
+    "products": {
+      "Meaties": {
+        "price_per_pack": 2.8,
+        "grains_lbs_per_pack": 2.0,
+        "meat_lbs_per_pack": 3.0,
+        "variable_cost_per_pack": 0.25
+      },
+      "Yummies": {
+        "price_per_pack": 2.0,
+        "grains_lbs_per_pack": 3.0,
+        "meat_lbs_per_pack": 1.5,
+        "variable_cost_per_pack": 0.2
+      }
+    },
+    "resources": {
+      "grains": {
+        "max_lbs": 400000,
+        "cost_per_lb": 0.2
+      },
+      "meat": {
+        "max_lbs": 300000,
+        "cost_per_lb": 0.5
+      },
+      "meaties_capacity_packs": 90000
+    }
+  }
+}

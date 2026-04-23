@@ -1,0 +1,54 @@
+{
+  "input_format": {
+    "properties": [
+      {
+        "id": "integer",
+        "annual_income": "number",
+        "cost_million": "number"
+      }
+    ],
+    "budget_million": "number",
+    "mutually_exclusive_pairs": [
+      ["integer", "integer"]
+    ]
+  },
+  "output_format": {
+    "selected_properties": ["integer"],
+    "buy": {
+      "property_1": "integer",
+      "property_2": "integer",
+      "property_3": "integer",
+      "property_4": "integer"
+    },
+    "total_cost_million": "number",
+    "total_annual_income": "number"
+  },
+  "example_input": {
+    "properties": [
+      {
+        "id": 1,
+        "annual_income": 12500,
+        "cost_million": 1.5
+      },
+      {
+        "id": 2,
+        "annual_income": 35000,
+        "cost_million": 2.1
+      },
+      {
+        "id": 3,
+        "annual_income": 23000,
+        "cost_million": 2.3
+      },
+      {
+        "id": 4,
+        "annual_income": 100000,
+        "cost_million": 4.2
+      }
+    ],
+    "budget_million": 7.0,
+    "mutually_exclusive_pairs": [
+      [4, 3]
+    ]
+  }
+}

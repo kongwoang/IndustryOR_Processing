@@ -1,0 +1,65 @@
+{
+  "input_format": {
+    "initial_capital": "number",
+    "horizon_years": "integer",
+    "products": [
+      {
+        "id": "string",
+        "available_at_start_of_years": ["integer"],
+        "maturity_end_of_year": "integer",
+        "payoff_multiplier": "number",
+        "capacity": "number|null"
+      }
+    ]
+  },
+  "output_format": {
+    "investments": [
+      {
+        "product_id": "string",
+        "start_year": "integer",
+        "amount": "number"
+      }
+    ],
+    "cash_carryover": [
+      {
+        "from_year_end": "integer",
+        "amount": "number"
+      }
+    ],
+    "ending_wealth": "number"
+  },
+  "example_input": {
+    "initial_capital": 500000,
+    "horizon_years": 3,
+    "products": [
+      {
+        "id": "p1",
+        "available_at_start_of_years": [1, 2, 3],
+        "maturity_end_of_year": 1,
+        "payoff_multiplier": 1.2,
+        "capacity": null
+      },
+      {
+        "id": "p2",
+        "available_at_start_of_years": [1],
+        "maturity_end_of_year": 2,
+        "payoff_multiplier": 1.5,
+        "capacity": 120000
+      },
+      {
+        "id": "p3",
+        "available_at_start_of_years": [2],
+        "maturity_end_of_year": 2,
+        "payoff_multiplier": 1.6,
+        "capacity": 150000
+      },
+      {
+        "id": "p4",
+        "available_at_start_of_years": [3],
+        "maturity_end_of_year": 3,
+        "payoff_multiplier": 1.4,
+        "capacity": 100000
+      }
+    ]
+  }
+}

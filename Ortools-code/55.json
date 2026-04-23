@@ -1,0 +1,64 @@
+{
+  "input_format": {
+    "requirements": {
+      "Mathematics": "integer",
+      "Operations Research": "integer",
+      "Computer Science": "integer"
+    },
+    "courses": [
+      {
+        "name": "string",
+        "categories": ["string"],
+        "prerequisites": ["string"]
+      }
+    ]
+  },
+  "output_format": {
+    "minimum_number_of_courses": "integer",
+    "selected_courses": ["string"]
+  },
+  "example_input": {
+    "requirements": {
+      "Mathematics": 2,
+      "Operations Research": 2,
+      "Computer Science": 2
+    },
+    "courses": [
+      {
+        "name": "Calculus",
+        "categories": ["Mathematics"],
+        "prerequisites": []
+      },
+      {
+        "name": "Operations Research",
+        "categories": ["Mathematics", "Operations Research"],
+        "prerequisites": []
+      },
+      {
+        "name": "Data Structures",
+        "categories": ["Mathematics", "Computer Science"],
+        "prerequisites": ["Computer Programming"]
+      },
+      {
+        "name": "Management Statistics",
+        "categories": ["Mathematics", "Operations Research"],
+        "prerequisites": ["Calculus"]
+      },
+      {
+        "name": "Computer Simulation",
+        "categories": ["Computer Science", "Operations Research"],
+        "prerequisites": ["Computer Programming"]
+      },
+      {
+        "name": "Computer Programming",
+        "categories": ["Computer Science"],
+        "prerequisites": []
+      },
+      {
+        "name": "Forecasting",
+        "categories": ["Operations Research", "Mathematics"],
+        "prerequisites": ["Management Statistics"]
+      }
+    ]
+  }
+}

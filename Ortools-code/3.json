@@ -1,0 +1,75 @@
+{
+  "input_format": {
+    "months": ["string"],
+    "demand": {"month": "number"},
+    "initial_workforce": "number",
+    "initial_inventory": "number",
+    "initial_backorder": "number",
+    "ending_inventory_min": "number",
+    "ending_backorder_required": "number",
+    "sales_price_per_unit": "number",
+    "raw_material_cost_per_inhouse_unit": "number",
+    "outsourcing_cost_per_unit": "number",
+    "inventory_holding_cost_per_unit_month": "number",
+    "backorder_cost_per_unit_month": "number",
+    "labor_hours_per_unit": "number",
+    "regular_hours_per_worker_month": "number",
+    "regular_wage_per_hour": "number",
+    "max_overtime_hours_per_worker_month": "number",
+    "overtime_wage_per_hour": "number",
+    "hire_cost_per_worker": "number",
+    "fire_cost_per_worker": "number"
+  },
+  "output_format": {
+    "monthly_plan": [
+      {
+        "month": "string",
+        "workforce": "number",
+        "hires": "number",
+        "fires": "number",
+        "inhouse_production": "number",
+        "outsourcing": "number",
+        "overtime_hours": "number",
+        "ending_inventory": "number",
+        "ending_backorder": "number",
+        "units_sold": "number",
+        "monthly_revenue": "number",
+        "monthly_cost": "number",
+        "monthly_profit": "number"
+      }
+    ],
+    "totals": {
+      "total_revenue": "number",
+      "total_cost": "number",
+      "net_profit": "number"
+    }
+  },
+  "example_input": {
+    "months": ["January", "February", "March", "April", "May", "June"],
+    "demand": {
+      "January": 20000,
+      "February": 40000,
+      "March": 42000,
+      "April": 35000,
+      "May": 19000,
+      "June": 18500
+    },
+    "initial_workforce": 1000,
+    "initial_inventory": 15000,
+    "initial_backorder": 0,
+    "ending_inventory_min": 10000,
+    "ending_backorder_required": 0,
+    "sales_price_per_unit": 300,
+    "raw_material_cost_per_inhouse_unit": 90,
+    "outsourcing_cost_per_unit": 200,
+    "inventory_holding_cost_per_unit_month": 15,
+    "backorder_cost_per_unit_month": 35,
+    "labor_hours_per_unit": 5,
+    "regular_hours_per_worker_month": 160,
+    "regular_wage_per_hour": 30,
+    "max_overtime_hours_per_worker_month": 20,
+    "overtime_wage_per_hour": 40,
+    "hire_cost_per_worker": 5000,
+    "fire_cost_per_worker": 8000
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "input_format": {
+    "initial_capital": "number",
+    "planning_horizon_years": "integer",
+    "investments": {
+      "option_1": {
+        "duration_years": "integer",
+        "maturity_value_per_yuan_invested": "number",
+        "allowed_start_years": ["integer"]
+      },
+      "option_2": {
+        "duration_years": "integer",
+        "maturity_value_per_yuan_invested": "number",
+        "allowed_start_years": ["integer"]
+      }
+    }
+  },
+  "output_format": {
+    "investment_plan": {
+      "option_1_by_start_year": {
+        "1": "number",
+        "2": "number",
+        "3": "number"
+      },
+      "option_2_by_start_year": {
+        "1": "number",
+        "2": "number"
+      }
+    },
+    "cash_available_by_start_of_year": {
+      "1": "number",
+      "2": "number",
+      "3": "number"
+    },
+    "final_wealth_end_of_year_3": "number",
+    "total_earnings": "number"
+  },
+  "example_input": {
+    "initial_capital": 100000,
+    "planning_horizon_years": 3,
+    "investments": {
+      "option_1": {
+        "duration_years": 1,
+        "maturity_value_per_yuan_invested": 1.7,
+        "allowed_start_years": [1, 2, 3]
+      },
+      "option_2": {
+        "duration_years": 2,
+        "maturity_value_per_yuan_invested": 3.0,
+        "allowed_start_years": [1, 2]
+      }
+    }
+  }
+}

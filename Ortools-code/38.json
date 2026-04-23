@@ -1,0 +1,33 @@
+{
+  "input_format": {
+    "products": ["integer"],
+    "machines": ["integer"],
+    "processing_times": [["integer"]]
+  },
+  "output_format": {
+    "product_order": ["integer"],
+    "makespan": "integer",
+    "schedule": [
+      {
+        "position": "integer",
+        "product": "integer",
+        "machine_times": [
+          {
+            "machine": "integer",
+            "start": "integer",
+            "end": "integer"
+          }
+        ]
+      }
+    ]
+  },
+  "example_input": {
+    "products": [1, 2, 3],
+    "machines": [1, 2, 3],
+    "processing_times": [
+      [2, 3, 1],
+      [4, 2, 3],
+      [3, 5, 2]
+    ]
+  }
+}

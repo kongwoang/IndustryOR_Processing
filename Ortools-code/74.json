@@ -1,0 +1,80 @@
+{
+  "input_format": {
+    "activities": [
+      {
+        "name": "string",
+        "duration": "number"
+      }
+    ],
+    "precedence": [
+      ["string", "string"]
+    ],
+    "daily_work_cost": "number",
+    "machine_rental": {
+      "from_activity_start": "string",
+      "to_activity_end": "string",
+      "daily_cost": "number"
+    }
+  },
+  "output_format": {
+    "start_times": {
+      "<activity_name>": "number"
+    },
+    "finish_times": {
+      "<activity_name>": "number"
+    },
+    "project_completion_time": "number",
+    "machine_rental_days": "number",
+    "cost_breakdown": {
+      "work_cost": "number",
+      "machine_cost": "number"
+    }
+  },
+  "example_input": {
+    "activities": [
+      {
+        "name": "A",
+        "duration": 4
+      },
+      {
+        "name": "B",
+        "duration": 3
+      },
+      {
+        "name": "C",
+        "duration": 5
+      },
+      {
+        "name": "D",
+        "duration": 2
+      },
+      {
+        "name": "E",
+        "duration": 10
+      },
+      {
+        "name": "F",
+        "duration": 10
+      },
+      {
+        "name": "G",
+        "duration": 1
+      }
+    ],
+    "precedence": [
+      ["A", "G"],
+      ["A", "D"],
+      ["E", "F"],
+      ["G", "F"],
+      ["D", "C"],
+      ["F", "C"],
+      ["F", "B"]
+    ],
+    "daily_work_cost": 1000,
+    "machine_rental": {
+      "from_activity_start": "A",
+      "to_activity_end": "B",
+      "daily_cost": 5000
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "input_format": {
+    "proteins": {
+      "<protein_name>": {
+        "price_per_100g": "number"
+      }
+    },
+    "vegetables": {
+      "<vegetable_name>": {
+        "price_per_100g": "number",
+        "fiber_per_100g": "number"
+      }
+    },
+    "budget": "number",
+    "total_food_grams": "number",
+    "choose_exactly_one_protein": "boolean",
+    "min_selected_vegetables": "integer",
+    "min_grams_if_selected": "number"
+  },
+  "output_format": {
+    "selected_protein": "string",
+    "food_quantities_grams": {
+      "<food_name>": "number"
+    },
+    "total_cost": "number",
+    "total_fiber_grams": "number"
+  },
+  "example_input": {
+    "proteins": {
+      "salmon": {
+        "price_per_100g": 4.0
+      },
+      "beef": {
+        "price_per_100g": 3.6
+      },
+      "pork": {
+        "price_per_100g": 1.8
+      }
+    },
+    "vegetables": {
+      "okra": {
+        "price_per_100g": 2.6,
+        "fiber_per_100g": 3.2
+      },
+      "carrots": {
+        "price_per_100g": 1.2,
+        "fiber_per_100g": 2.7
+      },
+      "celery": {
+        "price_per_100g": 1.6,
+        "fiber_per_100g": 1.6
+      },
+      "cabbage": {
+        "price_per_100g": 2.3,
+        "fiber_per_100g": 2.0
+      }
+    },
+    "budget": 15.0,
+    "total_food_grams": 600.0,
+    "choose_exactly_one_protein": true,
+    "min_selected_vegetables": 2,
+    "min_grams_if_selected": 10.0
+  }
+}

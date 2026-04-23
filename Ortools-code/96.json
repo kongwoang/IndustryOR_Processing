@@ -1,0 +1,81 @@
+{
+  "input_format": {
+    "raw_pipe_length_mm": "integer",
+    "raw_pipe_cost_in_raw_pipe_value_units": "number",
+    "max_patterns_used": "integer",
+    "max_pieces_per_pattern": "integer",
+    "max_leftover_mm": "integer",
+    "rank_extra_cost_once_in_raw_pipe_value_units": [
+      "number"
+    ],
+    "items": [
+      {
+        "length_mm": "integer",
+        "demand": "integer"
+      }
+    ]
+  },
+  "output_format": {
+    "selected_patterns": [
+      {
+        "rank": "integer",
+        "pattern_id": "integer",
+        "times_used": "integer",
+        "pieces_per_raw_pipe": {
+          "290": "integer",
+          "315": "integer",
+          "350": "integer",
+          "455": "integer"
+        },
+        "leftover_mm_per_raw_pipe": "integer",
+        "raw_pipe_cost_total_in_raw_pipe_value_units": "number",
+        "rank_extra_cost_once_in_raw_pipe_value_units": "number"
+      }
+    ],
+    "total_raw_pipes": "integer",
+    "produced_quantities": {
+      "290": "integer",
+      "315": "integer",
+      "350": "integer",
+      "455": "integer"
+    },
+    "overproduction": {
+      "290": "integer",
+      "315": "integer",
+      "350": "integer",
+      "455": "integer"
+    },
+    "total_leftover_mm": "integer"
+  },
+  "example_input": {
+    "raw_pipe_length_mm": 1850,
+    "raw_pipe_cost_in_raw_pipe_value_units": 1.0,
+    "max_patterns_used": 4,
+    "max_pieces_per_pattern": 5,
+    "max_leftover_mm": 100,
+    "rank_extra_cost_once_in_raw_pipe_value_units": [
+      0.1,
+      0.2,
+      0.3,
+      0.4
+    ],
+    "items": [
+      {
+        "length_mm": 290,
+        "demand": 15
+      },
+      {
+        "length_mm": 315,
+        "demand": 28
+      },
+      {
+        "length_mm": 350,
+        "demand": 21
+      },
+      {
+        "length_mm": 455,
+        "demand": 30
+      }
+    ]
+  }
+}

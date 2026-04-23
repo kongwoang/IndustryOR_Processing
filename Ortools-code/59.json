@@ -1,0 +1,80 @@
+{
+  "input_format": {
+    "raw_materials": ["string"],
+    "candy_brands": ["string"],
+    "raw_material_cost": {"<raw_material>": "number"},
+    "monthly_limit": {"<raw_material>": "number"},
+    "processing_fee": {"<candy_brand>": "number"},
+    "selling_price": {"<candy_brand>": "number"},
+    "min_percent": {"<candy_brand>": {"<raw_material>": "number"}},
+    "max_percent": {"<candy_brand>": {"<raw_material>": "number"}}
+  },
+  "output_format": {
+    "production_kg": {
+      "A": "number",
+      "B": "number",
+      "C": "number"
+    },
+    "raw_material_allocation_kg": {
+      "A": {
+        "A": "number",
+        "B": "number",
+        "C": "number"
+      },
+      "B": {
+        "A": "number",
+        "B": "number",
+        "C": "number"
+      },
+      "C": {
+        "A": "number",
+        "B": "number",
+        "C": "number"
+      }
+    }
+  },
+  "example_input": {
+    "raw_materials": ["A", "B", "C"],
+    "candy_brands": ["A", "B", "C"],
+    "raw_material_cost": {
+      "A": 2.0,
+      "B": 1.5,
+      "C": 1.0
+    },
+    "monthly_limit": {
+      "A": 2000.0,
+      "B": 2500.0,
+      "C": 1200.0
+    },
+    "processing_fee": {
+      "A": 0.5,
+      "B": 0.4,
+      "C": 0.3
+    },
+    "selling_price": {
+      "A": 3.4,
+      "B": 2.85,
+      "C": 2.25
+    },
+    "min_percent": {
+      "A": {
+        "A": 0.6
+      },
+      "B": {
+        "A": 0.15
+      },
+      "C": {}
+    },
+    "max_percent": {
+      "A": {
+        "C": 0.2
+      },
+      "B": {
+        "C": 0.6
+      },
+      "C": {
+        "C": 0.5
+      }
+    }
+  }
+}

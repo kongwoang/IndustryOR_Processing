@@ -1,0 +1,19 @@
+{
+  "input_format": {
+    "years": "array of integers",
+    "production_by_year": "object mapping year string to integer",
+    "pilots_trained_per_training_jet_per_year": "integer"
+  },
+  "output_format": {
+    "training_jets_by_year": "object mapping year string to integer",
+    "total_trained_pilots_by_end_of_year_2": "integer"
+  },
+  "example_input": {
+    "years": [1, 2],
+    "production_by_year": {
+      "1": 10,
+      "2": 15
+    },
+    "pilots_trained_per_training_jet_per_year": 5
+  }
+}

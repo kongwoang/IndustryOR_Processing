@@ -1,0 +1,21 @@
+{
+  "input_format": {
+    "cities": "list[int]",
+    "distance_matrix": "list[list[number]]",
+    "start_city": "int"
+  },
+  "output_format": {
+    "route": "list[int]",
+    "total_distance": "number"
+  },
+  "example_input": {
+    "cities": [1, 2, 3, 4],
+    "distance_matrix": [
+      [0, 10, 20, 12],
+      [10, 0, 5, 10],
+      [20, 5, 0, 8],
+      [15, 12, 8, 0]
+    ],
+    "start_city": 1
+  }
+}

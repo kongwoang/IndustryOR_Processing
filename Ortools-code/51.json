@@ -1,0 +1,84 @@
+{
+  "input_format": {
+    "time_periods": [
+      {
+        "start": "string (HH:MM)",
+        "end": "string (HH:MM)",
+        "required_nurses": "integer"
+      }
+    ],
+    "shift_start_times": ["string (HH:MM)"],
+    "shift_length_hours": "integer",
+    "nurse_types": {
+      "regular": {
+        "hourly_pay": "number"
+      },
+      "contract": {
+        "hourly_pay": "number"
+      }
+    }
+  },
+  "output_format": {
+    "regular_nurses_by_start_time": {
+      "HH:MM": "integer"
+    },
+    "contract_nurses_by_start_time": {
+      "HH:MM": "integer"
+    },
+    "total_regular_nurses": "integer",
+    "total_contract_nurses": "integer",
+    "hire_contract_nurses": "boolean",
+    "total_cost_yuan": "number"
+  },
+  "example_input": {
+    "time_periods": [
+      {
+        "start": "02:00",
+        "end": "06:00",
+        "required_nurses": 10
+      },
+      {
+        "start": "06:00",
+        "end": "10:00",
+        "required_nurses": 15
+      },
+      {
+        "start": "10:00",
+        "end": "14:00",
+        "required_nurses": 25
+      },
+      {
+        "start": "14:00",
+        "end": "18:00",
+        "required_nurses": 20
+      },
+      {
+        "start": "18:00",
+        "end": "22:00",
+        "required_nurses": 18
+      },
+      {
+        "start": "22:00",
+        "end": "02:00",
+        "required_nurses": 12
+      }
+    ],
+    "shift_start_times": [
+      "02:00",
+      "06:00",
+      "10:00",
+      "14:00",
+      "18:00",
+      "22:00"
+    ],
+    "shift_length_hours": 8,
+    "nurse_types": {
+      "regular": {
+        "hourly_pay": 10
+      },
+      "contract": {
+        "hourly_pay": 15
+      }
+    }
+  }
+}

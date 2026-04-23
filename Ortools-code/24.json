@@ -1,0 +1,48 @@
+{
+  "input_format": {
+    "demand_units": "int",
+    "modes": ["string"],
+    "capacities_per_trip": {
+      "truck": "int",
+      "van": "int",
+      "motorcycle": "int",
+      "electric_vehicle": "int"
+    },
+    "pollution_per_trip": {
+      "truck": "int",
+      "van": "int",
+      "motorcycle": "int",
+      "electric_vehicle": "int"
+    },
+    "min_truck_trips": "int",
+    "max_total_pollution": "int",
+    "mutually_exclusive_modes": ["string", "string"]
+  },
+  "output_format": {
+    "truck_trips": "int",
+    "van_trips": "int",
+    "motorcycle_trips": "int",
+    "electric_vehicle_trips": "int",
+    "total_delivered_units": "int",
+    "total_pollution": "int"
+  },
+  "example_input": {
+    "demand_units": 1800,
+    "modes": ["truck", "van", "motorcycle", "electric_vehicle"],
+    "capacities_per_trip": {
+      "truck": 100,
+      "van": 80,
+      "motorcycle": 40,
+      "electric_vehicle": 60
+    },
+    "pollution_per_trip": {
+      "truck": 100,
+      "van": 50,
+      "motorcycle": 10,
+      "electric_vehicle": 0
+    },
+    "min_truck_trips": 10,
+    "max_total_pollution": 2000,
+    "mutually_exclusive_modes": ["van", "electric_vehicle"]
+  }
+}

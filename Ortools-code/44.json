@@ -1,0 +1,96 @@
+{
+  "input_format": {
+    "production_points": [
+      {
+        "id": "int",
+        "supply": "number"
+      }
+    ],
+    "demand_points": [
+      {
+        "id": "int",
+        "demand": "number"
+      }
+    ],
+    "stations": [
+      {
+        "id": "int",
+        "fixed_cost": "number",
+        "capacity": "number"
+      }
+    ],
+    "cost_source_to_station": "number matrix of shape m x p",
+    "cost_station_to_demand": "number matrix of shape p x n"
+  },
+  "output_format": {
+    "open_stations": [
+      {
+        "station_id": "int",
+        "used": "0_or_1",
+        "throughput": "number"
+      }
+    ],
+    "shipments": [
+      {
+        "from_production": "int",
+        "via_station": "int",
+        "to_demand": "int",
+        "quantity": "number"
+      }
+    ]
+  },
+  "example_input": {
+    "production_points": [
+      {
+        "id": 1,
+        "supply": 100
+      },
+      {
+        "id": 2,
+        "supply": 150
+      }
+    ],
+    "demand_points": [
+      {
+        "id": 1,
+        "demand": 80
+      },
+      {
+        "id": 2,
+        "demand": 120
+      }
+    ],
+    "stations": [
+      {
+        "id": 1,
+        "fixed_cost": 10,
+        "capacity": 100
+      },
+      {
+        "id": 2,
+        "fixed_cost": 15,
+        "capacity": 100
+      }
+    ],
+    "cost_source_to_station": [
+      [
+        2,
+        3
+      ],
+      [
+        4,
+        1
+      ]
+    ],
+    "cost_station_to_demand": [
+      [
+        3,
+        2
+      ],
+      [
+        1,
+        4
+      ]
+    ]
+  }
+}

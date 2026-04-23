@@ -1,0 +1,58 @@
+{
+  "input_format": {
+    "sources": [
+      {
+        "name": "string",
+        "supply_tons": "number"
+      }
+    ],
+    "destinations": [
+      {
+        "name": "string",
+        "demand_tons": "number"
+      }
+    ],
+    "distance_km": [
+      ["number"]
+    ]
+  },
+  "output_format": {
+    "shipments_tons": [
+      {
+        "source": "string",
+        "destination": "string",
+        "tons": "number"
+      }
+    ]
+  },
+  "example_input": {
+    "sources": [
+      {
+        "name": "A",
+        "supply_tons": 80
+      },
+      {
+        "name": "B",
+        "supply_tons": 100
+      }
+    ],
+    "destinations": [
+      {
+        "name": "ResidentialArea1",
+        "demand_tons": 55
+      },
+      {
+        "name": "ResidentialArea2",
+        "demand_tons": 75
+      },
+      {
+        "name": "ResidentialArea3",
+        "demand_tons": 50
+      }
+    ],
+    "distance_km": [
+      [10, 5, 6],
+      [4, 8, 15]
+    ]
+  }
+}

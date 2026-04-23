@@ -1,0 +1,92 @@
+{
+  "input_format": {
+    "weeks": "int",
+    "initial_skilled_workers": "int",
+    "new_workers_to_train_by_end_of_week": "int",
+    "hours_per_week": {
+      "regular": "number",
+      "overtime": "number"
+    },
+    "training": {
+      "duration_weeks": "int",
+      "max_trainees_per_skilled_trainer": "int"
+    },
+    "production_rate_kg_per_hour": {
+      "I": "number",
+      "II": "number"
+    },
+    "weekly_wages_yuan": {
+      "skilled_regular": "number",
+      "skilled_overtime": "number",
+      "trainee_during_training": "number",
+      "trained_worker_after_training": "number"
+    },
+    "delay_penalty_yuan_per_kg_per_week": {
+      "I": "number",
+      "II": "number"
+    },
+    "demands_kg": {
+      "I": ["number"],
+      "II": ["number"]
+    }
+  },
+  "output_format": {
+    "training_starts": [
+      {
+        "week": "int",
+        "new_workers_started_training": "int",
+        "skilled_trainers_assigned": "int"
+      }
+    ],
+    "weekly_plan": [
+      {
+        "week": "int",
+        "overtime_skilled_workers": "int",
+        "trained_workers_available_for_production": "int",
+        "production_kg": {
+          "I": "number",
+          "II": "number"
+        },
+        "ending_inventory_kg": {
+          "I": "number",
+          "II": "number"
+        },
+        "ending_backlog_kg": {
+          "I": "number",
+          "II": "number"
+        }
+      }
+    ]
+  },
+  "example_input": {
+    "weeks": 8,
+    "initial_skilled_workers": 50,
+    "new_workers_to_train_by_end_of_week": 50,
+    "hours_per_week": {
+      "regular": 40,
+      "overtime": 60
+    },
+    "training": {
+      "duration_weeks": 2,
+      "max_trainees_per_skilled_trainer": 3
+    },
+    "production_rate_kg_per_hour": {
+      "I": 10,
+      "II": 6
+    },
+    "weekly_wages_yuan": {
+      "skilled_regular": 360,
+      "skilled_overtime": 540,
+      "trainee_during_training": 120,
+      "trained_worker_after_training": 240
+    },
+    "delay_penalty_yuan_per_kg_per_week": {
+      "I": 0.5,
+      "II": 0.6
+    },
+    "demands_kg": {
+      "I": [10000, 10000, 12000, 12000, 16000, 16000, 20000, 20000],
+      "II": [6000, 7200, 8400, 10800, 10800, 12000, 12000, 12000]
+    }
+  }
+}

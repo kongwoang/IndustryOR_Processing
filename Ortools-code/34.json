@@ -1,0 +1,96 @@
+{
+  "input_format": {
+    "container": {
+      "max_weight_tons": "number",
+      "min_weight_tons": "number"
+    },
+    "goods": {
+      "A": {
+        "quantity": "integer",
+        "weight_tons": "number"
+      },
+      "B": {
+        "quantity": "integer",
+        "weight_tons": "number"
+      },
+      "C": {
+        "quantity": "integer",
+        "weight_tons": "number"
+      },
+      "D": {
+        "quantity": "integer",
+        "weight_tons": "number"
+      },
+      "E": {
+        "quantity": "integer",
+        "weight_tons": "number"
+      }
+    },
+    "per_used_container_requirements": {
+      "D_min_units": "integer"
+    },
+    "packaging_requirements": [
+      {
+        "base_good": "string",
+        "paired_good": "string",
+        "min_paired_units_per_base_unit": "integer"
+      }
+    ],
+    "objective": "string"
+  },
+  "output_format": {
+    "container_count": "integer",
+    "containers": [
+      {
+        "container_id": "integer",
+        "loads": {
+          "A": "integer",
+          "B": "integer",
+          "C": "integer",
+          "D": "integer",
+          "E": "integer"
+        },
+        "total_weight_tons": "number"
+      }
+    ]
+  },
+  "example_input": {
+    "container": {
+      "max_weight_tons": 60,
+      "min_weight_tons": 18
+    },
+    "goods": {
+      "A": {
+        "quantity": 120,
+        "weight_tons": 0.5
+      },
+      "B": {
+        "quantity": 90,
+        "weight_tons": 1.0
+      },
+      "C": {
+        "quantity": 300,
+        "weight_tons": 0.4
+      },
+      "D": {
+        "quantity": 90,
+        "weight_tons": 0.6
+      },
+      "E": {
+        "quantity": 120,
+        "weight_tons": 0.65
+      }
+    },
+    "per_used_container_requirements": {
+      "D_min_units": 12
+    },
+    "packaging_requirements": [
+      {
+        "base_good": "A",
+        "paired_good": "C",
+        "min_paired_units_per_base_unit": 1
+      }
+    ],
+    "objective": "minimize_number_of_containers"
+  }
+}

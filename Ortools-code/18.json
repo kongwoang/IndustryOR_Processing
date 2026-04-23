@@ -1,0 +1,59 @@
+{
+  "input_format": {
+    "regular_hours_per_week": "number",
+    "overtime_limit_hours_per_week": "number",
+    "products": [
+      {
+        "name": "string",
+        "production_rate_meters_per_hour": "number",
+        "minimum_weekly_sales_meters": "number",
+        "profit_per_meter_yuan": "number"
+      }
+    ],
+    "priority_order": [
+      "string"
+    ]
+  },
+  "output_format": {
+    "production_meters": {
+      "curtain": "number",
+      "clothing": "number"
+    },
+    "hours": {
+      "regular": "number",
+      "overtime": "number",
+      "total": "number"
+    },
+    "profit_yuan": "number",
+    "goal_achievement": {
+      "unused_regular_hours": "number",
+      "overtime_excess_over_10_hours": "number",
+      "curtain_sales_shortfall_meters": "number",
+      "clothing_sales_shortfall_meters": "number"
+    }
+  },
+  "example_input": {
+    "regular_hours_per_week": 110,
+    "overtime_limit_hours_per_week": 10,
+    "products": [
+      {
+        "name": "curtain",
+        "production_rate_meters_per_hour": 1000,
+        "minimum_weekly_sales_meters": 70000,
+        "profit_per_meter_yuan": 2.5
+      },
+      {
+        "name": "clothing",
+        "production_rate_meters_per_hour": 1000,
+        "minimum_weekly_sales_meters": 45000,
+        "profit_per_meter_yuan": 1.5
+      }
+    ],
+    "priority_order": [
+      "fully_use_regular_time",
+      "keep_overtime_within_10_hours",
+      "meet_minimum_weekly_sales",
+      "minimize_overtime"
+    ]
+  }
+}

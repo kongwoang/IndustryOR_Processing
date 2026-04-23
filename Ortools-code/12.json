@@ -1,0 +1,110 @@
+{
+  "input_format": {
+    "container_types": [
+      {
+        "code": "int",
+        "volume_cm3": "int",
+        "demand_units": "int",
+        "variable_cost_per_unit": "float"
+      }
+    ],
+    "fixed_setup_cost": "float"
+  },
+  "output_format": {
+    "production_units": {
+      "1": "int",
+      "2": "int",
+      "3": "int",
+      "4": "int",
+      "5": "int",
+      "6": "int"
+    },
+    "equipment_activated": {
+      "1": "int",
+      "2": "int",
+      "3": "int",
+      "4": "int",
+      "5": "int",
+      "6": "int"
+    },
+    "allocation_units": {
+      "1": {
+        "1": "int"
+      },
+      "2": {
+        "1": "int",
+        "2": "int"
+      },
+      "3": {
+        "1": "int",
+        "2": "int",
+        "3": "int"
+      },
+      "4": {
+        "1": "int",
+        "2": "int",
+        "3": "int",
+        "4": "int"
+      },
+      "5": {
+        "1": "int",
+        "2": "int",
+        "3": "int",
+        "4": "int",
+        "5": "int"
+      },
+      "6": {
+        "1": "int",
+        "2": "int",
+        "3": "int",
+        "4": "int",
+        "5": "int",
+        "6": "int"
+      }
+    },
+    "total_variable_cost": "float",
+    "total_fixed_cost": "float",
+    "total_cost": "float"
+  },
+  "example_input": {
+    "container_types": [
+      {
+        "code": 1,
+        "volume_cm3": 1500,
+        "demand_units": 500,
+        "variable_cost_per_unit": 5.0
+      },
+      {
+        "code": 2,
+        "volume_cm3": 2500,
+        "demand_units": 550,
+        "variable_cost_per_unit": 8.0
+      },
+      {
+        "code": 3,
+        "volume_cm3": 4000,
+        "demand_units": 700,
+        "variable_cost_per_unit": 10.0
+      },
+      {
+        "code": 4,
+        "volume_cm3": 6000,
+        "demand_units": 900,
+        "variable_cost_per_unit": 12.0
+      },
+      {
+        "code": 5,
+        "volume_cm3": 9000,
+        "demand_units": 400,
+        "variable_cost_per_unit": 16.0
+      },
+      {
+        "code": 6,
+        "volume_cm3": 12000,
+        "demand_units": 300,
+        "variable_cost_per_unit": 18.0
+      }
+    ],
+    "fixed_setup_cost": 1200.0
+  }
+}

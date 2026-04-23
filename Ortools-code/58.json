@@ -1,0 +1,38 @@
+{
+  "input_format": {
+    "total_acres": "number",
+    "profits_per_acre": {
+      "apples": "number",
+      "pears": "number",
+      "oranges": "number",
+      "lemons": "number"
+    },
+    "constraints": {
+      "apples_min_at_least_multiplier_of_pears": "number",
+      "apples_min_at_least_multiplier_of_lemons": "number",
+      "oranges_equals_multiplier_of_lemons": "number",
+      "max_fruit_types": "integer"
+    }
+  },
+  "output_format": {
+    "apples_acres": "number",
+    "pears_acres": "number",
+    "oranges_acres": "number",
+    "lemons_acres": "number"
+  },
+  "example_input": {
+    "total_acres": 120,
+    "profits_per_acre": {
+      "apples": 2000,
+      "pears": 1800,
+      "oranges": 2200,
+      "lemons": 3000
+    },
+    "constraints": {
+      "apples_min_at_least_multiplier_of_pears": 2,
+      "apples_min_at_least_multiplier_of_lemons": 3,
+      "oranges_equals_multiplier_of_lemons": 2,
+      "max_fruit_types": 2
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "input_format": {
+    "products": ["string"],
+    "processes": ["string"],
+    "time_per_unit": {
+      "product_name": {
+        "process_name": "number"
+      }
+    },
+    "weekly_capacity": {
+      "process_name": "number"
+    },
+    "process_cost_per_hour": {
+      "process_name": "number"
+    },
+    "selling_price": {
+      "product_name": "number"
+    },
+    "goals": {
+      "min_weekly_profit": "number",
+      "min_type_A_units": "number",
+      "minimize_weighted_idle_time": "boolean"
+    }
+  },
+  "output_format": {
+    "decision_variables": {
+      "x_1": "number",
+      "x_2": "number"
+    },
+    "total_profit": "number",
+    "idle_time": {
+      "manufacturing": "number",
+      "assembly": "number",
+      "inspection": "number"
+    },
+    "weighted_idle_time_cost": "number"
+  },
+  "example_input": {
+    "products": ["A", "B"],
+    "processes": ["manufacturing", "assembly", "inspection"],
+    "time_per_unit": {
+      "A": {
+        "manufacturing": 20,
+        "assembly": 5,
+        "inspection": 3
+      },
+      "B": {
+        "manufacturing": 0,
+        "assembly": 7,
+        "inspection": 6
+      }
+    },
+    "weekly_capacity": {
+      "manufacturing": 120,
+      "assembly": 80,
+      "inspection": 40
+    },
+    "process_cost_per_hour": {
+      "manufacturing": 12,
+      "assembly": 8,
+      "inspection": 10
+    },
+    "selling_price": {
+      "A": 650,
+      "B": 725
+    },
+    "goals": {
+      "min_weekly_profit": 3000,
+      "min_type_A_units": 5,
+      "minimize_weighted_idle_time": true
+    }
+  }
+}

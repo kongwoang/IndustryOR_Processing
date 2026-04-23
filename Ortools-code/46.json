@@ -1,0 +1,150 @@
+{
+  "input_format": {
+    "students": [
+      {
+        "id": "integer",
+        "type": "string",
+        "wage": "number",
+        "availability_hours": {
+          "Monday": "integer",
+          "Tuesday": "integer",
+          "Wednesday": "integer",
+          "Thursday": "integer",
+          "Friday": "integer"
+        },
+        "min_weekly_hours": "integer",
+        "max_weekly_shifts": "integer"
+      }
+    ],
+    "days": ["string"],
+    "daily_required_hours": {
+      "Monday": "integer",
+      "Tuesday": "integer",
+      "Wednesday": "integer",
+      "Thursday": "integer",
+      "Friday": "integer"
+    },
+    "max_students_per_day": "integer"
+  },
+  "output_format": {
+    "assigned_hours": {
+      "<student_id>": {
+        "Monday": "integer",
+        "Tuesday": "integer",
+        "Wednesday": "integer",
+        "Thursday": "integer",
+        "Friday": "integer"
+      }
+    },
+    "selected_shifts": {
+      "<student_id>": ["string"]
+    },
+    "total_hours_per_student": {
+      "<student_id>": "integer"
+    },
+    "students_scheduled_per_day": {
+      "Monday": "integer",
+      "Tuesday": "integer",
+      "Wednesday": "integer",
+      "Thursday": "integer",
+      "Friday": "integer"
+    }
+  },
+  "example_input": {
+    "students": [
+      {
+        "id": 1,
+        "type": "undergraduate",
+        "wage": 10.0,
+        "availability_hours": {
+          "Monday": 6,
+          "Tuesday": 0,
+          "Wednesday": 6,
+          "Thursday": 0,
+          "Friday": 7
+        },
+        "min_weekly_hours": 8,
+        "max_weekly_shifts": 2
+      },
+      {
+        "id": 2,
+        "type": "undergraduate",
+        "wage": 10.0,
+        "availability_hours": {
+          "Monday": 0,
+          "Tuesday": 8,
+          "Wednesday": 9,
+          "Thursday": 6,
+          "Friday": 0
+        },
+        "min_weekly_hours": 8,
+        "max_weekly_shifts": 2
+      },
+      {
+        "id": 3,
+        "type": "undergraduate",
+        "wage": 9.9,
+        "availability_hours": {
+          "Monday": 4,
+          "Tuesday": 8,
+          "Wednesday": 3,
+          "Thursday": 0,
+          "Friday": 5
+        },
+        "min_weekly_hours": 8,
+        "max_weekly_shifts": 2
+      },
+      {
+        "id": 4,
+        "type": "undergraduate",
+        "wage": 9.8,
+        "availability_hours": {
+          "Monday": 5,
+          "Tuesday": 5,
+          "Wednesday": 6,
+          "Thursday": 0,
+          "Friday": 4
+        },
+        "min_weekly_hours": 8,
+        "max_weekly_shifts": 2
+      },
+      {
+        "id": 5,
+        "type": "graduate",
+        "wage": 10.8,
+        "availability_hours": {
+          "Monday": 3,
+          "Tuesday": 0,
+          "Wednesday": 5,
+          "Thursday": 8,
+          "Friday": 0
+        },
+        "min_weekly_hours": 7,
+        "max_weekly_shifts": 2
+      },
+      {
+        "id": 6,
+        "type": "graduate",
+        "wage": 11.3,
+        "availability_hours": {
+          "Monday": 0,
+          "Tuesday": 6,
+          "Wednesday": 0,
+          "Thursday": 6,
+          "Friday": 5
+        },
+        "min_weekly_hours": 7,
+        "max_weekly_shifts": 2
+      }
+    ],
+    "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "daily_required_hours": {
+      "Monday": 14,
+      "Tuesday": 14,
+      "Wednesday": 14,
+      "Thursday": 14,
+      "Friday": 14
+    },
+    "max_students_per_day": 3
+  }
+}

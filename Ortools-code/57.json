@@ -1,0 +1,54 @@
+{
+  "input_format": {
+    "orders": [
+      {
+        "order_number": "int",
+        "width": "float",
+        "length": "float"
+      }
+    ],
+    "standard_roll_widths": [
+      "float"
+    ]
+  },
+  "output_format": {
+    "total_waste_area": "float",
+    "patterns_used": [
+      {
+        "stock_width": "float",
+        "cuts": [
+          {
+            "width": "float",
+            "count_per_meter": "int"
+          }
+        ],
+        "length_used": "float",
+        "waste_width_per_meter": "float",
+        "waste_area": "float"
+      }
+    ]
+  },
+  "example_input": {
+    "orders": [
+      {
+        "order_number": 1,
+        "width": 0.5,
+        "length": 1000.0
+      },
+      {
+        "order_number": 2,
+        "width": 0.7,
+        "length": 3000.0
+      },
+      {
+        "order_number": 3,
+        "width": 0.9,
+        "length": 2000.0
+      }
+    ],
+    "standard_roll_widths": [
+      1.0,
+      2.0
+    ]
+  }
+}

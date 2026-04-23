@@ -1,0 +1,35 @@
+{
+  "input_format": {
+    "n": "int",
+    "requirements": ["int"],
+    "costs": {
+      "buy_new": "int",
+      "slow_repair": "int",
+      "fast_repair": "int"
+    },
+    "repair_times": {
+      "slow": "int",
+      "fast": "int"
+    }
+  },
+  "output_format": {
+    "buy": ["int"],
+    "slow_repair": ["int"],
+    "fast_repair": ["int"],
+    "inventory_start": ["int"],
+    "inventory_after_stage": ["int"]
+  },
+  "example_input": {
+    "n": 10,
+    "requirements": [3, 5, 2, 4, 6, 5, 4, 3, 2, 1],
+    "costs": {
+      "buy_new": 10,
+      "slow_repair": 1,
+      "fast_repair": 3
+    },
+    "repair_times": {
+      "slow": 3,
+      "fast": 1
+    }
+  }
+}

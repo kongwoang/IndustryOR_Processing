@@ -1,0 +1,91 @@
+{
+  "input_format": {
+    "raw_materials": [
+      {
+        "name": "string",
+        "sulfur_fraction": "number",
+        "purchase_cost_thousand_yuan_per_ton": "number",
+        "max_supply_tons": "number_or_null"
+      }
+    ],
+    "products": [
+      {
+        "name": "string",
+        "max_sulfur_fraction": "number",
+        "selling_price_thousand_yuan_per_ton": "number",
+        "max_demand_tons": "number"
+      }
+    ],
+    "process": {
+      "first_stage_mix": ["string"],
+      "second_stage_added_raw": "string"
+    }
+  },
+  "output_format": {
+    "product_output_tons": {
+      "product_A": "number",
+      "product_B": "number"
+    },
+    "raw_allocation_tons": {
+      "product_A": {
+        "raw_A": "number",
+        "raw_B": "number",
+        "raw_C": "number",
+        "raw_D": "number"
+      },
+      "product_B": {
+        "raw_A": "number",
+        "raw_B": "number",
+        "raw_C": "number",
+        "raw_D": "number"
+      }
+    },
+    "total_profit_thousand_yuan": "number"
+  },
+  "example_input": {
+    "raw_materials": [
+      {
+        "name": "raw_A",
+        "sulfur_fraction": 0.03,
+        "purchase_cost_thousand_yuan_per_ton": 6.0,
+        "max_supply_tons": null
+      },
+      {
+        "name": "raw_B",
+        "sulfur_fraction": 0.01,
+        "purchase_cost_thousand_yuan_per_ton": 16.0,
+        "max_supply_tons": null
+      },
+      {
+        "name": "raw_C",
+        "sulfur_fraction": 0.02,
+        "purchase_cost_thousand_yuan_per_ton": 10.0,
+        "max_supply_tons": null
+      },
+      {
+        "name": "raw_D",
+        "sulfur_fraction": 0.01,
+        "purchase_cost_thousand_yuan_per_ton": 15.0,
+        "max_supply_tons": 50.0
+      }
+    ],
+    "products": [
+      {
+        "name": "product_A",
+        "max_sulfur_fraction": 0.025,
+        "selling_price_thousand_yuan_per_ton": 9.15,
+        "max_demand_tons": 100.0
+      },
+      {
+        "name": "product_B",
+        "max_sulfur_fraction": 0.015,
+        "selling_price_thousand_yuan_per_ton": 9.15,
+        "max_demand_tons": 200.0
+      }
+    ],
+    "process": {
+      "first_stage_mix": ["raw_A", "raw_B", "raw_D"],
+      "second_stage_added_raw": "raw_C"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "input_format": {
+    "requirements": {
+      "raw_material_A_min_pieces": "integer",
+      "raw_material_B_min_kg": "integer",
+      "raw_material_C_min_tons": "integer"
+    },
+    "warehouses": {
+      "A": {
+        "raw_material_A_per_truck": "integer",
+        "raw_material_B_per_truck": "integer",
+        "raw_material_C_per_truck": "integer",
+        "cost_per_truck": "number"
+      },
+      "B": {
+        "raw_material_A_per_truck": "integer",
+        "raw_material_B_per_truck": "integer",
+        "raw_material_C_per_truck": "integer",
+        "cost_per_truck": "number"
+      }
+    }
+  },
+  "output_format": {
+    "trucks_from_warehouse_A": "integer",
+    "trucks_from_warehouse_B": "integer"
+  },
+  "example_input": {
+    "requirements": {
+      "raw_material_A_min_pieces": 240,
+      "raw_material_B_min_kg": 80,
+      "raw_material_C_min_tons": 120
+    },
+    "warehouses": {
+      "A": {
+        "raw_material_A_per_truck": 4,
+        "raw_material_B_per_truck": 2,
+        "raw_material_C_per_truck": 6,
+        "cost_per_truck": 200
+      },
+      "B": {
+        "raw_material_A_per_truck": 7,
+        "raw_material_B_per_truck": 2,
+        "raw_material_C_per_truck": 2,
+        "cost_per_truck": 160
+      }
+    }
+  }
+}

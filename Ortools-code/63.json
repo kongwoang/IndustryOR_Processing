@@ -1,0 +1,54 @@
+{
+  "input_format": {
+    "total_produce_required": "number",
+    "transport_options": {
+      "horse": {
+        "capacity_per_trip": "number",
+        "pollution_per_trip": "number",
+        "min_trips": "integer"
+      },
+      "bicycle": {
+        "capacity_per_trip": "number",
+        "pollution_per_trip": "number"
+      },
+      "handcart": {
+        "capacity_per_trip": "number",
+        "pollution_per_trip": "number"
+      }
+    },
+    "max_total_pollution": "number",
+    "choose_only_one_of": [
+      "string"
+    ]
+  },
+  "output_format": {
+    "horse_trips": "integer",
+    "bicycle_trips": "integer",
+    "handcart_trips": "integer",
+    "total_transported": "number",
+    "total_pollution": "number"
+  },
+  "example_input": {
+    "total_produce_required": 1000,
+    "transport_options": {
+      "horse": {
+        "capacity_per_trip": 55,
+        "pollution_per_trip": 80,
+        "min_trips": 8
+      },
+      "bicycle": {
+        "capacity_per_trip": 30,
+        "pollution_per_trip": 0
+      },
+      "handcart": {
+        "capacity_per_trip": 40,
+        "pollution_per_trip": 0
+      }
+    },
+    "max_total_pollution": 1000,
+    "choose_only_one_of": [
+      "bicycle",
+      "handcart"
+    ]
+  }
+}

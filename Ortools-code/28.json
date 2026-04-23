@@ -1,0 +1,69 @@
+{
+  "input_format": {
+    "initial_fund": "number",
+    "horizon_years": "integer",
+    "projects": [
+      {
+        "name": "string",
+        "allowed_start_years": ["integer"],
+        "duration_years": "integer",
+        "return_multiplier": "number",
+        "max_investment": "number|null"
+      }
+    ]
+  },
+  "output_format": {
+    "investment_plan": {
+      "year_1": {
+        "project_1": "number",
+        "project_2": "number",
+        "uninvested_cash": "number"
+      },
+      "year_2": {
+        "project_1": "number",
+        "project_3": "number",
+        "uninvested_cash": "number"
+      },
+      "year_3": {
+        "project_1": "number",
+        "project_4": "number",
+        "uninvested_cash": "number"
+      }
+    },
+    "ending_total_principal_and_interest": "number"
+  },
+  "example_input": {
+    "initial_fund": 300000,
+    "horizon_years": 3,
+    "projects": [
+      {
+        "name": "project_1",
+        "allowed_start_years": [1, 2, 3],
+        "duration_years": 1,
+        "return_multiplier": 1.2,
+        "max_investment": null
+      },
+      {
+        "name": "project_2",
+        "allowed_start_years": [1],
+        "duration_years": 2,
+        "return_multiplier": 1.5,
+        "max_investment": 150000
+      },
+      {
+        "name": "project_3",
+        "allowed_start_years": [2],
+        "duration_years": 2,
+        "return_multiplier": 1.6,
+        "max_investment": 200000
+      },
+      {
+        "name": "project_4",
+        "allowed_start_years": [3],
+        "duration_years": 1,
+        "return_multiplier": 1.4,
+        "max_investment": 100000
+      }
+    ]
+  }
+}

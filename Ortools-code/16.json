@@ -1,0 +1,22 @@
+{
+  "input_format": {
+    "months": ["integer"],
+    "initial_inventory": "number",
+    "warehouse_capacity": "number",
+    "purchase_price": ["number"],
+    "selling_price": ["number"]
+  },
+  "output_format": {
+    "purchase_plan": ["number"],
+    "sales_plan": ["number"],
+    "ending_inventory": ["number"],
+    "total_profit": "number"
+  },
+  "example_input": {
+    "months": [1, 2, 3],
+    "initial_inventory": 200,
+    "warehouse_capacity": 500,
+    "purchase_price": [8, 6, 9],
+    "selling_price": [9, 8, 10]
+  }
+}

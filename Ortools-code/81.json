@@ -1,0 +1,29 @@
+{
+  "input_format": {
+    "car_lengths_meters": "array[number]",
+    "capped_side_limit_meters": "number"
+  },
+  "output_format": {
+    "base_case": {
+      "status": "string",
+      "occupied_street_length_meters": "number|null",
+      "side_1_cars": "array[integer]",
+      "side_1_total_meters": "number|null",
+      "side_2_cars": "array[integer]",
+      "side_2_total_meters": "number|null"
+    },
+    "capped_side_case": {
+      "status": "string",
+      "occupied_street_length_meters": "number|null",
+      "side_1_cars": "array[integer]",
+      "side_1_total_meters": "number|null",
+      "side_2_cars": "array[integer]",
+      "side_2_total_meters": "number|null",
+      "side_1_cap_meters": "number"
+    }
+  },
+  "example_input": {
+    "car_lengths_meters": [4, 4.5, 5, 4.1, 2.4, 5.2, 3.7, 3.5, 3.2, 4.5, 2.3, 3.3, 3.8, 4.6, 3],
+    "capped_side_limit_meters": 30
+  }
+}

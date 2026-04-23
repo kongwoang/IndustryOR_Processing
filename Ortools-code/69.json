@@ -1,0 +1,39 @@
+{
+  "input_format": {
+    "stock_length": "integer",
+    "orders": [
+      {
+        "piece_length": "integer",
+        "required_quantity": "integer"
+      }
+    ]
+  },
+  "output_format": {
+    "total_raw_bars_used": "integer",
+    "total_waste": "number",
+    "patterns_used": [
+      {
+        "piece_counts": {
+          "3": "integer",
+          "4": "integer"
+        },
+        "bars": "integer",
+        "waste_per_bar": "number",
+        "total_waste": "number"
+      }
+    ]
+  },
+  "example_input": {
+    "stock_length": 10,
+    "orders": [
+      {
+        "piece_length": 3,
+        "required_quantity": 90
+      },
+      {
+        "piece_length": 4,
+        "required_quantity": 60
+      }
+    ]
+  }
+}

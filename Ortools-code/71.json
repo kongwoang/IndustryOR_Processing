@@ -1,0 +1,22 @@
+{
+  "input_format": {
+    "n": "integer",
+    "cost_matrix": "number[n][n], where cost_matrix[i][p] is the total cost of assigning factory i+1 to location p+1"
+  },
+  "output_format": {
+    "assignments": [
+      {
+        "factory": "integer",
+        "location": "integer"
+      }
+    ],
+    "total_cost": "number"
+  },
+  "example_input": {
+    "n": 2,
+    "cost_matrix": [
+      [50, 160],
+      [180, 280]
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "input_format": {
+    "quarters": ["string"],
+    "purchase_price": "array[number], unit: 10,000 yuan per 10,000 m^3",
+    "sale_price": "array[number], unit: 10,000 yuan per 10,000 m^3",
+    "max_sales": "array[number], unit: 10,000 m^3",
+    "warehouse_capacity": "number, unit: 10,000 m^3",
+    "storage_cost": {
+      "a": "number, unit: yuan per m^3",
+      "b": "number, unit: yuan per m^3 per quarter"
+    }
+  },
+  "output_format": {
+    "buy_to_sell_flow": {
+      "<purchase_quarter>": {
+        "<sale_quarter>": "number, unit: 10,000 m^3"
+      }
+    },
+    "purchase_by_quarter": {
+      "<quarter>": "number, unit: 10,000 m^3"
+    },
+    "sales_by_quarter": {
+      "<quarter>": "number, unit: 10,000 m^3"
+    },
+    "ending_inventory": {
+      "<quarter>": "number, unit: 10,000 m^3"
+    }
+  },
+  "example_input": {
+    "quarters": ["Winter", "Spring", "Summer", "Autumn"],
+    "purchase_price": [410, 430, 460, 450],
+    "sale_price": [425, 440, 465, 455],
+    "max_sales": [100, 140, 200, 160],
+    "warehouse_capacity": 20,
+    "storage_cost": {
+      "a": 70,
+      "b": 100
+    }
+  }
+}

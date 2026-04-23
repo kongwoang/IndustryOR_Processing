@@ -1,0 +1,41 @@
+{
+  "input_format": {
+    "students": "integer",
+    "drivers_available": "integer",
+    "vehicles": {
+      "bus": {
+        "available": "integer",
+        "seats": "integer",
+        "rental_cost": "number"
+      },
+      "minibus": {
+        "available": "integer",
+        "seats": "integer",
+        "rental_cost": "number"
+      }
+    }
+  },
+  "output_format": {
+    "buses_used": "integer",
+    "minibuses_used": "integer",
+    "total_seats": "integer",
+    "drivers_used": "integer",
+    "total_cost": "number"
+  },
+  "example_input": {
+    "students": 400,
+    "drivers_available": 9,
+    "vehicles": {
+      "bus": {
+        "available": 10,
+        "seats": 50,
+        "rental_cost": 800
+      },
+      "minibus": {
+        "available": 8,
+        "seats": 40,
+        "rental_cost": 600
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "input_format": {
+    "components": ["string"],
+    "max_spares_per_component": "integer",
+    "reliability_by_component_and_spares": {
+      "component_id": ["number indexed by spare count from 0 to max_spares_per_component"]
+    },
+    "unit_price_yuan": {
+      "component_id": "number"
+    },
+    "unit_weight_kg": {
+      "component_id": "number"
+    },
+    "budget_limit_yuan": "number",
+    "weight_limit_kg": "number"
+  },
+  "output_format": {
+    "selected_spares": {
+      "component_id": "integer"
+    },
+    "component_reliabilities": {
+      "component_id": "number"
+    },
+    "total_cost_yuan": "number",
+    "total_weight_kg": "number",
+    "system_reliability": "number"
+  },
+  "example_input": {
+    "components": ["1", "2", "3"],
+    "max_spares_per_component": 5,
+    "reliability_by_component_and_spares": {
+      "1": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "2": [0.6, 0.75, 0.95, 1.0, 1.0, 1.0],
+      "3": [0.7, 0.9, 1.0, 1.0, 1.0, 1.0]
+    },
+    "unit_price_yuan": {
+      "1": 20,
+      "2": 30,
+      "3": 40
+    },
+    "unit_weight_kg": {
+      "1": 2,
+      "2": 4,
+      "3": 6
+    },
+    "budget_limit_yuan": 150,
+    "weight_limit_kg": 20
+  }
+}

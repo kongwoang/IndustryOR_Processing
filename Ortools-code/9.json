@@ -1,0 +1,72 @@
+{
+  "input_format": {
+    "profits": {
+      "trucks": "int",
+      "airplanes": "int",
+      "boats": "int",
+      "trains": "int"
+    },
+    "resources": {
+      "wood_available": "int",
+      "steel_available": "int"
+    },
+    "resource_requirements": {
+      "wood": {
+        "trucks": "int",
+        "airplanes": "int",
+        "boats": "int",
+        "trains": "int"
+      },
+      "steel": {
+        "trucks": "int",
+        "airplanes": "int",
+        "boats": "int",
+        "trains": "int"
+      }
+    },
+    "logic_constraints": {
+      "if_trucks_then_no_trains": "bool",
+      "if_boats_then_also_airplanes": "bool",
+      "boats_cannot_exceed_trains": "bool"
+    }
+  },
+  "output_format": {
+    "production_quantities": {
+      "trucks": "int",
+      "airplanes": "int",
+      "boats": "int",
+      "trains": "int"
+    }
+  },
+  "example_input": {
+    "profits": {
+      "trucks": 5,
+      "airplanes": 10,
+      "boats": 8,
+      "trains": 7
+    },
+    "resources": {
+      "wood_available": 890,
+      "steel_available": 500
+    },
+    "resource_requirements": {
+      "wood": {
+        "trucks": 12,
+        "airplanes": 20,
+        "boats": 15,
+        "trains": 10
+      },
+      "steel": {
+        "trucks": 6,
+        "airplanes": 3,
+        "boats": 5,
+        "trains": 4
+      }
+    },
+    "logic_constraints": {
+      "if_trucks_then_no_trains": true,
+      "if_boats_then_also_airplanes": true,
+      "boats_cannot_exceed_trains": true
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "input_format": {
+    "commodities": ["string"],
+    "world_prices_klunz": {
+      "<commodity>": "number"
+    },
+    "production_requirements": {
+      "<commodity>": {
+        "inputs": {
+          "<input_commodity>": "number"
+        },
+        "imported_goods_klunz": "number",
+        "labor_person_months": "number"
+      }
+    },
+    "capacity_upper_bounds": {
+      "<commodity>": "number"
+    },
+    "total_labor_person_months": "number"
+  },
+  "output_format": {
+    "production_units": {
+      "steel": "number",
+      "engines": "number",
+      "electronic_components": "number",
+      "plastic": "number"
+    },
+    "net_exports_units": {
+      "steel": "number",
+      "engines": "number",
+      "electronic_components": "number",
+      "plastic": "number"
+    },
+    "imported_goods_cost_klunz": "number",
+    "labor_used_person_months": "number",
+    "gdp_klunz": "number"
+  },
+  "example_input": {
+    "commodities": ["steel", "engines", "electronic_components", "plastic"],
+    "world_prices_klunz": {
+      "steel": 500,
+      "engines": 1500,
+      "electronic_components": 300,
+      "plastic": 1200
+    },
+    "production_requirements": {
+      "steel": {
+        "inputs": {
+          "engines": 0.02,
+          "plastic": 0.01
+        },
+        "imported_goods_klunz": 250,
+        "labor_person_months": 6
+      },
+      "engines": {
+        "inputs": {
+          "steel": 0.8,
+          "electronic_components": 0.15,
+          "plastic": 0.11
+        },
+        "imported_goods_klunz": 300,
+        "labor_person_months": 12
+      },
+      "electronic_components": {
+        "inputs": {
+          "steel": 0.01,
+          "engines": 0.01,
+          "plastic": 0.05
+        },
+        "imported_goods_klunz": 50,
+        "labor_person_months": 6
+      },
+      "plastic": {
+        "inputs": {
+          "engines": 0.03,
+          "steel": 0.2,
+          "electronic_components": 0.05
+        },
+        "imported_goods_klunz": 300,
+        "labor_person_months": 24
+      }
+    },
+    "capacity_upper_bounds": {
+      "engines": 650000,
+      "plastic": 60000
+    },
+    "total_labor_person_months": 830000
+  }
+}

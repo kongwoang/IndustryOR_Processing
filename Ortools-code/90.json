@@ -1,0 +1,48 @@
+{
+  "input_format": {
+    "inventory": {
+      "shirts": "integer",
+      "pants": "integer"
+    },
+    "packages": {
+      "A": {
+        "shirts": "integer",
+        "pants": "integer",
+        "price": "number",
+        "minimum_to_sell": "integer"
+      },
+      "B": {
+        "shirts": "integer",
+        "pants": "integer",
+        "price": "number",
+        "minimum_to_sell": "integer"
+      }
+    },
+    "objective": "string"
+  },
+  "output_format": {
+    "package_A_to_sell": "integer",
+    "package_B_to_sell": "integer"
+  },
+  "example_input": {
+    "inventory": {
+      "shirts": 200,
+      "pants": 100
+    },
+    "packages": {
+      "A": {
+        "shirts": 1,
+        "pants": 2,
+        "price": 30,
+        "minimum_to_sell": 20
+      },
+      "B": {
+        "shirts": 3,
+        "pants": 1,
+        "price": 50,
+        "minimum_to_sell": 10
+      }
+    },
+    "objective": "maximize_revenue"
+  }
+}

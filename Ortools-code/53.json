@@ -1,0 +1,87 @@
+{
+  "input_format": {
+    "children": [
+      {
+        "name": "string",
+        "cost": "number"
+      }
+    ],
+    "max_children": "integer",
+    "min_children": "integer",
+    "fixed_take": [
+      "string"
+    ],
+    "incompatible_pairs": [
+      [
+        "string",
+        "string"
+      ]
+    ],
+    "implications": [
+      {
+        "if_taken": "string",
+        "must_also_take": [
+          "string"
+        ]
+      }
+    ]
+  },
+  "output_format": {
+    "selected_children": [
+      "string"
+    ],
+    "total_cost": "number"
+  },
+  "example_input": {
+    "children": [
+      {
+        "name": "Harry",
+        "cost": 1200
+      },
+      {
+        "name": "Hermione",
+        "cost": 1650
+      },
+      {
+        "name": "Ron",
+        "cost": 750
+      },
+      {
+        "name": "Fred",
+        "cost": 800
+      },
+      {
+        "name": "George",
+        "cost": 800
+      },
+      {
+        "name": "Ginny",
+        "cost": 1500
+      }
+    ],
+    "max_children": 4,
+    "min_children": 3,
+    "fixed_take": [
+      "Ginny"
+    ],
+    "incompatible_pairs": [
+      [
+        "Harry",
+        "Fred"
+      ],
+      [
+        "Harry",
+        "George"
+      ]
+    ],
+    "implications": [
+      {
+        "if_taken": "George",
+        "must_also_take": [
+          "Fred",
+          "Hermione"
+        ]
+      }
+    ]
+  }
+}

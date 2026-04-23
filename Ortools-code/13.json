@@ -1,0 +1,36 @@
+{
+  "input_format": {
+    "total_acres": "number",
+    "profit_per_acre": {
+      "corn": "number",
+      "wheat": "number",
+      "soybeans": "number",
+      "sorghum": "number"
+    },
+    "constraints": {
+      "corn_min_times_wheat": "number",
+      "soybeans_min_fraction_of_sorghum": "number",
+      "wheat_equals_times_sorghum": "number"
+    }
+  },
+  "output_format": {
+    "corn_acres": "number",
+    "wheat_acres": "number",
+    "soybeans_acres": "number",
+    "sorghum_acres": "number"
+  },
+  "example_input": {
+    "total_acres": 100,
+    "profit_per_acre": {
+      "corn": 1500,
+      "wheat": 1200,
+      "soybeans": 1800,
+      "sorghum": 1600
+    },
+    "constraints": {
+      "corn_min_times_wheat": 2,
+      "soybeans_min_fraction_of_sorghum": 0.5,
+      "wheat_equals_times_sorghum": 3
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "input_format": {
+    "products": {
+      "A": {
+        "process_1_time": "number",
+        "process_2_time": "number",
+        "unit_profit": "number"
+      },
+      "B": {
+        "process_1_time": "number",
+        "process_2_time": "number",
+        "unit_profit": "number",
+        "byproduct_C_generated": "number"
+      }
+    },
+    "processes": {
+      "process_1_capacity": "number",
+      "process_2_capacity": "number"
+    },
+    "byproduct_C": {
+      "sale_limit": "number",
+      "sale_profit": "number",
+      "disposal_cost": "number"
+    }
+  },
+  "output_format": {
+    "decision_variables": {
+      "A_units": "number",
+      "B_units": "number",
+      "C_sold_units": "number",
+      "C_disposed_units": "number"
+    },
+    "total_profit": "number"
+  },
+  "example_input": {
+    "products": {
+      "A": {
+        "process_1_time": 2,
+        "process_2_time": 3,
+        "unit_profit": 4
+      },
+      "B": {
+        "process_1_time": 3,
+        "process_2_time": 4,
+        "unit_profit": 10,
+        "byproduct_C_generated": 2
+      }
+    },
+    "processes": {
+      "process_1_capacity": 16,
+      "process_2_capacity": 24
+    },
+    "byproduct_C": {
+      "sale_limit": 5,
+      "sale_profit": 3,
+      "disposal_cost": 2
+    }
+  }
+}

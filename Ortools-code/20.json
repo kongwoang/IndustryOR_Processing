@@ -1,0 +1,67 @@
+{
+  "input_format": {
+    "products": {
+      "<product_name>": {
+        "profit": "number",
+        "plastic": "number",
+        "electronic_components": "number"
+      }
+    },
+    "resource_limits": {
+      "plastic": "number",
+      "electronic_components": "number"
+    },
+    "logical_constraints": {
+      "robots_and_dolls_mutually_exclusive_if_manufactured": "boolean",
+      "model_cars_imply_building_blocks_if_manufactured": "boolean",
+      "dolls_quantity_at_most_model_cars_quantity": "boolean"
+    }
+  },
+  "output_format": {
+    "production_quantities": {
+      "robots": "integer",
+      "model_cars": "integer",
+      "building_blocks": "integer",
+      "dolls": "integer"
+    },
+    "manufactured_types": {
+      "robots": "0_or_1",
+      "model_cars": "0_or_1",
+      "building_blocks": "0_or_1",
+      "dolls": "0_or_1"
+    }
+  },
+  "example_input": {
+    "products": {
+      "robots": {
+        "profit": 15,
+        "plastic": 30,
+        "electronic_components": 8
+      },
+      "model_cars": {
+        "profit": 8,
+        "plastic": 10,
+        "electronic_components": 5
+      },
+      "building_blocks": {
+        "profit": 12,
+        "plastic": 20,
+        "electronic_components": 3
+      },
+      "dolls": {
+        "profit": 5,
+        "plastic": 15,
+        "electronic_components": 2
+      }
+    },
+    "resource_limits": {
+      "plastic": 1200,
+      "electronic_components": 800
+    },
+    "logical_constraints": {
+      "robots_and_dolls_mutually_exclusive_if_manufactured": true,
+      "model_cars_imply_building_blocks_if_manufactured": true,
+      "dolls_quantity_at_most_model_cars_quantity": true
+    }
+  }
+}

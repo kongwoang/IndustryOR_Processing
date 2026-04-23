@@ -1,0 +1,128 @@
+{
+  "input_format": {
+    "resources": {
+      "land_hectares": "number",
+      "development_funds_yuan": "number",
+      "labor_person_days": {
+        "autumn_winter": "integer",
+        "spring_summer": "integer"
+      },
+      "external_work_wage_yuan_per_person_day": {
+        "autumn_winter": "number",
+        "spring_summer": "number"
+      }
+    },
+    "crops": {
+      "soybean": {
+        "autumn_winter_person_days_per_hectare": "number",
+        "spring_summer_person_days_per_hectare": "number",
+        "annual_net_income_yuan_per_hectare": "number"
+      },
+      "corn": {
+        "autumn_winter_person_days_per_hectare": "number",
+        "spring_summer_person_days_per_hectare": "number",
+        "annual_net_income_yuan_per_hectare": "number"
+      },
+      "wheat": {
+        "autumn_winter_person_days_per_hectare": "number",
+        "spring_summer_person_days_per_hectare": "number",
+        "annual_net_income_yuan_per_hectare": "number"
+      }
+    },
+    "livestock": {
+      "dairy_cow": {
+        "investment_yuan_per_head": "number",
+        "land_hectares_per_head": "number",
+        "autumn_winter_person_days_per_head": "number",
+        "spring_summer_person_days_per_head": "number",
+        "annual_net_income_yuan_per_head": "number",
+        "max_heads": "integer"
+      },
+      "chicken": {
+        "investment_yuan_per_head": "number",
+        "land_hectares_per_head": "number",
+        "autumn_winter_person_days_per_head": "number",
+        "spring_summer_person_days_per_head": "number",
+        "annual_net_income_yuan_per_head": "number",
+        "max_heads": "integer"
+      }
+    },
+    "integrality": {
+      "labor_days_must_be_whole_numbers": "boolean"
+    }
+  },
+  "output_format": {
+    "crop_plan_hectares": {
+      "soybean": "number",
+      "corn": "number",
+      "wheat": "number"
+    },
+    "livestock_plan": {
+      "dairy_cows": "integer",
+      "chickens": "integer"
+    },
+    "external_work_person_days": {
+      "autumn_winter": "integer",
+      "spring_summer": "integer"
+    },
+    "resource_usage": {
+      "land_hectares_used": "number",
+      "funds_yuan_used": "number",
+      "autumn_winter_person_days_used": "integer",
+      "spring_summer_person_days_used": "integer"
+    },
+    "total_annual_net_income_yuan": "number"
+  },
+  "example_input": {
+    "resources": {
+      "land_hectares": 100,
+      "development_funds_yuan": 15000,
+      "labor_person_days": {
+        "autumn_winter": 3500,
+        "spring_summer": 4000
+      },
+      "external_work_wage_yuan_per_person_day": {
+        "autumn_winter": 1.8,
+        "spring_summer": 2.1
+      }
+    },
+    "crops": {
+      "soybean": {
+        "autumn_winter_person_days_per_hectare": 20,
+        "spring_summer_person_days_per_hectare": 50,
+        "annual_net_income_yuan_per_hectare": 175
+      },
+      "corn": {
+        "autumn_winter_person_days_per_hectare": 35,
+        "spring_summer_person_days_per_hectare": 75,
+        "annual_net_income_yuan_per_hectare": 300
+      },
+      "wheat": {
+        "autumn_winter_person_days_per_hectare": 10,
+        "spring_summer_person_days_per_hectare": 40,
+        "annual_net_income_yuan_per_hectare": 120
+      }
+    },
+    "livestock": {
+      "dairy_cow": {
+        "investment_yuan_per_head": 400,
+        "land_hectares_per_head": 1.5,
+        "autumn_winter_person_days_per_head": 100,
+        "spring_summer_person_days_per_head": 50,
+        "annual_net_income_yuan_per_head": 400,
+        "max_heads": 32
+      },
+      "chicken": {
+        "investment_yuan_per_head": 3,
+        "land_hectares_per_head": 0,
+        "autumn_winter_person_days_per_head": 0.6,
+        "spring_summer_person_days_per_head": 0.3,
+        "annual_net_income_yuan_per_head": 2,
+        "max_heads": 3000
+      }
+    },
+    "integrality": {
+      "labor_days_must_be_whole_numbers": true
+    }
+  }
+}

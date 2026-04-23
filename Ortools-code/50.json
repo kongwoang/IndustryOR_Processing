@@ -1,0 +1,24 @@
+{
+  "input_format": {
+    "months": ["string"],
+    "buy_prices": ["number"],
+    "sell_prices": ["number"],
+    "initial_inventory": "number",
+    "warehouse_capacity": "number",
+    "purchases_at_beginning_of_month": "boolean"
+  },
+  "output_format": {
+    "months": ["string"],
+    "purchase": ["number"],
+    "sales": ["number"],
+    "ending_inventory": ["number"]
+  },
+  "example_input": {
+    "months": ["7", "8", "9", "10", "11", "12"],
+    "buy_prices": [28, 24, 25, 27, 23, 23],
+    "sell_prices": [29, 24, 26, 28, 22, 25],
+    "initial_inventory": 200,
+    "warehouse_capacity": 500,
+    "purchases_at_beginning_of_month": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "input_format": {
+    "methods": [
+      {
+        "name": "string",
+        "pollution_per_trip": "number",
+        "capacity_per_trip": "number",
+        "max_trips": "integer|null"
+      }
+    ],
+    "max_selected_methods": "integer",
+    "min_total_capacity": "number",
+    "max_total_trips": "integer",
+    "objective": "string"
+  },
+  "output_format": {
+    "selected_methods": ["string"],
+    "trips": {
+      "motorcycle": "integer",
+      "small_truck": "integer",
+      "large_truck": "integer"
+    },
+    "total_trips": "integer",
+    "total_capacity": "number",
+    "total_pollution": "number"
+  },
+  "example_input": {
+    "methods": [
+      {
+        "name": "motorcycle",
+        "pollution_per_trip": 40,
+        "capacity_per_trip": 10,
+        "max_trips": 8
+      },
+      {
+        "name": "small_truck",
+        "pollution_per_trip": 70,
+        "capacity_per_trip": 20,
+        "max_trips": null
+      },
+      {
+        "name": "large_truck",
+        "pollution_per_trip": 100,
+        "capacity_per_trip": 50,
+        "max_trips": null
+      }
+    ],
+    "max_selected_methods": 2,
+    "min_total_capacity": 300,
+    "max_total_trips": 20,
+    "objective": "minimize_total_pollution"
+  }
+}

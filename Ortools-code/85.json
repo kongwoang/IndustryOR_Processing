@@ -1,0 +1,50 @@
+{
+  "input_format": {
+    "products": ["string"],
+    "machine_time_minutes_per_batch": {"product_name": "number"},
+    "craftsman_time_minutes_per_batch": {"product_name": "number"},
+    "available_machine_hours_per_week": "number",
+    "available_craftsman_hours_per_week": "number",
+    "machine_cost_per_hour": "number",
+    "craftsman_cost_per_hour": "number",
+    "revenue_per_batch": {"product_name": "number"},
+    "min_batches": {"product_name": "number"},
+    "allow_fractional_batches": "boolean"
+  },
+  "output_format": {
+    "production": {
+      "X": "number",
+      "Y": "number"
+    },
+    "resource_usage": {
+      "machine_minutes_used": "number",
+      "craftsman_minutes_used": "number",
+      "machine_minutes_idle": "number",
+      "craftsman_minutes_idle": "number"
+    }
+  },
+  "example_input": {
+    "products": ["X", "Y"],
+    "machine_time_minutes_per_batch": {
+      "X": 13,
+      "Y": 19
+    },
+    "craftsman_time_minutes_per_batch": {
+      "X": 20,
+      "Y": 29
+    },
+    "available_machine_hours_per_week": 40,
+    "available_craftsman_hours_per_week": 35,
+    "machine_cost_per_hour": 10,
+    "craftsman_cost_per_hour": 2,
+    "revenue_per_batch": {
+      "X": 20,
+      "Y": 30
+    },
+    "min_batches": {
+      "X": 10,
+      "Y": 0
+    },
+    "allow_fractional_batches": true
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "input_format": {
+    "cities": [
+      "string"
+    ],
+    "specialties": [
+      "integer"
+    ],
+    "demands": [
+      {
+        "city": "string",
+        "specialty": "integer",
+        "demand": "integer"
+      }
+    ],
+    "applicant_types": [
+      {
+        "type": "integer",
+        "available": "integer",
+        "suitable_specialties": [
+          "integer"
+        ],
+        "preferred_specialty": "integer",
+        "preferred_city": "string"
+      }
+    ],
+    "priority_goals": {
+      "p1": "string",
+      "p2_preferred_specialty_target": "integer",
+      "p3_preferred_city_target": "integer"
+    }
+  },
+  "output_format": {
+    "total_recruited": "integer",
+    "max_preferred_specialty_people_under_p1": "integer",
+    "p2_shortfall": "integer",
+    "max_preferred_city_people_under_p1_and_best_p2": "integer",
+    "p3_shortfall": "integer",
+    "recruited_people_not_in_preferred_city": "integer"
+  },
+  "example_input": {
+    "cities": [
+      "Donghai City",
+      "Nanjiang City"
+    ],
+    "specialties": [
+      1,
+      2,
+      3
+    ],
+    "demands": [
+      {
+        "city": "Donghai City",
+        "specialty": 1,
+        "demand": 1000
+      },
+      {
+        "city": "Donghai City",
+        "specialty": 2,
+        "demand": 2000
+      },
+      {
+        "city": "Donghai City",
+        "specialty": 3,
+        "demand": 1500
+      },
+      {
+        "city": "Nanjiang City",
+        "specialty": 1,
+        "demand": 2000
+      },
+      {
+        "city": "Nanjiang City",
+        "specialty": 2,
+        "demand": 1000
+      },
+      {
+        "city": "Nanjiang City",
+        "specialty": 3,
+        "demand": 1000
+      }
+    ],
+    "applicant_types": [
+      {
+        "type": 1,
+        "available": 1500,
+        "suitable_specialties": [
+          1,
+          2
+        ],
+        "preferred_specialty": 1,
+        "preferred_city": "Donghai City"
+      },
+      {
+        "type": 2,
+        "available": 1500,
+        "suitable_specialties": [
+          2,
+          3
+        ],
+        "preferred_specialty": 2,
+        "preferred_city": "Donghai City"
+      },
+      {
+        "type": 3,
+        "available": 1500,
+        "suitable_specialties": [
+          1,
+          3
+        ],
+        "preferred_specialty": 1,
+        "preferred_city": "Nanjiang City"
+      },
+      {
+        "type": 4,
+        "available": 1500,
+        "suitable_specialties": [
+          1,
+          3
+        ],
+        "preferred_specialty": 3,
+        "preferred_city": "Nanjiang City"
+      },
+      {
+        "type": 5,
+        "available": 1500,
+        "suitable_specialties": [
+          2,
+          3
+        ],
+        "preferred_specialty": 3,
+        "preferred_city": "Donghai City"
+      },
+      {
+        "type": 6,
+        "available": 1500,
+        "suitable_specialties": [
+          3
+        ],
+        "preferred_specialty": 3,
+        "preferred_city": "Nanjiang City"
+      }
+    ],
+    "priority_goals": {
+      "p1": "Fully satisfy all branch-specialty demands",
+      "p2_preferred_specialty_target": 8000,
+      "p3_preferred_city_target": 8000
+    }
+  }
+}
