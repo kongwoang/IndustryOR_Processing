@@ -1,0 +1,21 @@
+{
+  "production_units": {
+    "month": {
+      "product_name": "number"
+    }
+  },
+  "ending_inventory_units": {
+    "month": {
+      "product_name": "number"
+    }
+  },
+  "warehouse_usage_m3": {
+    "month": {
+      "internal": "number",
+      "external": "number"
+    }
+  },
+  "total_production_cost": "number",
+  "total_inventory_cost": "number",
+  "total_cost": "number"
+}

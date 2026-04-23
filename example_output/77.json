@@ -1,0 +1,22 @@
+{
+  "assignments": {
+    "1": "A",
+    "2": "B",
+    "3": "A",
+    "4": "B",
+    "5": "C",
+    "6": "A",
+    "7": "A",
+    "8": "A",
+    "9": "A",
+    "10": "A"
+  },
+  "machines_used": [
+    "A",
+    "B",
+    "C"
+  ],
+  "total_processing_cost": 570,
+  "total_setup_cost": 435,
+  "total_cost": 1005
+}

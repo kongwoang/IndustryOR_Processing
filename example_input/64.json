@@ -1,0 +1,44 @@
+{
+  "candidates": [
+    {
+      "name": "F",
+      "salary": 12000,
+      "skill_level": 2,
+      "experience_years": 1
+    },
+    {
+      "name": "G",
+      "salary": 15000,
+      "skill_level": 3,
+      "experience_years": 2
+    },
+    {
+      "name": "H",
+      "salary": 18000,
+      "skill_level": 4,
+      "experience_years": 2
+    },
+    {
+      "name": "I",
+      "salary": 5000,
+      "skill_level": 1,
+      "experience_years": 5
+    },
+    {
+      "name": "J",
+      "salary": 10000,
+      "skill_level": 2,
+      "experience_years": 4
+    }
+  ],
+  "budget": 40000,
+  "max_hires": 4,
+  "min_total_skill": 8,
+  "min_total_experience": 8,
+  "mutually_exclusive_pairs": [
+    [
+      "G",
+      "J"
+    ]
+  ]
+}

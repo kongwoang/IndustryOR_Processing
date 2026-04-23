@@ -1,0 +1,33 @@
+{
+  "total_raw_bars_used": 53,
+  "total_waste": 20.0,
+  "patterns_used": [
+    {
+      "piece_counts": {
+        "3": 2,
+        "4": 1
+      },
+      "bars": 45,
+      "waste_per_bar": 0,
+      "total_waste": 0
+    },
+    {
+      "piece_counts": {
+        "3": 0,
+        "4": 2
+      },
+      "bars": 7,
+      "waste_per_bar": 2,
+      "total_waste": 14
+    },
+    {
+      "piece_counts": {
+        "3": 0,
+        "4": 1
+      },
+      "bars": 1,
+      "waste_per_bar": 6,
+      "total_waste": 6
+    }
+  ]
+}

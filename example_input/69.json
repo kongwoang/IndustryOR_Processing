@@ -1,0 +1,13 @@
+{
+  "stock_length": 10,
+  "orders": [
+    {
+      "piece_length": 3,
+      "required_quantity": 90
+    },
+    {
+      "piece_length": 4,
+      "required_quantity": 60
+    }
+  ]
+}

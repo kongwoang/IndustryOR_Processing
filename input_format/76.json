@@ -1,0 +1,13 @@
+{
+  "quarters": [
+    "string"
+  ],
+  "purchase_price": "array[number], unit: 10,000 yuan per 10,000 m^3",
+  "sale_price": "array[number], unit: 10,000 yuan per 10,000 m^3",
+  "max_sales": "array[number], unit: 10,000 m^3",
+  "warehouse_capacity": "number, unit: 10,000 m^3",
+  "storage_cost": {
+    "a": "number, unit: yuan per m^3",
+    "b": "number, unit: yuan per m^3 per quarter"
+  }
+}

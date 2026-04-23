@@ -1,0 +1,18 @@
+{
+  "total_area_m2": "number",
+  "rent_ratio": "number",
+  "store_types": [
+    {
+      "code": "integer",
+      "store_type": "string",
+      "area_per_shop_m2": "number",
+      "min_shops": "integer",
+      "max_shops": "integer",
+      "annual_profit_per_shop_10k_yuan": {
+        "1": "number",
+        "2": "number",
+        "3": "number"
+      }
+    }
+  ]
+}

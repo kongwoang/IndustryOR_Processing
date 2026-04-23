@@ -1,0 +1,5 @@
+{
+  "cities": "list[int]",
+  "distance_matrix": "list[list[number]]",
+  "start_city": "int"
+}

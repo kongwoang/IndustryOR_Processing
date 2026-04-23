@@ -1,0 +1,16 @@
+{
+  "selected_candidates": [
+    "B",
+    "D"
+  ],
+  "hire_decisions": {
+    "A": 0,
+    "B": 1,
+    "C": 0,
+    "D": 1,
+    "E": 0
+  },
+  "num_hired": 2,
+  "total_salary": 23000,
+  "total_experience": 13
+}

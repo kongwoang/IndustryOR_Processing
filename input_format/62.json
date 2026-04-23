@@ -1,0 +1,16 @@
+{
+  "restaurants": [
+    {
+      "name": "string",
+      "annual_revenue": "number",
+      "cost_million": "number"
+    }
+  ],
+  "budget_million": "number",
+  "mutual_exclusion_rules": [
+    {
+      "if_purchased": "string",
+      "cannot_purchase": "string"
+    }
+  ]
+}

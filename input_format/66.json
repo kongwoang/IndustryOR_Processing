@@ -1,0 +1,15 @@
+{
+  "products": [
+    {
+      "name": "string",
+      "labor_hours_per_unit": "number",
+      "inspection_hours_per_unit": "number",
+      "profit_per_unit": "number",
+      "max_demand": "integer"
+    }
+  ],
+  "resource_limits": {
+    "labor_hours": "number",
+    "inspection_hours": "number"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "chosen_methods": {
+    "task1": "string",
+    "task2": "string",
+    "task3": "string"
+  },
+  "hired_workers": {
+    "skilled": "integer",
+    "laborers": "integer"
+  },
+  "task_assignments": {
+    "task1": {
+      "skilled": "integer",
+      "laborers": "integer"
+    },
+    "task2": {
+      "skilled": "integer",
+      "laborers": "integer"
+    },
+    "task3": {
+      "skilled": "integer",
+      "laborers": "integer"
+    }
+  }
+}

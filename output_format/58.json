@@ -1,0 +1,6 @@
+{
+  "apples_acres": "number",
+  "pears_acres": "number",
+  "oranges_acres": "number",
+  "lemons_acres": "number"
+}

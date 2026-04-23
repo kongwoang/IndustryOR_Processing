@@ -1,0 +1,11 @@
+{
+  "selected_candidates": [
+    "string"
+  ],
+  "hire_decisions": {
+    "candidate_name": "integer"
+  },
+  "num_hired": "integer",
+  "total_salary": "number",
+  "total_experience": "number"
+}

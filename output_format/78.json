@@ -1,0 +1,19 @@
+{
+  "regular_hours_used": {
+    "full_time": "number",
+    "part_time": "number"
+  },
+  "overtime_hours": {
+    "full_time": "number",
+    "part_time": "number"
+  },
+  "sales_pairs": "number",
+  "sales_profit_yuan": "number",
+  "labor_cost_yuan": "number",
+  "goal_deviations": {
+    "sales_underachievement_pairs": "number",
+    "sales_overachievement_pairs": "number",
+    "full_time_unused_regular_hours": "number",
+    "part_time_unused_regular_hours": "number"
+  }
+}

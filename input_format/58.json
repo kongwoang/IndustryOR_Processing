@@ -1,0 +1,15 @@
+{
+  "total_acres": "number",
+  "profits_per_acre": {
+    "apples": "number",
+    "pears": "number",
+    "oranges": "number",
+    "lemons": "number"
+  },
+  "constraints": {
+    "apples_min_at_least_multiplier_of_pears": "number",
+    "apples_min_at_least_multiplier_of_lemons": "number",
+    "oranges_equals_multiplier_of_lemons": "number",
+    "max_fruit_types": "integer"
+  }
+}

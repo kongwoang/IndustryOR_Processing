@@ -1,0 +1,14 @@
+{
+  "truck_types": [
+    {
+      "name": "string",
+      "refrigerated_capacity": "number",
+      "non_refrigerated_capacity": "number",
+      "cost_per_km": "number"
+    }
+  ],
+  "demand": {
+    "refrigerated": "number",
+    "non_refrigerated": "number"
+  }
+}

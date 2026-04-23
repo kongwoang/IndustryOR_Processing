@@ -1,0 +1,31 @@
+{
+  "quarters": [
+    "Winter",
+    "Spring",
+    "Summer",
+    "Autumn"
+  ],
+  "purchase_price": [
+    410,
+    430,
+    460,
+    450
+  ],
+  "sale_price": [
+    425,
+    440,
+    465,
+    455
+  ],
+  "max_sales": [
+    100,
+    140,
+    200,
+    160
+  ],
+  "warehouse_capacity": 20,
+  "storage_cost": {
+    "a": 70,
+    "b": 100
+  }
+}

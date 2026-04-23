@@ -1,0 +1,25 @@
+{
+  "months": [
+    "string"
+  ],
+  "products": {
+    "product_name": {
+      "demand": {
+        "month": "number"
+      },
+      "production_cost": {
+        "month": "number"
+      },
+      "volume_per_unit_m3": "number"
+    }
+  },
+  "monthly_combined_capacity_units": "number",
+  "warehouse": {
+    "internal_capacity_m3": "number",
+    "internal_cost_per_m3_per_month": "number",
+    "external_cost_per_m3_per_month": "number"
+  },
+  "initial_inventory_units": {
+    "product_name": "number"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "production_lots": {
+    "liquid": 45,
+    "solid": 6.25
+  },
+  "ending_inventory_lots": {
+    "liquid": 0,
+    "solid": 1.25
+  },
+  "total_ending_inventory_lots": 1.25
+}

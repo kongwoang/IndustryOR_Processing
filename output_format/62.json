@@ -1,0 +1,10 @@
+{
+  "selected_restaurants": [
+    "string"
+  ],
+  "purchase_decisions": {
+    "restaurant_name": "0_or_1"
+  },
+  "total_cost_million": "number",
+  "total_annual_revenue": "number"
+}

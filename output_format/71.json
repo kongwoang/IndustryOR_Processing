@@ -1,0 +1,9 @@
+{
+  "assignments": [
+    {
+      "factory": "integer",
+      "location": "integer"
+    }
+  ],
+  "total_cost": "number"
+}

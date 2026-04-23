@@ -1,0 +1,11 @@
+{
+  "total_waiters": "integer",
+  "waiters_starting_by_time": {
+    "2": "integer",
+    "6": "integer",
+    "10": "integer",
+    "14": "integer",
+    "18": "integer",
+    "22": "integer"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "selected_candidates": [
+    "string"
+  ],
+  "total_salary": "number",
+  "total_skill": "number",
+  "total_experience": "number"
+}

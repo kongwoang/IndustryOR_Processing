@@ -1,0 +1,9 @@
+{
+  "enabled_devices": [
+    "string"
+  ],
+  "production_plan": {
+    "device_name": "number"
+  },
+  "total_cost": "number"
+}

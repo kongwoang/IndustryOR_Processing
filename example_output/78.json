@@ -1,0 +1,19 @@
+{
+  "regular_hours_used": {
+    "full_time": 800,
+    "part_time": 320
+  },
+  "overtime_hours": {
+    "full_time": 172.0,
+    "part_time": 0
+  },
+  "sales_pairs": 5500.0,
+  "sales_profit_yuan": 1650.0,
+  "labor_cost_yuan": 1250.0,
+  "goal_deviations": {
+    "sales_underachievement_pairs": 0.0,
+    "sales_overachievement_pairs": 0,
+    "full_time_unused_regular_hours": 0,
+    "part_time_unused_regular_hours": 0
+  }
+}

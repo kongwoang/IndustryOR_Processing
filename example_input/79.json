@@ -1,0 +1,28 @@
+{
+  "products": [
+    "tables",
+    "chairs",
+    "bookshelves"
+  ],
+  "selling_price": {
+    "tables": 200,
+    "chairs": 50,
+    "bookshelves": 150
+  },
+  "manufacturing_cost": {
+    "tables": 120,
+    "chairs": 20,
+    "bookshelves": 90
+  },
+  "space": {
+    "tables": 5,
+    "chairs": 2,
+    "bookshelves": 3
+  },
+  "max_space": 500,
+  "min_production": {
+    "tables": 10,
+    "bookshelves": 20
+  },
+  "max_total_items": 200
+}

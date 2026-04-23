@@ -1,0 +1,12 @@
+{
+  "orders": [
+    {
+      "order_number": "int",
+      "width": "float",
+      "length": "float"
+    }
+  ],
+  "standard_roll_widths": [
+    "float"
+  ]
+}

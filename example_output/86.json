@@ -1,0 +1,16 @@
+{
+  "production_packs": {
+    "Meaties": 50000,
+    "Yummies": 100000
+  },
+  "resource_usage": {
+    "grains_lbs": 400000,
+    "meat_lbs": 300000
+  },
+  "financials": {
+    "revenue": 340000,
+    "raw_material_cost": 230000,
+    "mixing_packaging_cost": 32500,
+    "profit": 77500
+  }
+}

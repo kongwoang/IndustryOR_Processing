@@ -1,0 +1,14 @@
+{
+  "selected_restaurants": [
+    "B",
+    "D"
+  ],
+  "purchase_decisions": {
+    "A": 0,
+    "B": 1,
+    "C": 0,
+    "D": 1
+  },
+  "total_cost_million": 5.5,
+  "total_annual_revenue": 90000
+}

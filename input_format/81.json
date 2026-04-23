@@ -1,0 +1,4 @@
+{
+  "car_lengths_meters": "array[number]",
+  "capped_side_limit_meters": "number"
+}

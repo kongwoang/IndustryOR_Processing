@@ -1,0 +1,23 @@
+{
+  "total_produce_required": 1000,
+  "transport_options": {
+    "horse": {
+      "capacity_per_trip": 55,
+      "pollution_per_trip": 80,
+      "min_trips": 8
+    },
+    "bicycle": {
+      "capacity_per_trip": 30,
+      "pollution_per_trip": 0
+    },
+    "handcart": {
+      "capacity_per_trip": 40,
+      "pollution_per_trip": 0
+    }
+  },
+  "max_total_pollution": 1000,
+  "choose_only_one_of": [
+    "bicycle",
+    "handcart"
+  ]
+}

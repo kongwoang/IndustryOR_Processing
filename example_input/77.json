@@ -1,0 +1,62 @@
+{
+  "parts": 10,
+  "machines": [
+    "A",
+    "B",
+    "C"
+  ],
+  "processing_costs": {
+    "A": [
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100
+    ],
+    "B": [
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95,
+      105
+    ],
+    "C": [
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110
+    ]
+  },
+  "setup_costs": {
+    "A": 100,
+    "B": 135,
+    "C": 200
+  },
+  "fixed_assignments": {
+    "3": "A",
+    "4": "B",
+    "5": "C"
+  },
+  "logical_rules": [
+    "part 2 is assigned to A if and only if part 1 is not assigned to A"
+  ],
+  "max_parts_on_machine": {
+    "C": 3
+  }
+}

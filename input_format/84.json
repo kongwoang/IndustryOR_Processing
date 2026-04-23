@@ -1,0 +1,23 @@
+{
+  "candidates": [
+    {
+      "name": "string",
+      "salary": "number",
+      "degree": "string",
+      "experience": "number"
+    }
+  ],
+  "constraints": {
+    "min_hires": "integer",
+    "max_hires": "integer",
+    "budget": "number",
+    "min_total_experience": "number",
+    "require_at_least_one_master_or_doctoral": "boolean",
+    "mutually_exclusive_pairs": [
+      [
+        "string",
+        "string"
+      ]
+    ]
+  }
+}

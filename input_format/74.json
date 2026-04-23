@@ -1,0 +1,20 @@
+{
+  "activities": [
+    {
+      "name": "string",
+      "duration": "number"
+    }
+  ],
+  "precedence": [
+    [
+      "string",
+      "string"
+    ]
+  ],
+  "daily_work_cost": "number",
+  "machine_rental": {
+    "from_activity_start": "string",
+    "to_activity_end": "string",
+    "daily_cost": "number"
+  }
+}

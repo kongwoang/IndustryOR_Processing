@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "id": "integer",
+      "annual_income": "number",
+      "cost_million": "number"
+    }
+  ],
+  "budget_million": "number",
+  "mutually_exclusive_pairs": [
+    [
+      "integer",
+      "integer"
+    ]
+  ]
+}

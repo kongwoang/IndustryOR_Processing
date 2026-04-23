@@ -1,0 +1,27 @@
+{
+  "products": {
+    "Meaties": {
+      "price_per_pack": 2.8,
+      "grains_lbs_per_pack": 2.0,
+      "meat_lbs_per_pack": 3.0,
+      "variable_cost_per_pack": 0.25
+    },
+    "Yummies": {
+      "price_per_pack": 2.0,
+      "grains_lbs_per_pack": 3.0,
+      "meat_lbs_per_pack": 1.5,
+      "variable_cost_per_pack": 0.2
+    }
+  },
+  "resources": {
+    "grains": {
+      "max_lbs": 400000,
+      "cost_per_lb": 0.2
+    },
+    "meat": {
+      "max_lbs": 300000,
+      "cost_per_lb": 0.5
+    },
+    "meaties_capacity_packs": 90000
+  }
+}

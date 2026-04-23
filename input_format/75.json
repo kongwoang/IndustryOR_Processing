@@ -1,0 +1,24 @@
+{
+  "products": {
+    "A": {
+      "process_1_time": "number",
+      "process_2_time": "number",
+      "unit_profit": "number"
+    },
+    "B": {
+      "process_1_time": "number",
+      "process_2_time": "number",
+      "unit_profit": "number",
+      "byproduct_C_generated": "number"
+    }
+  },
+  "processes": {
+    "process_1_capacity": "number",
+    "process_2_capacity": "number"
+  },
+  "byproduct_C": {
+    "sale_limit": "number",
+    "sale_profit": "number",
+    "disposal_cost": "number"
+  }
+}

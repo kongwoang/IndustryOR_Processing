@@ -1,0 +1,30 @@
+{
+  "raw_materials": [
+    "string"
+  ],
+  "candy_brands": [
+    "string"
+  ],
+  "raw_material_cost": {
+    "<raw_material>": "number"
+  },
+  "monthly_limit": {
+    "<raw_material>": "number"
+  },
+  "processing_fee": {
+    "<candy_brand>": "number"
+  },
+  "selling_price": {
+    "<candy_brand>": "number"
+  },
+  "min_percent": {
+    "<candy_brand>": {
+      "<raw_material>": "number"
+    }
+  },
+  "max_percent": {
+    "<candy_brand>": {
+      "<raw_material>": "number"
+    }
+  }
+}

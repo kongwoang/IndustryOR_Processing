@@ -1,0 +1,29 @@
+{
+  "employee_types": [
+    {
+      "name": "full_time",
+      "count": 5,
+      "regular_hours_per_employee": 160,
+      "sales_pairs_per_hour": 5,
+      "regular_wage_yuan_per_hour": 1.0,
+      "overtime_wage_yuan_per_hour": 1.5
+    },
+    {
+      "name": "part_time",
+      "count": 4,
+      "regular_hours_per_employee": 80,
+      "sales_pairs_per_hour": 2,
+      "regular_wage_yuan_per_hour": 0.6,
+      "overtime_wage_yuan_per_hour": 0.7
+    }
+  ],
+  "profit_per_pair_yuan": 0.3,
+  "goals": {
+    "sales_target_pairs": 5500,
+    "priorities": [
+      "meet_sales_target",
+      "fully_use_regular_hours",
+      "minimize_overtime_hours"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "selected_properties": [
+    2,
+    4
+  ],
+  "buy": {
+    "property_1": 0,
+    "property_2": 1,
+    "property_3": 0,
+    "property_4": 1
+  },
+  "total_cost_million": 6.300000000000001,
+  "total_annual_income": 135000
+}

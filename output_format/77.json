@@ -1,0 +1,11 @@
+{
+  "assignments": {
+    "part_index_1_based": "string, assigned machine"
+  },
+  "machines_used": [
+    "string, machines that incur setup cost"
+  ],
+  "total_processing_cost": "number",
+  "total_setup_cost": "number",
+  "total_cost": "number"
+}

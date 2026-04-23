@@ -1,0 +1,46 @@
+{
+  "buy_to_sell_flow": {
+    "Winter": {
+      "Winter": 100.0,
+      "Spring": 0.0,
+      "Summer": 0.0,
+      "Autumn": 0.0
+    },
+    "Spring": {
+      "Winter": 0.0,
+      "Spring": 140.0,
+      "Summer": 0.0,
+      "Autumn": 0.0
+    },
+    "Summer": {
+      "Winter": 0.0,
+      "Spring": 0.0,
+      "Summer": 200.0,
+      "Autumn": 0.0
+    },
+    "Autumn": {
+      "Winter": 0.0,
+      "Spring": 0.0,
+      "Summer": 0.0,
+      "Autumn": 160.0
+    }
+  },
+  "purchase_by_quarter": {
+    "Winter": 100.0,
+    "Spring": 140.0,
+    "Summer": 200.0,
+    "Autumn": 160.0
+  },
+  "sales_by_quarter": {
+    "Winter": 100.0,
+    "Spring": 140.0,
+    "Summer": 200.0,
+    "Autumn": 160.0
+  },
+  "ending_inventory": {
+    "Winter": 0.0,
+    "Spring": 0.0,
+    "Summer": 0.0,
+    "Autumn": 0
+  }
+}

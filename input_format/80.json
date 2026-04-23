@@ -1,0 +1,78 @@
+{
+  "tasks": {
+    "task1": {
+      "required_effective_hours": "number",
+      "methods": {
+        "A": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        },
+        "B": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        }
+      }
+    },
+    "task2": {
+      "required_effective_hours": "number",
+      "methods": {
+        "A": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        },
+        "B": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        }
+      }
+    },
+    "task3": {
+      "required_effective_hours": "number",
+      "methods": {
+        "A": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        },
+        "B": {
+          "team": {
+            "skilled": "integer",
+            "laborers": "integer"
+          },
+          "fixed_cost": "number"
+        }
+      }
+    }
+  },
+  "weekly_wage": {
+    "skilled": "number",
+    "laborers": "number"
+  },
+  "effective_hours_per_worker": {
+    "skilled": "number",
+    "laborers": "number"
+  },
+  "worker_limits": {
+    "skilled_max": "integer",
+    "laborers_max": "integer"
+  },
+  "policies": {
+    "task1_B_excludes_task3_A": "boolean",
+    "task3_B_min_skilled": "integer",
+    "skilled_at_most_fraction_of_laborers": "number"
+  }
+}

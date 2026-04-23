@@ -1,0 +1,19 @@
+{
+  "base_case": {
+    "status": "string",
+    "occupied_street_length_meters": "number|null",
+    "side_1_cars": "array[integer]",
+    "side_1_total_meters": "number|null",
+    "side_2_cars": "array[integer]",
+    "side_2_total_meters": "number|null"
+  },
+  "capped_side_case": {
+    "status": "string",
+    "occupied_street_length_meters": "number|null",
+    "side_1_cars": "array[integer]",
+    "side_1_total_meters": "number|null",
+    "side_2_cars": "array[integer]",
+    "side_2_total_meters": "number|null",
+    "side_1_cap_meters": "number"
+  }
+}

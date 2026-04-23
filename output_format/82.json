@@ -1,0 +1,12 @@
+{
+  "store_counts": [
+    {
+      "code": "integer",
+      "store_type": "string",
+      "shops": "integer"
+    }
+  ],
+  "total_area_used_m2": "number",
+  "total_annual_profit_10k_yuan": "number",
+  "total_rent_income_10k_yuan": "number"
+}

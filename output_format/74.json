@@ -1,0 +1,14 @@
+{
+  "start_times": {
+    "<activity_name>": "number"
+  },
+  "finish_times": {
+    "<activity_name>": "number"
+  },
+  "project_completion_time": "number",
+  "machine_rental_days": "number",
+  "cost_breakdown": {
+    "work_cost": "number",
+    "machine_cost": "number"
+  }
+}

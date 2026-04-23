@@ -1,0 +1,19 @@
+{
+  "products": [
+    "string"
+  ],
+  "selling_price": {
+    "product_name": "number"
+  },
+  "manufacturing_cost": {
+    "product_name": "number"
+  },
+  "space": {
+    "product_name": "number"
+  },
+  "max_space": "number",
+  "min_production": {
+    "product_name": "integer"
+  },
+  "max_total_items": "integer"
+}

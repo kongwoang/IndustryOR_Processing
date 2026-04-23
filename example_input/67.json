@@ -1,0 +1,60 @@
+{
+  "months": [
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ],
+  "products": {
+    "I": {
+      "demand": {
+        "Jul": 30000,
+        "Aug": 30000,
+        "Sep": 30000,
+        "Oct": 100000,
+        "Nov": 100000,
+        "Dec": 100000
+      },
+      "production_cost": {
+        "Jul": 4.5,
+        "Aug": 4.5,
+        "Sep": 4.5,
+        "Oct": 4.5,
+        "Nov": 4.5,
+        "Dec": 4.5
+      },
+      "volume_per_unit_m3": 0.2
+    },
+    "II": {
+      "demand": {
+        "Jul": 15000,
+        "Aug": 15000,
+        "Sep": 15000,
+        "Oct": 50000,
+        "Nov": 50000,
+        "Dec": 50000
+      },
+      "production_cost": {
+        "Jul": 7.0,
+        "Aug": 7.0,
+        "Sep": 7.0,
+        "Oct": 7.0,
+        "Nov": 7.0,
+        "Dec": 7.0
+      },
+      "volume_per_unit_m3": 0.4
+    }
+  },
+  "monthly_combined_capacity_units": 120000,
+  "warehouse": {
+    "internal_capacity_m3": 15000,
+    "internal_cost_per_m3_per_month": 1.0,
+    "external_cost_per_m3_per_month": 1.5
+  },
+  "initial_inventory_units": {
+    "I": 0,
+    "II": 0
+  }
+}

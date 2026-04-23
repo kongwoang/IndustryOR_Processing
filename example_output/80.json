@@ -1,0 +1,25 @@
+{
+  "chosen_methods": {
+    "task1": "A",
+    "task2": "B",
+    "task3": "A"
+  },
+  "hired_workers": {
+    "skilled": 200,
+    "laborers": 800
+  },
+  "task_assignments": {
+    "task1": {
+      "skilled": 200,
+      "laborers": 0
+    },
+    "task2": {
+      "skilled": 0,
+      "laborers": 300
+    },
+    "task3": {
+      "skilled": 0,
+      "laborers": 500
+    }
+  }
+}

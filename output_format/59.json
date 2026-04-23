@@ -1,0 +1,24 @@
+{
+  "production_kg": {
+    "A": "number",
+    "B": "number",
+    "C": "number"
+  },
+  "raw_material_allocation_kg": {
+    "A": {
+      "A": "number",
+      "B": "number",
+      "C": "number"
+    },
+    "B": {
+      "A": "number",
+      "B": "number",
+      "C": "number"
+    },
+    "C": {
+      "A": "number",
+      "B": "number",
+      "C": "number"
+    }
+  }
+}

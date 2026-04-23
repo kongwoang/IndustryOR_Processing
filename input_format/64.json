@@ -1,0 +1,20 @@
+{
+  "candidates": [
+    {
+      "name": "string",
+      "salary": "number",
+      "skill_level": "number",
+      "experience_years": "number"
+    }
+  ],
+  "budget": "number",
+  "max_hires": "integer",
+  "min_total_skill": "number",
+  "min_total_experience": "number",
+  "mutually_exclusive_pairs": [
+    [
+      "string",
+      "string"
+    ]
+  ]
+}

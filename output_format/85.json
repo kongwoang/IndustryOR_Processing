@@ -1,0 +1,12 @@
+{
+  "production": {
+    "X": "number",
+    "Y": "number"
+  },
+  "resource_usage": {
+    "machine_minutes_used": "number",
+    "craftsman_minutes_used": "number",
+    "machine_minutes_idle": "number",
+    "craftsman_minutes_idle": "number"
+  }
+}

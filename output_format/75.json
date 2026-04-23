@@ -1,0 +1,9 @@
+{
+  "decision_variables": {
+    "A_units": "number",
+    "B_units": "number",
+    "C_sold_units": "number",
+    "C_disposed_units": "number"
+  },
+  "total_profit": "number"
+}

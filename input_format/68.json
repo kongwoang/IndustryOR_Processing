@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "name": "string",
+      "supply_tons": "number"
+    }
+  ],
+  "destinations": [
+    {
+      "name": "string",
+      "demand_tons": "number"
+    }
+  ],
+  "distance_km": [
+    [
+      "number"
+    ]
+  ]
+}

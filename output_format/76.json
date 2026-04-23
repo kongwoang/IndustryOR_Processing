@@ -1,0 +1,16 @@
+{
+  "buy_to_sell_flow": {
+    "<purchase_quarter>": {
+      "<sale_quarter>": "number, unit: 10,000 m^3"
+    }
+  },
+  "purchase_by_quarter": {
+    "<quarter>": "number, unit: 10,000 m^3"
+  },
+  "sales_by_quarter": {
+    "<quarter>": "number, unit: 10,000 m^3"
+  },
+  "ending_inventory": {
+    "<quarter>": "number, unit: 10,000 m^3"
+  }
+}

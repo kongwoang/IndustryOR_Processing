@@ -1,0 +1,21 @@
+{
+  "products": {
+    "<product_name>": {
+      "price_per_pack": "number",
+      "grains_lbs_per_pack": "number",
+      "meat_lbs_per_pack": "number",
+      "variable_cost_per_pack": "number"
+    }
+  },
+  "resources": {
+    "grains": {
+      "max_lbs": "number",
+      "cost_per_lb": "number"
+    },
+    "meat": {
+      "max_lbs": "number",
+      "cost_per_lb": "number"
+    },
+    "meaties_capacity_packs": "number"
+  }
+}

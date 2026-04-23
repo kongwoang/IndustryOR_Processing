@@ -1,0 +1,28 @@
+{
+  "period_length_hours": 4,
+  "shift_length_hours": 8,
+  "shift_start_times": [
+    2,
+    6,
+    10,
+    14,
+    18,
+    22
+  ],
+  "time_slots": [
+    "2-6",
+    "6-10",
+    "10-14",
+    "14-18",
+    "18-22",
+    "22-2"
+  ],
+  "minimum_waiters_needed": [
+    4,
+    8,
+    10,
+    7,
+    12,
+    4
+  ]
+}

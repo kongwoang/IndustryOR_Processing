@@ -1,0 +1,13 @@
+{
+  "period_length_hours": "integer",
+  "shift_length_hours": "integer",
+  "shift_start_times": [
+    "integer"
+  ],
+  "time_slots": [
+    "string"
+  ],
+  "minimum_waiters_needed": [
+    "integer"
+  ]
+}

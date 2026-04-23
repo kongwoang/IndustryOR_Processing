@@ -1,0 +1,32 @@
+{
+  "products": {
+    "microwave_ovens": {
+      "workshop_a_hours_per_unit": 2,
+      "workshop_b_hours_per_unit": 1,
+      "inspection_and_sales_cost_per_unit": 30
+    },
+    "water_heaters": {
+      "workshop_a_hours_per_unit": 1,
+      "workshop_b_hours_per_unit": 3,
+      "inspection_and_sales_cost_per_unit": 50
+    }
+  },
+  "workshops": {
+    "A": {
+      "regular_hours_available": 250,
+      "hourly_cost": 80,
+      "max_overtime_hours": 20
+    },
+    "B": {
+      "regular_hours_available": 150,
+      "hourly_cost": 20
+    }
+  },
+  "constraints": {
+    "max_monthly_inspection_and_sales_cost": 5500,
+    "minimum_monthly_sales": {
+      "microwave_ovens": 80,
+      "water_heaters": 50
+    }
+  }
+}

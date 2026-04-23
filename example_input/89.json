@@ -1,0 +1,17 @@
+{
+  "profits_per_kg": {
+    "product_A": 30,
+    "product_B": 10
+  },
+  "production_hours_per_kg": {
+    "product_A": 6,
+    "product_B": 3
+  },
+  "max_production_hours_per_week": 40,
+  "min_output_ratio_B_to_A": 3,
+  "storage_space_per_kg_relative_to_B": {
+    "product_A": 4,
+    "product_B": 1
+  },
+  "max_storage_capacity_equivalent_to_product_A_kg": 4
+}

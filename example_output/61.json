@@ -1,0 +1,13 @@
+{
+  "enabled_devices": [
+    "A",
+    "C"
+  ],
+  "production_plan": {
+    "A": 800,
+    "B": 0,
+    "C": 1200,
+    "D": 0
+  },
+  "total_cost": 37000.0
+}

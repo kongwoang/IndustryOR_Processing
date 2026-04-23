@@ -1,0 +1,9 @@
+{
+  "stock_length": "integer",
+  "orders": [
+    {
+      "piece_length": "integer",
+      "required_quantity": "integer"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "products": [
+    {
+      "name": "high_end",
+      "labor_hours_per_unit": 17,
+      "inspection_hours_per_unit": 8,
+      "profit_per_unit": 300,
+      "max_demand": 50
+    },
+    {
+      "name": "mid_range",
+      "labor_hours_per_unit": 10,
+      "inspection_hours_per_unit": 4,
+      "profit_per_unit": 200,
+      "max_demand": 80
+    },
+    {
+      "name": "low_end",
+      "labor_hours_per_unit": 2,
+      "inspection_hours_per_unit": 2,
+      "profit_per_unit": 100,
+      "max_demand": 150
+    }
+  ],
+  "resource_limits": {
+    "labor_hours": 1000,
+    "inspection_hours": 500
+  }
+}

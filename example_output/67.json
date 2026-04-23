@@ -1,0 +1,83 @@
+{
+  "production_units": {
+    "Jul": {
+      "I": 30000,
+      "II": 15000
+    },
+    "Aug": {
+      "I": 45000,
+      "II": 15000
+    },
+    "Sep": {
+      "I": 105000,
+      "II": 15000
+    },
+    "Oct": {
+      "I": 70000,
+      "II": 50000
+    },
+    "Nov": {
+      "I": 70000,
+      "II": 50000
+    },
+    "Dec": {
+      "I": 70000,
+      "II": 50000
+    }
+  },
+  "ending_inventory_units": {
+    "Jul": {
+      "I": 0,
+      "II": 0
+    },
+    "Aug": {
+      "I": 15000,
+      "II": 0
+    },
+    "Sep": {
+      "I": 90000,
+      "II": 0
+    },
+    "Oct": {
+      "I": 60000,
+      "II": 0
+    },
+    "Nov": {
+      "I": 30000,
+      "II": 0
+    },
+    "Dec": {
+      "I": 0,
+      "II": 0
+    }
+  },
+  "warehouse_usage_m3": {
+    "Jul": {
+      "internal": 0,
+      "external": 0
+    },
+    "Aug": {
+      "internal": 3000,
+      "external": 0
+    },
+    "Sep": {
+      "internal": 15000,
+      "external": 3000
+    },
+    "Oct": {
+      "internal": 12000,
+      "external": 0
+    },
+    "Nov": {
+      "internal": 6000,
+      "external": 0
+    },
+    "Dec": {
+      "internal": 0,
+      "external": 0
+    }
+  },
+  "total_production_cost": 3120000,
+  "total_inventory_cost": 40500,
+  "total_cost": 3160500
+}

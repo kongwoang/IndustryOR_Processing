@@ -1,0 +1,12 @@
+{
+  "production": {
+    "X": 10.0,
+    "Y": 65.51724137931033
+  },
+  "resource_usage": {
+    "machine_minutes_used": 1374.8275862068963,
+    "craftsman_minutes_used": 2100.0,
+    "machine_minutes_idle": 1025.1724137931037,
+    "craftsman_minutes_idle": 0.0
+  }
+}

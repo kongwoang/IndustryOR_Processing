@@ -1,0 +1,9 @@
+{
+  "shipments_tons": [
+    {
+      "source": "string",
+      "destination": "string",
+      "tons": "number"
+    }
+  ]
+}

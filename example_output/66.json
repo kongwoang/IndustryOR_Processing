@@ -1,0 +1,7 @@
+{
+  "production_plan": {
+    "high_end": 0,
+    "mid_range": 50,
+    "low_end": 150
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "horse_trips": "integer",
+  "bicycle_trips": "integer",
+  "handcart_trips": "integer",
+  "total_transported": "number",
+  "total_pollution": "number"
+}

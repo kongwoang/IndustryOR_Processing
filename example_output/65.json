@@ -1,0 +1,13 @@
+{
+  "production_plan": {
+    "microwave_ovens": 100,
+    "water_heaters": 50
+  },
+  "workshop_hours": {
+    "A_total_hours_used": 250,
+    "A_overtime_hours": 0,
+    "B_total_hours_used": 250
+  },
+  "inspection_and_sales_cost": 5500,
+  "total_operating_cost": 30500
+}

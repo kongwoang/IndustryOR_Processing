@@ -1,0 +1,13 @@
+{
+  "selected_properties": [
+    "integer"
+  ],
+  "buy": {
+    "property_1": "integer",
+    "property_2": "integer",
+    "property_3": "integer",
+    "property_4": "integer"
+  },
+  "total_cost_million": "number",
+  "total_annual_income": "number"
+}

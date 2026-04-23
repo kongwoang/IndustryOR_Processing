@@ -1,0 +1,13 @@
+{
+  "production_plan": {
+    "microwave_ovens": "integer",
+    "water_heaters": "integer"
+  },
+  "workshop_hours": {
+    "A_total_hours_used": "number",
+    "A_overtime_hours": "number",
+    "B_total_hours_used": "number"
+  },
+  "inspection_and_sales_cost": "number",
+  "total_operating_cost": "number"
+}

@@ -1,0 +1,32 @@
+{
+  "store_counts": [
+    {
+      "code": 1,
+      "store_type": "Jewelry",
+      "shops": 2
+    },
+    {
+      "code": 2,
+      "store_type": "Shoes & Hats",
+      "shops": 2
+    },
+    {
+      "code": 3,
+      "store_type": "General Merchandise",
+      "shops": 3
+    },
+    {
+      "code": 4,
+      "store_type": "Bookstore",
+      "shops": 1
+    },
+    {
+      "code": 5,
+      "store_type": "Catering",
+      "shops": 2
+    }
+  ],
+  "total_area_used_m2": 5000,
+  "total_annual_profit_10k_yuan": 140,
+  "total_rent_income_10k_yuan": 28.0
+}

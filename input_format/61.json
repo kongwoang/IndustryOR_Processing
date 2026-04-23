@@ -1,0 +1,11 @@
+{
+  "devices": [
+    {
+      "name": "string",
+      "prep_completion_cost": "number",
+      "unit_production_cost": "number",
+      "max_processing_capacity": "number"
+    }
+  ],
+  "required_production": "number"
+}

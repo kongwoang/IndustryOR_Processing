@@ -1,0 +1,5 @@
+{
+  "num_locations": "integer",
+  "start_location": "integer, 1-based index of the depot/start-end location",
+  "distance_matrix": "2D array of numbers, square symmetric matrix with 0 on the diagonal"
+}

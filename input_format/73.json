@@ -1,0 +1,25 @@
+{
+  "children": [
+    {
+      "name": "string",
+      "cost": "number"
+    }
+  ],
+  "max_children": "integer",
+  "min_children": "integer",
+  "must_take": [
+    "string"
+  ],
+  "incompatible_pairs": [
+    [
+      "string",
+      "string"
+    ]
+  ],
+  "implications": [
+    {
+      "if_taken": "string",
+      "must_also_take": "string"
+    }
+  ]
+}

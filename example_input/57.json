@@ -1,0 +1,23 @@
+{
+  "orders": [
+    {
+      "order_number": 1,
+      "width": 0.5,
+      "length": 1000.0
+    },
+    {
+      "order_number": 2,
+      "width": 0.7,
+      "length": 3000.0
+    },
+    {
+      "order_number": 3,
+      "width": 0.9,
+      "length": 2000.0
+    }
+  ],
+  "standard_roll_widths": [
+    1.0,
+    2.0
+  ]
+}

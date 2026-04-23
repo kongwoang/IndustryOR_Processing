@@ -1,0 +1,9 @@
+{
+  "decision_variables": {
+    "A_units": 4.25,
+    "B_units": 2.5,
+    "C_sold_units": 5.0,
+    "C_disposed_units": 0.0
+  },
+  "total_profit": 57.0
+}

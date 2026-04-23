@@ -1,0 +1,34 @@
+{
+  "shipments_tons": [
+    {
+      "source": "A",
+      "destination": "ResidentialArea1",
+      "tons": 0.0
+    },
+    {
+      "source": "A",
+      "destination": "ResidentialArea2",
+      "tons": 30.000000000000007
+    },
+    {
+      "source": "A",
+      "destination": "ResidentialArea3",
+      "tons": 50.0
+    },
+    {
+      "source": "B",
+      "destination": "ResidentialArea1",
+      "tons": 55.0
+    },
+    {
+      "source": "B",
+      "destination": "ResidentialArea2",
+      "tons": 44.99999999999999
+    },
+    {
+      "source": "B",
+      "destination": "ResidentialArea3",
+      "tons": 0.0
+    }
+  ]
+}

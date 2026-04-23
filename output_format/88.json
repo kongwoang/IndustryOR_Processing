@@ -1,0 +1,9 @@
+{
+  "production_lots": {
+    "product_name": "number"
+  },
+  "ending_inventory_lots": {
+    "product_name": "number"
+  },
+  "total_ending_inventory_lots": "number"
+}

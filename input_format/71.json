@@ -1,0 +1,4 @@
+{
+  "n": "integer",
+  "cost_matrix": "number[n][n], where cost_matrix[i][p] is the total cost of assigning factory i+1 to location p+1"
+}

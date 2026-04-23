@@ -1,0 +1,15 @@
+{
+  "total_raw_bars_used": "integer",
+  "total_waste": "number",
+  "patterns_used": [
+    {
+      "piece_counts": {
+        "3": "integer",
+        "4": "integer"
+      },
+      "bars": "integer",
+      "waste_per_bar": "number",
+      "total_waste": "number"
+    }
+  ]
+}

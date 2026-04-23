@@ -1,0 +1,4 @@
+{
+  "route": "list[int]",
+  "total_distance": "number"
+}

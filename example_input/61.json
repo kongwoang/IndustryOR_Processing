@@ -1,0 +1,29 @@
+{
+  "devices": [
+    {
+      "name": "A",
+      "prep_completion_cost": 1000,
+      "unit_production_cost": 20,
+      "max_processing_capacity": 900
+    },
+    {
+      "name": "B",
+      "prep_completion_cost": 920,
+      "unit_production_cost": 24,
+      "max_processing_capacity": 1000
+    },
+    {
+      "name": "C",
+      "prep_completion_cost": 800,
+      "unit_production_cost": 16,
+      "max_processing_capacity": 1200
+    },
+    {
+      "name": "D",
+      "prep_completion_cost": 700,
+      "unit_production_cost": 28,
+      "max_processing_capacity": 1600
+    }
+  ],
+  "required_production": 2000
+}

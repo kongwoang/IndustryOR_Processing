@@ -1,0 +1,20 @@
+{
+  "truck_types": [
+    {
+      "name": "Type A",
+      "refrigerated_capacity": 20,
+      "non_refrigerated_capacity": 40,
+      "cost_per_km": 30
+    },
+    {
+      "name": "Type B",
+      "refrigerated_capacity": 30,
+      "non_refrigerated_capacity": 30,
+      "cost_per_km": 40
+    }
+  ],
+  "demand": {
+    "refrigerated": 3000,
+    "non_refrigerated": 4000
+  }
+}

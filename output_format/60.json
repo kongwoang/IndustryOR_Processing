@@ -1,0 +1,6 @@
+{
+  "tour": [
+    "integer, 1-based location index"
+  ],
+  "total_distance": "number"
+}

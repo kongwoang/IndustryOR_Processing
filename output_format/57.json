@@ -1,0 +1,17 @@
+{
+  "total_waste_area": "float",
+  "patterns_used": [
+    {
+      "stock_width": "float",
+      "cuts": [
+        {
+          "width": "float",
+          "count_per_meter": "int"
+        }
+      ],
+      "length_used": "float",
+      "waste_width_per_meter": "float",
+      "waste_area": "float"
+    }
+  ]
+}

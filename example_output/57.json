@@ -1,0 +1,45 @@
+{
+  "total_waste_area": 600.0,
+  "patterns_used": [
+    {
+      "stock_width": 1.0,
+      "cuts": [
+        {
+          "width": 0.7,
+          "count_per_meter": 1
+        }
+      ],
+      "length_used": 1000.0,
+      "waste_width_per_meter": 0.3,
+      "waste_area": 300.0
+    },
+    {
+      "stock_width": 2.0,
+      "cuts": [
+        {
+          "width": 0.5,
+          "count_per_meter": 1
+        },
+        {
+          "width": 0.7,
+          "count_per_meter": 2
+        }
+      ],
+      "length_used": 1000.0,
+      "waste_width_per_meter": 0.1,
+      "waste_area": 100.0
+    },
+    {
+      "stock_width": 2.0,
+      "cuts": [
+        {
+          "width": 0.9,
+          "count_per_meter": 2
+        }
+      ],
+      "length_used": 1000.0,
+      "waste_width_per_meter": 0.2,
+      "waste_area": 200.0
+    }
+  ]
+}

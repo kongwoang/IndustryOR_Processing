@@ -1,0 +1,23 @@
+{
+  "parts": "integer, number of part types",
+  "machines": [
+    "string, machine name"
+  ],
+  "processing_costs": {
+    "machine_name": [
+      "number, unit processing cost for each part in order 1..parts"
+    ]
+  },
+  "setup_costs": {
+    "machine_name": "number, one-time setup cost if any part is assigned to that machine"
+  },
+  "fixed_assignments": {
+    "part_index_1_based": "string, required machine"
+  },
+  "logical_rules": [
+    "string, extra logical assignment rule"
+  ],
+  "max_parts_on_machine": {
+    "machine_name": "integer, maximum number of part types allowed on that machine"
+  }
+}

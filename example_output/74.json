@@ -1,0 +1,26 @@
+{
+  "start_times": {
+    "A": 5.0,
+    "B": 20.0,
+    "C": 20.0,
+    "D": 18.0,
+    "E": 0.0,
+    "F": 10.0,
+    "G": 9.0
+  },
+  "finish_times": {
+    "A": 9.0,
+    "B": 23.0,
+    "C": 25.0,
+    "D": 20.0,
+    "E": 10.0,
+    "F": 20.0,
+    "G": 10.0
+  },
+  "project_completion_time": 25.0,
+  "machine_rental_days": 18.0,
+  "cost_breakdown": {
+    "work_cost": 25000.0,
+    "machine_cost": 90000.0
+  }
+}

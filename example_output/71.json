@@ -1,0 +1,13 @@
+{
+  "assignments": [
+    {
+      "factory": 1,
+      "location": 1
+    },
+    {
+      "factory": 2,
+      "location": 2
+    }
+  ],
+  "total_cost": 330.0
+}

@@ -1,0 +1,5 @@
+{
+  "product_A_kg": "number",
+  "product_B_kg": "number",
+  "max_profit": "number"
+}

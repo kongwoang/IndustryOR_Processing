@@ -1,0 +1,5 @@
+{
+  "type_a_trucks": "integer",
+  "type_b_trucks": "integer",
+  "total_cost_per_km": "number"
+}

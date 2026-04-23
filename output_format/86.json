@@ -1,0 +1,16 @@
+{
+  "production_packs": {
+    "Meaties": "number",
+    "Yummies": "number"
+  },
+  "resource_usage": {
+    "grains_lbs": "number",
+    "meat_lbs": "number"
+  },
+  "financials": {
+    "revenue": "number",
+    "raw_material_cost": "number",
+    "mixing_packaging_cost": "number",
+    "profit": "number"
+  }
+}
