@@ -1,0 +1,187 @@
+{
+    "problem": "Problem description\n- There is a finite set of processing devices $$\\mathcal{D}$$ and a finite planning horizon $$\\mathcal{T}$$.\n- There is a finite set of products $$\\mathcal{P}$$; the original instance contains a single product, but the model is written in generalized indexed form.\n- For each device $$d \\in \\mathcal{D}$$, the fixed preparation completion cost is $$F_d$$, the unit production cost for product $$p \\in \\mathcal{P}$$ on that device is $$C_{d,p}$$, and the maximum processing capacity is $$U_d$$.\n- The required demand for each product $$p \\in \\mathcal{P}$$ over the planning horizon is given by $$Q_p$$.\n- The decision is to choose which devices to enable and how much of each product to assign to each enabled device.\n- Production may be split across multiple devices as long as all demand is met and no device exceeds its capacity.\n- A device that is not enabled cannot produce any quantity.\n- If a device is enabled, its fixed preparation completion cost is incurred once.\n- The planning goal is to minimize the total cost made up of device enabling costs and unit production costs while satisfying all demand.\n- A solution is represented by:\n  - $$y_d$$, a binary decision variable indicating whether device $$d$$ is enabled.\n  - $$x_{d,p}$$, a nonnegative decision variable giving the quantity of product $$p$$ produced on device $$d$$.\n  - $$Z$$, the total minimized cost of the plan.\n\nInput Format\n{\n  \"devices\": \"$$\\mathcal{D}$$, indexed by $$d \\in \\mathcal{D}$$\",\n  \"products\": \"$$\\mathcal{P}$$, indexed by $$p \\in \\mathcal{P}$$\",\n  \"planning_horizon\": \"$$\\mathcal{T}$$\",\n  \"demand\": \"$$Q_p$$, a vector of length $$|\\mathcal{P}|$$ giving required quantity for each product $$p$$ over $$\\mathcal{T}$$\",\n  \"setup_cost\": \"$$F_d$$, a vector of length $$|\\mathcal{D}|$$ giving fixed enabling cost for each device $$d$$\",\n  \"unit_production_cost\": \"$$C_{d,p}$$, a matrix of shape $$|\\mathcal{D}|\\\\times|\\mathcal{P}|$$ giving unit cost for producing product $$p$$ on device $$d$$\",\n  \"capacity\": \"$$U_d$$, a vector of length $$|\\mathcal{D}|$$ giving maximum processing capacity for each device $$d$$\"\n}\n\nOutput Format\n{\n  \"enabled_devices\": \"list of devices $$d \\\\in \\\\mathcal{D}$$ with $$y_d = 1$$\",\n  \"production_plan\": \"$$x_{d,p}$$, a matrix of shape $$|\\mathcal{D}|\\\\times|\\mathcal{P}|$$ giving production quantities assigned to each device-product pair\",\n  \"total_cost\": \"$$Z^*$$, the minimum total cost\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"devices\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$D$$\"],\n  \"products\": [\"$$P_1$$\"],\n  \"planning_horizon\": \"$$\\mathcal{T}$$\",\n  \"demand\": {\n    \"$$P_1$$\": \"$$2000$$\"\n  },\n  \"setup_cost\": {\n    \"$$A$$\": \"$$1000$$\",\n    \"$$B$$\": \"$$920$$\",\n    \"$$C$$\": \"$$800$$\",\n    \"$$D$$\": \"$$700$$\"\n  },\n  \"unit_production_cost\": {\n    \"$$A$$\": {\n      \"$$P_1$$\": \"$$20$$\"\n    },\n    \"$$B$$\": {\n      \"$$P_1$$\": \"$$24$$\"\n    },\n    \"$$C$$\": {\n      \"$$P_1$$\": \"$$16$$\"\n    },\n    \"$$D$$\": {\n      \"$$P_1$$\": \"$$28$$\"\n    }\n  },\n  \"capacity\": {\n    \"$$A$$\": \"$$900$$\",\n    \"$$B$$\": \"$$1000$$\",\n    \"$$C$$\": \"$$1200$$\",\n    \"$$D$$\": \"$$1600$$\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_devices",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of processing devices"
+        },
+        {
+            "name": "num_products",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of products"
+        },
+        {
+            "name": "planning_horizon_size",
+            "symbol": "T",
+            "shape": [],
+            "description": "Size of the finite planning horizon"
+        },
+        {
+            "name": "fixed_preparation_cost",
+            "symbol": "F",
+            "shape": [
+                "M"
+            ],
+            "description": "Fixed preparation completion cost for each device"
+        },
+        {
+            "name": "unit_production_cost",
+            "symbol": "C",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "description": "Unit production cost of each product on each device"
+        },
+        {
+            "name": "device_capacity",
+            "symbol": "U",
+            "shape": [
+                "M"
+            ],
+            "description": "Maximum processing capacity of each device"
+        },
+        {
+            "name": "product_demand",
+            "symbol": "Q",
+            "shape": [
+                "N"
+            ],
+            "description": "Required demand of each product over the planning horizon"
+        }
+    ],
+    "variables": [
+        {
+            "name": "device_enabled",
+            "symbol": "y",
+            "shape": [
+                "M"
+            ],
+            "domain": "binary",
+            "description": "Binary variable equal to 1 if device is enabled and 0 otherwise"
+        },
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product produced on each device"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total minimized cost of the plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "device_enabled_binary_domain",
+            "description": "Each device-enabled decision variable is binary.",
+            "formula": "y[d] \\in \\{0,1\\}\\quad \\forall d=0,\\dots,M-1",
+            "parameters": [
+                "num_devices"
+            ],
+            "variables": [
+                "device_enabled"
+            ]
+        },
+        {
+            "name": "production_nonnegative_domain",
+            "description": "Production quantities must be nonnegative for every device-product pair.",
+            "formula": "x[d][p] \\ge 0\\quad \\forall d=0,\\dots,M-1,\\ \\forall p=0,\\dots,N-1",
+            "parameters": [
+                "num_devices",
+                "num_products"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Define total cost as the sum of fixed enabling costs and variable production costs.",
+            "formula": "Z = \\sum_{d=0}^{M-1} F[d] \\, y[d] + \\sum_{d=0}^{M-1}\\sum_{p=0}^{N-1} C[d][p] \\, x[d][p]",
+            "parameters": [
+                "num_devices",
+                "num_products",
+                "fixed_preparation_cost",
+                "unit_production_cost"
+            ],
+            "variables": [
+                "device_enabled",
+                "production_quantity",
+                "total_cost"
+            ]
+        },
+        {
+            "name": "demand_satisfaction_constraint",
+            "description": "Each product's total production across all devices must meet the required demand.",
+            "formula": "\\sum_{d=0}^{M-1} x[d][p] \\ge Q[p] \\quad \\forall p=0,\\dots,N-1",
+            "parameters": [
+                "num_devices",
+                "num_products",
+                "product_demand"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "device_capacity_constraint",
+            "description": "For each device, total production across all products cannot exceed its capacity.",
+            "formula": "\\sum_{p=0}^{N-1} x[d][p] \\le U[d] \\quad \\forall d=0,\\dots,M-1",
+            "parameters": [
+                "num_devices",
+                "num_products",
+                "device_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_enablement_link",
+            "description": "Production on a device is only allowed when that device is enabled.",
+            "formula": "\\sum_{p=0}^{N-1} x[d][p] \\le U[d] \\, y[d] \\quad \\forall d=0,\\dots,M-1",
+            "parameters": [
+                "num_devices",
+                "device_capacity"
+            ],
+            "variables": [
+                "device_enabled",
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize the total cost of the plan, including fixed device enabling costs and variable production costs, while meeting all product demand.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total cost of the plan, consisting of fixed device enabling costs and variable production costs, subject to demand satisfaction and device capacity limits.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{d=0}^{M-1} F[d] \\, y[d] + \\sum_{d=0}^{M-1}\\sum_{p=0}^{N-1} C[d][p] \\, x[d][p]",
+        "parameters": [
+            "fixed_preparation_cost",
+            "unit_production_cost"
+        ],
+        "variables": [
+            "device_enabled",
+            "production_quantity",
+            "total_cost"
+        ]
+    }
+}

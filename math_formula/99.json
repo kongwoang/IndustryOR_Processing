@@ -1,0 +1,215 @@
+{
+    "problem": "Problem description\n- There is a directed communication network with node set $$\\mathcal{N}$$, source node $$s \\in \\mathcal{N}$$, sink node $$t \\in \\mathcal{N}$$, and a mandatory service node $$m \\in \\mathcal{N}$$.\n- The network data are given by a bandwidth-capacity matrix $$B=[b_{ij}]$$ over node pairs $$i,j \\in \\mathcal{N}$$, where $$b_{ij} \\ge 0$$ is the available direct bandwidth from $$i$$ to $$j$$.\n- A zero entry in $$B$$ means that no direct link is available between the corresponding nodes.\n- The planning horizon is static and is represented by $$\\mathcal{T}$$ as a single planning stage.\n- The goal is to choose a route from $$s$$ to $$t$$ that must pass through $$m$$ and maximize the route bandwidth, where the route bandwidth is the smallest bandwidth among the selected direct links on that route.\n- The selected route must be loop-free, meaning no node may be visited more than once.\n- Only available direct links with positive bandwidth may be used.\n- If several feasible routes achieve the same maximum bandwidth, any one of them is acceptable.\n- No demand data are present in this problem.\n- No separate cost objective is active in this problem; if a generic implementation needs one, it may be denoted by a link-cost matrix $$C=[c_{ij}]$$, though it is not used here.\n- A solution is represented by:\n  - an ordered simple path $$\\pi=(v_0,v_1,\\ldots,v_L)$$ with $$v_0=s$$ and $$v_L=t$$, and with $$m$$ appearing somewhere along the path;\n  - a binary link-selection pattern $$x_{ij}$$ indicating whether direct link $$\\left(i,j\\right)$$ is used;\n  - a scalar bottleneck bandwidth $$z$$ giving the minimum selected link bandwidth along the chosen route.\n\nInput Format\n{\n  \"sets\": {\n    \"nodes\": {\n      \"symbol\": \"$$\\\\mathcal{N}$$\",\n      \"indexing\": \"$$i,j \\\\in \\\\mathcal{N}$$\"\n    },\n    \"time_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"meaning\": \"static single-stage planning set\"\n    }\n  },\n  \"parameters\": {\n    \"source_node\": {\n      \"symbol\": \"$$s$$\",\n      \"type\": \"node label\"\n    },\n    \"sink_node\": {\n      \"symbol\": \"$$t$$\",\n      \"type\": \"node label\"\n    },\n    \"mandatory_service_node\": {\n      \"symbol\": \"$$m$$\",\n      \"type\": \"node label\"\n    },\n    \"capacity_matrix\": {\n      \"symbol\": \"$$B=[b_{ij}]$$\",\n      \"shape\": \"$$|\\\\mathcal{N}| \\\\times |\\\\mathcal{N}|$$\",\n      \"meaning\": \"direct bandwidth capacity for each ordered node pair; $$b_{ij}=0$$ means no direct link\"\n    },\n    \"cost_matrix_optional\": {\n      \"symbol\": \"$$C=[c_{ij}]$$\",\n      \"shape\": \"$$|\\\\mathcal{N}| \\\\times |\\\\mathcal{N}|$$\",\n      \"meaning\": \"optional generic link-cost data, not used in the stated objective\"\n    }\n  },\n  \"planning_goal\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximize the bottleneck bandwidth of a simple route from $$s$$ to $$t$$ that passes through $$m$$\"\n  }\n}\n\nOutput Format\n{\n  \"route\": {\n    \"path\": {\n      \"symbol\": \"$$\\\\pi=(v_0,v_1,\\\\ldots,v_L)$$\",\n      \"meaning\": \"ordered node sequence of the selected simple route from $$s$$ to $$t$$ that includes $$m$$\"\n    },\n    \"selected_links\": {\n      \"symbol\": \"$$X=[x_{ij}]$$\",\n      \"shape\": \"$$|\\\\mathcal{N}| \\\\times |\\\\mathcal{N}|$$\",\n      \"meaning\": \"binary description of which direct links are used in the route\"\n    }\n  },\n  \"bandwidth\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximum achievable bottleneck bandwidth of the chosen route\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"nodes\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$D$$\", \"$$E$$\"],\n    \"time_horizon\": \"$$\\\\mathcal{T}$$\"\n  },\n  \"parameters\": {\n    \"source_node\": \"$$A$$\",\n    \"sink_node\": \"$$E$$\",\n    \"mandatory_service_node\": \"$$C$$\",\n    \"capacity_matrix\": [\n      [\"$$0$$\", \"$$90$$\", \"$$85$$\", \"$$0$$\", \"$$65$$\"],\n      [\"$$95$$\", \"$$0$$\", \"$$70$$\", \"$$65$$\", \"$$34$$\"],\n      [\"$$60$$\", \"$$0$$\", \"$$0$$\", \"$$88$$\", \"$$80$$\"],\n      [\"$$67$$\", \"$$30$$\", \"$$25$$\", \"$$0$$\", \"$$84$$\"],\n      [\"$$0$$\", \"$$51$$\", \"$$0$$\", \"$$56$$\", \"$$0$$\"]\n    ]\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_nodes",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of nodes in the directed communication network"
+        },
+        {
+            "name": "source_node",
+            "symbol": "s",
+            "shape": [],
+            "description": "Source node label"
+        },
+        {
+            "name": "sink_node",
+            "symbol": "t",
+            "shape": [],
+            "description": "Sink node label"
+        },
+        {
+            "name": "mandatory_service_node",
+            "symbol": "m",
+            "shape": [],
+            "description": "Mandatory service node label"
+        },
+        {
+            "name": "time_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single static planning horizon set"
+        },
+        {
+            "name": "bandwidth_matrix",
+            "symbol": "B",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Available direct bandwidth matrix for ordered node pairs"
+        },
+        {
+            "name": "optional_cost_matrix",
+            "symbol": "C",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Optional link-cost matrix for ordered node pairs, not used in the stated objective"
+        }
+    ],
+    "variables": [
+        {
+            "name": "route_path",
+            "symbol": "\\pi",
+            "shape": [
+                "-"
+            ],
+            "domain": "integer",
+            "description": "Ordered simple path of visited node indices from source to sink including the mandatory service node"
+        },
+        {
+            "name": "link_selection",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary link-selection matrix indicating whether direct link (i,j) is used in the chosen route"
+        },
+        {
+            "name": "bottleneck_bandwidth",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Scalar route bottleneck bandwidth"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "binary_link_selection",
+            "description": "Link-selection variables x are binary decision variables",
+            "formula": "x_{ij} \\in \\{0,1\\} \\quad \\forall i,j \\in \\mathcal{N}",
+            "parameters": [
+                "bandwidth_matrix"
+            ],
+            "variables": [
+                "link_selection"
+            ]
+        },
+        {
+            "name": "nonnegative_bottleneck",
+            "description": "Bottleneck bandwidth z must be nonnegative",
+            "formula": "z \\ge 0",
+            "parameters": [],
+            "variables": [
+                "bottleneck_bandwidth"
+            ]
+        },
+        {
+            "name": "positive_bandwidth_links_only",
+            "description": "A direct link may be selected only when its available bandwidth is positive",
+            "formula": "x_{ij} = 0 \\quad \\forall i,j \\in \\mathcal{N} \\text{ with } b_{ij}=0",
+            "parameters": [
+                "bandwidth_matrix"
+            ],
+            "variables": [
+                "link_selection"
+            ]
+        },
+        {
+            "name": "simple_path_no_repeated_nodes",
+            "description": "The chosen route must be a simple path, so each node appears at most once in the ordered route representation",
+            "formula": "v_\u007fi \\neq v_\u007fj \\quad \\forall i,j \\in \\{0,\\ldots,L\\},\\ i \\neq j",
+            "parameters": [
+                "source_node",
+                "sink_node",
+                "mandatory_service_node"
+            ],
+            "variables": [
+                "route_path"
+            ]
+        },
+        {
+            "name": "start_at_source_end_at_sink",
+            "description": "The route must start at source node s and end at sink node t",
+            "formula": "v_0=s,\\ v_L=t",
+            "parameters": [
+                "source_node",
+                "sink_node"
+            ],
+            "variables": [
+                "route_path"
+            ]
+        },
+        {
+            "name": "must_include_mandatory_node",
+            "description": "The route must include mandatory service node m at least once",
+            "formula": "\\exists k \\in \\{0,\\ldots,L\\}:\\ v_k=m",
+            "parameters": [
+                "mandatory_service_node"
+            ],
+            "variables": [
+                "route_path"
+            ]
+        },
+        {
+            "name": "route_uses_only_available_links",
+            "description": "If consecutive nodes appear in the route, the corresponding selected link must be used and must have positive bandwidth",
+            "formula": "x_{v_k v_{k+1}} = 1 \\quad \\forall k \\in \\{0,\\ldots,L-1\\}, \\qquad x_{ij} \\le \\mathbf{1}(b_{ij}>0) \\quad \\forall i,j \\in \\mathcal{N}",
+            "parameters": [
+                "bandwidth_matrix"
+            ],
+            "variables": [
+                "route_path",
+                "link_selection"
+            ]
+        },
+        {
+            "name": "maximize_bottleneck_route",
+            "description": "The bottleneck bandwidth is bounded above by the bandwidth of every selected link on the route",
+            "formula": "z \\le b_{ij} + M(1-x_{ij}) \\quad \\forall i,j \\in \\mathcal{N}",
+            "parameters": [
+                "bandwidth_matrix"
+            ],
+            "variables": [
+                "link_selection",
+                "bottleneck_bandwidth"
+            ]
+        },
+        {
+            "name": "static_single_stage_horizon",
+            "description": "The planning horizon is a single static stage",
+            "formula": "\\mathcal{T}=\\{1\\}",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "bandwidths_nonnegative",
+            "description": "All bandwidth values b are nonnegative",
+            "formula": "b_{ij} \\ge 0 \\quad \\forall i,j \\in \\mathcal{N}",
+            "parameters": [
+                "bandwidth_matrix"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "maximize_bottleneck_bandwidth",
+            "description": "Maximize the route bottleneck bandwidth z for a simple directed route from source node s to sink node t that must pass through mandatory service node m",
+            "sense": "maximize"
+        },
+        {
+            "name": "find_any_optimal_route",
+            "description": "Return any feasible simple route achieving the maximum bottleneck bandwidth when multiple routes tie for the best value",
+            "sense": "find_all"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize the bottleneck bandwidth of the selected simple directed route from source node s to sink node t that must pass through mandatory service node m. The tie-handling request 'find any optimal route' does not introduce a second optimization criterion.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\max \\, z",
+        "parameters": [],
+        "variables": [
+            "z"
+        ]
+    }
+}

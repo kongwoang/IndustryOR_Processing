@@ -1,0 +1,166 @@
+{
+    "problem": "Problem description\n- There is a single promotional planning horizon $$\\mathcal{T}$$ over which the store decides how many promotional packages to sell.\n- The store has a set of legacy item types $$\\mathcal{I}$$ with available starting stock given by the inventory vector $$u_i$$ for each item $$i \\in \\mathcal{I}$$.\n- The store offers a set of promotional package types $$\\mathcal{P}$$. Each package type $$p \\in \\mathcal{P}$$ uses known quantities of the underlying items, recorded by the composition matrix $$a_{i,p}$$.\n- Each package type $$p \\in \\mathcal{P}$$ generates revenue $$r_p$$ per unit sold.\n- The promotion may also include optional external demand limits $$d_p$$ and optional unit cost information $$c_p$$ if such data are provided; the original instance is revenue-driven and does not provide these additional values.\n- The store must decide the number of units $$x_p$$ to sell for each package type $$p \\in \\mathcal{P}$$.\n- Each package type has a minimum required sales level $$\\ell_p$$ that must be met during the promotion.\n- Total item usage across all sold packages must not exceed the available stock of each item.\n- Sales quantities must be whole numbers and cannot be negative.\n- The planning goal is to maximize total promotional revenue.\n- A solution is represented by:\n  - $$x_p$$: the number of units of package type $$p$$ sold during $$\\mathcal{T}$$.\n  - $$z$$: the total revenue obtained from the selected sales plan.\n\nInput Format\n{\n  \"time_horizon\": \"Single promotional horizon $$\\mathcal{T}$$.\",\n  \"items\": \"List of item identifiers, size $$|\\mathcal{I}|$$.\",\n  \"packages\": \"List of package identifiers, size $$|\\mathcal{P}|$$.\",\n  \"inventory\": \"Vector $$u_i$$ of available units for each item $$i \\in \\mathcal{I}$$, length $$|\\mathcal{I}|$$.\",\n  \"composition\": \"Matrix $$a_{i,p}$$ giving the units of item $$i$$ consumed by one unit of package $$p$$, shape $$|\\mathcal{I}| \\times |\\mathcal{P}|$$.\",\n  \"price\": \"Vector $$r_p$$ of revenue per unit sold for each package $$p \\in \\mathcal{P}$$, length $$|\\mathcal{P}|$$.\",\n  \"minimum_sales\": \"Vector $$\\ell_p$$ of minimum required sales for each package $$p \\in \\mathcal{P}$$, length $$|\\mathcal{P}|$$.\",\n  \"demand\": \"Optional vector $$d_p$$ of external demand limits for each package $$p \\in \\mathcal{P}$$, length $$|\\mathcal{P}|$$.\",\n  \"unit_cost\": \"Optional vector $$c_p$$ of unit costs for each package $$p \\in \\mathcal{P}$$, length $$|\\mathcal{P}|$$.\"\n}\n\nOutput Format\n{\n  \"sales_plan\": \"Vector $$x_p$$ of optimal nonnegative integer sales quantities for each package $$p \\in \\mathcal{P}$$, length $$|\\mathcal{P}|$$.\",\n  \"total_revenue\": \"Scalar $$z$$ equal to the maximum achievable promotional revenue.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 1,\n  \"items\": [\"shirts\", \"pants\"],\n  \"packages\": [\"A\", \"B\"],\n  \"inventory\": [200, 100],\n  \"composition\": [\n    [1, 3],\n    [2, 1]\n  ],\n  \"price\": [30, 50],\n  \"minimum_sales\": [20, 10]\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single promotional planning horizon"
+        },
+        {
+            "name": "legacy_item_types",
+            "symbol": "\\mathcal{I}",
+            "shape": [],
+            "description": "Set of legacy item types"
+        },
+        {
+            "name": "package_types",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Set of promotional package types"
+        },
+        {
+            "name": "starting_inventory",
+            "symbol": "u",
+            "shape": [
+                "\\mathcal{I}"
+            ],
+            "description": "Available starting inventory of each legacy item type"
+        },
+        {
+            "name": "item_consumption",
+            "symbol": "a",
+            "shape": [
+                "\\mathcal{I}",
+                "\\mathcal{P}"
+            ],
+            "description": "Quantity of each item consumed by one unit of each package type"
+        },
+        {
+            "name": "revenue_per_unit",
+            "symbol": "r",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Revenue earned per unit sold of each package type"
+        },
+        {
+            "name": "minimum_sales_level",
+            "symbol": "\\ell",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Minimum required sales level for each package type"
+        },
+        {
+            "name": "optional_demand_limit",
+            "symbol": "d",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Optional external demand limit for each package type"
+        },
+        {
+            "name": "optional_unit_cost",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Optional unit cost for each package type"
+        }
+    ],
+    "variables": [
+        {
+            "name": "sales_quantity",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "domain": "integer",
+            "description": "Number of units sold for each package type during the planning horizon"
+        },
+        {
+            "name": "total_revenue",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total revenue obtained from the sales plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "inventory_capacity",
+            "description": "Total item consumption across all sold packages must not exceed starting inventory for each item.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{i,p} x_p \\le u_i \\quad \\forall i\\in\\mathcal{I}",
+            "parameters": [
+                "starting_inventory",
+                "item_consumption",
+                "legacy_item_types",
+                "package_types"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "revenue_definition",
+            "description": "Define total revenue as the sum of per-unit revenues across all sold packages.",
+            "formula": "z = \\sum_{p\\in\\mathcal{P}} r_p x_p",
+            "parameters": [
+                "revenue_per_unit",
+                "package_types"
+            ],
+            "variables": [
+                "sales_quantity",
+                "total_revenue"
+            ]
+        },
+        {
+            "name": "revenue_scalar_definition",
+            "description": "The scalar total revenue variable equals the revenue from the sales plan.",
+            "formula": "z = \\sum_{p\\in\\mathcal{P}} r_p x_p",
+            "parameters": [
+                "revenue_per_unit",
+                "package_types"
+            ],
+            "variables": [
+                "sales_quantity",
+                "total_revenue"
+            ]
+        },
+        {
+            "name": "sales_domain_and_minimum_bounds",
+            "description": "Each package sales quantity must be an integer no less than its minimum required sales level.",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0},\\; x_p \\ge \\ell_p \\quad \\forall p\\in\\mathcal{P}",
+            "parameters": [
+                "minimum_sales_level",
+                "package_types"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_promotional_revenue_maximization",
+            "description": "Maximize total promotional revenue over the planning horizon",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total promotional revenue over the planning horizon; the scalar revenue variable is defined by the sales quantities and per-unit revenues.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "z = \\sum_{p\\in\\mathcal{P}} r_p x_p",
+        "parameters": [
+            "revenue_per_unit",
+            "package_types"
+        ],
+        "variables": [
+            "sales_quantity",
+            "total_revenue"
+        ]
+    }
+}

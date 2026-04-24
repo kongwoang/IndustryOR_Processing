@@ -1,0 +1,139 @@
+{
+    "problem": "Problem description\n- There is a single daily logistics planning problem for a production base that must receive raw materials from two warehouses, indexed by $$w \\in W$$, where $$W=\\{1,2\\}$$ corresponds to warehouses $$A$$ and $$B$$.\n- There are raw material types indexed by $$r \\in R$$, where each warehouse dispatch delivers a fixed amount of each raw material type per truck.\n- The planning horizon is one day, indexed by $$t \\in T$$, where $$T=\\{1\\}$$.\n- The minimum daily required quantities of raw materials are represented by demand parameters $$d_r$$ for each $$r \\in R$$.\n- The amount of raw material $$r$$ transported by one truck from warehouse $$w$$ is represented by the coefficient $$q_{w,r}$$.\n- The freight cost per truck dispatched from warehouse $$w$$ is represented by the parameter $$c_w$$.\n- The decision is to choose the number of trucks dispatched daily from each warehouse.\n- The planning goal is to minimize the total freight cost while meeting all minimum raw material requirements.\n\n- Required business constraints:\n  - The number of trucks dispatched from each warehouse must be a nonnegative integer.\n  - The total amount of each raw material delivered to the production base from all dispatched trucks must meet or exceed the required daily demand for that material.\n  - Each warehouse contributes raw materials according to its fixed per-truck transport mix.\n  - The total freight cost is the sum of the per-truck freight costs across all dispatched trucks.\n  - The model is a daily planning model and does not include inventory carryover, backlogging, or alternative transportation modes.\n\n- A solution is represented by:\n  - $$x_w$$: the integer number of trucks dispatched daily from warehouse $$w \\in W$$.\n  - $$z$$: the total daily freight cost incurred by the dispatch plan.\n\nInput Format\n{\n  \"warehouses\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Set of warehouses indexed by $$w \\\\in W$$\"\n  },\n  \"materials\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Set of raw material types indexed by $$r \\\\in R$$\"\n  },\n  \"demand\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Minimum required daily quantity of each raw material, where entry $$d_r$$ is the demand for material $$r$$\"\n  },\n  \"transport_yield_per_truck\": {\n    \"type\": \"matrix\",\n    \"dimension\": \"$$|W| \\\\times |R|$$\",\n    \"meaning\": \"Amount of each raw material delivered by one truck from each warehouse, where entry $$q_{w,r}$$ is the quantity of material $$r$$ carried by one truck from warehouse $$w$$\"\n  },\n  \"truck_cost\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Freight cost per truck dispatched from each warehouse, where entry $$c_w$$ is the cost for warehouse $$w$$\"\n  }\n}\n\nOutput Format\n{\n  \"trucks_dispatched\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Integer number of trucks dispatched daily from each warehouse, where entry $$x_w$$ is the truck count for warehouse $$w$$\"\n  },\n  \"total_freight_cost\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Minimum total daily freight cost, denoted by $$z$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"warehouses\": [\"A\", \"B\"],\n  \"materials\": [\"A\", \"B\", \"C\"],\n  \"demand\": [240, 80, 120],\n  \"transport_yield_per_truck\": [\n    [4, 2, 6],\n    [7, 2, 2]\n  ],\n  \"truck_cost\": [200, 160]\n}",
+    "parameters": [
+        {
+            "name": "warehouses",
+            "symbol": "W",
+            "shape": [],
+            "description": "Set of warehouses indexed by $w$, with $W=\\{0,1\\}$ corresponding to warehouses $A$ and $B$"
+        },
+        {
+            "name": "raw_material_types",
+            "symbol": "R",
+            "shape": [],
+            "description": "Set of raw material types indexed by $r$"
+        },
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "R"
+            ],
+            "description": "Minimum required daily quantity of each raw material type $r$"
+        },
+        {
+            "name": "transport_yield_per_truck",
+            "symbol": "q",
+            "shape": [
+                "W",
+                "R"
+            ],
+            "description": "Quantity of material $r$ delivered by one truck from warehouse $w$"
+        },
+        {
+            "name": "truck_cost",
+            "symbol": "c",
+            "shape": [
+                "W"
+            ],
+            "description": "Freight cost per truck dispatched from each warehouse $w$"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Single-day planning horizon index set with $T=\\{0\\}$"
+        }
+    ],
+    "variables": [
+        {
+            "name": "trucks_dispatched",
+            "symbol": "x",
+            "shape": [
+                "W"
+            ],
+            "domain": "integer",
+            "description": "Number of trucks dispatched daily from each warehouse $w$"
+        },
+        {
+            "name": "total_freight_cost",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total daily freight cost incurred by the dispatch plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_integer_truck_dispatch",
+            "description": "The number of trucks dispatched from each warehouse must be a nonnegative integer.",
+            "formula": "x_w \\in \\mathbb{Z}_{\\ge 0}",
+            "variables": [
+                "trucks_dispatched"
+            ]
+        },
+        {
+            "name": "material_demand_satisfaction",
+            "description": "For each raw material type r, the total quantity delivered by trucks from all warehouses must meet or exceed the minimum daily demand.",
+            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\ge d_r \\quad \\forall r\\in R",
+            "parameters": [
+                "raw_material_types",
+                "demand",
+                "transport_yield_per_truck"
+            ],
+            "variables": [
+                "trucks_dispatched"
+            ]
+        },
+        {
+            "name": "fixed_mix_per_truck",
+            "description": "Each dispatched truck from warehouse w delivers a fixed mix of raw materials q_{w,r}; this is captured directly in the demand satisfaction constraints and requires no separate restriction beyond the delivery coefficients.",
+            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\text{ is the delivered amount of material } r",
+            "parameters": [
+                "transport_yield_per_truck"
+            ],
+            "variables": [
+                "trucks_dispatched"
+            ]
+        },
+        {
+            "name": "total_freight_cost_definition",
+            "description": "Define total freight cost as the sum of per-truck freight costs over all dispatched trucks.",
+            "formula": "z = \\sum_{w\\in W} c_w x_w",
+            "parameters": [
+                "truck_cost"
+            ],
+            "variables": [
+                "trucks_dispatched",
+                "total_freight_cost"
+            ]
+        },
+        {
+            "name": "single_day_no_carryover_or_backlog",
+            "description": "Single-day planning is modeled implicitly by using only daily dispatch variables, so no intertemporal flow variables are needed; there is no carryover or backlog state in the model.",
+            "formula": "\\text{Single-day planning model with no inventory carryover or backlog}",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_freight_cost",
+            "description": "Minimize the total daily freight cost of dispatching trucks from the warehouses while satisfying all raw material demand requirements.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total daily freight cost of dispatching trucks from the two warehouses while meeting or exceeding all raw material demands.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\min \\; z",
+        "parameters": [],
+        "variables": [
+            "total_freight_cost"
+        ]
+    }
+}

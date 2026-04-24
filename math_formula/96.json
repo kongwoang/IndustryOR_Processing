@@ -1,0 +1,224 @@
+{
+    "problem": "Problem description\n- There is a single-period blending and selling planning problem with a finite set of raw materials and a finite set of final products.\n- Let $$\\mathcal{R}$$ be the set of raw materials and let $$\\mathcal{P}$$ be the set of products.\n- A designated subset of raw materials, denoted by $$\\mathcal{R}^{(1)} \\subseteq \\mathcal{R}$$, must be mixed first in an intermediate tank.\n- A designated raw material, denoted by $$r^{(2)} \\in \\mathcal{R}$$, must be added after the first-stage blend to complete the production of each product.\n- Each raw material $$r \\in \\mathcal{R}$$ has sulfur content $$s_r$$, purchase cost $$c_r$$, and available supply limit $$u_r$$.\n- Each product $$p \\in \\mathcal{P}$$ has selling price $$v_p$$, sulfur-content limit $$\\bar{s}_p$$, and market demand limit $$d_p$$.\n- The planning goal is to maximize total profit, defined as total sales revenue minus total raw material purchasing cost.\n- The production plan must respect material availability, demand limits, product quality limits, and the required two-stage mixing sequence.\n- Only nonnegative production and allocation quantities are allowed.\n- A solution is represented by:\n  - $$x_{r,p}^{(1)}$$: the quantity of first-stage raw material $$r \\in \\mathcal{R}^{(1)}$$ allocated to product $$p \\in \\mathcal{P}$$.\n  - $$x_{p}^{(2)}$$: the quantity of the second-stage raw material $$r^{(2)}$$ allocated to product $$p \\in \\mathcal{P}$$.\n  - $$q_p$$: the quantity of product $$p \\in \\mathcal{P}$$ produced and sold.\n  - $$\\Pi$$: the total profit of the plan.\n\nInput Format\n{\n  \"sets\": {\n    \"raw_materials\": {\n      \"symbol\": \"$$\\\\mathcal{R}$$\",\n      \"meaning\": \"identifiers of all raw materials\"\n    },\n    \"products\": {\n      \"symbol\": \"$$\\\\mathcal{P}$$\",\n      \"meaning\": \"identifiers of all final products\"\n    },\n    \"first_stage_materials\": {\n      \"symbol\": \"$$\\\\mathcal{R}^{(1)}$$\",\n      \"meaning\": \"raw materials that must be mixed in the first stage\"\n    },\n    \"second_stage_material\": {\n      \"symbol\": \"$$r^{(2)}$$\",\n      \"meaning\": \"the raw material added in the second stage\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"meaning\": \"single planning period\"\n    }\n  },\n  \"parameters\": {\n    \"sulfur_content\": {\n      \"symbol\": \"$$s_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"sulfur content of raw material $$r$$\"\n    },\n    \"purchase_cost\": {\n      \"symbol\": \"$$c_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"purchase cost per ton of raw material $$r$$\"\n    },\n    \"selling_price\": {\n      \"symbol\": \"$$v_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"selling price per ton of product $$p$$\"\n    },\n    \"sulfur_cap\": {\n      \"symbol\": \"$$\\\\bar{s}_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"maximum allowed sulfur content for product $$p$$\"\n    },\n    \"supply_limit\": {\n      \"symbol\": \"$$u_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"maximum available supply of raw material $$r$$; use $$+\\infty$$ for unlimited supply\"\n    },\n    \"demand_limit\": {\n      \"symbol\": \"$$d_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"maximum market demand for product $$p$$\"\n    }\n  },\n  \"objective\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"meaning\": \"total profit to maximize\"\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"first_stage_allocation\": {\n      \"symbol\": \"$$x_{r,p}^{(1)}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}^{(1)}| \\\\times |\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity of each first-stage raw material allocated to each product\"\n    },\n    \"second_stage_allocation\": {\n      \"symbol\": \"$$x_{p}^{(2)}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity of the second-stage raw material allocated to each product\"\n    },\n    \"production_quantity\": {\n      \"symbol\": \"$$q_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity produced and sold for each product\"\n    },\n    \"profit\": {\n      \"symbol\": \"$$\\\\Pi$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"total profit of the selected production plan\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"raw_materials\": [\"RM_A\", \"RM_B\", \"RM_C\", \"RM_D\"],\n    \"products\": [\"P_A\", \"P_B\"],\n    \"first_stage_materials\": [\"RM_A\", \"RM_B\", \"RM_D\"],\n    \"second_stage_material\": \"RM_C\",\n    \"planning_horizon\": \"single period\"\n  },\n  \"parameters\": {\n    \"sulfur_content_percent\": {\n      \"RM_A\": 3,\n      \"RM_B\": 1,\n      \"RM_C\": 2,\n      \"RM_D\": 1\n    },\n    \"purchase_cost_thousand_yuan_per_ton\": {\n      \"RM_A\": 6,\n      \"RM_B\": 16,\n      \"RM_C\": 10,\n      \"RM_D\": 15\n    },\n    \"selling_price_thousand_yuan_per_ton\": {\n      \"P_A\": 9.15,\n      \"P_B\": 9.15\n    },\n    \"sulfur_cap_percent\": {\n      \"P_A\": 2.5,\n      \"P_B\": 1.5\n    },\n    \"supply_limit_tons\": {\n      \"RM_A\": \"Infinity\",\n      \"RM_B\": \"Infinity\",\n      \"RM_C\": \"Infinity\",\n      \"RM_D\": 50\n    },\n    \"demand_limit_tons\": {\n      \"P_A\": 100,\n      \"P_B\": 200\n    }\n  }\n}",
+    "parameters": [
+        {
+            "name": "raw_material_count",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of raw materials in the finite set $\\mathcal{R}$"
+        },
+        {
+            "name": "product_count",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of final products in the finite set $\\mathcal{P}$"
+        },
+        {
+            "name": "sulfur_content",
+            "symbol": "s",
+            "shape": [
+                "R"
+            ],
+            "description": "Sulfur content of each raw material $r \\in \\mathcal{R}$"
+        },
+        {
+            "name": "purchase_cost",
+            "symbol": "c",
+            "shape": [
+                "R"
+            ],
+            "description": "Purchase cost of each raw material $r \\in \\mathcal{R}$"
+        },
+        {
+            "name": "supply_limit",
+            "symbol": "u",
+            "shape": [
+                "R"
+            ],
+            "description": "Available supply limit of each raw material $r \\in \\mathcal{R}$; infinity may denote unlimited supply"
+        },
+        {
+            "name": "selling_price",
+            "symbol": "v",
+            "shape": [
+                "P"
+            ],
+            "description": "Selling price of each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "sulfur_cap",
+            "symbol": "\\bar{s}",
+            "shape": [
+                "P"
+            ],
+            "description": "Maximum allowed sulfur content for each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "demand_limit",
+            "symbol": "d",
+            "shape": [
+                "P"
+            ],
+            "description": "Market demand limit for each product $p \\in \\mathcal{P}$"
+        }
+    ],
+    "variables": [
+        {
+            "name": "first_stage_allocation",
+            "symbol": "x^{(1)}",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "First-stage allocation quantity from raw material $r \\in \\mathcal{R}^{(1)}$ to product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "second_stage_allocation",
+            "symbol": "x^{(2)}",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Second-stage allocation quantity of designated raw material $r^{(2)}$ for each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "production_quantity",
+            "symbol": "q",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit of the plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_first_stage_allocation",
+            "description": "First-stage allocation quantities must be nonnegative",
+            "formula": "x^{(1)}_{r,p} \\ge 0 \\quad \\forall r \\in \\mathcal{R},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "first_stage_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_second_stage_allocation",
+            "description": "Second-stage allocation quantities must be nonnegative",
+            "formula": "x^{(2)}_{p} \\ge 0 \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "second_stage_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative",
+            "formula": "q_p \\ge 0 \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "supply_limit_bound",
+            "description": "Raw material usage must not exceed available supply limits",
+            "formula": "\\sum_{p \\in \\mathcal{P}} x^{(1)}_{r,p} \\le u_r \\quad \\forall r \\in \\mathcal{R}^{(1)};\\qquad \\sum_{p \\in \\mathcal{P}} x^{(2)}_{p} \\le u_{r^{(2)}}",
+            "parameters": [
+                "supply_limit"
+            ],
+            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation"
+            ]
+        },
+        {
+            "name": "demand_limit_bound",
+            "description": "Production quantities must not exceed market demand limits",
+            "formula": "q_p \\le d_p \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [
+                "demand_limit"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "sulfur_cap_bound",
+            "description": "Linear sulfur-content limit: weighted sulfur input to each product cannot exceed the product sulfur cap times production quantity",
+            "formula": "\\sum_{r \\in \\mathcal{R}^{(1)}} s_r x^{(1)}_{r,p} + s_{r^{(2)}} x^{(2)}_{p} \\le \\bar{s}_p q_p",
+            "parameters": [
+                "sulfur_content",
+                "sulfur_cap"
+            ],
+            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "two_stage_mixing_sequence",
+            "description": "Only raw materials in the first-stage set may be allocated in stage one; all other raw-material/product allocations are fixed to zero",
+            "formula": "x^{(1)}_{r,p} = 0 \\quad \\forall r \\in \\mathcal{R} \\setminus \\mathcal{R}^{(1)},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "first_stage_allocation"
+            ]
+        },
+        {
+            "name": "production_consistency",
+            "description": "Production quantity equals total blended input for each product across both stages",
+            "formula": "q_p = \\sum_{r \\in \\mathcal{R}^{(1)}} x^{(1)}_{r,p} + x^{(2)}_{p} \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_data_domain",
+            "description": "Supply limits, demand limits, and sulfur caps are nonnegative, and the planning data are finite with the designated subset and second-stage material properly defined",
+            "formula": "u_r \\ge 0,\\ d_p \\ge 0,\\ \\bar{s}_p \\ge 0 \\quad \\forall r \\in \\mathcal{R},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [
+                "supply_limit",
+                "demand_limit",
+                "sulfur_cap",
+                "raw_material_count",
+                "product_count"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit, defined as total sales revenue minus total raw-material purchasing cost",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit, defined as total sales revenue minus total raw-material purchasing cost, with \\Pi recorded as the resulting profit expression",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\Pi = \\sum_{p \\in \\mathcal{P}} v_p q_p - \\sum_{r \\in \\mathcal{R}^{(1)}} c_r \\sum_{p \\in \\mathcal{P}} x^{(1)}_{r,p} - c_{r^{(2)}} \\sum_{p \\in \\mathcal{P}} x^{(2)}_{p}",
+        "parameters": [
+            "selling_price",
+            "purchase_cost"
+        ],
+        "variables": [
+            "production_quantity",
+            "first_stage_allocation",
+            "second_stage_allocation"
+        ]
+    }
+}

@@ -1,0 +1,308 @@
+{
+    "problem": "Problem description\n- There is a single-period transportation planning problem with a set of supply locations $$\\mathcal{I}$$ indexed by $$i$$ and a set of destination ports $$\\mathcal{J}$$ indexed by $$j$$.\n- Each warehouse $$i \\in \\mathcal{I}$$ has an available inventory of empty containers denoted by $$s_i$$.\n- Each port $$j \\in \\mathcal{J}$$ has a required container demand denoted by $$d_j$$ that must be fulfilled.\n- The transportation distance between warehouse $$i$$ and port $$j$$ is denoted by $$\\ell_{ij}$$.\n- Transportation cost is linear in shipped containers and distance, with a common cost rate denoted by $$\\rho$$ per kilometer per container.\n- Transportation is carried out by whole trucks, each with a maximum carrying capacity denoted by $$u$$ containers.\n- The planning goal is to choose a minimum-cost shipping policy that allocates containers from warehouses to ports and determines the needed truck usage on each lane.\n- Business constraints are:\n  - Only containers available in the warehouse network may be shipped.\n  - Every port demand must be satisfied.\n  - Shipments are assigned to exactly one destination port per container.\n  - Truck usage on any lane must be sufficient to carry the containers assigned to that lane, respecting the truck capacity $$u$$.\n  - Container quantities and truck counts are integral.\n  - Any excess inventory may remain unused at warehouses if total supply exceeds total demand.\n- A solution is represented by:\n  - $$x_{ij}$$: the number of containers shipped from warehouse $$i$$ to port $$j$$.\n  - $$y_{ij}$$: the number of trucks deployed on the route from warehouse $$i$$ to port $$j$$.\n  - $$r_i$$: the number of containers left unused at warehouse $$i$$ after the transportation plan.\n\nInput Format\n{\n  \"warehouses\": \"array of labels for the set $$\\\\mathcal{I}$$\",\n  \"ports\": \"array of labels for the set $$\\\\mathcal{J}$$\",\n  \"supply\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"available inventory vector $$s$$, where $$s_i$$ is the number of containers at warehouse $$i$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$|\\\\mathcal{J}|$$\",\n    \"meaning\": \"required demand vector $$d$$, where $$d_j$$ is the number of containers required at port $$j$$\"\n  },\n  \"distance\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"distance matrix $$\\\\ell$$, where $$\\\\ell_{ij}$$ is the distance from warehouse $$i$$ to port $$j$$\"\n  },\n  \"cost_rate\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"transport cost rate $$\\\\rho$$ per kilometer per container\"\n  },\n  \"truck_capacity\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"truck capacity $$u$$ measured in containers per truck\"\n  }\n}\n\nOutput Format\n{\n  \"shipments\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"shipment matrix $$x$$, where $$x_{ij}$$ is the number of containers sent from warehouse $$i$$ to port $$j$$\"\n  },\n  \"trucks\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"truck matrix $$y$$, where $$y_{ij}$$ is the number of trucks used on route $$i \\\\to j$$\"\n  },\n  \"unused_inventory\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"remaining inventory vector $$r$$, where $$r_i$$ is the number of containers left at warehouse $$i$$\"\n  },\n  \"objective_value\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"minimum total transportation cost achieved by the plan\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"warehouses\": [\"Verona\", \"Perugia\", \"Rome\", \"Pescara\", \"Taranto\", \"Lamezia\"],\n  \"ports\": [\"Genoa\", \"Venice\", \"Ancona\", \"Naples\", \"Bari\"],\n  \"supply\": [10, 12, 20, 24, 18, 40],\n  \"demand\": [20, 15, 25, 33, 21],\n  \"distance\": [\n    [290, 115, 355, 715, 810],\n    [380, 340, 165, 380, 610],\n    [505, 530, 285, 220, 450],\n    [655, 450, 155, 240, 315],\n    [1010, 840, 550, 305, 95],\n    [1072, 1097, 747, 372, 333]\n  ],\n  \"cost_rate\": 30,\n  \"truck_capacity\": 2\n}",
+    "parameters": [
+        {
+            "name": "warehouses",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "M"
+            ],
+            "description": "Labels of warehouses indexed by i"
+        },
+        {
+            "name": "ports",
+            "symbol": "\\mathcal{J}",
+            "shape": [
+                "N"
+            ],
+            "description": "Labels of destination ports indexed by j"
+        },
+        {
+            "name": "supply",
+            "symbol": "s",
+            "shape": [
+                "M"
+            ],
+            "description": "Available inventory of empty containers at each warehouse"
+        },
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Required container demand at each port"
+        },
+        {
+            "name": "distance",
+            "symbol": "\\ell",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "description": "Distance from each warehouse to each port"
+        },
+        {
+            "name": "cost_rate",
+            "symbol": "\\rho",
+            "shape": [],
+            "description": "Transportation cost rate per kilometer per container"
+        },
+        {
+            "name": "truck_capacity",
+            "symbol": "u",
+            "shape": [],
+            "description": "Truck capacity in containers per truck"
+        }
+    ],
+    "variables": [
+        {
+            "name": "shipments",
+            "symbol": "x",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "domain": "integer",
+            "description": "Number of containers shipped from warehouse i to port j"
+        },
+        {
+            "name": "trucks",
+            "symbol": "y",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "domain": "integer",
+            "description": "Number of trucks deployed on route from warehouse i to port j"
+        },
+        {
+            "name": "unused_inventory",
+            "symbol": "r",
+            "shape": [
+                "M"
+            ],
+            "domain": "integer",
+            "description": "Number of containers left unused at each warehouse after the plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "supply_balance",
+            "description": "Total shipped containers from each warehouse plus unused inventory cannot exceed available supply",
+            "formula": "\\sum_{j=1}^{N} x_{ij} + r_i = s_i \\quad \\forall i=1,\\dots,M",
+            "parameters": [
+                "supply"
+            ],
+            "variables": [
+                "shipments",
+                "unused_inventory"
+            ]
+        },
+        {
+            "name": "demand_satisfaction",
+            "description": "Every port demand must be satisfied exactly by incoming shipments",
+            "formula": "\\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j=1,\\dots,N",
+            "parameters": [
+                "demand"
+            ],
+            "variables": [
+                "shipments"
+            ]
+        },
+        {
+            "name": "truck_capacity_route",
+            "description": "Truck count on each route must be sufficient to carry the shipped containers within capacity",
+            "formula": "x_{ij} \\le u\\,y_{ij} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [
+                "truck_capacity"
+            ],
+            "variables": [
+                "shipments",
+                "trucks"
+            ]
+        },
+        {
+            "name": "nonnegativity_shipments",
+            "description": "Shipment quantities must be nonnegative integers.",
+            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "shipments"
+            ]
+        },
+        {
+            "name": "nonnegativity_trucks",
+            "description": "Truck counts must be nonnegative integers.",
+            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "trucks"
+            ]
+        },
+        {
+            "name": "nonnegativity_unused_inventory",
+            "description": "Unused inventory must be nonnegative integers.",
+            "formula": "r_i \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M",
+            "parameters": [],
+            "variables": [
+                "unused_inventory"
+            ]
+        },
+        {
+            "name": "warehouse_inventory_balance",
+            "description": "All inventory at each warehouse is either shipped to ports or left unused.",
+            "formula": "\\sum_{j=1}^{N} x_{ij} + r_i = s_i \\quad \\forall i=1,\\dots,M",
+            "parameters": [
+                "supply"
+            ],
+            "variables": [
+                "shipments",
+                "unused_inventory"
+            ]
+        },
+        {
+            "name": "port_demand_satisfaction",
+            "description": "Each port demand must be met exactly by incoming shipments.",
+            "formula": "\\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j=1,\\dots,N",
+            "parameters": [
+                "demand"
+            ],
+            "variables": [
+                "shipments"
+            ]
+        },
+        {
+            "name": "route_truck_capacity",
+            "description": "The number of trucks assigned to a route must be sufficient to carry the containers shipped on that route.",
+            "formula": "x_{ij} \\le u\\,y_{ij} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [
+                "truck_capacity"
+            ],
+            "variables": [
+                "shipments",
+                "trucks"
+            ]
+        },
+        {
+            "name": "shipment_integrality",
+            "description": "Shipment quantities must be nonnegative integers.",
+            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "shipments"
+            ]
+        },
+        {
+            "name": "truck_integrality",
+            "description": "Truck counts must be nonnegative integers.",
+            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "trucks"
+            ]
+        },
+        {
+            "name": "unused_inventory_integrality",
+            "description": "Unused inventory must be nonnegative integers.",
+            "formula": "r_i \\in \\mathbb{Z}_{\n{\\ge 0}} \\quad \\forall i=1,\\dots,M",
+            "parameters": [],
+            "variables": [
+                "unused_inventory"
+            ]
+        },
+        {
+            "name": "integrality_and_nonnegativity_shipments",
+            "description": "Shipment quantities must be nonnegative integers.",
+            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "shipments"
+            ]
+        },
+        {
+            "name": "integrality_and_nonnegativity_trucks",
+            "description": "Truck counts must be nonnegative integers.",
+            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [],
+            "variables": [
+                "trucks"
+            ]
+        },
+        {
+            "name": "integrality_and_nonnegativity_unused_inventory",
+            "description": "Unused inventory must be nonnegative integers.",
+            "formula": "r_i \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M",
+            "parameters": [],
+            "variables": [
+                "unused_inventory"
+            ]
+        },
+        {
+            "name": "supply_nonnegativity",
+            "description": "Supply is a nonnegative integer parameter.",
+            "formula": "s_i \\ge 0 \\quad \\forall i=1,\\dots,M",
+            "parameters": [
+                "supply"
+            ],
+            "variables": []
+        },
+        {
+            "name": "demand_nonnegativity",
+            "description": "Demand is a nonnegative integer parameter.",
+            "formula": "d_j \\ge 0 \\quad \\forall j=1,\\dots,N",
+            "parameters": [
+                "demand"
+            ],
+            "variables": []
+        },
+        {
+            "name": "distance_nonnegativity",
+            "description": "Distances are nonnegative real parameters.",
+            "formula": "\\ell_{ij} \\ge 0 \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "parameters": [
+                "distance"
+            ],
+            "variables": []
+        },
+        {
+            "name": "cost_rate_nonnegativity",
+            "description": "Transportation cost rate is a nonnegative scalar parameter.",
+            "formula": "\\rho \\ge 0",
+            "parameters": [
+                "cost_rate"
+            ],
+            "variables": []
+        },
+        {
+            "name": "truck_capacity_positivity",
+            "description": "Truck capacity is a positive scalar parameter.",
+            "formula": "u > 0",
+            "parameters": [
+                "truck_capacity"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "transportation_cost_minimization",
+            "description": "Minimize total transportation cost for shipping containers from warehouses to ports",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total transportation cost for all shipped containers, using the per-container route cost \\(\\rho\\,\\ell_{ij}\\) multiplied by shipment quantity \\(x_{ij}\\).",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i=1}^{M}\\sum_{j=1}^{N} \\rho\\,\\ell_{ij}\\,x_{ij}",
+        "parameters": [
+            "cost_rate",
+            "distance"
+        ],
+        "variables": [
+            "shipments"
+        ]
+    }
+}

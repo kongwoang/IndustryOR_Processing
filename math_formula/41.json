@@ -1,0 +1,192 @@
+{
+    "problem": "Problem description\n- There is a steel plant with a set of furnaces $$\\mathcal{F}$$ and a set of steelmaking methods $$\\mathcal{M}$$.\n- Each method $$m \\in \\mathcal{M}$$ has a processing time $$t_m$$ per furnace and a fuel expense $$c_m$$ per furnace.\n- Every furnace produces the same steel output $$r$$ tons, independent of the method used.\n- The planning horizon is $$H$$ hours.\n- The minimum required production is $$D$$ tons.\n- The planning goal is to allocate furnace usage across the available methods so that the required steel output is achieved within the available time and the total fuel expense is minimized.\n- Business constraints:\n  - The total furnace allocation across all methods cannot exceed the available furnace capacity $$F$$.\n  - The selected allocation must fit within the planning horizon $$H$$.\n  - The total produced steel must be at least the required demand $$D$$.\n  - Fuel expense is incurred according to the chosen method allocations.\n- A solution is represented by:\n  - $$y_m$$: the amount of furnace capacity assigned to method $$m$$ over the planning horizon.\n  - $$z$$: the total fuel expense of the plan.\n  - If a detailed assignment is needed, $$x_{f,m}$$ may be used to represent the allocation of furnace $$f$$ to method $$m$$.\n\nInput Format\n{\n  \"sets\": {\n    \"furnaces\": {\n      \"symbol\": \"$$\\\\mathcal{F}$$\",\n      \"size\": \"$$F$$\",\n      \"meaning\": \"set of available furnaces\"\n    },\n    \"methods\": {\n      \"symbol\": \"$$\\\\mathcal{M}$$\",\n      \"size\": \"$$M$$\",\n      \"meaning\": \"set of steelmaking methods\"\n    }\n  },\n  \"parameters\": {\n    \"processing_time_per_method\": {\n      \"symbol\": \"$$t$$\",\n      \"shape\": \"$$M$$\",\n      \"meaning\": \"vector where $$t_m$$ is the number of hours required per furnace when method $$m$$ is used\"\n    },\n    \"fuel_cost_per_method\": {\n      \"symbol\": \"$$c$$\",\n      \"shape\": \"$$M$$\",\n      \"meaning\": \"vector where $$c_m$$ is the fuel expense per furnace for method $$m$$\"\n    },\n    \"output_per_furnace\": {\n      \"symbol\": \"$$r$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"tons of steel produced by one furnace\"\n    },\n    \"minimum_required_output\": {\n      \"symbol\": \"$$D$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"minimum tons of steel that must be produced\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$H$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"available planning time in hours\"\n    },\n    \"available_furnace_capacity\": {\n      \"symbol\": \"$$F$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"total number of furnace units available for allocation\"\n    }\n  },\n  \"assumptions\": {\n    \"output_independence\": \"the output per furnace does not depend on the chosen method\",\n    \"cost_additivity\": \"total fuel expense is the sum of method-specific fuel expenses across all allocated furnace usage\"\n  }\n}\n\nOutput Format\n{\n  \"allocation_by_method\": {\n    \"symbol\": \"$$y$$\",\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"vector where $$y_m$$ is the allocated furnace capacity for method $$m$$\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$z$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"minimum total fuel expense achieved by the allocation\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"furnaces\": \"$$2$$\",\n  \"methods\": \"$$2$$\",\n  \"processing_time_per_method\": [\"$$2$$\", \"$$3$$\"],\n  \"fuel_cost_per_method\": [\"$$50$$\", \"$$70$$\"],\n  \"output_per_furnace\": \"$$10$$\",\n  \"minimum_required_output\": \"$$30$$\",\n  \"planning_horizon\": \"$$12$$\"\n}",
+    "parameters": [
+        {
+            "name": "num_furnaces",
+            "symbol": "F",
+            "shape": [],
+            "description": "Number of available furnaces / total furnace capacity available for allocation"
+        },
+        {
+            "name": "num_methods",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of steelmaking methods"
+        },
+        {
+            "name": "processing_time_per_method",
+            "symbol": "t",
+            "shape": [
+                "M"
+            ],
+            "description": "Processing time in hours per furnace for each steelmaking method"
+        },
+        {
+            "name": "fuel_cost_per_method",
+            "symbol": "c",
+            "shape": [
+                "M"
+            ],
+            "description": "Fuel expense per furnace for each steelmaking method"
+        },
+        {
+            "name": "output_per_furnace",
+            "symbol": "r",
+            "shape": [],
+            "description": "Steel output in tons produced by one furnace, independent of method"
+        },
+        {
+            "name": "minimum_required_output",
+            "symbol": "D",
+            "shape": [],
+            "description": "Minimum required steel output in tons"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "H",
+            "shape": [],
+            "description": "Available planning horizon in hours"
+        }
+    ],
+    "variables": [
+        {
+            "name": "method_allocation",
+            "symbol": "y",
+            "shape": [
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Amount of furnace capacity allocated to each steelmaking method"
+        },
+        {
+            "name": "total_fuel_expense",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total fuel expense of the plan"
+        },
+        {
+            "name": "furnace_method_assignment",
+            "symbol": "x",
+            "shape": [
+                "F",
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Detailed allocation of each furnace to each steelmaking method"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_method_allocation",
+            "description": "Method allocation must be nonnegative",
+            "formula": "y_m \\geq 0",
+            "parameters": [
+                "num_methods"
+            ],
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_total_fuel_expense",
+            "description": "Total fuel expense must be nonnegative",
+            "formula": "z \\geq 0",
+            "parameters": [],
+            "variables": [
+                "total_fuel_expense"
+            ]
+        },
+        {
+            "name": "nonnegative_assignment",
+            "description": "Detailed furnace-to-method assignment must be nonnegative when used",
+            "formula": "x_{f,m} \\geq 0",
+            "parameters": [
+                "num_furnaces",
+                "num_methods"
+            ],
+            "variables": [
+                "furnace_method_assignment"
+            ]
+        },
+        {
+            "name": "total_capacity_limit",
+            "description": "Total furnace allocation across all methods cannot exceed available furnace capacity",
+            "formula": "\\sum_{m=0}^{M-1} y_m \\leq F",
+            "parameters": [
+                "num_furnaces",
+                "num_methods"
+            ],
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "planning_horizon_limit",
+            "description": "Chosen allocation must fit within the available planning horizon using method processing times",
+            "formula": "\\sum_{m=0}^{M-1} t_m y_m \\leq H",
+            "parameters": [
+                "processing_time_per_method",
+                "planning_horizon"
+            ],
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "minimum_output_requirement",
+            "description": "Total steel produced must meet or exceed the minimum required output",
+            "formula": "r \\sum_{m=0}^{M-1} y_m \\geq D",
+            "parameters": [
+                "output_per_furnace",
+                "minimum_required_output"
+            ],
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "fuel_expense_definition",
+            "description": "Total fuel expense is determined from method allocations and method-specific fuel costs",
+            "formula": "z = \\sum_{m=0}^{M-1} c_m y_m",
+            "parameters": [
+                "fuel_cost_per_method"
+            ],
+            "variables": [
+                "method_allocation",
+                "total_fuel_expense"
+            ]
+        },
+        {
+            "name": "assignment_aggregation",
+            "description": "Detailed furnace-by-method assignment must aggregate consistently to method-level allocation when used",
+            "formula": "y_m = \\sum_{f=0}^{F-1} x_{f,m}",
+            "parameters": [
+                "num_furnaces",
+                "num_methods"
+            ],
+            "variables": [
+                "furnace_method_assignment",
+                "method_allocation"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "fuel_expense_minimization",
+            "description": "Minimize total fuel expense while meeting production demand and respecting furnace capacity and planning horizon limits",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total fuel expense for the furnace allocation plan while satisfying production demand, furnace capacity, and planning horizon limits.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "z",
+        "parameters": [],
+        "variables": [
+            "total_fuel_expense"
+        ]
+    }
+}

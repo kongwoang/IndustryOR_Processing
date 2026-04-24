@@ -1,0 +1,248 @@
+{
+    "problem": "Problem description\n- A single service location requires staffing over a planning horizon $$H$$ divided into $$T$$ equal time periods indexed by $$t \\in \\mathcal{T}$$.\n- There is a set of allowed shift start times indexed by $$s \\in \\mathcal{S}$$. Each shift has a fixed duration $$L$$ and may continue across the end of the planning horizon if needed.\n- Demand data $$d_t$$ gives the required number of salespeople in each period $$t \\in \\mathcal{T}$$.\n- Coverage data $$a_{t,s}$$ indicates whether a salesperson starting shift $$s$$ is available in period $$t$$.\n- Decision variables $$x_s$$ represent the number of salespeople assigned to each allowed shift start time $$s \\in \\mathcal{S}$$.\n- The planning goal is to minimize the total number of salespeople scheduled while meeting all staffing requirements in every period.\n- Business constraints:\n  - Every time period must be staffed with at least the required number of salespeople.\n  - Salespeople may only start work at the allowed shift start times.\n  - Each salesperson works continuously for the full shift duration $$L$$ once assigned.\n  - All staffing quantities must be nonnegative integers.\n- A solution is represented by:\n  - The integer assignment vector $$x = (x_s)_{s \\in \\mathcal{S}}$$.\n  - The minimum total workforce size $$Z$$.\n\nInput Format\n{\n  \"H\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"planning horizon length\"\n  },\n  \"T\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of equal planning periods\"\n  },\n  \"period_length\": {\n    \"type\": \"scalar $$\\\\Delta$$\",\n    \"meaning\": \"length of each planning period\"\n  },\n  \"S\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of allowed shift start times\"\n  },\n  \"shift_duration\": {\n    \"type\": \"scalar $$L$$\",\n    \"meaning\": \"duration of each shift\"\n  },\n  \"shift_starts\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"allowed shift start times for each $$s \\\\in \\\\mathcal{S}$$\"\n  },\n  \"demand\": {\n    \"type\": \"array of length $$T$$\",\n    \"meaning\": \"required staffing level $$d_t$$ for each period $$t \\\\in \\\\mathcal{T}$$\"\n  },\n  \"coverage\": {\n    \"type\": \"optional binary matrix of shape $$T \\\\times S$$\",\n    \"meaning\": \"coverage indicator $$a_{t,s}$$, where $$1$$ means shift $$s$$ covers period $$t$$ and $$0$$ otherwise\"\n  }\n}\n\nOutput Format\n{\n  \"total_salespeople\": {\n    \"type\": \"integer\",\n    \"meaning\": \"minimum total number of scheduled salespeople, denoted by $$Z$$\"\n  },\n  \"shift_assignments\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"integer values $$x_s$$ for each allowed shift start time $$s \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"H\": 24,\n  \"T\": 6,\n  \"period_length\": 4,\n  \"S\": 6,\n  \"shift_duration\": 8,\n  \"shift_starts\": [\"02:00\", \"06:00\", \"10:00\", \"14:00\", \"18:00\", \"22:00\"],\n  \"periods\": [\n    {\"start\": \"02:00\", \"end\": \"06:00\"},\n    {\"start\": \"06:00\", \"end\": \"10:00\"},\n    {\"start\": \"10:00\", \"end\": \"14:00\"},\n    {\"start\": \"14:00\", \"end\": \"18:00\"},\n    {\"start\": \"18:00\", \"end\": \"22:00\"},\n    {\"start\": \"22:00\", \"end\": \"02:00\"}\n  ],\n  \"demand\": [10, 15, 25, 20, 18, 12]\n}",
+    "parameters": [
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "T"
+            ],
+            "description": "Period-by-period staffing demand"
+        },
+        {
+            "name": "coverage_indicator",
+            "symbol": "a",
+            "shape": [
+                "T",
+                "S"
+            ],
+            "description": "Binary indicator of whether shift start s covers period t"
+        },
+        {
+            "name": "planning_horizon_length",
+            "symbol": "H",
+            "shape": [],
+            "description": "Planning horizon length"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of equal planning periods"
+        },
+        {
+            "name": "period_length",
+            "symbol": "\\Delta",
+            "shape": [],
+            "description": "Length of each planning period"
+        },
+        {
+            "name": "num_shift_starts",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of allowed shift start times"
+        },
+        {
+            "name": "shift_duration",
+            "symbol": "L",
+            "shape": [],
+            "description": "Duration of each shift"
+        },
+        {
+            "name": "shift_starts",
+            "symbol": "\\sigma",
+            "shape": [
+                "S"
+            ],
+            "description": "Allowed shift start times indexed by shift start"
+        }
+    ],
+    "variables": [
+        {
+            "name": "staff_assigned_by_shift",
+            "symbol": "x",
+            "shape": [
+                "S"
+            ],
+            "domain": "integer",
+            "description": "Integer number of salespeople assigned to start each shift"
+        },
+        {
+            "name": "total_scheduled_salespeople",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of scheduled salespeople"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_integer_staff_assignments",
+            "description": "The number of salespeople assigned to each shift start is a nonnegative integer.",
+            "formula": "x_s \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall s \\in \\{0,\\dots,S-1\\}",
+            "parameters": [
+                "num_shift_starts"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "nonnegative_integer_total_scheduled_salespeople",
+            "description": "The total number of scheduled salespeople is a nonnegative integer.",
+            "formula": "Z \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [],
+            "variables": [
+                "total_scheduled_salespeople"
+            ]
+        },
+        {
+            "name": "binary_coverage_indicator",
+            "description": "Coverage indicators are binary values indicating whether a shift starting at s covers period t.",
+            "formula": "a_{t,s} \\in \\{0,1\\}\\quad \\forall t \\in \\{0,\\dots,T-1\\},\\ \\forall s \\in \\{0,\\dots,S-1\\}",
+            "parameters": [
+                "num_periods",
+                "num_shift_starts"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_integer_demand",
+            "description": "Period demand is nonnegative and integer-valued for each period.",
+            "formula": "d_t \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
+            "parameters": [
+                "num_periods",
+                "demand"
+            ],
+            "variables": []
+        },
+        {
+            "name": "positive_problem_dimensions",
+            "description": "Core sizing parameters are positive.",
+            "formula": "H > 0,\\ T \\in \\mathbb{Z}_{>0},\\ \\Delta > 0,\\ S \\in \\mathbb{Z}_{>0},\\ L > 0",
+            "parameters": [
+                "planning_horizon_length",
+                "num_periods",
+                "period_length",
+                "num_shift_starts",
+                "shift_duration"
+            ],
+            "variables": []
+        },
+        {
+            "name": "period_partition_structure",
+            "description": "The planning horizon is partitioned into T equal periods of length Delta.",
+            "formula": "[0,H) = \\bigcup_{t=0}^{T-1} [t\\Delta,(t+1)\\Delta)\\quad \\text{and}\\quad \\Delta = \\frac{H}{T}",
+            "parameters": [
+                "planning_horizon_length",
+                "num_periods",
+                "period_length"
+            ],
+            "variables": []
+        },
+        {
+            "name": "shift_start_restriction",
+            "description": "Salespeople may only start at allowed shift start times.",
+            "formula": "x_s \\text{ is defined only for } s \\in \\{0,\\dots,S-1\\}",
+            "parameters": [
+                "shift_starts",
+                "num_shift_starts"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "fixed_shift_duration",
+            "description": "Each salesperson assigned to a shift works continuously for the full shift duration.",
+            "formula": "\\text{Each shift assigned to } x_s \\text{ lasts for } L \\text{ time units}",
+            "parameters": [
+                "shift_duration"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "coverage_requirement",
+            "description": "Every period must receive staffing coverage sufficient to meet or exceed demand.",
+            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\n\\dots,T-1\\}",
+            "parameters": [
+                "demand",
+                "coverage_indicator",
+                "num_periods",
+                "num_shift_starts"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "coverage_indicator_semantics",
+            "description": "A shift assignment covers a period whenever the corresponding coverage indicator equals 1.",
+            "formula": "a_{t,s}=1 \\Rightarrow \\text{shift } s \\text{ covers period } t",
+            "parameters": [
+                "coverage_indicator"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "shift_wraparound_possible",
+            "description": "Shifts may extend beyond the end of the planning horizon if needed.",
+            "formula": "\\text{Coverage is allowed for periods beyond } H \\text{ when a shift extends past the horizon end}",
+            "parameters": [
+                "planning_horizon_length",
+                "shift_duration"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "staffing_coverage_constraint",
+            "description": "Each period must be staffed to at least its required demand using the assigned shift coverage indicators.",
+            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
+            "parameters": [
+                "demand",
+                "coverage_indicator",
+                "num_periods",
+                "num_shift_starts"
+            ],
+            "variables": [
+                "staff_assigned_by_shift"
+            ]
+        },
+        {
+            "name": "total_salespeople_definition",
+            "description": "The total scheduled workforce equals the sum of the assigned staff across all allowed shift starts.",
+            "formula": "Z = \\sum_{s=0}^{S-1} x_s",
+            "parameters": [
+                "num_shift_starts"
+            ],
+            "variables": [
+                "staff_assigned_by_shift",
+                "total_scheduled_salespeople"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_scheduled_salespeople",
+            "description": "Minimize the total number of scheduled salespeople while satisfying all period staffing requirements",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total number of scheduled salespeople by minimizing the scalar total workforce variable Z; this is a single-objective MILP, so no combination strategy is needed.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_scheduled_salespeople"
+        ]
+    }
+}

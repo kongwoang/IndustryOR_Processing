@@ -1,0 +1,178 @@
+{
+    "problem": "Problem description\n- There is a finite set $$\\mathcal{P}$$ of product types, indexed by $$p \\in \\mathcal{P}$$, and a finite set $$\\mathcal{R}$$ of resource types, indexed by $$r \\in \\mathcal{R}$$.\n- The planning horizon is represented by $$\\mathcal{T}$$. This is a single-period production planning problem, so all decisions are made for one planning period.\n- For each product type $$p$$, the input data include unit profit $$\\pi_p$$, resource usage coefficients $$a_{r,p}$$ for each resource $$r$$, and a market demand upper bound $$d_p$$.\n- For each resource type $$r$$, the available capacity is $$b_r$$.\n- The planning goal is to choose production quantities that maximize total profit.\n- Production for each product type must not exceed its market demand limit.\n- Total consumption of each resource across all produced products must stay within the available capacity.\n- Production quantities must be feasible for discrete units and cannot be negative.\n\n- A solution is represented by:\n  - $$x_p$$: the production quantity of product type $$p$$.\n  - $$Z$$: the total profit achieved by the production plan.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"single_period\",\n    \"period_count\": \"$$H$$\"\n  },\n  \"products\": {\n    \"count\": \"$$P$$\",\n    \"index_set\": \"$$\\\\mathcal{P}$$\",\n    \"unit_profit\": \"$$\\\\pi_p$$ for each $$p \\\\in \\\\mathcal{P}$$\",\n    \"resource_requirements\": {\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n      \"meaning\": \"$$a_{r,p}$$ is the amount of resource $$r$$ required to produce one unit of product $$p$$\"\n    },\n    \"demand_upper_bounds\": \"$$d_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"resources\": {\n    \"count\": \"$$R$$\",\n    \"index_set\": \"$$\\\\mathcal{R}$$\",\n    \"capacities\": \"$$b_r$$ for each $$r \\\\in \\\\mathcal{R}$$\"\n  },\n  \"decision_variables\": {\n    \"production_quantities\": \"$$x_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"$$P$$\",\n    \"values\": \"$$x_p$$ for each $$p \\\\in \\\\mathcal{P}$$\",\n    \"meaning\": \"the chosen production quantity of each product type\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"the maximum total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": {\n    \"type\": \"single_period\",\n    \"period_count\": 1\n  },\n  \"products\": [\n    {\n      \"name\": \"high_end\",\n      \"unit_profit\": 300,\n      \"labor_requirement\": 17,\n      \"inspection_requirement\": 8,\n      \"demand_upper_bound\": 50\n    },\n    {\n      \"name\": \"mid_range\",\n      \"unit_profit\": 200,\n      \"labor_requirement\": 10,\n      \"inspection_requirement\": 4,\n      \"demand_upper_bound\": 80\n    },\n    {\n      \"name\": \"low_end\",\n      \"unit_profit\": 100,\n      \"labor_requirement\": 2,\n      \"inspection_requirement\": 2,\n      \"demand_upper_bound\": 150\n    }\n  ],\n  \"resources\": {\n    \"labor_capacity\": 1000,\n    \"inspection_capacity\": 500\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the product set $\\mathcal{P}$."
+        },
+        {
+            "name": "num_resources",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of resources in the resource set $\\mathcal{R}$."
+        },
+        {
+            "name": "planning_horizon_size",
+            "symbol": "H",
+            "shape": [],
+            "description": "Single-period planning horizon size."
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit for each product."
+        },
+        {
+            "name": "resource_usage",
+            "symbol": "a",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "description": "Resource usage coefficient for each resource-product pair."
+        },
+        {
+            "name": "demand_upper_bound",
+            "symbol": "d",
+            "shape": [
+                "P"
+            ],
+            "description": "Market demand upper bound for each product."
+        },
+        {
+            "name": "resource_capacity",
+            "symbol": "b",
+            "shape": [
+                "R"
+            ],
+            "description": "Available capacity for each resource."
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P"
+            ],
+            "domain": "integer",
+            "description": "Production quantity of each product."
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit of the production plan."
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "integer_production_quantity",
+            "description": "Production quantities are integer-valued and nonnegative for each product.",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "num_products"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities are nonnegative for each product.",
+            "formula": "x_p \\ge 0 \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "num_products"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_demand_upper_bound",
+            "description": "Demand upper bounds are nonnegative for each product.",
+            "formula": "d_p \\ge 0 \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "demand_upper_bound"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_resource_capacity",
+            "description": "Resource capacities are nonnegative for each resource.",
+            "formula": "b_r \\ge 0 \\quad \\forall r \\in \\{1,\\dots,R\\}",
+            "parameters": [
+                "resource_capacity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_resource_usage",
+            "description": "Resource usage coefficients are nonnegative for each resource-product pair.",
+            "formula": "a_{r p} \\ge 0 \\quad \\forall r \\in \\{1,\\dots,R\\},\\ \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "resource_usage"
+            ],
+            "variables": []
+        },
+        {
+            "name": "demand_limit",
+            "description": "Production of each product does not exceed its market demand upper bound.",
+            "formula": "x_p \\le d_p \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "demand_upper_bound"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "resource_capacity_limit",
+            "description": "Total resource consumption across all products does not exceed available capacity for each resource.",
+            "formula": "\\sum_{p=1}^{P} a_{r p} x_p \\le b_r \\quad \\forall r \\in \\{1,\\dots,R\\}",
+            "parameters": [
+                "resource_usage",
+                "resource_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "single_period_decision",
+            "description": "Production decisions are made for a single period only.",
+            "formula": "H = 1",
+            "parameters": [
+                "planning_horizon_size"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize total profit of the single-period production plan",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit of the single-period production plan.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p=1}^{P} \\pi_p x_p",
+        "parameters": [
+            "unit_profit"
+        ],
+        "variables": [
+            "production_quantity",
+            "total_profit"
+        ]
+    }
+}

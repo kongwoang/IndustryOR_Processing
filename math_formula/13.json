@@ -1,0 +1,269 @@
+{
+    "problem": "Problem description\n- There is a single meal-planning horizon $$\\mathcal{T}=\\{1\\}$$.\n- The available food items are partitioned into protein items indexed by $$p \\in \\mathcal{P}$$ and vegetable items indexed by $$v \\in \\mathcal{V}$$.\n- Each protein item $$p \\in \\mathcal{P}$$ has a protein yield $$\\pi_p$$ per unit, a unit cost $$c_p$$, and a unit weight $$w_p$$. Protein items may be purchased in any nonnegative quantity measured in units of $$100\\text{g}$$.\n- Each vegetable item $$v \\in \\mathcal{V}$$ has a protein yield $$\\pi_v$$ per pack, a pack cost $$c_v$$, and a pack weight $$w_v$$. Vegetable purchases are made in packs.\n- The planning goal is to choose a combination of protein and vegetable purchases that maximizes total protein intake for the meal.\n- The total spending must stay within the budget $$B$$.\n- The total purchased food weight must not exceed the weight limit $$W^{\\max}$$.\n- At least $$K$$ distinct vegetable types must be selected.\n- A vegetable type may only be purchased if it is selected.\n- A solution is represented by:\n  - $$x_p$$: purchased quantity of protein item $$p \\in \\mathcal{P}$$, measured in units of $$100\\text{g}$$.\n  - $$z_v$$: purchased number of packs of vegetable item $$v \\in \\mathcal{V}$$.\n  - $$y_v$$: binary selection indicator for vegetable item $$v \\in \\mathcal{V}$$, where $$1$$ means selected and $$0$$ means not selected.\n  - $$Z$$: total protein achieved by the chosen meal plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"periods\": \"$$\\\\mathcal{T}=\\\\{1\\\\}$$\"\n  },\n  \"protein_items\": {\n    \"count\": \"$$|\\\\mathcal{P}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{P}|$$\",\n    \"protein_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$\\\\pi_p$$ is the protein yield per unit for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"cost_per_unit\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$c_p$$ is the unit cost for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"weight_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$w_p$$ is the unit weight for protein item $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"vegetable_items\": {\n    \"count\": \"$$|\\\\mathcal{V}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{V}|$$\",\n    \"protein_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$\\\\pi_v$$ is the protein yield per pack for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"cost_per_pack\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$c_v$$ is the pack cost for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"weight_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$w_v$$ is the pack weight for vegetable item $$v \\\\in \\\\mathcal{V}$$\"\n  },\n  \"budget\": \"$$B$$, the maximum total spending allowed\",\n  \"max_total_weight_g\": \"$$W^{\\\\max}$$, the maximum total food weight allowed in grams\",\n  \"min_distinct_vegetables\": \"$$K$$, the minimum number of different vegetable types that must be selected\",\n  \"variable_domains\": {\n    \"protein_purchase\": \"$$x_p \\\\ge 0$$ for all $$p \\\\in \\\\mathcal{P}$$\",\n    \"vegetable_purchase\": \"$$z_v \\\\in \\\\mathbb{Z}_{\\\\ge 0}$$ for all $$v \\\\in \\\\mathcal{V}$$\",\n    \"vegetable_selected\": \"$$y_v \\\\in \\\\{0,1\\\\}$$ for all $$v \\\\in \\\\mathcal{V}$$\"\n  }\n}\n\nOutput Format\n{\n  \"protein_purchase\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$x_p$$ is the chosen purchase quantity of protein item $$p \\\\in \\\\mathcal{P}$$ in units of $$100\\\\text{g}$$\",\n  \"vegetable_purchase\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$z_v$$ is the chosen number of packs of vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n  \"vegetable_selected\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$y_v$$ indicates whether vegetable item $$v \\\\in \\\\mathcal{V}$$ is selected\",\n  \"total_protein\": \"$$Z$$, the total protein obtained by the selected meal plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"periods\": 1\n  },\n  \"protein_items\": {\n    \"count\": 3,\n    \"names\": [\"chicken\", \"salmon\", \"tofu\"],\n    \"protein_per_unit_g\": [23, 20, 8],\n    \"cost_per_unit\": [3.0, 5.0, 1.5],\n    \"weight_per_unit_g\": [100, 100, 100]\n  },\n  \"vegetable_items\": {\n    \"count\": 5,\n    \"names\": [\"broccoli\", \"carrots\", \"spinach\", \"bell_pepper\", \"mushrooms\"],\n    \"protein_per_pack_g\": [2.8, 0.9, 2.9, 1.0, 3.1],\n    \"cost_per_pack\": [1.2, 0.8, 1.5, 1.0, 2.0],\n    \"weight_per_pack_g\": [100, 100, 100, 100, 100]\n  },\n  \"budget\": 20,\n  \"max_total_weight_g\": 800,\n  \"min_distinct_vegetables\": 3\n}",
+    "parameters": [
+        {
+            "name": "num_protein_items",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of protein items"
+        },
+        {
+            "name": "num_vegetable_items",
+            "symbol": "V",
+            "shape": [],
+            "description": "Number of vegetable items"
+        },
+        {
+            "name": "time_horizon_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in the meal-planning horizon"
+        },
+        {
+            "name": "protein_yield_per_unit",
+            "symbol": "\\pi_p",
+            "shape": [
+                "P"
+            ],
+            "description": "Protein yield per unit for each protein item"
+        },
+        {
+            "name": "protein_cost_per_unit",
+            "symbol": "c_p",
+            "shape": [
+                "P"
+            ],
+            "description": "Cost per unit for each protein item"
+        },
+        {
+            "name": "protein_weight_per_unit",
+            "symbol": "w_p",
+            "shape": [
+                "P"
+            ],
+            "description": "Weight per unit for each protein item"
+        },
+        {
+            "name": "vegetable_protein_yield_per_pack",
+            "symbol": "\\pi_v",
+            "shape": [
+                "V"
+            ],
+            "description": "Protein yield per pack for each vegetable item"
+        },
+        {
+            "name": "vegetable_cost_per_pack",
+            "symbol": "c_v",
+            "shape": [
+                "V"
+            ],
+            "description": "Cost per pack for each vegetable item"
+        },
+        {
+            "name": "vegetable_weight_per_pack",
+            "symbol": "w_v",
+            "shape": [
+                "V"
+            ],
+            "description": "Weight per pack for each vegetable item"
+        },
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Total spending limit for the meal plan"
+        },
+        {
+            "name": "max_total_weight",
+            "symbol": "W^{\\max}",
+            "shape": [],
+            "description": "Maximum total purchased food weight"
+        },
+        {
+            "name": "min_distinct_vegetables",
+            "symbol": "K",
+            "shape": [],
+            "description": "Minimum number of distinct vegetable types to select"
+        }
+    ],
+    "variables": [
+        {
+            "name": "protein_purchase_quantity",
+            "symbol": "x_p",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Purchased quantity of each protein item in units of 100g"
+        },
+        {
+            "name": "vegetable_purchase_packs",
+            "symbol": "z_v",
+            "shape": [
+                "V"
+            ],
+            "domain": "integer",
+            "description": "Purchased number of packs of each vegetable item"
+        },
+        {
+            "name": "vegetable_selected",
+            "symbol": "y_v",
+            "shape": [
+                "V"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if the vegetable item is selected, 0 otherwise"
+        },
+        {
+            "name": "total_protein",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total protein achieved by the meal plan"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "vegetable_big_m",
+            "symbol": "M_v",
+            "shape": [
+                "V"
+            ],
+            "domain": "continuous",
+            "description": "Item-specific upper bound for vegetable purchases used to linearize purchase-implies-selection"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "nonnegative_protein_purchase",
+            "description": "Protein purchase quantities must be nonnegative",
+            "formula": "x_p \\ge 0",
+            "parameters": [
+                "num_protein_items"
+            ],
+            "variables": [
+                "protein_purchase_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_vegetable_purchase",
+            "description": "Vegetable purchase quantities must be nonnegative integers",
+            "formula": "z_v \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [
+                "num_vegetable_items"
+            ],
+            "variables": [
+                "vegetable_purchase_packs"
+            ]
+        },
+        {
+            "name": "binary_vegetable_selection",
+            "description": "Vegetable selection indicators must be binary",
+            "formula": "y_v \\in \\{0,1\\}",
+            "parameters": [
+                "num_vegetable_items"
+            ],
+            "variables": [
+                "vegetable_selected"
+            ]
+        },
+        {
+            "name": "nonnegative_total_protein",
+            "description": "Total protein must be nonnegative",
+            "formula": "Z \\ge 0",
+            "variables": [
+                "total_protein"
+            ]
+        },
+        {
+            "name": "budget_limit",
+            "description": "Total spending must not exceed the available budget",
+            "formula": "\\sum_{p=1}^{P} c_p x_p + \\sum_{v=1}^{V} c_v z_v \\le B",
+            "parameters": [
+                "budget",
+                "protein_cost_per_unit",
+                "vegetable_cost_per_pack"
+            ],
+            "variables": [
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs"
+            ]
+        },
+        {
+            "name": "weight_limit",
+            "description": "Total purchased food weight must not exceed the maximum total weight",
+            "formula": "\\sum_{p=1}^{P} w_p x_p + \\sum_{v=1}^{V} w_v z_v \\le W^{\\max}",
+            "parameters": [
+                "max_total_weight",
+                "protein_weight_per_unit",
+                "vegetable_weight_per_pack"
+            ],
+            "variables": [
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs"
+            ]
+        },
+        {
+            "name": "minimum_vegetable_diversity",
+            "description": "At least the required number of distinct vegetable types must be selected",
+            "formula": "\\sum_v y_v \\ge K",
+            "parameters": [
+                "min_distinct_vegetables"
+            ],
+            "variables": [
+                "vegetable_selected"
+            ]
+        },
+        {
+            "name": "purchase_requires_selection",
+            "description": "A vegetable item may be purchased only if it is selected",
+            "formula": "z_v \\le M_v y_v \\quad \\forall v \\in \\{1,\\dots,V\\}",
+            "parameters": [
+                "num_vegetable_items"
+            ],
+            "variables": [
+                "vegetable_purchase_packs",
+                "vegetable_selected"
+            ]
+        },
+        {
+            "name": "single_period_horizon",
+            "description": "The planning horizon consists of a single period, so there is no intertemporal coupling",
+            "formula": "\\mathcal{T} = \\{1\\}",
+            "parameters": [
+                "time_horizon_periods"
+            ]
+        },
+        {
+            "name": "total_protein_definition",
+            "description": "Defines total protein as the sum of protein contributions from purchased protein items and vegetables.",
+            "formula": "Z = \\sum_{p=1}^{P} \\pi_p x_p + \\sum_{v=1}^{V} \\pi_v z_v",
+            "parameters": [
+                "protein_yield_per_unit",
+                "vegetable_protein_yield_per_pack"
+            ],
+            "variables": [
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs",
+                "total_protein"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_protein_maximization",
+            "description": "maximize total protein intake achieved by the meal plan",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total protein intake of the meal plan. This is a single-objective MILP, so the original objective is used directly without combination.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_protein"
+        ]
+    }
+}

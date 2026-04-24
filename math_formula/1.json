@@ -1,0 +1,214 @@
+{
+    "problem": "Problem description\n- There is a planning horizon of $$T$$ periods, indexed by $$t \\in \\mathcal{T} = \\{1,\\dots,T\\}$$.\n- In each period $$t$$, a quantity of fighter jets is produced and becomes available for allocation.\n- A decision is made in each period about how many of the available fighter jets are dedicated exclusively to pilot training.\n- Each training jet can train up to $$\\kappa$$ pilots per period.\n- A trained pilot can operate one combat jet in later periods after training is completed.\n- Training begins in period $$s$$ and is tracked over the planning horizon.\n- If training cost information is included, let $$c_t$$ denote the cost of assigning one jet to training in period $$t$$.\n- The planning goal is to determine a feasible training allocation that maximizes the number of trained pilots available by the end of the horizon for air defense.\n- Business constraints:\n  - Jets assigned to training in a period are reserved only for training in that period and are not simultaneously available for combat use in that same period.\n  - The number of jets allocated to training in any period cannot exceed the jets produced and available in that period.\n  - The number of pilots trained in any period cannot exceed the training capacity created by the number of training jets used in that period.\n  - Pilots become available for combat only after completing training.\n  - The total number of trained pilots available by the end of the horizon is the main quantity of interest.\n- A solution is represented by:\n  - $$x_t$$: the number of fighter jets allocated exclusively to training in period $$t$$.\n  - $$z_t$$: the number of pilots trained in period $$t$$.\n  - $$y_t$$: the cumulative number of trained pilots available by the end of period $$t$$.\n  - If needed, a period-by-period record of how many jets remain available for combat after training allocation.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"meaning\": \"number of planning periods\"\n  },\n  \"period_index_set\": {\n    \"symbol\": \"$$\\mathcal{T}$$\",\n    \"meaning\": \"set of periods indexed by $$t$$\"\n  },\n  \"production_by_period\": {\n    \"symbol\": \"$$a_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of fighter jets produced and available in period $$t$$\"\n  },\n  \"training_capacity_per_jet\": {\n    \"symbol\": \"$$\\kappa$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"number of pilots that one training jet can train per period\"\n  },\n  \"training_start_period\": {\n    \"symbol\": \"$$s$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"first period in which training is allowed\"\n  },\n  \"availability_lag\": {\n    \"symbol\": \"$$\\delta$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"number of periods after training before a pilot is available for combat\"\n  },\n  \"optional_training_cost_by_period\": {\n    \"symbol\": \"$$c_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"optional cost of dedicating one jet to training in period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"training_allocation_by_period\": {\n    \"symbol\": \"$$x_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of fighter jets allocated exclusively to training in period $$t$$\"\n  },\n  \"pilots_trained_by_period\": {\n    \"symbol\": \"$$z_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of pilots trained in period $$t$$\"\n  },\n  \"trained_pilots_available_by_period\": {\n    \"symbol\": \"$$y_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"cumulative number of trained pilots available by the end of period $$t$$\"\n  },\n  \"total_trained_pilots\": {\n    \"symbol\": \"$$y_T$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"total number of trained pilots available by the end of the horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"$$2$$\",\n  \"production_by_period\": [\n    \"$$10$$\",\n    \"$$15$$\"\n  ],\n  \"training_capacity_per_jet\": \"$$5$$\",\n  \"training_start_period\": \"$$1$$\",\n  \"availability_lag\": \"$$1$$\"\n}",
+    "parameters": [
+        {
+            "name": "time_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "number of planning periods"
+        },
+        {
+            "name": "production_by_period",
+            "symbol": "a",
+            "shape": [
+                "T"
+            ],
+            "description": "number of fighter jets produced and available in each period"
+        },
+        {
+            "name": "training_capacity_per_jet",
+            "symbol": "\\kappa",
+            "shape": [],
+            "description": "number of pilots one training jet can train per period"
+        },
+        {
+            "name": "training_start_period",
+            "symbol": "s",
+            "shape": [],
+            "description": "first period in which training is allowed"
+        },
+        {
+            "name": "availability_lag",
+            "symbol": "\\delta",
+            "shape": [],
+            "description": "number of periods after training before a pilot is available for combat"
+        },
+        {
+            "name": "training_cost_by_period",
+            "symbol": "c",
+            "shape": [
+                "T"
+            ],
+            "description": "optional cost of assigning one jet to training in each period"
+        }
+    ],
+    "variables": [
+        {
+            "name": "training_jets_allocated",
+            "symbol": "x",
+            "shape": [
+                "T"
+            ],
+            "domain": "integer",
+            "description": "number of fighter jets allocated exclusively to training in each period"
+        },
+        {
+            "name": "pilots_trained",
+            "symbol": "z",
+            "shape": [
+                "T"
+            ],
+            "domain": "integer",
+            "description": "number of pilots trained in each period"
+        },
+        {
+            "name": "trained_pilot_availability",
+            "symbol": "y",
+            "shape": [
+                "T"
+            ],
+            "domain": "integer",
+            "description": "cumulative number of trained pilots available by the end of each period"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "training_nonnegativity",
+            "description": "Training jets allocated each period must be nonnegative",
+            "formula": "x_t \\ge 0",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "training_jets_allocated"
+            ]
+        },
+        {
+            "name": "trained_pilots_nonnegativity",
+            "description": "Pilots trained each period must be nonnegative",
+            "formula": "z_t \\ge 0",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "pilots_trained"
+            ]
+        },
+        {
+            "name": "availability_nonnegativity",
+            "description": "Cumulative trained pilot availability must be nonnegative",
+            "formula": "y_t \\ge 0",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "trained_pilot_availability"
+            ]
+        },
+        {
+            "name": "training_integer_domain",
+            "description": "Training jet allocations are integer-valued counts",
+            "formula": "x_t \\in \\mathbb{Z}",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "training_jets_allocated"
+            ]
+        },
+        {
+            "name": "trained_pilots_integer_domain",
+            "description": "Trained pilot counts are integer-valued",
+            "formula": "z_t \\in \\mathbb{Z}",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "pilots_trained"
+            ]
+        },
+        {
+            "name": "availability_integer_domain",
+            "description": "Cumulative trained pilot availability is integer-valued",
+            "formula": "y_t \\in \\mathbb{Z}",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "trained_pilot_availability"
+            ]
+        },
+        {
+            "name": "training_capacity_limit",
+            "description": "Training allocation in any period cannot exceed the fighter jets available in that period",
+            "formula": "x_t \\le a_t",
+            "parameters": [
+                "production_by_period",
+                "time_horizon"
+            ],
+            "variables": [
+                "training_jets_allocated"
+            ]
+        },
+        {
+            "name": "pilot_training_capacity",
+            "description": "The number of pilots trained in a period is limited by the capacity generated by training jets used in that period",
+            "formula": "z_t \\le \\kappa x_t",
+            "parameters": [
+                "training_capacity_per_jet",
+                "time_horizon"
+            ],
+            "variables": [
+                "training_jets_allocated",
+                "pilots_trained"
+            ]
+        },
+        {
+            "name": "training_start_restriction",
+            "description": "Training is allowed only from the first allowable training period onward",
+            "formula": "x_t = z_t = y_t = 0 \\quad \\forall t = 0,\\dots,s-1",
+            "parameters": [
+                "training_start_period",
+                "time_horizon"
+            ],
+            "variables": [
+                "training_jets_allocated",
+                "pilots_trained",
+                "trained_pilot_availability"
+            ]
+        },
+        {
+            "name": "combat_availability_lag",
+            "description": "Pilots trained in period t become available only after the specified lag has passed; for each period, availability is the cumulative sum of training completions up to t-\\delta, with the convention that empty sums are zero.",
+            "formula": "\\begin{cases}y_t = 0, & t < \\delta \\\\ y_t = \\sum_{\\tau = 0}^{t-\\delta} z_\\tau, & t \\ge \\delta\\end{cases} \\quad \\forall t = 0,\\dots,T-1",
+            "parameters": [
+                "availability_lag",
+                "time_horizon"
+            ],
+            "variables": [
+                "pilots_trained",
+                "trained_pilot_availability"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "maximize_trained_pilots_available",
+            "description": "Maximize the total number of trained pilots available by the end of the planning horizon, represented by the final cumulative availability value",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize the cumulative number of trained pilots available by the end of the planning horizon; since the problem has a single explicit objective, use it directly as the final objective.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "y_{T-1}",
+        "parameters": [
+            "time_horizon"
+        ],
+        "variables": [
+            "trained_pilot_availability"
+        ]
+    }
+}

@@ -1,0 +1,162 @@
+{
+    "problem": "Problem description\n- There is a planning horizon made up of periods $$t \\in \\mathcal{T}$$, with the given instance corresponding to a weekly production setting.\n- There is a set of liquid products $$p \\in \\mathcal{P}$$; the instance contains the product categories corresponding to $$A$$ and $$B$$.\n- Each product has a unit profit $$\\pi_p$$, a unit production-time requirement $$\\tau_p$$, and a unit storage-space requirement $$\\sigma_p$$.\n- The planning goal is to choose nonnegative production quantities so that total profit from all sold output is maximized.\n- The total production time used in any period must not exceed the available production capacity $$H_t$$.\n- Market-mix requirements may impose minimum proportional output relationships between selected products, represented by ratios $$\\rho_{pq}$$.\n- Storage usage is limited through the product-specific storage coefficients and any direct storage cap parameters $$U_p$$.\n- The business rules require that the output of product $$B$$ must be at least a fixed multiple of the output of product $$A$$.\n- The business rules require that product $$A$$ uses more storage space per unit than product $$B$$.\n- The business rules also impose a direct upper bound on the amount of product $$A$$ that can be stored in the period.\n- All decision quantities must remain nonnegative.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced or sold in period $$t$$.\n  - $$z$$: the total profit achieved by the plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"periods\": \"array of period identifiers with length $$|\\mathcal{T}|$$\",\n    \"unit\": \"planning period label, such as weekly\"\n  },\n  \"products\": {\n    \"product_ids\": \"array of product identifiers with length $$|\\mathcal{P}|$$\"\n  },\n  \"parameters\": {\n    \"unit_profit\": \"vector $$\\pi_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"production_time_per_unit\": \"vector $$\\tau_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"storage_space_per_unit\": \"vector $$\\sigma_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"available_production_time\": \"vector $$H_t$$ for $$t \\in \\mathcal{T}$$\",\n    \"minimum_mix_requirements\": \"list of records $$\\langle p,q,\\rho_{pq} \\rangle$$ meaning product $$p$$ must be produced in at least $$\\rho_{pq}$$ times the quantity of product $$q$$\",\n    \"direct_storage_caps\": \"optional vector $$U_p$$ for $$p \\in \\mathcal{P}$$ giving any direct upper bound on stored quantity\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"quantities\": \"array or table of records $$\\langle t,p,x_{p,t} \\rangle$$ with shape $$|\\mathcal{T}| \\times |\\mathcal{P}|$$\"\n  },\n  \"objective_value\": \"scalar $$z$$ representing total profit\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"periods\": [\"week_1\"],\n    \"unit\": \"weekly\"\n  },\n  \"products\": {\n    \"product_ids\": [\"A\", \"B\"]\n  },\n  \"parameters\": {\n    \"unit_profit\": {\n      \"A\": 30,\n      \"B\": 10\n    },\n    \"production_time_per_unit\": {\n      \"A\": 6,\n      \"B\": 3\n    },\n    \"storage_space_per_unit\": {\n      \"A\": 4,\n      \"B\": 1\n    },\n    \"available_production_time\": {\n      \"week_1\": 40\n    },\n    \"minimum_mix_requirements\": [\n      {\n        \"product\": \"B\",\n        \"reference_product\": \"A\",\n        \"minimum_multiple\": 3\n      }\n    ],\n    \"direct_storage_caps\": {\n      \"A\": 4\n    }\n  }\n}",
+    "parameters": [
+        {
+            "name": "periods",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Set of planning periods in the weekly horizon"
+        },
+        {
+            "name": "products",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Set of liquid products"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of periods in the planning horizon"
+        },
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the planning problem"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Unit profit for each product"
+        },
+        {
+            "name": "production_time_per_unit",
+            "symbol": "\\tau",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Production time requirement per unit of each product"
+        },
+        {
+            "name": "storage_space_per_unit",
+            "symbol": "\\sigma",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Storage space requirement per unit of each product"
+        },
+        {
+            "name": "available_production_time",
+            "symbol": "H",
+            "shape": [
+                "\\mathcal{T}"
+            ],
+            "description": "Available production time in each period"
+        },
+        {
+            "name": "minimum_mix_requirements",
+            "symbol": "\\rho",
+            "shape": [
+                "\\mathcal{R}"
+            ],
+            "description": "Listed minimum proportional output requirements between ordered product pairs"
+        },
+        {
+            "name": "direct_storage_caps",
+            "symbol": "U",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Direct storage capacity cap for products when provided"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product produced or sold for each product in each period"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit achieved by the production plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "production_time_capacity",
+            "description": "Total production time used in each period cannot exceed the available production time for that period.",
+            "formula": "\\sum_{p \\in \\mathcal{P}} \\tau_p \\, x_{p,t} \\le H_t \\quad \\forall t \\in \\mathcal{T}",
+            "parameters": [
+                "production_time_per_unit",
+                "available_production_time"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "minimum_mix_requirements",
+            "description": "All specified minimum proportional output relationships between product pairs must be satisfied, including the rule that product B must be produced at least a fixed multiple of product A.",
+            "formula": "x_{p,t} \\ge \\rho_{pq} \\, x_{q,t} \\quad \\forall t \\in \\mathcal{T},\\ \\forall (p,q,\\rho_{pq}) \\in \\mathcal{R}",
+            "parameters": [
+                "minimum_mix_requirements"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "storage_capacity_limits",
+            "description": "Storage usage must respect product-specific storage coefficients and any direct storage caps, including the direct upper bound on product A.",
+            "formula": "\\sum_{t \\in \\mathcal{T}} \\sigma_p \\, x_{p,t} \\le U_p \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [
+                "storage_space_per_unit",
+                "direct_storage_caps"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantities",
+            "description": "All production quantities must be nonnegative.",
+            "formula": "x_{p,t} \\ge 0 \\quad \\forall p \\in \\mathcal{P},\\ \\forall t \\in \\mathcal{T}",
+            "variables": [
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "maximize total profit from all sold output over all periods",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "maximize total profit from all sold output over all periods",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "z = \\sum_{t \\in \\mathcal{T}} \\sum_{p \\in \\mathcal{P}} \\pi_p \\, x_{p,t}",
+        "parameters": [
+            "unit_profit"
+        ],
+        "variables": [
+            "production_quantity",
+            "total_profit"
+        ]
+    }
+}

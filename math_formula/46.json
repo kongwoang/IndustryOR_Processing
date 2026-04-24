@@ -1,0 +1,263 @@
+{
+    "problem": "Problem description\n- The planning horizon is one production year with seasonal labor periods $$\\mathcal{S}$$, and the farm must decide a land-and-livestock operating plan over crop types $$\\mathcal{P}$$ and livestock types $$\\mathcal{G}$$.\n- The farm has total land availability $$L$$, total development capital $$B$$, seasonal labor availability $$H_s$$ for each $$s \\in \\mathcal{S}$$, and external-work earning rate $$w_s$$ for each $$s \\in \\mathcal{S}$$.\n- For each crop $$p \\in \\mathcal{P}$$, the labor requirement per land unit in season $$s$$ is $$\\ell_{p,s}$$, and the annual net income per land unit is $$\\pi_p$$. Crop cultivation uses land and labor, but it does not require dedicated capital investment.\n- For each livestock type $$g \\in \\mathcal{G}$$, the capital required per head is $$c_g$$, the land required per head is $$\\lambda_g$$, the seasonal labor requirement per head in season $$s$$ is $$m_{g,s}$$, the annual net income per head is $$r_g$$, and the housing capacity is $$U_g$$.\n- The optimization goal is to maximize total annual net income from crop production, livestock production, and any external labor performed by unused farm labor.\n- The total land used by crops and livestock-related feed production must not exceed available land $$L$$.\n- The total capital required to raise livestock must not exceed available development capital $$B$$.\n- The seasonal labor demand created by the selected crops and livestock must be covered by the available labor in each season, and any unused labor may be assigned to outside work that earns seasonal wage income.\n- The number of animals of each type must not exceed the corresponding housing capacity.\n- All livestock counts and all labor-day quantities must be whole numbers; fractional labor days are not allowed.\n- A solution is represented by:\n  - $$x_p$$: land area assigned to crop $$p$$.\n  - $$y_g$$: number of animals raised of type $$g$$.\n  - $$o_s$$: number of farm labor days in season $$s$$ assigned to outside work.\n  - $$Z$$: total annual net income of the operating plan.\n\nInput Format\n{\n  \"sets\": {\n    \"crops\": \"List of crop identifiers, ordered as the index set $$\\mathcal{P}$$.\",\n    \"livestock\": \"List of livestock identifiers, ordered as the index set $$\\mathcal{G}$$.\",\n    \"seasons\": \"List of seasonal labor periods, ordered as the index set $$\\mathcal{S}$$.\"\n  },\n  \"resources\": {\n    \"land_available\": \"Scalar $$L$$, total available land.\",\n    \"capital_available\": \"Scalar $$B$$, total available development capital.\"\n  },\n  \"seasonal_data\": {\n    \"labor_available\": \"Vector $$H_s$$ of size $$|\\mathcal{S}|$$, available farm labor days in each season.\",\n    \"external_wage\": \"Vector $$w_s$$ of size $$|\\mathcal{S}|$$, external-work earning per person-day in each season.\"\n  },\n  \"crop_data\": {\n    \"seasonal_labor_per_land\": \"Matrix $$\\ell_{p,s}$$ of shape $$|\\mathcal{P}| \\times |\\mathcal{S}|$$, labor days required per land unit for each crop in each season.\",\n    \"annual_net_income_per_land\": \"Vector $$\\pi_p$$ of size $$|\\mathcal{P}|$$, annual net income per land unit for each crop.\"\n  },\n  \"livestock_data\": {\n    \"investment_per_head\": \"Vector $$c_g$$ of size $$|\\mathcal{G}|$$, capital required per head.\",\n    \"land_per_head\": \"Vector $$\\lambda_g$$ of size $$|\\mathcal{G}|$$, land required per head.\",\n    \"seasonal_labor_per_head\": \"Matrix $$m_{g,s}$$ of shape $$|\\mathcal{G}| \\times |\\mathcal{S}|$$, labor days required per head in each season.\",\n    \"annual_net_income_per_head\": \"Vector $$r_g$$ of size $$|\\mathcal{G}|$$, annual net income per head.\",\n    \"capacity\": \"Vector $$U_g$$ of size $$|\\mathcal{G}|$$, maximum feasible head count for each livestock type.\"\n  }\n}\n\nOutput Format\n{\n  \"plan\": {\n    \"crop_area\": \"Vector $$x_p$$ of size $$|\\mathcal{P}|$$, planned land area for each crop.\",\n    \"livestock_count\": \"Vector $$y_g$$ of size $$|\\mathcal{G}|$$, planned head count for each livestock type.\",\n    \"external_labor_days\": \"Vector $$o_s$$ of size $$|\\mathcal{S}|$$, planned outside-work labor days in each season.\"\n  },\n  \"objective\": {\n    \"total_annual_net_income\": \"Scalar $$Z$$, the maximum achievable annual net income.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"crops\": [\"soybean\", \"corn\", \"wheat\"],\n    \"livestock\": [\"dairy_cow\", \"chicken\"],\n    \"seasons\": [\"autumn_winter\", \"spring_summer\"]\n  },\n  \"resources\": {\n    \"land_available\": \"$$100$$\",\n    \"capital_available\": \"$$15000$$\"\n  },\n  \"seasonal_data\": {\n    \"labor_available\": {\n      \"autumn_winter\": \"$$3500$$\",\n      \"spring_summer\": \"$$4000$$\"\n    },\n    \"external_wage\": {\n      \"autumn_winter\": \"$$1.8$$\",\n      \"spring_summer\": \"$$2.1$$\"\n    }\n  },\n  \"crop_data\": {\n    \"seasonal_labor_per_land\": {\n      \"autumn_winter\": [\"$$20$$\", \"$$35$$\", \"$$10$$\"],\n      \"spring_summer\": [\"$$50$$\", \"$$75$$\", \"$$40$$\"]\n    },\n    \"annual_net_income_per_land\": [\"$$175$$\", \"$$300$$\", \"$$120$$\"]\n  },\n  \"livestock_data\": {\n    \"investment_per_head\": [\"$$400$$\", \"$$3$$\"],\n    \"land_per_head\": [\"$$1.5$$\", \"$$0$$\"],\n    \"seasonal_labor_per_head\": {\n      \"autumn_winter\": [\"$$100$$\", \"$$0.6$$\"],\n      \"spring_summer\": [\"$$50$$\", \"$$0.3$$\"]\n    },\n    \"annual_net_income_per_head\": [\"$$400$$\", \"$$2$$\"],\n    \"capacity\": [\"$$32$$\", \"$$3000$$\"]\n  }\n}",
+    "parameters": [
+        {
+            "name": "crop_types",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Set of crop types indexed by crop identifier p"
+        },
+        {
+            "name": "livestock_types",
+            "symbol": "\\mathcal{G}",
+            "shape": [],
+            "description": "Set of livestock types indexed by livestock identifier g"
+        },
+        {
+            "name": "seasonal_labor_periods",
+            "symbol": "\\mathcal{S}",
+            "shape": [],
+            "description": "Set of seasonal labor periods indexed by season identifier s"
+        },
+        {
+            "name": "total_land",
+            "symbol": "L",
+            "shape": [],
+            "description": "Total available land"
+        },
+        {
+            "name": "total_development_capital",
+            "symbol": "B",
+            "shape": [],
+            "description": "Total available development capital"
+        },
+        {
+            "name": "seasonal_labor_availability",
+            "symbol": "H",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "description": "Available farm labor days in each season s"
+        },
+        {
+            "name": "external_work_wage",
+            "symbol": "w",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "description": "External-work earning rate in each season s"
+        },
+        {
+            "name": "crop_labor_requirement",
+            "symbol": "\\ell",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{S}"
+            ],
+            "description": "Labor days required per land unit for each crop p in each season s"
+        },
+        {
+            "name": "crop_net_income",
+            "symbol": "\\pi",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Annual net income per land unit for each crop p"
+        },
+        {
+            "name": "livestock_capital_requirement",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{G}"
+            ],
+            "description": "Capital required per head of each livestock type g"
+        },
+        {
+            "name": "livestock_land_requirement",
+            "symbol": "\\lambda",
+            "shape": [
+                "\\mathcal{G}"
+            ],
+            "description": "Land required per head of each livestock type g"
+        },
+        {
+            "name": "livestock_labor_requirement",
+            "symbol": "m",
+            "shape": [
+                "\\mathcal{G}",
+                "\\mathcal{S}"
+            ],
+            "description": "Labor days required per head of each livestock type g in each season s"
+        },
+        {
+            "name": "livestock_net_income",
+            "symbol": "r",
+            "shape": [
+                "\\mathcal{G}"
+            ],
+            "description": "Annual net income per head of each livestock type g"
+        },
+        {
+            "name": "livestock_housing_capacity",
+            "symbol": "U",
+            "shape": [
+                "\\mathcal{G}"
+            ],
+            "description": "Housing capacity for each livestock type g"
+        }
+    ],
+    "variables": [
+        {
+            "name": "crop_area",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "domain": "continuous",
+            "description": "Land area assigned to each crop p"
+        },
+        {
+            "name": "livestock_count",
+            "symbol": "y",
+            "shape": [
+                "\\mathcal{G}"
+            ],
+            "domain": "integer",
+            "description": "Number of animals raised of each livestock type g"
+        },
+        {
+            "name": "external_labor_days",
+            "symbol": "o",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "domain": "integer",
+            "description": "Number of farm labor days in each season s assigned to outside work"
+        },
+        {
+            "name": "total_annual_net_income",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total annual net income of the operating plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "land_availability",
+            "description": "Total land used for crops and livestock must not exceed available land",
+            "formula": "\\sum_{p\\in\\mathcal{P}} x_p + \\sum_{g\\in\\mathcal{G}} \\lambda_g y_g \\le L",
+            "parameters": [
+                "total_land",
+                "livestock_land_requirement"
+            ],
+            "variables": [
+                "crop_area",
+                "livestock_count"
+            ]
+        },
+        {
+            "name": "capital_availability",
+            "description": "Total development capital used for livestock must not exceed available capital",
+            "formula": "\\sum_{g\\in\\mathcal{G}} c_g y_g \\le B",
+            "parameters": [
+                "total_development_capital",
+                "livestock_capital_requirement"
+            ],
+            "variables": [
+                "livestock_count"
+            ]
+        },
+        {
+            "name": "seasonal_labor_balance",
+            "description": "In each season, labor demand from crops and livestock must be covered by available farm labor, with any unused labor assigned to outside work",
+            "formula": "\\sum_{p\\in\\mathcal{P}} \\ell_{p,s} x_p + \\sum_{g\\in\\mathcal{G}} m_{g,s} y_g + o_s = H_s \\quad \\forall s\\in\\mathcal{S}",
+            "parameters": [
+                "seasonal_labor_availability",
+                "crop_labor_requirement",
+                "livestock_labor_requirement"
+            ],
+            "variables": [
+                "crop_area",
+                "livestock_count",
+                "external_labor_days"
+            ]
+        },
+        {
+            "name": "housing_capacity",
+            "description": "Livestock head count for each type must not exceed its housing capacity",
+            "formula": "y_g \\le U_g \\quad \\forall g\\in\\mathcal{G}",
+            "parameters": [
+                "livestock_housing_capacity"
+            ],
+            "variables": [
+                "livestock_count"
+            ]
+        },
+        {
+            "name": "crop_area_nonnegative",
+            "description": "Crop land allocations must be nonnegative",
+            "formula": "x_p \\ge 0 \\quad \\forall p\\in\\mathcal{P}",
+            "variables": [
+                "crop_area"
+            ]
+        },
+        {
+            "name": "livestock_count_integrality",
+            "description": "Livestock counts must be nonnegative integers",
+            "formula": "y_g \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall g\\in\\mathcal{G}",
+            "variables": [
+                "livestock_count"
+            ]
+        },
+        {
+            "name": "external_labor_days_integrality",
+            "description": "External-work labor day assignments must be nonnegative integers",
+            "formula": "o_s \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall s\\in\\mathcal{S}",
+            "variables": [
+                "external_labor_days"
+            ]
+        },
+        {
+            "name": "objective_variable_definition",
+            "description": "Total annual net income equals the sum of crop income, livestock income, and outside-work income",
+            "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{g\\in\\mathcal{G}} r_g y_g + \\sum_{s\\in\\mathcal{S}} w_s o_s",
+            "parameters": [
+                "crop_net_income",
+                "livestock_net_income",
+                "external_work_wage"
+            ],
+            "variables": [
+                "total_annual_net_income",
+                "crop_area",
+                "livestock_count",
+                "external_labor_days"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_annual_net_income_maximization",
+            "description": "Maximize total annual net income from crop production, livestock production, and outside work using unused seasonal labor",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total annual net income from crop production, livestock production, and outside work. This is a single-objective MILP with a linear revenue expression.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\max Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{g\\in\\mathcal{G}} r_g y_g + \\sum_{s\\in\\mathcal{S}} w_s o_s",
+        "parameters": [
+            "crop_net_income",
+            "livestock_net_income",
+            "external_work_wage"
+        ],
+        "variables": [
+            "total_annual_net_income",
+            "crop_area",
+            "livestock_count",
+            "external_labor_days"
+        ]
+    }
+}

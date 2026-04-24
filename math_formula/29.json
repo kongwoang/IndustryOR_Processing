@@ -1,0 +1,129 @@
+{
+    "problem": "Problem description\n- There is a single-period feed blending planning problem for one animal.\n- Define $$\\mathcal{I}$$ as the set of feed types, indexed by $$i \\in \\mathcal{I}$$, and define $$\\mathcal{R}$$ as the set of nutrient types, indexed by $$r \\in \\mathcal{R}$$.\n- Each feed type $$i$$ has a known nutrient composition $$a_{r i}$$, meaning the amount of nutrient $$r$$ provided by one unit of feed $$i$$.\n- Each feed type $$i$$ has a known unit cost $$c_i$$.\n- Each nutrient type $$r$$ has a minimum required daily amount $$d_r$$ that must be covered by the selected feed mix.\n- The planning goal is to choose nonnegative feed quantities $$x_i$$ so that all nutritional requirements are satisfied at minimum total cost.\n- Required business constraints:\n  - The selected quantity of each feed type must be nonnegative.\n  - The total supplied amount of each nutrient must meet or exceed its required daily minimum.\n  - All nutrient requirements must be satisfied at the same time by the same feed mix.\n  - The total purchasing cost of the selected feeds must be minimized.\n- A solution is represented by:\n  - $$x_i$$: the chosen quantity of feed type $$i$$ for each $$i \\in \\mathcal{I}$$.\n  - $$z$$: the minimum total cost of the selected feed mix.\n\nInput Format\n{\n  \"num_feeds\": \"$$N$$\",\n  \"num_nutrients\": \"$$R$$\",\n  \"requirements\": {\n    \"shape\": \"$$R$$\",\n    \"meaning\": \"vector $$d_r$$ of minimum daily nutrient requirements for each $$r \\\\in \\\\mathcal{R}$$\",\n    \"type\": \"array of nonnegative numbers\"\n  },\n  \"nutrient_content\": {\n    \"shape\": \"$$R \\\\times N$$\",\n    \"meaning\": \"matrix $$A=[a_{r i}]$$ where $$a_{r i}$$ is the amount of nutrient $$r$$ in one unit of feed $$i$$\",\n    \"type\": \"2D array of nonnegative numbers\"\n  },\n  \"unit_cost\": {\n    \"shape\": \"$$N$$\",\n    \"meaning\": \"vector $$c_i$$ of unit costs for each feed type $$i \\\\in \\\\mathcal{I}$$\",\n    \"type\": \"array of nonnegative numbers\"\n  },\n  \"quantity_unit\": {\n    \"meaning\": \"common unit used for feed quantities and nutrient composition basis\"\n  }\n}\n\nOutput Format\n{\n  \"feed_quantities\": {\n    \"shape\": \"$$N$$\",\n    \"meaning\": \"optimal quantity $$x_i$$ chosen for each feed type $$i \\\\in \\\\mathcal{I}$$\",\n    \"type\": \"array of nonnegative numbers\"\n  },\n  \"total_cost\": {\n    \"meaning\": \"optimal objective value $$z$$, equal to the minimum total cost of the selected feed mix\",\n    \"type\": \"number\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"num_feeds\": 5,\n  \"num_nutrients\": 3,\n  \"requirements\": [700, 30, 100],\n  \"nutrient_content\": [\n    [3, 2, 1, 6, 18],\n    [1, 0.5, 0.2, 2, 0.5],\n    [0.5, 1, 0.2, 2, 0.8]\n  ],\n  \"unit_cost\": [0.2, 0.7, 0.4, 0.3, 0.8],\n  \"quantity_unit\": \"feed mass unit as used in the source data\"\n}",
+    "parameters": [
+        {
+            "name": "num_feeds",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of feed types"
+        },
+        {
+            "name": "num_nutrients",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of nutrient types"
+        },
+        {
+            "name": "minimum_nutrient_requirement",
+            "symbol": "d",
+            "shape": [
+                "R"
+            ],
+            "description": "Minimum required daily amount for each nutrient"
+        },
+        {
+            "name": "nutrient_content",
+            "symbol": "A",
+            "shape": [
+                "R",
+                "N"
+            ],
+            "description": "Amount of nutrient provided by one unit of each feed type"
+        },
+        {
+            "name": "unit_cost",
+            "symbol": "c",
+            "shape": [
+                "N"
+            ],
+            "description": "Unit cost of each feed type"
+        },
+        {
+            "name": "quantity_unit",
+            "symbol": "u",
+            "shape": [],
+            "description": "Common unit used for feed quantities and nutrient composition basis"
+        }
+    ],
+    "variables": [
+        {
+            "name": "feed_quantity",
+            "symbol": "x",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of each feed type selected"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total cost of the selected feed mix"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_feed_quantities",
+            "description": "Each feed quantity must be nonnegative.",
+            "formula": "x_i \\ge 0 \\quad \\forall i=1,\\dots,N",
+            "variables": [
+                "feed_quantity"
+            ]
+        },
+        {
+            "name": "minimum_nutrient_requirements",
+            "description": "For every nutrient, the total amount supplied by the selected feed mix must meet or exceed the minimum required daily amount.",
+            "formula": "\\sum_{i=1}^{N} a_{ri} x_i \\ge d_r \\quad \\forall r=1,\\dots,R",
+            "parameters": [
+                "minimum_nutrient_requirement",
+                "nutrient_content"
+            ],
+            "variables": [
+                "feed_quantity"
+            ]
+        },
+        {
+            "name": "simultaneous_mix_satisfaction",
+            "description": "All nutrient requirements must be satisfied by the same chosen feed mix; this is a descriptive modeling statement and does not impose an additional numerical restriction beyond the shared decision vector.",
+            "formula": "\\text{All nutrient constraints use the same vector } x",
+            "variables": [
+                "feed_quantity"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "The total purchasing cost is determined from feed quantities and unit costs.",
+            "formula": "z = \\sum_{i=1}^{N} c_i x_i",
+            "parameters": [
+                "unit_cost"
+            ],
+            "variables": [
+                "feed_quantity",
+                "total_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_purchasing_cost",
+            "description": "Minimize the total purchasing cost of the selected feed mix while satisfying all nutrient minimum requirements.",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total purchasing cost of the feed mix while satisfying all nutrient minimum requirements. The provided objective was labeled maximize, but the problem statement clearly defines a minimum-cost blending problem, so the objective sense is corrected to minimization.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "z = \\sum_{i=1}^{N} c_i x_i",
+        "parameters": [
+            "unit_cost"
+        ],
+        "variables": [
+            "feed_quantity",
+            "total_cost"
+        ]
+    }
+}

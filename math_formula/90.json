@@ -1,0 +1,199 @@
+{
+    "problem": "Problem description\n- There is a finite product set $$\\mathcal{P}$$ and a planning horizon $$\\mathcal{T}$$ indexed by periods $$t$$.\n- There is a finite machine set $$\\mathcal{M}$$, and each product $$p\\in\\mathcal{P}$$ is assigned to a designated machine $$\\mu_p\\in\\mathcal{M}$$.\n- Two distinguished products, $$p^{\\mathrm{A}}$$ and $$p^{\\mathrm{B}}$$, belong to $$\\mathcal{P}$$ and are linked by a technical production-mix rule.\n- Each product $$p\\in\\mathcal{P}$$ earns unit profit $$\\pi_p$$ when sold and requires processing time $$\\tau_p$$ per unit on its designated machine.\n- The available effective machine time for machine $$m\\in\\mathcal{M}$$ in period $$t\\in\\mathcal{T}$$ is limited by capacity parameter $$H_{m,t}$$.\n- A minimum mix requirement connects $$p^{\\mathrm{A}}$$ and $$p^{\\mathrm{B}}$$ through ratio parameters $$\\alpha$$ and $$\\beta$$, meaning the quantity of $$p^{\\mathrm{B}}$$ produced must be kept at or above the required minimum proportion relative to the quantity of $$p^{\\mathrm{A}}$$ produced.\n- No explicit external demand limit is given; the plan determines how much of each product to produce and sell within the available capacities and technical rules.\n- The planning goal is to maximize total profit over the full horizon.\n- Required business constraints:\n  - Production on each machine in each period must not exceed the effective available machine time.\n  - The technical mix rule between $$p^{\\mathrm{A}}$$ and $$p^{\\mathrm{B}}$$ must hold throughout the plan.\n  - Production quantities must be nonnegative.\n  - If the implementation uses discrete units, production quantities should be integral.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced and sold in period $$t$$.\n  - $$Z$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"sets\": {\n    \"P\": {\n      \"description\": \"Set of products indexed by $$p$$.\"\n    },\n    \"T\": {\n      \"description\": \"Set of planning periods indexed by $$t$$.\"\n    },\n    \"M\": {\n      \"description\": \"Set of machines indexed by $$m$$.\"\n    },\n    \"pA\": {\n      \"description\": \"Distinguished product corresponding to $$A$$.\"\n    },\n    \"pB\": {\n      \"description\": \"Distinguished product corresponding to $$B$$.\"\n    }\n  },\n  \"parameters\": {\n    \"pi\": {\n      \"description\": \"Unit profit of each product $$p$$.\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\"\n    },\n    \"tau\": {\n      \"description\": \"Processing time per unit of each product $$p$$ on its designated machine.\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\"\n    },\n    \"H\": {\n      \"description\": \"Available effective machine time for machine $$m$$ in period $$t$$.\",\n      \"shape\": \"$$|\\\\mathcal{M}|\\\\times|\\\\mathcal{T}|$$\"\n    },\n    \"mu\": {\n      \"description\": \"Designated machine used by each product $$p$$.\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\"\n    },\n    \"alpha\": {\n      \"description\": \"Minimum base quantity in the technical mix rule for product $$p^{\\\\mathrm{A}}$$.\",\n      \"type\": \"scalar\"\n    },\n    \"beta\": {\n      \"description\": \"Minimum accompanying quantity in the technical mix rule for product $$p^{\\\\mathrm{B}}$$.\",\n      \"type\": \"scalar\"\n    }\n  },\n  \"demand_data\": {\n    \"d\": {\n      \"description\": \"Optional demand limit for product $$p$$ in period $$t$$; if omitted, demand is not externally capped.\",\n      \"shape\": \"$$|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\"\n    }\n  },\n  \"costs\": {\n    \"c\": {\n      \"description\": \"Optional separate unit cost of product $$p$$ if the model distinguishes cost from profit; not required in the base instance.\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\"\n    }\n  },\n  \"decision_variables\": {\n    \"x\": {\n      \"description\": \"Quantity of product $$p$$ produced and sold in period $$t$$.\",\n      \"shape\": \"$$|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"x\": {\n      \"description\": \"Production and sales quantities $$x_{p,t}$$ for all products and periods.\",\n      \"shape\": \"$$|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\"\n    }\n  },\n  \"objective_value\": {\n    \"Z\": {\n      \"description\": \"Maximum total profit achieved by the plan.\",\n      \"type\": \"scalar\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"A\", \"B\"],\n  \"planning_periods\": [\"week_1\"],\n  \"machines\": [\"assembly_machine\"],\n  \"unit_profit\": {\n    \"A\": 3,\n    \"B\": 5\n  },\n  \"processing_time_minutes\": {\n    \"A\": 12,\n    \"B\": 25\n  },\n  \"available_effective_machine_time_minutes\": {\n    \"assembly_machine\": {\n      \"week_1\": 1800\n    }\n  },\n  \"designated_machine\": {\n    \"A\": \"assembly_machine\",\n    \"B\": \"assembly_machine\"\n  },\n  \"technical_mix_rule\": {\n    \"base_product\": \"A\",\n    \"support_product\": \"B\",\n    \"base_quantity\": 5,\n    \"support_min_quantity\": 2\n  }\n}",
+    "parameters": [
+        {
+            "name": "products",
+            "symbol": "\\mathcal{P}",
+            "shape": [
+                "-"
+            ],
+            "description": "Finite set of products, indexed by p"
+        },
+        {
+            "name": "planning_periods",
+            "symbol": "\\mathcal{T}",
+            "shape": [
+                "-"
+            ],
+            "description": "Finite set of planning periods, indexed by t"
+        },
+        {
+            "name": "machines",
+            "symbol": "\\mathcal{M}",
+            "shape": [
+                "-"
+            ],
+            "description": "Finite set of machines, indexed by m"
+        },
+        {
+            "name": "base_product",
+            "symbol": "p^{\\mathrm{A}}",
+            "shape": [],
+            "description": "Distinguished base product in the technical mix rule"
+        },
+        {
+            "name": "support_product",
+            "symbol": "p^{\\mathrm{B}}",
+            "shape": [],
+            "description": "Distinguished support product in the technical mix rule"
+        },
+        {
+            "name": "designated_machine",
+            "symbol": "\\mu_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Designated machine for each product"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Unit profit of each product"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "\\tau_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Processing time per unit of each product on its designated machine"
+        },
+        {
+            "name": "available_effective_machine_time",
+            "symbol": "H_{m,t}",
+            "shape": [
+                "\\mathcal{M}",
+                "\\mathcal{T}"
+            ],
+            "description": "Available effective machine time for each machine and period"
+        },
+        {
+            "name": "alpha",
+            "symbol": "\\alpha",
+            "shape": [],
+            "description": "Ratio parameter in the technical mix rule"
+        },
+        {
+            "name": "beta",
+            "symbol": "\\beta",
+            "shape": [],
+            "description": "Ratio parameter in the technical mix rule"
+        },
+        {
+            "name": "demand_limit",
+            "symbol": "d_{p,t}",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "description": "Optional external demand limit for each product and period"
+        },
+        {
+            "name": "unit_cost",
+            "symbol": "c_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Optional unit cost for each product"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x_{p,t}",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "integer",
+            "description": "Quantity of product p produced and sold in period t"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit over the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "machine_time_capacity",
+            "description": "For each machine and period, the total effective time used by products assigned to that machine cannot exceed the available effective machine time.",
+            "formula": "\\sum_{p\\in\\mathcal{P}:\\,\\mu_p=m} \\tau_p x_{p,t} \\le H_{m,t} \\qquad \\forall m\\in\\mathcal{M},\\ \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "available_effective_machine_time",
+                "designated_machine",
+                "processing_time"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "technical_mix_rule",
+            "description": "The total quantity of the support product must be at least the required minimum proportion relative to the total quantity of the base product over the planning horizon.",
+            "formula": "\\beta \\sum_{t\\in\\mathcal{T}} x_{p^{\\mathrm{B}},t} \\ge \\alpha \\sum_{t\\in\\mathcal{T}} x_{p^{\\mathrm{A}},t}",
+            "parameters": [
+                "base_product",
+                "support_product",
+                "alpha",
+                "beta"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "demand_limit_upper_bound",
+            "description": "If optional demand limits are provided, production-and-sales quantities for each product and period must not exceed the corresponding demand limit.",
+            "formula": "x_{p,t} \\le d_{p,t} \\qquad \\forall p\\in\\mathcal{P},\\ \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "demand_limit"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegativity_of_production",
+            "description": "Production-and-sales quantities must be nonnegative for all products and periods.",
+            "formula": "x_{p,t} \\ge 0 \\qquad \\forall p\\in\\mathcal{P},\\ \\forall t\\in\\mathcal{T}",
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "integrality_of_production",
+            "description": "Production-and-sales quantities must be integer-valued for all products and periods when discrete production is required.",
+            "formula": "x_{p,t} \\in \\mathbb{Z}_{\\ge 0} \\qquad \\forall p\\in\\mathcal{P},\\ \\forall t\\in\\mathcal{T}",
+            "variables": [
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit over the full planning horizon based on production-and-sales quantities and unit profits",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit over the full planning horizon by summing unit profit times production-and-sales quantity across all products and periods.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p\\in\\mathcal{P}}\\sum_{t\\in\\mathcal{T}} \\pi_p x_{p,t}",
+        "parameters": [
+            "unit_profit"
+        ],
+        "variables": [
+            "production_quantity",
+            "total_profit"
+        ]
+    }
+}

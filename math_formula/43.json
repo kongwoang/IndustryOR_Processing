@@ -1,0 +1,196 @@
+{
+    "problem": "Problem description\n- There are $$m$$ production points indexed by $$i \\in \\mathcal{I}$$, $$n$$ demand points indexed by $$j \\in \\mathcal{J}$$, and $$p$$ intermediate marshaling stations indexed by $$k \\in \\mathcal{K}$$.\n- Each production point $$i$$ has available supply $$a_i$$.\n- Each demand point $$j$$ has required demand $$b_j$$.\n- Each marshaling station $$k$$ has a fixed usage cost $$f_k$$ and a maximum transshipment capacity $$q_k$$.\n- The unit transportation cost from production point $$i$$ to marshaling station $$k$$ is $$c_{ik}$$, and the unit transportation cost from marshaling station $$k$$ to demand point $$j$$ is $$c'_{kj}$$.\n- The instance is assumed to have total available supply at least as large as total demand.\n- The planning goal is to choose shipment quantities and station-usage decisions so that all demand is satisfied at minimum total cost.\n- All material must be routed from production points to demand points through intermediate marshaling stations; direct shipment from a production point to a demand point is not allowed.\n- Every demand point must receive its full required quantity.\n- Shipments leaving any production point cannot exceed that point\u2019s available supply.\n- If a marshaling station is used, the total amount transshipped through it cannot exceed its capacity.\n- If a marshaling station is not used, no material may pass through it and no fixed usage cost is incurred.\n- Flow entering a marshaling station must be matched by flow leaving that station so that material is conserved at the station.\n- A solution is represented by:\n  - $$x_{ik}$$, the quantity shipped from production point $$i$$ to marshaling station $$k$$.\n  - $$y_{kj}$$, the quantity shipped from marshaling station $$k$$ to demand point $$j$$.\n  - $$z_k$$, a binary indicator showing whether marshaling station $$k$$ is used.\n  - $$Z$$, the total transportation-and-usage cost of the plan.\n\nInput Format\n{\n  \"m\": \"integer $$m$$, number of production points\",\n  \"n\": \"integer $$n$$, number of demand points\",\n  \"p\": \"integer $$p$$, number of marshaling stations\",\n  \"supply\": \"array of length $$m$$, where $$supply[i] = a_i$$ is the available supply at production point $$i$$\",\n  \"demand\": \"array of length $$n$$, where $$demand[j] = b_j$$ is the required demand at demand point $$j$$\",\n  \"fixed_cost\": \"array of length $$p$$, where $$fixed\\_cost[k] = f_k$$ is the fixed usage cost of marshaling station $$k$$\",\n  \"capacity\": \"array of length $$p$$, where $$capacity[k] = q_k$$ is the maximum transshipment capacity of marshaling station $$k$$\",\n  \"cost_production_to_station\": \"matrix of shape $$m \\times p$$, where entry $$c_{ik}$$ is the unit cost from production point $$i$$ to marshaling station $$k$$\",\n  \"cost_station_to_demand\": \"matrix of shape $$p \\times n$$, where entry $$c'_{kj}$$ is the unit cost from marshaling station $$k$$ to demand point $$j$$\"\n}\n\nOutput Format\n{\n  \"station_used\": \"binary array of length $$p$$, where $$station\\_used[k] = z_k$$ indicates whether marshaling station $$k$$ is used\",\n  \"shipments_to_station\": \"nonnegative matrix of shape $$m \\times p$$, where entry $$x_{ik}$$ is the shipment from production point $$i$$ to marshaling station $$k$$\",\n  \"shipments_to_demand\": \"nonnegative matrix of shape $$p \\times n$$, where entry $$y_{kj}$$ is the shipment from marshaling station $$k$$ to demand point $$j$$\",\n  \"total_cost\": \"scalar value $$Z$$ giving the minimum total cost of the transportation plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"m\": 2,\n  \"n\": 2,\n  \"p\": 2,\n  \"supply\": [100, 150],\n  \"demand\": [80, 120],\n  \"fixed_cost\": [10, 15],\n  \"capacity\": [100, 100],\n  \"cost_production_to_station\": [[2, 3], [4, 1]],\n  \"cost_station_to_demand\": [[3, 2], [1, 4]]\n}",
+    "parameters": [
+        {
+            "name": "m",
+            "symbol": "m",
+            "shape": [],
+            "description": "Integer count of production points; the set of production points is \\mathcal{I} = {0,\\dots,m-1}"
+        },
+        {
+            "name": "n",
+            "symbol": "n",
+            "shape": [],
+            "description": "Integer count of demand points; the set of demand points is \\mathcal{J} = {0,\\dots,n-1}"
+        },
+        {
+            "name": "p",
+            "symbol": "p",
+            "shape": [],
+            "description": "Integer count of marshaling stations; the set of stations is \\mathcal{K} = {0,\\dots,p-1}"
+        },
+        {
+            "name": "supply",
+            "symbol": "a",
+            "shape": [
+                "m"
+            ],
+            "description": "Available supply at each production point i \\in \\mathcal{I}"
+        },
+        {
+            "name": "demand",
+            "symbol": "b",
+            "shape": [
+                "n"
+            ],
+            "description": "Required demand at each demand point j \\in \\mathcal{J}"
+        },
+        {
+            "name": "fixed_cost",
+            "symbol": "f",
+            "shape": [
+                "p"
+            ],
+            "description": "Fixed usage cost of each marshaling station k \\in \\mathcal{K}"
+        },
+        {
+            "name": "capacity",
+            "symbol": "q",
+            "shape": [
+                "p"
+            ],
+            "description": "Maximum transshipment capacity of each marshaling station k \\in \\mathcal{K}"
+        },
+        {
+            "name": "cost_production_to_station",
+            "symbol": "c",
+            "shape": [
+                "m",
+                "p"
+            ],
+            "description": "Unit shipping cost from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
+        },
+        {
+            "name": "cost_station_to_demand",
+            "symbol": "c'",
+            "shape": [
+                "p",
+                "n"
+            ],
+            "description": "Unit shipping cost from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
+        }
+    ],
+    "variables": [
+        {
+            "name": "shipments_to_station",
+            "symbol": "x",
+            "shape": [
+                "m",
+                "p"
+            ],
+            "domain": "continuous",
+            "description": "Quantity shipped from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
+        },
+        {
+            "name": "shipments_to_demand",
+            "symbol": "y",
+            "shape": [
+                "p",
+                "n"
+            ],
+            "domain": "continuous",
+            "description": "Quantity shipped from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
+        },
+        {
+            "name": "station_used",
+            "symbol": "z",
+            "shape": [
+                "p"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if marshaling station k \\in \\mathcal{K} is used, and 0 otherwise"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "demand_satisfaction",
+            "description": "Each demand point must receive exactly its required demand through marshaling stations",
+            "formula": "\\sum_{k=0}^{p-1} y_{kj} = b_j \\quad \\forall j\\in\\{0,\\dots,n-1\\}",
+            "parameters": [
+                "demand"
+            ],
+            "variables": [
+                "shipments_to_demand"
+            ]
+        },
+        {
+            "name": "supply_limit",
+            "description": "Total shipment leaving each production point cannot exceed its available supply",
+            "formula": "\\sum_{k=0}^{p-1} x_{ik} \\le a_i \\quad \\forall i\\in\\{0,\\dots,m-1\\}",
+            "parameters": [
+                "supply"
+            ],
+            "variables": [
+                "shipments_to_station"
+            ]
+        },
+        {
+            "name": "station_capacity_usage",
+            "description": "If a station is used, total flow through it is limited by its capacity; if it is not used, no flow may pass through it",
+            "formula": "\\sum_{i=0}^{m-1} x_{ik} = \\sum_{j=0}^{n-1} y_{kj} \\le q_k z_k \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
+            "parameters": [
+                "capacity"
+            ],
+            "variables": [
+                "shipments_to_station",
+                "shipments_to_demand",
+                "station_used"
+            ]
+        },
+        {
+            "name": "station_flow_conservation",
+            "description": "Removed because station balance is now embedded in the station capacity/usage constraint",
+            "formula": "inflow equals outflow at each station",
+            "parameters": [],
+            "variables": []
+        },
+        {
+            "name": "no_direct_shipping",
+            "description": "Removed because direct production-to-demand shipping is structurally excluded by the variable set; no separate algebraic constraint is needed",
+            "formula": "no direct production to demand shipment",
+            "parameters": [],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_shipments",
+            "description": "Shipment quantities must be nonnegative",
+            "formula": "x_{ik} \\ge 0 \\; \\forall i\\in\\{0,\\dots,m-1\\},\\forall k\\in\\{0,\\dots,p-1\\},\\qquad y_{kj} \\ge 0 \\; \\forall k\\in\\{0,\\dots,p-1\\},\\forall j\\in\\{0,\\dots,n-1\\}",
+            "variables": [
+                "shipments_to_station",
+                "shipments_to_demand"
+            ]
+        },
+        {
+            "name": "binary_station_usage",
+            "description": "Station usage indicator must be binary",
+            "formula": "z_k \\in \\{0,1\\} \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
+            "variables": [
+                "station_used"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i=0}^{m-1}\\sum_{k=0}^{p-1} c_{ik}x_{ik}+\\sum_{k=0}^{p-1}\\sum_{j=0}^{n-1} c'_{kj}y_{kj}+\\sum_{k=0}^{p-1} f_k z_k",
+        "parameters": [
+            "cost_production_to_station",
+            "cost_station_to_demand",
+            "fixed_cost"
+        ],
+        "variables": [
+            "shipments_to_station",
+            "shipments_to_demand",
+            "station_used"
+        ]
+    }
+}

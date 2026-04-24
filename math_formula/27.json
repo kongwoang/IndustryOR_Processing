@@ -1,0 +1,241 @@
+{
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,\\ldots,T\\}$$.\n- There are $$N$$ investment opportunities indexed by $$j \\in \\mathcal{J}=\\{1,\\ldots,N\\}$$.\n- The decision maker starts with initial liquid capital $$C_0$$ at the beginning of period $$1$$.\n- Each opportunity $$j$$ has an allowed opening set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$, a lock-up duration $$d_j$$, a gross return multiplier $$\\rho_j$$, a per-unit cash requirement $$c_j$$, and a maximum cumulative investment limit $$U_j$$.\n- Capital invested in an opportunity is tied up until the opportunity matures, after which the principal and return are released back into liquid capital.\n- Any liquid capital not invested in a period may be carried forward and used later.\n- Investments may only be made in periods when the corresponding opportunity is open, and the total amount placed into any opportunity may not exceed its investment limit.\n- The available liquid capital in any period cannot be exceeded by the total new investments initiated in that period.\n- The planning goal is to choose the investment amounts over all periods so that the terminal capital at the end of $$T$$ is maximized.\n- A solution is represented by:\n  - $$x_{j,t}$$, the amount invested in opportunity $$j$$ at the beginning of period $$t$$.\n  - $$h_t$$, the liquid capital available at the relevant reporting point of period $$t$$.\n  - $$Z_T$$, the total capital available at the end of period $$T$$.\n\nInput Format\n{\n  \"T\": \"planning horizon length, scalar $$T$$\",\n  \"C0\": \"initial liquid capital at the beginning of period $$1$$, scalar $$C_0$$\",\n  \"N\": \"number of investment opportunities, scalar $$N$$\",\n  \"projects\": [\n    {\n      \"id\": \"project index $$j$$\",\n      \"open_periods\": \"set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$ of periods when a new investment may start\",\n      \"maturity_lag\": \"lock-up duration $$d_j$$ in periods before capital is released\",\n      \"unit_cash_requirement\": \"cash requirement per unit invested, scalar $$c_j$$\",\n      \"gross_return\": \"gross return multiplier $$\\rho_j$$ applied at maturity\",\n      \"max_investment\": \"capacity limit $$U_j$$ on the total amount that can be invested in project $$j$$\"\n    }\n  ]\n}\n\nOutput Format\n{\n  \"investment_plan\": \"array $$x_{j,t}$$ with shape $$N \\\\times T$$; each entry is the planned amount invested in opportunity $$j$$ at the beginning of period $$t$$\",\n  \"liquid_capital_path\": \"array $$h_t$$ with shape $$T+1$$; each entry is the liquid capital available at the chosen reporting point of period $$t$$\",\n  \"terminal_capital\": \"scalar $$Z_T$$; the total capital at the end of period $$T$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"C0\": 300000,\n  \"N\": 4,\n  \"projects\": [\n    {\n      \"id\": 1,\n      \"open_periods\": [1, 2, 3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.2,\n      \"max_investment\": null\n    },\n    {\n      \"id\": 2,\n      \"open_periods\": [1],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.5,\n      \"max_investment\": 150000\n    },\n    {\n      \"id\": 3,\n      \"open_periods\": [2],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.6,\n      \"max_investment\": 200000\n    },\n    {\n      \"id\": 4,\n      \"open_periods\": [3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.4,\n      \"max_investment\": 100000\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon_t",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of periods in the finite planning horizon"
+        },
+        {
+            "name": "num_opportunities",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of investment opportunities"
+        },
+        {
+            "name": "initial_liquid_capital",
+            "symbol": "C_0",
+            "shape": [],
+            "description": "Initial liquid capital at the beginning of period 1"
+        },
+        {
+            "name": "allowed_open_periods",
+            "symbol": "\\mathcal{A}",
+            "shape": [
+                "N",
+                "-"
+            ],
+            "description": "Allowed opening periods for each opportunity j"
+        },
+        {
+            "name": "lock_up_duration",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Lock-up duration for each opportunity"
+        },
+        {
+            "name": "gross_return_multiplier",
+            "symbol": "\\rho",
+            "shape": [
+                "N"
+            ],
+            "description": "Gross return multiplier for each opportunity"
+        },
+        {
+            "name": "unit_cash_requirement",
+            "symbol": "c",
+            "shape": [
+                "N"
+            ],
+            "description": "Per-unit cash requirement for each opportunity"
+        },
+        {
+            "name": "max_investment_limit",
+            "symbol": "U",
+            "shape": [
+                "N"
+            ],
+            "description": "Maximum cumulative investment limit for each opportunity, possibly unbounded if no limit is imposed"
+        }
+    ],
+    "variables": [
+        {
+            "name": "investment_amount",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Amount invested in opportunity j at the beginning of period t"
+        },
+        {
+            "name": "liquid_capital_path",
+            "symbol": "h",
+            "shape": [
+                "T+1"
+            ],
+            "domain": "continuous",
+            "description": "Liquid capital available at each reporting point from period 0 through period T"
+        },
+        {
+            "name": "terminal_capital",
+            "symbol": "Z_T",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total capital available at the end of period T"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_investment_amounts",
+            "description": "Investment amounts must be nonnegative",
+            "formula": "x_{j,t} \\ge 0",
+            "parameters": [
+                "planning_horizon_t",
+                "num_opportunities"
+            ],
+            "variables": [
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "nonnegative_liquid_capital",
+            "description": "Liquid capital values must be nonnegative",
+            "formula": "h_t \\ge 0",
+            "parameters": [
+                "planning_horizon_t"
+            ],
+            "variables": [
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "nonnegative_terminal_capital",
+            "description": "Terminal capital must be nonnegative",
+            "formula": "Z_T \\ge 0",
+            "parameters": [
+                "planning_horizon_t"
+            ],
+            "variables": [
+                "terminal_capital"
+            ]
+        },
+        {
+            "name": "open_period_restriction",
+            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
+            "formula": "t \\in \\mathcal{A}_j",
+            "parameters": [
+                "allowed_open_periods"
+            ],
+            "variables": [
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "opportunity_investment_cap",
+            "description": "Total investment in each opportunity over the horizon may not exceed its maximum investment limit",
+            "formula": "\\sum_t x_{j,t} \\le U_j",
+            "parameters": [
+                "max_investment_limit"
+            ],
+            "variables": [
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "period_liquidity_limit",
+            "description": "Total new investments initiated in any period cannot exceed liquid capital available in that period",
+            "formula": "\\sum_j x_{j,t} \\le h_t",
+            "parameters": [
+                "planning_horizon_t"
+            ],
+            "variables": [
+                "investment_amount",
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "capital_carry_forward",
+            "description": "Liquid capital evolves by carrying forward unused capital from the previous period and adding matured investment proceeds at the start of each period",
+            "formula": "h_t = h_{t-1} - \\sum_{j=1}^{N} x_{j,t-1} + \\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\\ldots,T",
+            "parameters": [
+                "planning_horizon_t",
+                "gross_return_multiplier",
+                "lock_up_duration"
+            ],
+            "variables": [
+                "liquid_capital_path",
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "maturity_release",
+            "description": "Invested capital is released back into liquid capital exactly after the corresponding lock-up duration with gross return, enforced through the period-to-period capital balance",
+            "formula": "\\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\n\\ldots,T",
+            "parameters": [
+                "lock_up_duration",
+                "gross_return_multiplier"
+            ],
+            "variables": [
+                "investment_amount",
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "terminal_capital_reporting",
+            "description": "Terminal capital equals liquid capital at the end of period T",
+            "formula": "Z_T = h_T",
+            "parameters": [
+                "planning_horizon_t"
+            ],
+            "variables": [
+                "terminal_capital",
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "opportunity_opening_restriction",
+            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
+            "formula": "x_{j,t} = 0 \\quad \\forall t \\notin \\mathcal{A}_j",
+            "parameters": [
+                "allowed_open_periods"
+            ],
+            "variables": [
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "initial_capital_condition",
+            "description": "Liquid capital at the start of period 0 equals the initial capital",
+            "formula": "h_0 = C_0",
+            "parameters": [
+                "initial_liquid_capital"
+            ],
+            "variables": [
+                "liquid_capital_path"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "terminal_capital_maximization",
+            "description": "Maximize terminal capital at the end of period T",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize terminal capital at the end of period T.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z_T",
+        "parameters": [],
+        "variables": [
+            "terminal_capital"
+        ]
+    }
+}

@@ -1,0 +1,167 @@
+{
+    "problem": "Problem description\n- There is a single planning horizon $$\\tau$$, and the problem is a static allocation problem over that horizon.\n- There are $$|\\mathcal{W}|$$ workshops indexed by $$w\\in\\mathcal{W}$$.\n- There are $$|\\mathcal{C}|$$ components indexed by $$c\\in\\mathcal{C}$$.\n- Each workshop $$w$$ has a limited available production time of $$H_w$$ hours.\n- Each workshop has a component-specific production rate $$R_{w,c}$$, meaning that allocating one hour of workshop $$w$$ to component $$c$$ produces output at rate $$R_{w,c}$$ units per hour.\n- A finished product is formed by combining one unit of every component in $$\\mathcal{C}$$.\n- The total number of finished products is therefore limited by the least available component quantity after all workshop production is completed.\n- The planning goal is to decide how many hours each workshop should allocate to each component so that the number of completed products is as large as possible.\n- There are no explicit cost trade-offs in the base problem; the objective is driven only by finished-product maximization.\n- Required business constraints:\n  - Each workshop must allocate no more than its available hours $$H_w$$ across all components.\n  - Each workshop-hour allocation must be nonnegative.\n  - A workshop\u2019s production time can be assigned to at most one component at a time.\n  - Component output is determined by the allocated hours and the corresponding rate $$R_{w,c}$$.\n  - The quantity of each completed product cannot exceed the available quantity of any component.\n  - The final plan must respect the assembly rule that one finished product requires one unit of every component.\n- A solution is represented by:\n  - $$X_{w,c}$$: the number of hours workshop $$w$$ allocates to component $$c$$.\n  - $$Q_c$$: the total quantity of component $$c$$ produced across all workshops.\n  - $$Z$$: the total number of completed products assembled.\n\nInput Format\n{\n  \"time_horizon\": \"Single planning horizon $$\\\\tau$$ for a static allocation decision.\",\n  \"workshops\": \"List of workshop identifiers representing $$\\\\mathcal{W}$$, with size $$|\\\\mathcal{W}|$$.\",\n  \"components\": \"List of component identifiers representing $$\\\\mathcal{C}$$, with size $$|\\\\mathcal{C}|$$.\",\n  \"available_hours\": \"Vector $$H\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{W}|}$$, where $$H_w$$ is the available production hours for workshop $$w$$.\",\n  \"production_rate\": \"Matrix $$R\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{W}|\\\\times|\\\\mathcal{C}|}$$, where $$R_{w,c}$$ is the units of component $$c$$ produced per hour by workshop $$w$$.\",\n  \"component_requirement\": \"Vector $$a\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{C}|}$$, where $$a_c$$ is the number of units of component $$c$$ needed for one finished product; in this problem, $$a_c=1$$ for all $$c\\\\in\\\\mathcal{C}$$.\",\n  \"unit_cost\": \"Optional matrix $$K\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{W}|\\\\times|\\\\mathcal{C}|}$$ for per-hour or per-unit costs, if a cost variant is used; not required in the base problem.\"\n}\n\nOutput Format\n{\n  \"hours_allocation\": \"Matrix $$X\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{W}|\\\\times|\\\\mathcal{C}|}$$, where $$X_{w,c}$$ is the allocated hours from workshop $$w$$ to component $$c$$.\",\n  \"component_totals\": \"Vector $$Q\\\\in\\\\mathbb{R}_+^{|\\\\mathcal{C}|}$$, where $$Q_c$$ is the total produced quantity of component $$c$$.\",\n  \"completed_products\": \"Scalar $$Z\\\\in\\\\mathbb{Z}_+$$ giving the maximum number of finished products achieved.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"single_period\",\n  \"workshops\": [\"A\", \"B\", \"C\", \"D\"],\n  \"components\": [\"Component 1\", \"Component 2\", \"Component 3\"],\n  \"available_hours\": {\n    \"A\": 100,\n    \"B\": 150,\n    \"C\": 80,\n    \"D\": 200\n  },\n  \"production_rate\": {\n    \"A\": {\n      \"Component 1\": 10,\n      \"Component 2\": 15,\n      \"Component 3\": 5\n    },\n    \"B\": {\n      \"Component 1\": 15,\n      \"Component 2\": 10,\n      \"Component 3\": 5\n    },\n    \"C\": {\n      \"Component 1\": 20,\n      \"Component 2\": 5,\n      \"Component 3\": 10\n    },\n    \"D\": {\n      \"Component 1\": 10,\n      \"Component 2\": 15,\n      \"Component 3\": 20\n    }\n  },\n  \"component_requirement\": {\n    \"Component 1\": 1,\n    \"Component 2\": 1,\n    \"Component 3\": 1\n  }\n}",
+    "parameters": [
+        {
+            "name": "time_horizon",
+            "symbol": "\\tau",
+            "shape": [],
+            "description": "Single planning horizon for the static allocation decision"
+        },
+        {
+            "name": "num_workshops",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of workshops"
+        },
+        {
+            "name": "num_components",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of components"
+        },
+        {
+            "name": "available_hours",
+            "symbol": "H",
+            "shape": [
+                "M"
+            ],
+            "description": "Available production hours for each workshop"
+        },
+        {
+            "name": "production_rate",
+            "symbol": "R",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "description": "Production rate of each workshop for each component in units per hour"
+        },
+        {
+            "name": "component_requirement",
+            "symbol": "a",
+            "shape": [
+                "N"
+            ],
+            "description": "Units of each component required per finished product"
+        }
+    ],
+    "variables": [
+        {
+            "name": "allocation_hours",
+            "symbol": "X",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Hours allocated by each workshop to each component"
+        },
+        {
+            "name": "component_total",
+            "symbol": "Q",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Total quantity produced for each component across all workshops"
+        },
+        {
+            "name": "completed_products",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of completed products assembled"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "workshop_hour_capacity",
+            "description": "each workshop may allocate no more than its available production hours across all components",
+            "formula": "\\sum_{c=0}^{N-1} X_{w,c} \\le H_w \\quad \\forall w=0,\\dots,M-1",
+            "parameters": [
+                "available_hours",
+                "num_workshops"
+            ],
+            "variables": [
+                "allocation_hours"
+            ]
+        },
+        {
+            "name": "nonnegative_allocation_hours",
+            "description": "allocation hours must be nonnegative for every workshop-component pair",
+            "formula": "X_{w,c} \\ge 0 \\quad \\forall w=0,\\dots,M-1,\\ \\forall c=0,\\dots,N-1",
+            "parameters": [
+                "num_workshops",
+                "num_components"
+            ],
+            "variables": [
+                "allocation_hours"
+            ]
+        },
+        {
+            "name": "nonnegative_component_totals",
+            "description": "component totals must be nonnegative for every component",
+            "formula": "Q_c \\ge 0 \\quad \\forall c=0,\\dots,N-1",
+            "parameters": [
+                "num_components"
+            ],
+            "variables": [
+                "component_total"
+            ]
+        },
+        {
+            "name": "integer_completed_products",
+            "description": "completed products must be a nonnegative integer count",
+            "formula": "Z \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [],
+            "variables": [
+                "completed_products"
+            ]
+        },
+        {
+            "name": "component_output_aggregation",
+            "description": "each component total is obtained by aggregating production from all workshops based on allocation hours and production rates",
+            "formula": "Q_c = \\sum_{w=0}^{M-1} R_{w,c} X_{w,c} \\quad \\forall c=0,\\dots,N-1",
+            "parameters": [
+                "production_rate",
+                "num_workshops",
+                "num_components"
+            ],
+            "variables": [
+                "allocation_hours",
+                "component_total"
+            ]
+        },
+        {
+            "name": "finished_product_component_bottleneck",
+            "description": "the number of finished products cannot exceed the available quantity of any required component",
+            "formula": "a_c Z \\le Q_c \\quad \\forall c=0,\\dots,N-1",
+            "parameters": [
+                "component_requirement",
+                "num_components"
+            ],
+            "variables": [
+                "component_total",
+                "completed_products"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "maximize_completed_products",
+            "description": "maximize the total number of completed products assembled",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "maximize the total number of completed products assembled",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "completed_products"
+        ]
+    }
+}

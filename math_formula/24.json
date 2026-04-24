@@ -1,0 +1,246 @@
+{
+    "problem": "Problem description\n- There is an investor with initial capital $$B$$ and a finite planning horizon of $$H$$ periods.\n- There are $$N$$ investment alternatives indexed by $$i \\in \\mathcal{I}$$, where each alternative has a guaranteed payoff structure.\n- Investment alternative $$i$$ requires a holding period of $$\\tau_i$$ periods and produces a guaranteed terminal cash amount of $$\\gamma_i$$ per unit of capital invested.\n- The decision is to allocate the available capital across the feasible investment alternatives and feasible start periods so that the terminal wealth at the end of period $$H$$ is maximized.\n- The investment amount committed to a choice remains unavailable until that investment matures.\n- An investment may only be started if it can still mature within the planning horizon.\n- Capital is allocated linearly and proportionally across the available alternatives.\n- The investment plan must respect the available budget and any timing restrictions implied by the holding periods.\n- If idle cash is allowed, uninvested capital may remain as cash; otherwise, the full budget must be committed according to the plan.\n- The planning goal is to maximize the total wealth available at the end of the horizon.\n- A solution is represented by:\n  - $$x_{t,i}$$: the amount of capital invested in alternative $$i$$ when started at period $$t$$\n  - $$c_t$$: the cash balance carried into period $$t$$, if a cash state is included\n  - $$W_H$$: the terminal wealth at the end of period $$H$$\n  - The complete solution specifies all feasible investment amounts and the resulting maximum terminal wealth\n\nInput Format\n{\n  \"budget\": \"Initial available capital $$B$$\",\n  \"horizon_periods\": \"Planning horizon length $$H$$\",\n  \"investment_options\": [\n    {\n      \"option_id\": \"Investment alternative index $$i$$\",\n      \"holding_period\": \"Holding duration $$\\tau_i$$\",\n      \"guaranteed_payoff_per_unit\": \"Guaranteed terminal payoff $$\\gamma_i$$ per unit invested\"\n    }\n  ],\n  \"feasible_start_periods\": \"Optional set of valid start periods $$\\mathcal{T}_i$$ for each option, meaning the periods in which the option can be initiated and still mature by $$H$$\",\n  \"cash_allowed\": \"Boolean indicator of whether unused capital may remain as cash\"\n}\n\nOutput Format\n{\n  \"investment_plan\": [\n    {\n      \"start_period\": \"Start period index $$t$$\",\n      \"option_id\": \"Investment option index $$i$$\",\n      \"amount_invested\": \"Optimal investment amount $$x_{t,i}$$\"\n    }\n  ],\n  \"terminal_wealth\": \"Maximum wealth at the end of period $$H$$, denoted $$W_H$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"budget\": 100000,\n  \"horizon_periods\": 3,\n  \"investment_options\": [\n    {\n      \"option_id\": 1,\n      \"holding_period\": 1,\n      \"guaranteed_payoff_per_unit\": 0.7\n    },\n    {\n      \"option_id\": 2,\n      \"holding_period\": 2,\n      \"guaranteed_payoff_per_unit\": 2\n    }\n  ],\n  \"cash_allowed\": false\n}",
+    "parameters": [
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Initial available capital budget"
+        },
+        {
+            "name": "horizon_periods",
+            "symbol": "H",
+            "shape": [],
+            "description": "Number of planning periods in the horizon"
+        },
+        {
+            "name": "num_investment_options",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of investment alternatives"
+        },
+        {
+            "name": "holding_periods",
+            "symbol": "\\tau",
+            "shape": [
+                "N"
+            ],
+            "description": "Holding period of each investment option"
+        },
+        {
+            "name": "guaranteed_payoffs",
+            "symbol": "\\gamma",
+            "shape": [
+                "N"
+            ],
+            "description": "Guaranteed terminal payoff per unit invested for each option"
+        },
+        {
+            "name": "investment_options_set",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "N"
+            ],
+            "description": "Set of investment option indices"
+        },
+        {
+            "name": "feasible_start_periods",
+            "symbol": "T",
+            "shape": [
+                "N",
+                "-"
+            ],
+            "description": "Feasible start periods for each investment option, if provided"
+        }
+    ],
+    "variables": [
+        {
+            "name": "investment_amounts",
+            "symbol": "x",
+            "shape": [
+                "H",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Amount of capital invested in option i when started at period t"
+        },
+        {
+            "name": "cash_balance",
+            "symbol": "c",
+            "shape": [
+                "H"
+            ],
+            "domain": "continuous",
+            "description": "Cash balance carried into each period, if cash state is included"
+        },
+        {
+            "name": "terminal_wealth",
+            "symbol": "W_H",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Terminal wealth at the end of the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "budget_nonnegativity",
+            "description": "Initial capital budget must be nonnegative",
+            "formula": "B \\geq 0",
+            "parameters": [
+                "budget"
+            ],
+            "variables": []
+        },
+        {
+            "name": "horizon_positivity",
+            "description": "Planning horizon must be a positive integer",
+            "formula": "H \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "horizon_periods"
+            ],
+            "variables": []
+        },
+        {
+            "name": "option_count_positivity",
+            "description": "Number of investment options must be a positive integer",
+            "formula": "N \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "num_investment_options"
+            ],
+            "variables": []
+        },
+        {
+            "name": "holding_period_positivity",
+            "description": "Each investment option must have a positive holding period",
+            "formula": "\\tau_i \\in \\mathbb{Z}_{>0} \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "holding_periods",
+                "investment_options_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "payoff_nonnegativity",
+            "description": "Guaranteed terminal payoff per unit must be nonnegative for each option",
+            "formula": "\\gamma_i \\geq 0 \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "guaranteed_payoffs",
+                "investment_options_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "investment_nonnegativity",
+            "description": "Investment amounts must be nonnegative",
+            "formula": "x_{t,i} \\geq 0 \\quad \\forall t \\in \\{0,\\dots,H-1\\},\\ \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "horizon_periods",
+                "investment_options_set"
+            ],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "cash_nonnegativity",
+            "description": "Cash balances must be nonnegative when cash is modeled",
+            "formula": "c_t \\geq 0 \\quad \\forall t \\in \\{0,\\dots,H\\}",
+            "parameters": [
+                "horizon_periods"
+            ],
+            "variables": [
+                "cash_balance"
+            ]
+        },
+        {
+            "name": "terminal_wealth_nonnegativity",
+            "description": "Terminal wealth must be nonnegative",
+            "formula": "W_H \\geq 0",
+            "parameters": [],
+            "variables": [
+                "terminal_wealth"
+            ]
+        },
+        {
+            "name": "maturity_feasible_start_periods",
+            "description": "An investment may start only in periods that allow maturity within the horizon",
+            "formula": "x_{t,i} = 0 \\quad \\forall i \\in \\mathcal{I},\\ \\forall t \\notin \\{0,\\dots,H-\\tau_i\\}",
+            "parameters": [
+                "horizon_periods",
+                "holding_periods",
+                "investment_options_set"
+            ],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "option_specific_start_set_restriction",
+            "description": "If feasible start periods are provided for an option, investment is allowed only in those periods",
+            "formula": "x_{t,i} = 0 \\quad \\forall i \\in \\mathcal{I},\\ \\forall t \\notin T_i",
+            "parameters": [
+                "feasible_start_periods",
+                "investment_options_set"
+            ],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "initial_budget_allocation",
+            "description": "The initial budget can be split between cash and investments started in period 0",
+            "formula": "c_0 + \\sum_{i \\in \\mathcal{I}} x_{0,i} = B",
+            "parameters": [
+                "budget",
+                "investment_options_set"
+            ],
+            "variables": [
+                "cash_balance",
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "cash_flow_recursion",
+            "description": "Cash carried to the next period equals current cash minus new investments plus matured proceeds from investments started earlier",
+            "formula": "c_{t+1} = c_t - \\sum_{i \\in \\mathcal{I}} x_{t,i} + \\sum_{i \\in \\mathcal{I}:\\ t-\\tau_i \\geq 0} \\gamma_i x_{t-\\tau_i,i} \\quad \\forall t \\in \\{0,\\dots,H-1\\}",
+            "parameters": [
+                "horizon_periods",
+                "holding_periods",
+                "guaranteed_payoffs",
+                "investment_options_set"
+            ],
+            "variables": [
+                "cash_balance",
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "terminal_wealth_definition",
+            "description": "Terminal wealth is equal to the final cash balance at the end of the horizon",
+            "formula": "W_H = c_H",
+            "parameters": [],
+            "variables": [
+                "terminal_wealth",
+                "cash_balance"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "terminal_wealth_maximization",
+            "description": "Maximize terminal wealth at the end of the planning horizon",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize terminal wealth at the end of the planning horizon using the single given objective.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "W_H",
+        "parameters": [],
+        "variables": [
+            "terminal_wealth"
+        ]
+    }
+}

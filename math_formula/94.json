@@ -1,0 +1,154 @@
+{
+    "problem": "Problem description\n- There is one beverage product planned over a finite weekly horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T} = \\{1,\\dots,T\\}$$.\n- For each period $$t$$, the input data include market demand $$d_t$$, production capacity $$u_t$$, and unit production cost $$c_t$$.\n- A unit holding cost $$h$$ is incurred for each unit of inventory left after meeting the demand of a period.\n- The plan determines the production quantity $$x_t$$ in each period and the ending inventory level $$I_t$$ after demand is satisfied.\n- The planning goal is to minimize the total cost over the horizon, consisting of production cost and inventory holding cost.\n- Weekly demand must be satisfied on time.\n- Production in any period cannot exceed the available production capacity of that period.\n- Inventory may be carried from one period to the next, but only nonnegative inventory is allowed.\n- Unmet demand is not allowed.\n- A solution is represented by:\n  - $$x_t$$, the planned production quantity in period $$t$$.\n  - $$I_t$$, the inventory remaining at the end of period $$t$$.\n  - $$Z$$, the total cost of the plan over all periods.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"meaning\": \"Number of planning periods in the horizon\"\n  },\n  \"periods\": {\n    \"symbol\": \"$$\\\\mathcal{T} = \\\\{1,\\\\dots,T\\\\}$$\",\n    \"meaning\": \"Ordered set of weekly periods\"\n  },\n  \"demand\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$d_t$$\",\n    \"meaning\": \"Demand in period $$t$$\"\n  },\n  \"capacity\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$u_t$$\",\n    \"meaning\": \"Maximum producible quantity in period $$t$$\"\n  },\n  \"production_cost\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$c_t$$\",\n    \"meaning\": \"Unit production cost in period $$t$$\"\n  },\n  \"holding_cost\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$h$$\",\n    \"meaning\": \"Unit inventory holding cost charged for leftover inventory in each period\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$I_0$$\",\n    \"meaning\": \"Inventory available at the start of period $$1$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$x_t$$\",\n    \"meaning\": \"Planned production quantity in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$I_t$$\",\n    \"meaning\": \"Inventory remaining at the end of period $$t$$\"\n  },\n  \"total_cost\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"Total minimized cost over the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 4,\n  \"demand\": [15, 25, 35, 25],\n  \"capacity\": [30, 40, 45, 20],\n  \"production_cost\": [5.0, 5.1, 5.4, 5.5],\n  \"holding_cost\": 0.2,\n  \"initial_inventory\": 0\n}",
+    "parameters": [
+        {
+            "name": "time_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in the finite horizon, indexed by t=0,...,T-1"
+        },
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "T"
+            ],
+            "description": "Demand in each period t"
+        },
+        {
+            "name": "capacity",
+            "symbol": "u",
+            "shape": [
+                "T"
+            ],
+            "description": "Maximum producible quantity in each period t"
+        },
+        {
+            "name": "production_cost",
+            "symbol": "c",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit production cost in each period t"
+        },
+        {
+            "name": "holding_cost",
+            "symbol": "h",
+            "shape": [],
+            "description": "Unit holding cost per unit of ending inventory in each period"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [],
+            "description": "Initial inventory available at the start of period 0"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity in each period t"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Ending inventory after demand is satisfied in each period t"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "period_production_capacity",
+            "description": "Production in each period must not exceed the available capacity",
+            "formula": "x[t] \\leq u[t]",
+            "parameters": [
+                "capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_inventory",
+            "description": "Ending inventory must remain nonnegative in every period",
+            "formula": "I[t] \\geq 0",
+            "parameters": [],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "nonnegative_production",
+            "description": "Production quantity must be nonnegative in every period",
+            "formula": "x[t] \\geq 0",
+            "parameters": [],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "time_horizon_positive_integer",
+            "description": "The planning horizon length is a positive integer",
+            "formula": "T \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "inventory_balance_initial_period",
+            "description": "Inventory balance in period 0 uses the initial inventory as the starting stock",
+            "formula": "I[0] = I_0 + x[0] - d[0]",
+            "parameters": [
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "inventory_balance_subsequent_periods",
+            "description": "Inventory balance for periods t=1,\\dots,T-1 links previous ending inventory, production, demand, and current ending inventory",
+            "formula": "I[t] = I[t-1] + x[t] - d[t] \\quad \\forall t=1,\\dots,T-1",
+            "parameters": [
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize total cost over the planning horizon, including production cost and inventory holding cost",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total cost over the horizon by summing per-period production cost and ending-inventory holding cost. This is a single linear objective, so no combination strategy is needed.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{t=0}^{T-1} c[t] x[t] + h \\sum_{t=0}^{T-1} I[t]",
+        "parameters": [
+            "production_cost",
+            "holding_cost"
+        ],
+        "variables": [
+            "production_quantity",
+            "ending_inventory"
+        ]
+    }
+}

@@ -1,0 +1,157 @@
+{
+    "problem": "Problem description\n- There is a finite set of children indexed by $$i \\in \\mathcal{I}$$.\n- Each child $$i$$ has a selection cost $$c_i$$.\n- The planning horizon is a single decision period, so the decision is whether each child is included in the trip or not.\n- The planning goal is to choose a subset of children that minimizes total selection cost while satisfying all family rules and trip-size limits.\n- A child-selection decision is represented by:\n  - $$x_i$$: a binary variable that equals $$1$$ if child $$i$$ is taken on the trip and $$0$$ otherwise.\n  - The selected set is the collection of all children with $$x_i = 1$$.\n  - The total trip cost is the sum of the costs of all selected children.\n- Mandatory participation rules:\n  - Some children may be required to be included in every feasible plan.\n- Capacity rules:\n  - The total number of selected children may not exceed an upper limit $$U$$.\n  - The total number of selected children must be at least a lower limit $$L$$.\n- Compatibility rules:\n  - If one child is selected, certain other children must not be selected together with that child.\n- Precedence or dependency rules:\n  - If one child is selected, one or more other children must also be selected.\n- The objective is to minimize the total cost of the selected children subject to the mandatory, capacity, compatibility, and dependency rules.\n- A solution is represented by:\n  - $$x_i$$ for each $$i \\in \\mathcal{I}$$, indicating whether each child is selected.\n  - The resulting selected subset of children.\n  - The total minimized trip cost.\n\nInput Format\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Set of children indexed by $$i$$.\",\n      \"size\": \"$$n$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"description\": \"Selection cost of child $$i$$.\",\n      \"shape\": [\"$$n$$\"]\n    },\n    \"$$U$$\": {\n      \"description\": \"Maximum number of children that may be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$L$$\": {\n      \"description\": \"Minimum number of children that must be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$\\\\mathcal{M}$$\": {\n      \"description\": \"Set of mandatory children that must be selected.\",\n      \"type\": \"set of indices\"\n    },\n    \"$$\\\\mathcal{P}$$\": {\n      \"description\": \"Set of ordered dependency rules where selecting one child requires selecting another child or group of children.\",\n      \"type\": \"list of rules\"\n    },\n    \"$$\\\\mathcal{Q}$$\": {\n      \"description\": \"Set of incompatibility rules where selecting one child forbids selecting another child or group of children together.\",\n      \"type\": \"list of rules\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"decision_variables\": {\n    \"$$x_i$$\": {\n      \"description\": \"Binary selection variable for child $$i$$.\",\n      \"shape\": [\"$$n$$\"],\n      \"values\": [\"$$0$$\", \"$$1$$\"]\n    }\n  },\n  \"selected_children\": {\n    \"description\": \"The set of children with $$x_i = 1$$.\",\n    \"type\": \"list of indices\"\n  },\n  \"total_cost\": {\n    \"description\": \"The minimized total selection cost of the chosen children.\",\n    \"type\": \"number\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Children\",\n      \"elements\": [\"$$\\\\text{Harry}$$\", \"$$\\\\text{Hermione}$$\", \"$$\\\\text{Ron}$$\", \"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\", \"$$\\\\text{Ginny}$$\"],\n      \"size\": \"$$6$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"$$\\\\text{Harry}$$\": \"$$1200$$\",\n      \"$$\\\\text{Hermione}$$\": \"$$1650$$\",\n      \"$$\\\\text{Ron}$$\": \"$$750$$\",\n      \"$$\\\\text{Fred}$$\": \"$$800$$\",\n      \"$$\\\\text{George}$$\": \"$$800$$\",\n      \"$$\\\\text{Ginny}$$\": \"$$1500$$\"\n    },\n    \"$$U$$\": \"$$4$$\",\n    \"$$L$$\": \"$$3$$\",\n    \"$$\\\\mathcal{M}$$\": [\"$$\\\\text{Ginny}$$\"],\n    \"$$\\\\mathcal{P}$$\": [\n      {\n        \"if\": \"$$\\\\text{George}$$\",\n        \"then\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{Hermione}$$\"]\n      }\n    ],\n    \"$$\\\\mathcal{Q}$$\": [\n      {\n        \"if\": \"$$\\\\text{Harry}$$\",\n        \"forbid\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\"]\n      }\n    ]\n  }\n}",
+    "parameters": [
+        {
+            "name": "selection_cost",
+            "symbol": "c",
+            "shape": [
+                "n"
+            ],
+            "description": "Selection cost of each child $i \\in \\mathcal{I}$"
+        },
+        {
+            "name": "max_selected_children",
+            "symbol": "U",
+            "shape": [],
+            "description": "Maximum number of selected children"
+        },
+        {
+            "name": "min_selected_children",
+            "symbol": "L",
+            "shape": [],
+            "description": "Minimum number of selected children"
+        },
+        {
+            "name": "mandatory_children",
+            "symbol": "\\mathcal{M}",
+            "shape": [
+                "-"
+            ],
+            "description": "Set of mandatory children"
+        },
+        {
+            "name": "precedence_rules",
+            "symbol": "\\mathcal{P}",
+            "shape": [
+                "-"
+            ],
+            "description": "List of precedence or dependency rules"
+        },
+        {
+            "name": "incompatibility_rules",
+            "symbol": "\\mathcal{Q}",
+            "shape": [
+                "-"
+            ],
+            "description": "List of incompatibility rules"
+        }
+    ],
+    "variables": [
+        {
+            "name": "child_selected",
+            "symbol": "x",
+            "shape": [
+                "n"
+            ],
+            "domain": "binary",
+            "description": "Binary selection variable for child $i$, where 1 indicates the child is selected"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "selection_cardinality_bounds",
+            "description": "The number of selected children must be between the minimum and maximum trip sizes.",
+            "formula": "L \\le \\sum_{i \\in \\mathcal{I}} x_i \\le U",
+            "parameters": [
+                "min_selected_children",
+                "max_selected_children"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "mandatory_child_inclusion",
+            "description": "Every mandatory child must be selected.",
+            "formula": "x_i = 1 \\quad \\forall i \\in \\mathcal{M}",
+            "parameters": [
+                "mandatory_children"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "precedence_dependency_rules",
+            "description": "If a child triggers a precedence rule, all listed dependent children must also be selected.",
+            "formula": "x_a \\le x_b \\quad \\forall (a,b) \\in \\mathcal{P}",
+            "parameters": [
+                "precedence_rules"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "incompatibility_rules",
+            "description": "If a child triggers an incompatibility rule, none of the listed forbidden children may be selected together with it.",
+            "formula": "x_a + x_b \\le 1 \\quad \\forall (a,b) \\in \\mathcal{Q}",
+            "parameters": [
+                "incompatibility_rules"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "binary_selection_variables",
+            "description": "Each child selection decision is binary.",
+            "formula": "x_i \\in \\{0,1\\} \\quad \\forall i \\in \\mathcal{I}",
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "selection_cardinality_bounds_lower",
+            "description": "The number of selected children must be at least the minimum trip size.",
+            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\ge L",
+            "parameters": [
+                "min_selected_children"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        },
+        {
+            "name": "selection_cardinality_bounds_upper",
+            "description": "The number of selected children must not exceed the maximum trip size.",
+            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\le U",
+            "parameters": [
+                "max_selected_children"
+            ],
+            "variables": [
+                "child_selected"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_selection_cost",
+            "description": "Minimize the total selection cost of the chosen children.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total selection cost of the chosen children in the single-period child selection problem.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i \\in \\mathcal{I}} c_i x_i",
+        "parameters": [
+            "selection_cost"
+        ],
+        "variables": [
+            "child_selected"
+        ]
+    }
+}

@@ -1,0 +1,186 @@
+{
+    "problem": "Problem description\n- There is a single product planned over a finite horizon of $$T$$ periods, indexed by $$t \\in \\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- The planning goal is to determine the monthly purchasing and selling quantities that maximize total profit over the horizon.\n- The store has a storage capacity of $$C$$ units for the product.\n- The initial inventory available at the beginning of the planning horizon is $$I^{0}$$ units.\n- Purchasing is allowed once at the beginning of each period, and sales occur within the same period.\n- The unit purchasing cost in period $$t$$ is $$c^{\\mathrm{buy}}_{t}$$.\n- The unit selling revenue in period $$t$$ is $$c^{\\mathrm{sell}}_{t}$$.\n- Demand or market absorption in each period may be represented by the quantity actually sold in that period, denoted by $$s_{t}$$.\n- Inventory carried from one period to the next is tracked so that stock balance is maintained across the planning horizon.\n- The total inventory held at any time must not exceed the warehouse capacity.\n- The quantity sold in each period cannot exceed the product available from initial inventory plus purchases made up to that period.\n- End-of-period inventory must remain feasible and nonnegative.\n- A solution is represented by:\n  - $$x_{t}$$: quantity purchased in period $$t$$.\n  - $$s_{t}$$: quantity sold in period $$t$$.\n  - $$I_{t}$$: inventory remaining at the end of period $$t$$.\n  - $$Z$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"T\": \"integer, number of planning periods, indexed by $$t \\\\in \\\\mathcal{T}$$\",\n  \"C\": \"nonnegative number, storage capacity of the product\",\n  \"I0\": \"nonnegative number, initial inventory at the beginning of period $$1$$\",\n  \"buy_price\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$c^{\\\\mathrm{buy}}_{t}$$, unit purchasing cost in period $$t$$\"\n  },\n  \"sell_price\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$c^{\\\\mathrm{sell}}_{t}$$, unit selling revenue in period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"purchase_quantity\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$x_{t}$$, quantity purchased in period $$t$$\"\n  },\n  \"sales_quantity\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$s_{t}$$, quantity sold in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$I_{t}$$, inventory remaining at the end of period $$t$$\"\n  },\n  \"total_profit\": {\n    \"type\": \"number\",\n    \"meaning\": \"$$Z$$, maximum total profit over the horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"C\": 500,\n  \"I0\": 200,\n  \"buy_price\": [8, 6, 9],\n  \"sell_price\": [9, 8, 10]\n}",
+    "parameters": [
+        {
+            "name": "planning_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in the finite horizon"
+        },
+        {
+            "name": "storage_capacity",
+            "symbol": "C",
+            "shape": [],
+            "description": "Maximum inventory storage capacity"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [],
+            "description": "Inventory available at the beginning of period 0"
+        },
+        {
+            "name": "buy_price",
+            "symbol": "c^{buy}",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit purchasing cost in each period"
+        },
+        {
+            "name": "sell_price",
+            "symbol": "c^{sell}",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit selling revenue in each period"
+        }
+    ],
+    "variables": [
+        {
+            "name": "purchase_quantity",
+            "symbol": "x",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity purchased in each period"
+        },
+        {
+            "name": "sales_quantity",
+            "symbol": "s",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity sold in each period"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Inventory remaining at the end of each period"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_purchase_quantity",
+            "description": "Purchases must be nonnegative in each period.",
+            "formula": "x[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_sales_quantity",
+            "description": "Sales must be nonnegative in each period.",
+            "formula": "s[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_ending_inventory",
+            "description": "Ending inventory must be nonnegative in each period.",
+            "formula": "I[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "period_index_integrality",
+            "description": "The planning horizon size must be a positive integer.",
+            "formula": "T \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": []
+        },
+        {
+            "name": "capacity_nonnegative",
+            "description": "Storage capacity must be nonnegative.",
+            "formula": "C \\geq 0",
+            "parameters": [
+                "storage_capacity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "initial_inventory_nonnegative",
+            "description": "Initial inventory must be nonnegative.",
+            "formula": "I_0 \\geq 0",
+            "parameters": [
+                "initial_inventory"
+            ],
+            "variables": []
+        },
+        {
+            "name": "purchase_quantity_domain",
+            "description": "Purchase quantities are continuous and nonnegative.",
+            "formula": "x[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "sales_quantity_domain",
+            "description": "Sales quantities are continuous and nonnegative.",
+            "formula": "s[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "ending_inventory_domain",
+            "description": "Ending inventory is continuous and nonnegative.",
+            "formula": "I[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "planning_periods"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit over the finite planning horizon.",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit over the finite planning horizon, defined as total sales revenue minus total purchasing cost.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\max \\; Z = \\sum_{t=0}^{T-1} c^{sell}_t s[t] - \\sum_{t=0}^{T-1} c^{buy}_t x[t]",
+        "parameters": [
+            "buy_price",
+            "sell_price",
+            "planning_periods"
+        ],
+        "variables": [
+            "purchase_quantity",
+            "sales_quantity"
+        ]
+    }
+}

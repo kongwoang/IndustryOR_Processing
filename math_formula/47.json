@@ -1,0 +1,339 @@
+{
+    "problem": "Problem description\n- There is a finite set of products $$\\mathcal{P}$$, a finite set of processes $$\\mathcal{R}$$, and a weekly planning horizon $$\\mathcal{T}$$.\n- Each product $$p \\in \\mathcal{P}$$ requires processing on the available processes, and the processing time per unit on process $$r \\in \\mathcal{R}$$ is given by $$a_{r,p}$$.\n- Each process $$r$$ has a regular available weekly capacity $$C_{r,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- A designated process $$r^{\\mathrm{O}}$$ allows overtime, with overtime availability $$O_{r,t}$$ in each period.\n- Each product $$p$$ has a standard unit profit $$\\pi_{p,t}$$.\n- If a unit of product $$p$$ is completed using overtime on process $$r^{\\mathrm{O}}$$, its realized profit is reduced by $$\\delta_{p,t}$$.\n- Each product has a minimum required production level $$L_{p,t}$$ in each period.\n- A designated process $$r^{\\mathrm{E}}$$ must be used exactly to its regular capacity in every period.\n- The designated overtime-eligible process $$r^{\\mathrm{O}}$$ should use its regular capacity fully, and any additional required time may be covered by overtime up to the overtime limit.\n- The total realized profit over the planning horizon must meet or exceed the target $$\\Pi^{\\min}$$.\n- Production quantities must be nonnegative, and unit counts are integer-valued whenever whole units are required.\n- The optimization goal is to choose a weekly production plan and overtime allocation that satisfy the profit target, minimum production commitments, and process-utilization requirements while accounting for reduced profit on overtime production.\n- A solution is represented by:\n  - $$x_{p,t}$$: total quantity of product $$p$$ produced in period $$t$$.\n  - $$y_{p,t}$$: quantity of product $$p$$ whose work on process $$r^{\\mathrm{O}}$$ is performed in overtime in period $$t$$.\n  - $$h_t^{\\mathrm{OT}}$$: overtime hours used on process $$r^{\\mathrm{O}}$$ in period $$t$$.\n  - $$d$$: optional deviation variables, if the model is built as a goal-attainment or priority-goal program.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": \"$$\\\\mathcal{P}$$\",\n    \"processes\": \"$$\\\\mathcal{R}$$\",\n    \"periods\": \"$$\\\\mathcal{T}$$\"\n  },\n  \"parameters\": {\n    \"processingTime\": {\n      \"symbol\": \"$$a_{r,p}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n      \"meaning\": \"hours required on process $$r$$ per unit of product $$p$$\"\n    },\n    \"regularCapacity\": {\n      \"symbol\": \"$$C_{r,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"regular available hours on process $$r$$ in period $$t$$\"\n    },\n    \"overtimeCapacity\": {\n      \"symbol\": \"$$O_{r,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"maximum overtime hours on process $$r$$ in period $$t$$\"\n    },\n    \"unitProfit\": {\n      \"symbol\": \"$$\\\\pi_{p,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"standard profit per unit of product $$p$$ in period $$t$$\"\n    },\n    \"overtimeProfitReduction\": {\n      \"symbol\": \"$$\\\\delta_{p,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"profit reduction per unit of product $$p$$ completed in overtime on $$r^{\\\\mathrm{O}}$$\"\n    },\n    \"minimumProduction\": {\n      \"symbol\": \"$$L_{p,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"minimum required production of product $$p$$ in period $$t$$\"\n    },\n    \"profitTarget\": {\n      \"symbol\": \"$$\\\\Pi^{\\\\min}$$\",\n      \"meaning\": \"minimum total realized profit over the planning horizon\"\n    },\n    \"exactUtilizationProcess\": {\n      \"symbol\": \"$$r^{\\\\mathrm{E}} \\\\in \\\\mathcal{R}$$\",\n      \"meaning\": \"process that must be fully used exactly at its regular capacity\"\n    },\n    \"overtimeEligibleProcess\": {\n      \"symbol\": \"$$r^{\\\\mathrm{O}} \\\\in \\\\mathcal{R}$$\",\n      \"meaning\": \"process for which overtime is allowed\"\n    },\n    \"utilizationTargets\": {\n      \"symbol\": \"$$U_{r,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n      \"meaning\": \"target utilization hours for each process and period\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"productionPlan\": {\n    \"symbol\": \"$$x_{p,t}$$\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"meaning\": \"total production quantity of each product in each period\"\n  },\n  \"overtimeAllocation\": {\n    \"symbol\": \"$$y_{p,t}$$\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"meaning\": \"quantity of each product whose designated overtime-process work is performed in overtime\"\n  },\n  \"overtimeUsage\": {\n    \"symbol\": \"$$h_t^{\\\\mathrm{OT}}$$\",\n    \"shape\": \"$$|\\\\mathcal{T}|$$\",\n    \"meaning\": \"overtime hours used on the overtime-eligible process in each period\"\n  },\n  \"goalDeviations\": {\n    \"symbol\": \"$$d$$\",\n    \"meaning\": \"optional deviation values for profit, production, and utilization targets if the chosen model uses goal programming\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"products\": [\"$$A$$\", \"$$B$$\"],\n    \"processes\": [\"$$I$$\", \"$$II$$\"],\n    \"periods\": [\"$$\\\\tau_1$$\"]\n  },\n  \"parameters\": {\n    \"processingTime\": \"$$\\\\begin{bmatrix}4 & 6\\\\\\\\3 & 2\\\\end{bmatrix}$$\",\n    \"regularCapacity\": \"$$\\\\begin{bmatrix}150\\\\\\\\70\\\\end{bmatrix}$$\",\n    \"overtimeCapacity\": \"$$\\\\begin{bmatrix}0\\\\\\\\30\\\\end{bmatrix}$$\",\n    \"unitProfit\": \"$$\\\\begin{bmatrix}300\\\\\\\\450\\\\end{bmatrix}$$\",\n    \"overtimeProfitReduction\": \"$$\\\\begin{bmatrix}20\\\\\\\\25\\\\end{bmatrix}$$\",\n    \"minimumProduction\": \"$$\\\\begin{bmatrix}10\\\\\\\\15\\\\end{bmatrix}$$\",\n    \"profitTarget\": \"$$10000$$\",\n    \"exactUtilizationProcess\": \"$$I$$\",\n    \"overtimeEligibleProcess\": \"$$II$$\",\n    \"utilizationTargets\": \"$$\\\\begin{bmatrix}150\\\\\\\\70\\\\end{bmatrix}$$\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "products",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Finite set of products indexed by p"
+        },
+        {
+            "name": "processes",
+            "symbol": "\\mathcal{R}",
+            "shape": [],
+            "description": "Finite set of processes indexed by r"
+        },
+        {
+            "name": "planning_periods",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Finite set of planning periods indexed by t"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "a",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{P}"
+            ],
+            "description": "Processing time per unit of product p on process r"
+        },
+        {
+            "name": "regular_capacity",
+            "symbol": "C",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{T}"
+            ],
+            "description": "Regular available hours on process r in period t"
+        },
+        {
+            "name": "overtime_capacity",
+            "symbol": "O",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{T}"
+            ],
+            "description": "Maximum overtime hours on process r in period t"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "description": "Standard profit per unit of product p in period t"
+        },
+        {
+            "name": "overtime_profit_reduction",
+            "symbol": "\\delta",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "description": "Profit reduction per unit of product p completed in overtime on the designated overtime-eligible process in period t"
+        },
+        {
+            "name": "minimum_production",
+            "symbol": "L",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "description": "Minimum required production of product p in period t"
+        },
+        {
+            "name": "minimum_total_profit",
+            "symbol": "\\Pi^{\\min}",
+            "shape": [],
+            "description": "Minimum total realized profit over the planning horizon"
+        },
+        {
+            "name": "exact_utilization_process",
+            "symbol": "r^{\\mathrm{E}}",
+            "shape": [],
+            "description": "Designated process that must be used exactly at regular capacity in every period"
+        },
+        {
+            "name": "overtime_eligible_process",
+            "symbol": "r^{\\mathrm{O}}",
+            "shape": [],
+            "description": "Designated process on which overtime is allowed"
+        },
+        {
+            "name": "utilization_targets",
+            "symbol": "U",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{T}"
+            ],
+            "description": "Utilization targets by process and period"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_plan",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "integer",
+            "description": "Total quantity of product p produced in period t"
+        },
+        {
+            "name": "overtime_allocation",
+            "symbol": "y",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "integer",
+            "description": "Quantity of product p whose work on the overtime-eligible process is performed in overtime in period t"
+        },
+        {
+            "name": "overtime_usage",
+            "symbol": "h^{\\mathrm{OT}}",
+            "shape": [
+                "\\mathcal{T}"
+            ],
+            "domain": "continuous",
+            "description": "Overtime hours used on the overtime-eligible process in period t"
+        },
+        {
+            "name": "goal_deviations",
+            "symbol": "d",
+            "shape": [
+                "-"
+            ],
+            "domain": "continuous",
+            "description": "Optional deviation variables for goal-attainment or priority-goal formulations"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_production",
+            "description": "Production quantities must be nonnegative",
+            "formula": "x_{p,t}\\ge 0",
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "nonnegative_overtime_allocation",
+            "description": "Overtime allocation quantities must be nonnegative",
+            "formula": "y_{p,t}\\ge 0",
+            "variables": [
+                "overtime_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_overtime_usage",
+            "description": "Overtime usage must be nonnegative",
+            "formula": "h^{\\mathrm{OT}}_t\\ge 0",
+            "variables": [
+                "overtime_usage"
+            ]
+        },
+        {
+            "name": "integer_production_and_overtime",
+            "description": "Production and overtime allocation quantities are integer-valued whenever whole units are required",
+            "formula": "x_{p,t},y_{p,t}\\in\\mathbb{Z}_{\\ge 0}",
+            "variables": [
+                "production_plan",
+                "overtime_allocation"
+            ]
+        },
+        {
+            "name": "minimum_production_requirement",
+            "description": "Each product-period production quantity must meet the minimum production requirement",
+            "formula": "x_{p,t}\\ge L_{p,t}\\quad \\forall p\\in\\mathcal{P},\\ \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "minimum_production"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "exact_capacity_use_designated_process",
+            "description": "The designated exact-utilization process must use its regular capacity exactly in every period.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{r^{\\mathrm{E}},p}x_{p,t}=C_{r^{\\mathrm{E}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "processing_time",
+                "regular_capacity",
+                "exact_utilization_process"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "full_regular_capacity_overtime_process",
+            "description": "The designated overtime-eligible process must use its regular capacity exactly in every period before overtime begins.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{r^{\\mathrm{O}},p}x_{p,t}=C_{r^{\\mathrm{O}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "processing_time",
+                "regular_capacity",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "overtime_within_limit",
+            "description": "Any overtime on the designated overtime-eligible process is limited by the available overtime capacity",
+            "formula": "h^{\\mathrm{OT}}_t\\le O_{r^{\\mathrm{O}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "overtime_capacity",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "overtime_usage"
+            ]
+        },
+        {
+            "name": "profit_target",
+            "description": "Total realized profit across all products and periods must be at least the minimum total profit target",
+            "formula": "\\sum_{p\\in\\mathcal{P}}\\sum_{t\\in\\mathcal{T}}\\pi_{p,t}x_{p,t}-\\sum_{p\\in\\mathcal{P}}\\sum_{t\\in\\mathcal{T}}\\delta_{p,t}y_{p,t}\\ge \\Pi^{\\min}",
+            "parameters": [
+                "unit_profit",
+                "overtime_profit_reduction",
+                "minimum_total_profit"
+            ],
+            "variables": [
+                "production_plan",
+                "overtime_allocation"
+            ]
+        },
+        {
+            "name": "production_decomposition",
+            "description": "Total production is split into regular and overtime-produced units on the designated overtime-eligible process, ensuring the overtime allocation is accounted for linearly.",
+            "formula": "x_{p,t}=x^{\\mathrm{R}}_{p,t}+y_{p,t}",
+            "parameters": [
+                "processing_time",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "production_plan",
+                "overtime_allocation"
+            ]
+        },
+        {
+            "name": "overtime_time_link",
+            "description": "Overtime hours equal the processing-time-weighted overtime allocation on the designated overtime-eligible process in each period.",
+            "formula": "h^{\\mathrm{OT}}_t=\\sum_{p\\in\\mathcal{P}} a_{r^{\\mathrm{O}},p}y_{p,t}",
+            "parameters": [
+                "processing_time",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "overtime_usage",
+                "overtime_allocation"
+            ]
+        },
+        {
+            "name": "regular_capacity_exact_use",
+            "description": "The designated exact-utilization process uses its regular capacity exactly in every period.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{r^{\\mathrm{E}},p}x_{p,t}=C_{r^{\\mathrm{E}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "processing_time",
+                "regular_capacity",
+                "exact_utilization_process"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "regular_capacity_full_use_overtime_process",
+            "description": "The designated overtime-eligible process uses its regular capacity exactly in every period before any overtime is counted.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{r^{\\mathrm{O}},p}x_{p,t}=C_{r^{\\mathrm{O}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "processing_time",
+                "regular_capacity",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        },
+        {
+            "name": "overtime_limit",
+            "description": "Overtime usage on the designated overtime-eligible process cannot exceed the available overtime capacity.",
+            "formula": "h^{\\mathrm{OT}}_t\\le O_{r^{\\mathrm{O}},t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "overtime_capacity",
+                "overtime_eligible_process"
+            ],
+            "variables": [
+                "overtime_usage"
+            ]
+        },
+        {
+            "name": "utilization_targets_linked",
+            "description": "If the utilization target matrix U is intended to be enforced, define the target coverage level as a linear equality to the corresponding process-period workload; this keeps the schema-consistent target data operational.",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{r,t,p}x_{p,t}=U_{r,t}\\quad \\forall r\\in\\mathcal{R},\\ \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "utilization_targets",
+                "processing_time"
+            ],
+            "variables": [
+                "production_plan"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "feasibility_of_production_plan",
+            "description": "Find a weekly production and overtime plan that satisfies minimum production requirements, capacity rules, overtime limits, and profit target",
+            "sense": "feasibility"
+        },
+        {
+            "name": "minimize_goal_deviations",
+            "description": "If a goal-attainment or priority-goal formulation is used, minimize the deviation variables associated with the stated targets",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "The model is a feasibility-driven MILP; the previous generic deviation objective is removed because no explicit deviation equations are defined. The final objective is to find any feasible production and overtime plan satisfying all hard constraints.",
+        "objective_combination_method": "one_objective",
+        "sense": "feasibility",
+        "formula": "0",
+        "parameters": [],
+        "variables": []
+    }
+}

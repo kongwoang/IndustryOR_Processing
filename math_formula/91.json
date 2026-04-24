@@ -1,0 +1,205 @@
+{
+    "problem": "Problem description\n- There is a finite set $$\\mathcal{V}$$ of vehicle types, indexed by $$i \\in \\mathcal{V}$$.\n- A group of $$N$$ travelers must be transported in a single planning decision.\n- Each vehicle type $$i$$ has a seating capacity $$c_i$$, a rental cost $$k_i$$, and an available fleet limit $$u_i$$.\n- A total of $$D$$ drivers are available.\n- Each rented vehicle requires one driver.\n- The goal is to choose how many vehicles of each type to rent so that all travelers are accommodated at minimum total rental cost.\n- The chosen fleet must respect the available number of vehicles of each type.\n- The total number of rented vehicles must not exceed the number of available drivers.\n- The total seating capacity of the chosen vehicles must be sufficient for all travelers.\n- All decision quantities must be nonnegative integers.\n- A solution is represented by:\n  - $$x_i$$: the number of vehicles rented of type $$i \\in \\mathcal{V}$$.\n  - $$z$$: the total rental cost of the selected fleet.\n\nInput Format\n{\n  \"demand\": {\n    \"travelers\": \"$$N$$\"\n  },\n  \"resources\": {\n    \"drivers_available\": \"$$D$$\"\n  },\n  \"vehicle_types\": [\n    {\n      \"type_id\": \"$$i$$\",\n      \"available_units\": \"$$u_i$$\",\n      \"capacity\": \"$$c_i$$\",\n      \"rental_cost\": \"$$k_i$$\"\n    }\n  ]\n}\n\nThe array $$vehicle\\_types$$ contains one record for each vehicle type $$i \\in \\mathcal{V}$$.\n\nOutput Format\n{\n  \"selected_units\": [\n    {\n      \"type_id\": \"$$i$$\",\n      \"quantity\": \"$$x_i$$\"\n    }\n  ],\n  \"total_rental_cost\": \"$$z$$\"\n}\n\nThe array $$selected\\_units$$ contains one record for each vehicle type $$i \\in \\mathcal{V}$$, giving the chosen integer quantity of that type.\n\nExample(s)\n\nInput 1\n{\n  \"demand\": {\n    \"travelers\": 400\n  },\n  \"resources\": {\n    \"drivers_available\": 9\n  },\n  \"vehicle_types\": [\n    {\n      \"type_id\": \"bus\",\n      \"available_units\": 10,\n      \"capacity\": 50,\n      \"rental_cost\": 800\n    },\n    {\n      \"type_id\": \"minibus\",\n      \"available_units\": 8,\n      \"capacity\": 40,\n      \"rental_cost\": 600\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "vehicle_types",
+            "symbol": "\\mathcal{V}",
+            "shape": [
+                "-"
+            ],
+            "description": "Finite set of vehicle types, indexed by i in the set"
+        },
+        {
+            "name": "total_travelers",
+            "symbol": "N",
+            "shape": [],
+            "description": "Total number of travelers to transport"
+        },
+        {
+            "name": "available_drivers",
+            "symbol": "D",
+            "shape": [],
+            "description": "Total number of available drivers"
+        },
+        {
+            "name": "seating_capacity",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "description": "Seating capacity of each vehicle type i"
+        },
+        {
+            "name": "rental_cost",
+            "symbol": "k",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "description": "Rental cost of one vehicle of each type i"
+        },
+        {
+            "name": "fleet_limit",
+            "symbol": "u",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "description": "Available fleet limit for each vehicle type i"
+        }
+    ],
+    "variables": [
+        {
+            "name": "vehicles_rented",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "domain": "integer",
+            "description": "Number of vehicles rented of each type i"
+        },
+        {
+            "name": "total_rental_cost",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total rental cost of the selected fleet"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_travelers",
+            "description": "Total travelers is nonnegative",
+            "formula": "N",
+            "parameters": [
+                "total_travelers"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_drivers",
+            "description": "Available drivers is nonnegative",
+            "formula": "D",
+            "parameters": [
+                "available_drivers"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_vehicle_capacity",
+            "description": "Vehicle seating capacity is nonnegative for each vehicle type",
+            "formula": "c[i]",
+            "parameters": [
+                "seating_capacity",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_rental_cost",
+            "description": "Rental cost is nonnegative for each vehicle type",
+            "formula": "k[i]",
+            "parameters": [
+                "rental_cost",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_fleet_limit",
+            "description": "Fleet limit is nonnegative for each vehicle type",
+            "formula": "u[i]",
+            "parameters": [
+                "fleet_limit",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "integer_vehicle_decisions",
+            "description": "Number of vehicles rented of each type is a nonnegative integer",
+            "formula": "x[i]",
+            "parameters": [
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "nonnegative_total_rental_cost",
+            "description": "Total rental cost is nonnegative",
+            "formula": "z",
+            "parameters": [],
+            "variables": [
+                "total_rental_cost"
+            ]
+        },
+        {
+            "name": "driver_limit",
+            "description": "Total number of rented vehicles cannot exceed the number of available drivers; each rented vehicle requires one driver",
+            "formula": "\\sum_{i\\in\\mathcal{V}} x_i \\leq D",
+            "parameters": [
+                "available_drivers",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "fleet_availability_limit",
+            "description": "Rented vehicles of each type cannot exceed the available fleet limit for that type",
+            "formula": "x_i \\leq u_i \\quad \\forall i\\in\\mathcal{V}",
+            "parameters": [
+                "fleet_limit",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "capacity_requirement",
+            "description": "Total seating capacity must be sufficient to transport all travelers",
+            "formula": "\\sum_{i\\in\\mathcal{V}} c_i x_i \\geq N",
+            "parameters": [
+                "seating_capacity",
+                "total_travelers",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "cost_definition",
+            "description": "Total rental cost is determined by the selected vehicle quantities and their rental costs",
+            "formula": "z = \\sum_{i\\in\\mathcal{V}} k_i x_i",
+            "parameters": [
+                "rental_cost",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented",
+                "total_rental_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_rental_cost",
+            "description": "Minimize the total rental cost of the selected fleet while meeting traveler demand and resource limits",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total rental cost of the selected fleet while meeting traveler demand and resource limits.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "z",
+        "parameters": [],
+        "variables": [
+            "total_rental_cost"
+        ]
+    }
+}

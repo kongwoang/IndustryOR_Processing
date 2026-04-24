@@ -1,0 +1,293 @@
+{
+    "problem": "Problem description\n- A single-period production and export planning problem is considered for a set $$\\mathcal{I}$$ of commodities, where each commodity may be both a final export item and an intermediate input to other commodities.\n- The planner is given a world-market export price $$\\pi_i$$ for each commodity $$i \\in \\mathcal{I}$$, an imported-input expenditure coefficient $$\\mu_i$$ per unit of commodity $$i$$, a technical input matrix $$A = [a_{ij}]$$, a labor requirement coefficient $$\\lambda_i$$ per unit of commodity $$i$$, and optional commodity-specific production caps $$\\bar{x}_i$$.\n- The planning horizon is a single period $$\\mathcal{T}$$, and the total available labor over $$\\mathcal{T}$$ is $$L$$.\n- The planning goal is to choose nonnegative production levels so that the total export value is maximized while imported-input expenditure is minimized, subject to all feasibility limits.\n- The plan must respect the production recipe of each commodity, meaning that all required intermediate commodity inputs, imported inputs, and labor must be available for the chosen production level.\n- Production may not exceed any commodity-specific capacity limit that is provided.\n- Total labor used across all commodities must not exceed the available labor budget.\n- All produced quantities are assumed to be sold or exported within the same planning period, with no inventory carryover, backlog, or explicit domestic demand cap unless a demand limit $$d_i$$ is provided as input.\n- A solution is represented by:\n  - $$x_i$$: the production and export quantity of commodity $$i \\in \\mathcal{I}$$.\n  - $$z$$: the optimal value of the planning objective, representing the best net domestic value created by the plan.\n  - $$m$$: the total imported-input expenditure implied by the chosen production plan.\n\nInput Format\n{\n  \"commodities\": {\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"type\": \"array of identifiers\",\n    \"description\": \"Set of commodities indexed by $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"type\": \"array or singleton set\",\n    \"description\": \"Planning period set; in this problem, a single-period horizon.\"\n  },\n  \"export_prices\": {\n    \"symbol\": \"$$\\\\pi_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"World-market export price per unit of commodity $$i$$.\"\n  },\n  \"imported_input_expenditure\": {\n    \"symbol\": \"$$\\\\mu_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Imported-input expenditure required per unit of commodity $$i$$.\"\n  },\n  \"technical_input_coefficients\": {\n    \"symbol\": \"$$A = [a_{ij}]$$\",\n    \"type\": \"matrix of size $$|\\\\mathcal{I}| \\\\times |\\\\mathcal{I}|$$\",\n    \"description\": \"For each produced commodity $$i$$, the amount of commodity $$j$$ needed per unit of $$i$$.\"\n  },\n  \"labor_requirements\": {\n    \"symbol\": \"$$\\\\lambda_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Labor required per unit of commodity $$i$$, expressed in a common labor unit.\"\n  },\n  \"capacity_upper_bounds\": {\n    \"symbol\": \"$$\\\\bar{x}_i$$\",\n    \"type\": \"optional array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Maximum allowable production for commodity $$i$$ when a cap exists; omitted or set to no upper bound otherwise.\"\n  },\n  \"external_demand_cap\": {\n    \"symbol\": \"$$d_i$$\",\n    \"type\": \"optional array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Optional external demand limit for commodity $$i$$; if absent, assume unlimited market absorption at price $$\\\\pi_i$$.\"\n  },\n  \"total_labor_available\": {\n    \"symbol\": \"$$L$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Total labor available over $$\\\\mathcal{T}$$.\"\n  },\n  \"objective_priority\": {\n    \"symbol\": \"$$\\\\text{maximize net export value}$$\",\n    \"type\": \"string\",\n    \"description\": \"Planning objective stating that export value should be maximized while import expenditure is reduced subject to feasibility.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Optimal production and export quantity for each commodity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$z^*$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Optimal value of the planning objective.\"\n  },\n  \"imported_input_expenditure_total\": {\n    \"symbol\": \"$$m^*$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Total imported-input expenditure implied by the optimal production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"commodities\": [\"steel\", \"engines\", \"electronic_components\", \"plastic\"],\n  \"planning_horizon\": [\"single_period\"],\n  \"export_prices\": {\n    \"steel\": 500,\n    \"engines\": 1500,\n    \"electronic_components\": 300,\n    \"plastic\": 1200\n  },\n  \"technical_input_coefficients\": {\n    \"steel\": {\n      \"engines\": 0.02,\n      \"plastic\": 0.01\n    },\n    \"engines\": {\n      \"steel\": 0.8,\n      \"electronic_components\": 0.15,\n      \"plastic\": 0.11\n    },\n    \"electronic_components\": {\n      \"steel\": 0.01,\n      \"engines\": 0.01,\n      \"plastic\": 0.05\n    },\n    \"plastic\": {\n      \"engines\": 0.03,\n      \"steel\": 0.2,\n      \"electronic_components\": 0.05\n    }\n  },\n  \"imported_input_expenditure\": {\n    \"steel\": 250,\n    \"engines\": 300,\n    \"electronic_components\": 50,\n    \"plastic\": 300\n  },\n  \"labor_requirements\": {\n    \"steel\": {\n      \"value\": 6,\n      \"unit\": \"person-months\"\n    },\n    \"engines\": {\n      \"value\": 1,\n      \"unit\": \"person-year\"\n    },\n    \"electronic_components\": {\n      \"value\": 6,\n      \"unit\": \"person-months\"\n    },\n    \"plastic\": {\n      \"value\": 2,\n      \"unit\": \"person-years\"\n    }\n  },\n  \"capacity_upper_bounds\": {\n    \"engines\": 650000,\n    \"plastic\": 60000\n  },\n  \"total_labor_available\": {\n    \"value\": 830000,\n    \"unit\": \"person-months per year\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "commodity_set_size",
+            "symbol": "I",
+            "shape": [],
+            "description": "Number of commodities in the commodity set \\(\\mathcal{I}\\)"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single-period planning horizon"
+        },
+        {
+            "name": "export_prices",
+            "symbol": "\\pi",
+            "shape": [
+                "I"
+            ],
+            "description": "Export price for each commodity"
+        },
+        {
+            "name": "imported_input_expenditure_coefficients",
+            "symbol": "\\mu",
+            "shape": [
+                "I"
+            ],
+            "description": "Imported-input expenditure coefficient for each commodity"
+        },
+        {
+            "name": "technical_input_matrix",
+            "symbol": "A",
+            "shape": [
+                "I",
+                "I"
+            ],
+            "description": "Technical input matrix where \\(a_{ij}\\) is the amount of commodity \\(j\\) required per unit of commodity \\(i\\)"
+        },
+        {
+            "name": "labor_requirements",
+            "symbol": "\\lambda",
+            "shape": [
+                "I"
+            ],
+            "description": "Labor requirement for each commodity"
+        },
+        {
+            "name": "production_upper_bounds",
+            "symbol": "\\bar{x}",
+            "shape": [
+                "I"
+            ],
+            "description": "Optional production capacity upper bound for each commodity"
+        },
+        {
+            "name": "demand_caps",
+            "symbol": "d",
+            "shape": [
+                "I"
+            ],
+            "description": "Optional external demand cap for each commodity"
+        },
+        {
+            "name": "total_available_labor",
+            "symbol": "L",
+            "shape": [],
+            "description": "Total labor available over the planning horizon"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "I"
+            ],
+            "domain": "continuous",
+            "description": "Production and export quantity for each commodity"
+        },
+        {
+            "name": "optimal_objective_value",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Optimal objective value of the planning problem"
+        },
+        {
+            "name": "total_imported_input_expenditure",
+            "symbol": "m",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total imported-input expenditure"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "production_nonnegativity",
+            "description": "production and export quantities must be nonnegative for all commodities",
+            "formula": "x[i]",
+            "parameters": [
+                "commodity_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "scalar_output_nonnegativity",
+            "description": "the reported objective value and imported-input expenditure are real-valued scalars, with imported-input expenditure nonnegative",
+            "formula": "z, m",
+            "parameters": [],
+            "variables": [
+                "optimal_objective_value",
+                "total_imported_input_expenditure"
+            ]
+        },
+        {
+            "name": "labor_capacity_limit",
+            "description": "total labor used across all commodities may not exceed the available labor",
+            "formula": "\\sum_{i=1}^{I} \\lambda_i x_i \\le L",
+            "parameters": [
+                "labor_requirements",
+                "total_available_labor"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_capacity_limit",
+            "description": "if a production upper bound is provided, production of a commodity cannot exceed that bound",
+            "formula": "x_i \\le \\bar{x}_i \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "production_upper_bounds"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "demand_cap_limit",
+            "description": "if a demand cap is provided, exported quantity of a commodity cannot exceed that cap",
+            "formula": "x_i \\le d_i \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "demand_caps"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "same_period_sale_or_export",
+            "description": "all produced quantities are sold or exported within the same period",
+            "formula": "x_i \\text{ is sold/exported in } \\mathcal{T} \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_nonnegativity",
+            "description": "production and export quantities must be nonnegative for all commodities",
+            "formula": "x_i \\ge 0 \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "commodity_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "scalar_output_nonnegativity",
+            "description": "the reported objective value is unrestricted and imported-input expenditure is nonnegative",
+            "formula": "m \\ge 0",
+            "parameters": [],
+            "variables": [
+                "total_imported_input_expenditure"
+            ]
+        },
+        {
+            "name": "optimal_objective_definition",
+            "description": "the reported objective value equals the total export revenue from the production plan",
+            "formula": "z = \\sum_{i=1}^{I} \\pi_i x_i",
+            "parameters": [
+                "export_prices"
+            ],
+            "variables": [
+                "production_quantity",
+                "optimal_objective_value"
+            ]
+        },
+        {
+            "name": "parameter_nonnegativity",
+            "description": "export prices, imported-input expenditure coefficients, labor requirements, total labor, and any optional capacity or demand caps are nonnegative",
+            "formula": "\\pi_i \\ge 0,\\; \\mu_i \\ge 0,\\; \\lambda_i \\ge 0,\\; L \\ge 0,\\; \\bar{x}_i \\ge 0,\\; d_i \\ge 0",
+            "parameters": [
+                "export_prices",
+                "imported_input_expenditure_coefficients",
+                "labor_requirements",
+                "total_available_labor",
+                "production_upper_bounds",
+                "demand_caps"
+            ],
+            "variables": []
+        },
+        {
+            "name": "technical_coefficient_nonnegativity",
+            "description": "technical input coefficients must be nonnegative for all commodity pairs",
+            "formula": "a_{ij} \\ge 0 \\quad \\forall i=1,\\ldots,I,\\; \\forall j=1,\\ldots,I",
+            "parameters": [
+                "technical_input_matrix"
+            ],
+            "variables": []
+        },
+        {
+            "name": "production_continuous_domain",
+            "description": "production quantities are continuous and nonnegative",
+            "formula": "x_i \\in \\mathbb{R}_{+} \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "commodity_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "single_period_indexing",
+            "description": "the model is indexed to a single planning period and has no inter-period carryover state",
+            "formula": "t \\in \\mathcal{T},\\; |\\mathcal{T}|=1",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "imported_input_expenditure_definition",
+            "description": "the imported-input expenditure equals the coefficient-weighted expenditure implied by the production plan",
+            "formula": "m = \\sum_{i=1}^{I} \\mu_i x_i",
+            "parameters": [
+                "imported_input_expenditure_coefficients"
+            ],
+            "variables": [
+                "production_quantity",
+                "total_imported_input_expenditure"
+            ]
+        },
+        {
+            "name": "reporting_variable_definition",
+            "description": "the scalar report variable z records total export value and m records total imported-input expenditure",
+            "formula": "z = \\sum_{i=1}^{I} \\pi_i x_i,\\; m = \\sum_{i=1}^{I} \\mu_i x_i",
+            "parameters": [
+                "export_prices",
+                "imported_input_expenditure_coefficients"
+            ],
+            "variables": [
+                "production_quantity",
+                "optimal_objective_value",
+                "total_imported_input_expenditure"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "maximize_export_value",
+            "description": "maximize total export value across all commodities",
+            "sense": "maximize"
+        },
+        {
+            "name": "minimize_imported_input_expenditure",
+            "description": "minimize total imported-input expenditure",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Lexicographically maximize total export revenue and, among all export-optimal plans, minimize total imported-input expenditure.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "maximize",
+        "formula": "\\text{preemptively maximize } \\sum_{i=1}^{I} \\pi_i x_i \\text{, then minimize } m",
+        "parameters": [
+            "export_prices",
+            "imported_input_expenditure_coefficients"
+        ],
+        "variables": [
+            "production_quantity",
+            "total_imported_input_expenditure"
+        ]
+    }
+}

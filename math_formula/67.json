@@ -1,0 +1,177 @@
+{
+    "problem": "Problem description\n- A single-period transportation planning problem is considered over a monthly planning horizon $$\\mathcal{T}$$.\n- There is a set of supply nodes $$\\mathcal{I}$$ representing coal yards, and a set of demand nodes $$\\mathcal{J}$$ representing residential areas.\n- Each supply node $$i \\in \\mathcal{I}$$ has an available coal quantity $$s_i$$ for the planning horizon.\n- Each demand node $$j \\in \\mathcal{J}$$ has a required coal quantity $$d_j$$ for the planning horizon.\n- The transportation distance from supply node $$i$$ to demand node $$j$$ is denoted by $$\\ell_{ij}$$.\n- The planning goal is to determine how much coal to ship from each supply node to each demand node so that demand is satisfied, supply availability is respected, and total ton-kilometers are minimized.\n- The business rules are:\n  - Coal shipped out of any supply node must not exceed the amount available at that node.\n  - Each demand node must receive enough coal to meet its monthly requirement.\n  - Shipment quantities must be nonnegative.\n  - When the network is balanced, all available supply is allocated and all demand is met.\n- A solution is represented by:\n  - $$x_{ij}$$: the quantity of coal shipped from supply node $$i \\in \\mathcal{I}$$ to demand node $$j \\in \\mathcal{J}$$ over the planning horizon.\n  - $$Z$$: the total transportation burden measured in ton-kilometers.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"Monthly planning horizon.\"\n  },\n  \"supply_nodes\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"meaning\": \"Set of coal yards.\"\n  },\n  \"demand_nodes\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{J}$$\",\n    \"meaning\": \"Set of residential areas.\"\n  },\n  \"supply_availability\": {\n    \"type\": \"vector\",\n    \"symbol\": \"$$s_i$$\",\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"Available coal quantity at each supply node $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"demand_requirements\": {\n    \"type\": \"vector\",\n    \"symbol\": \"$$d_j$$\",\n    \"shape\": \"$$|\\\\mathcal{J}|$$\",\n    \"meaning\": \"Required coal quantity at each demand node $$j \\\\in \\\\mathcal{J}$$.\"\n  },\n  \"distance_matrix\": {\n    \"type\": \"matrix\",\n    \"symbol\": \"$$\\\\ell_{ij}$$\",\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"Distance in kilometers from supply node $$i$$ to demand node $$j$$.\"\n  }\n}\n\nOutput Format\n{\n  \"shipments\": {\n    \"type\": \"matrix\",\n    \"symbol\": \"$$x_{ij}$$\",\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"Coal shipment quantity from supply node $$i$$ to demand node $$j$$.\"\n  },\n  \"total_transportation_burden\": {\n    \"type\": \"scalar\",\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"Total ton-kilometers produced by the shipment plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 1,\n  \"supply_nodes\": [\"A\", \"B\"],\n  \"demand_nodes\": [\"R1\", \"R2\", \"R3\"],\n  \"supply_availability\": {\n    \"A\": 80,\n    \"B\": 100\n  },\n  \"demand_requirements\": {\n    \"R1\": 55,\n    \"R2\": 75,\n    \"R3\": 50\n  },\n  \"distance_matrix\": {\n    \"A\": {\n      \"R1\": 10,\n      \"R2\": 5,\n      \"R3\": 6\n    },\n    \"B\": {\n      \"R1\": 4,\n      \"R2\": 8,\n      \"R3\": 15\n    }\n  }\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Monthly planning horizon for the single-period transportation planning model"
+        },
+        {
+            "name": "num_supply_nodes",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of supply nodes in the coal shipping network"
+        },
+        {
+            "name": "num_demand_nodes",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of demand nodes in the coal shipping network"
+        },
+        {
+            "name": "supply_availability",
+            "symbol": "s",
+            "shape": [
+                "M"
+            ],
+            "description": "Available coal quantity at each supply node"
+        },
+        {
+            "name": "demand_requirements",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Required coal quantity at each demand node"
+        },
+        {
+            "name": "distance_matrix",
+            "symbol": "\\ell",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "description": "Transportation distance in kilometers from each supply node to each demand node"
+        }
+    ],
+    "variables": [
+        {
+            "name": "shipment_quantity",
+            "symbol": "x",
+            "shape": [
+                "M",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of coal shipped from each supply node to each demand node"
+        },
+        {
+            "name": "total_transportation_burden",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total transportation burden measured in ton-kilometers"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "shipment_nonnegativity",
+            "description": "Shipment quantities must be nonnegative",
+            "formula": "x_{ij} \\ge 0",
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "supply_limit",
+            "description": "Total shipments out of each supply node must not exceed available supply",
+            "formula": "\\sum_{j=1}^{N} x_{ij} \\le s_i \\quad \\forall i\\in\\mathcal{I}",
+            "parameters": [
+                "supply_availability"
+            ],
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "demand_satisfaction",
+            "description": "Each demand node must receive enough coal to satisfy demand requirements",
+            "formula": "\\sum_{i=1}^{M} x_{ij} \\ge d_j \\quad \\forall j\\in\\mathcal{J}",
+            "parameters": [
+                "demand_requirements"
+            ],
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "balanced_network_exact_matching",
+            "description": "In a balanced network, total supply and total demand are matched exactly by the shipment plan",
+            "formula": "\\sum_{j=1}^{N} x_{ij} = s_i \\quad \\forall i\\in\\mathcal{I},\\qquad \\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j\\in\\mathcal{J}",
+            "parameters": [
+                "supply_availability",
+                "demand_requirements"
+            ],
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "parameter_nonnegativity_supply",
+            "description": "Supply availability values are nonnegative",
+            "formula": "s[i] \\ge 0",
+            "parameters": [
+                "supply_availability"
+            ]
+        },
+        {
+            "name": "parameter_nonnegativity_demand",
+            "description": "Demand requirements are nonnegative",
+            "formula": "d[j] \\ge 0",
+            "parameters": [
+                "demand_requirements"
+            ]
+        },
+        {
+            "name": "parameter_nonnegativity_distance",
+            "description": "Transportation distances are nonnegative",
+            "formula": "\\ell[i][j] \\ge 0",
+            "parameters": [
+                "distance_matrix"
+            ]
+        },
+        {
+            "name": "variable_domain_continuous_shipment",
+            "description": "Shipment quantities are continuous variables",
+            "formula": "x[i][j] \\text{ is continuous}",
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "variable_domain_continuous_burden",
+            "description": "Total transportation burden is a continuous variable",
+            "formula": "Z \\text{ is continuous}",
+            "variables": [
+                "total_transportation_burden"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "transportation_burden_minimization",
+            "description": "Minimize the total ton-kilometers associated with the shipment plan",
+            "sense": "maximize"
+        },
+        {
+            "name": "feasibility_shipment_plan",
+            "description": "Find any shipment plan satisfying all supply and demand requirements while respecting nonnegativity",
+            "sense": "feasibility"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total ton-kilometers associated with the shipment plan; the feasibility requirement is enforced through constraints, and the previous maximize sense is corrected to minimize.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{i=1}^{M}\\sum_{j=1}^{N} \\ell_{ij} x_{ij}",
+        "parameters": [
+            "distance_matrix"
+        ],
+        "variables": [
+            "shipment_quantity",
+            "total_transportation_burden"
+        ]
+    }
+}

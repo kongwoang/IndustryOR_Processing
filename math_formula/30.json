@@ -1,0 +1,344 @@
+{
+    "problem": "Problem description\n- There is a single planning horizon $$\\tau$$ in which production is planned.\n- A finite set of products $$\\mathcal P$$ must be manufactured, and every unit must pass through two sequential processing stages $$\\mathcal S=\\{A,B\\}$$.\n- Stage $$A$$ is performed on a stage-specific machine set $$\\mathcal M_A$$, and stage $$B$$ is performed on a stage-specific machine set $$\\mathcal M_B$$.\n- Product-and-machine feasibility is part of the input through a binary compatibility parameter $$\\delta_{p,s,m}$$, where $$\\delta_{p,s,m}=1$$ means product $$p$$ may be processed on machine $$m$$ at stage $$s$$, and $$\\delta_{p,s,m}=0$$ means that combination is not allowed.\n- For each feasible product-stage-machine combination, the input provides a processing time per unit $$t_{p,s,m}$$ measured in machine-hours per piece.\n- Each machine-stage combination has a limited available capacity $$H_{s,m}$$ measured in hours within the planning horizon $$\\tau$$.\n- Each machine-stage combination has a processing cost rate $$c_{s,m}$$ measured in cost per machine-hour.\n- Each product has a raw material cost $$r_p$$ per unit and a selling price $$u_p$$ per unit.\n- The planning decision is to choose how many units of each product to produce and how to distribute those units across the eligible machines at each stage.\n- Every manufactured unit must be processed at stage $$A$$ first and then at stage $$B$$, and the quantity processed through both stages must remain consistent for each product.\n- The objective is to maximize total profit over the planning horizon $$\\tau$$, where profit is the sales revenue from finished units minus raw material expense and machine processing expense.\n- Business requirements:\n  - Only compatible product-stage-machine combinations may receive production.\n  - No unit may skip either processing stage.\n  - The total time used on any machine must not exceed its available hours.\n  - All planned quantities must be nonnegative, and if the operating setting requires discrete pieces, quantities must be whole numbers.\n  - If an external demand limit $$d_p$$ is supplied for product $$p$$, then the number of units sold for that product must not exceed $$d_p$$; otherwise sales are treated as unconstrained by demand.\n- A solution is represented by:\n  - $$x_{p,s,m}$$: the number of units of product $$p$$ assigned to machine $$m$$ at stage $$s$$.\n  - $$q_p$$: the total finished quantity of product $$p$$ available for sale.\n  - $$\\Pi^\\star$$: the optimal total profit achieved by the production plan.\n\nInput Format\n{\n  \"planning_horizon\": \"$$\\\\tau$$\",\n  \"products\": {\n    \"set\": \"$$\\\\mathcal P$$\",\n    \"cardinality\": \"$$P$$\"\n  },\n  \"stages\": {\n    \"set\": \"$$\\\\mathcal S=\\\\{A,B\\\\}$$\",\n    \"cardinality\": \"$$S=2$$\"\n  },\n  \"machines\": {\n    \"stage_A\": \"$$\\\\mathcal M_A$$\",\n    \"stage_B\": \"$$\\\\mathcal M_B$$\"\n  },\n  \"compatibility\": {\n    \"meaning\": \"$$\\\\delta_{p,s,m}\\\\in\\\\{0,1\\\\}$$ indicates whether product $$p$$ can be processed on machine $$m$$ at stage $$s$$\",\n    \"shape\": \"for each $$s\\\\in\\\\mathcal S$$ and $$m\\\\in\\\\mathcal M_s$$, a vector over $$p\\\\in\\\\mathcal P$$\"\n  },\n  \"processing_time_per_unit\": {\n    \"meaning\": \"$$t_{p,s,m}$$ is the machine-hours required to process one unit of product $$p$$ on machine $$m$$ at stage $$s$$\",\n    \"shape\": \"for each $$s\\\\in\\\\mathcal S$$ and $$m\\\\in\\\\mathcal M_s$$, a vector over $$p\\\\in\\\\mathcal P$$\"\n  },\n  \"machine_capacity_hours\": {\n    \"meaning\": \"$$H_{s,m}$$ is the available machine time on machine $$m$$ at stage $$s$$ during $$\\\\tau$$\",\n    \"shape\": \"for each $$s\\\\in\\\\mathcal S$$ and $$m\\\\in\\\\mathcal M_s$$\"\n  },\n  \"processing_cost_per_hour\": {\n    \"meaning\": \"$$c_{s,m}$$ is the processing cost rate on machine $$m$$ at stage $$s$$\",\n    \"shape\": \"for each $$s\\\\in\\\\mathcal S$$ and $$m\\\\in\\\\mathcal M_s$$\"\n  },\n  \"raw_material_cost_per_unit\": {\n    \"meaning\": \"$$r_p$$ is the raw material cost for one unit of product $$p$$\",\n    \"shape\": \"for each $$p\\\\in\\\\mathcal P$$\"\n  },\n  \"unit_sales_price\": {\n    \"meaning\": \"$$u_p$$ is the sales price for one unit of product $$p$$\",\n    \"shape\": \"for each $$p\\\\in\\\\mathcal P$$\"\n  },\n  \"demand_cap\": {\n    \"meaning\": \"$$d_p$$ is an optional maximum sellable quantity for product $$p$$; if omitted, no demand cap is imposed\",\n    \"shape\": \"optional vector over $$p\\\\in\\\\mathcal P$$\"\n  }\n}\n\nOutput Format\n{\n  \"assigned_quantity\": {\n    \"field\": \"$$x_{p,s,m}$$\",\n    \"dimensions\": [\"$$p\\\\in\\\\mathcal P$$\", \"$$s\\\\in\\\\mathcal S$$\", \"$$m\\\\in\\\\mathcal M_s$$\"],\n    \"meaning\": \"units of product $$p$$ assigned to machine $$m$$ at stage $$s$$\"\n  },\n  \"finished_quantity\": {\n    \"field\": \"$$q_p$$\",\n    \"dimensions\": [\"$$p\\\\in\\\\mathcal P$$\"],\n    \"meaning\": \"total finished and saleable units of product $$p$$\"\n  },\n  \"objective_value\": {\n    \"field\": \"$$\\\\Pi^\\\\star$$\",\n    \"dimensions\": [\"scalar\"],\n    \"meaning\": \"maximum total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"single horizon\",\n  \"products\": [\"I\", \"II\", \"III\"],\n  \"stages\": [\"A\", \"B\"],\n  \"machines\": {\n    \"A\": [\"A1\", \"A2\"],\n    \"B\": [\"B1\", \"B2\", \"B3\"]\n  },\n  \"compatibility\": {\n    \"A\": {\n      \"A1\": {\"I\": true, \"II\": true, \"III\": false},\n      \"A2\": {\"I\": true, \"II\": true, \"III\": true}\n    },\n    \"B\": {\n      \"B1\": {\"I\": true, \"II\": true, \"III\": false},\n      \"B2\": {\"I\": true, \"II\": false, \"III\": true},\n      \"B3\": {\"I\": true, \"II\": false, \"III\": false}\n    }\n  },\n  \"processing_time_per_unit\": {\n    \"A\": {\n      \"A1\": {\"I\": 5, \"II\": 10, \"III\": null},\n      \"A2\": {\"I\": 7, \"II\": 9, \"III\": 12}\n    },\n    \"B\": {\n      \"B1\": {\"I\": 6, \"II\": 8, \"III\": null},\n      \"B2\": {\"I\": 4, \"II\": null, \"III\": 11},\n      \"B3\": {\"I\": 7, \"II\": null, \"III\": null}\n    }\n  },\n  \"machine_capacity_hours\": {\n    \"A1\": 6000,\n    \"A2\": 10000,\n    \"B1\": 4000,\n    \"B2\": 7000,\n    \"B3\": 4000\n  },\n  \"processing_cost_per_hour\": {\n    \"A1\": 0.05,\n    \"A2\": 0.03,\n    \"B1\": 0.06,\n    \"B2\": 0.11,\n    \"B3\": 0.05\n  },\n  \"raw_material_cost_per_unit\": {\n    \"I\": 0.25,\n    \"II\": 0.35,\n    \"III\": 0.5\n  },\n  \"unit_sales_price\": {\n    \"I\": 1.25,\n    \"II\": 2,\n    \"III\": 2.8\n  }\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "\\tau",
+            "shape": [],
+            "description": "Single planning horizon"
+        },
+        {
+            "name": "products",
+            "symbol": "\\mathcal P",
+            "shape": [],
+            "description": "Set of products indexed by p = 0,\\dots,P-1"
+        },
+        {
+            "name": "stages",
+            "symbol": "\\mathcal S",
+            "shape": [],
+            "description": "Set of processing stages {A,B}"
+        },
+        {
+            "name": "machines_stage_a",
+            "symbol": "\\mathcal M_A",
+            "shape": [],
+            "description": "Set of machines available at stage A"
+        },
+        {
+            "name": "machines_stage_b",
+            "symbol": "\\mathcal M_B",
+            "shape": [],
+            "description": "Set of machines available at stage B"
+        },
+        {
+            "name": "machines_by_stage",
+            "symbol": "\\mathcal M_s",
+            "shape": [
+                "\\mathcal S"
+            ],
+            "description": "Machine set corresponding to each stage s"
+        },
+        {
+            "name": "compatibility",
+            "symbol": "\\delta_{p,s,m}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal S",
+                "\\mathcal M_s"
+            ],
+            "description": "Compatibility indicator for product p, stage s, and machine m"
+        },
+        {
+            "name": "processing_time_per_unit",
+            "symbol": "t_{p,s,m}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal S",
+                "\\mathcal M_s"
+            ],
+            "description": "Processing time per unit of product p on machine m at stage s for feasible combinations"
+        },
+        {
+            "name": "available_machine_hours",
+            "symbol": "H_{s,m}",
+            "shape": [
+                "\\mathcal S",
+                "\\mathcal M_s"
+            ],
+            "description": "Available machine hours on machine m at stage s during the planning horizon"
+        },
+        {
+            "name": "processing_cost_rate",
+            "symbol": "c_{s,m}",
+            "shape": [
+                "\\mathcal S",
+                "\\mathcal M_s"
+            ],
+            "description": "Processing cost rate on machine m at stage s, in cost per machine-hour"
+        },
+        {
+            "name": "raw_material_cost",
+            "symbol": "r_p",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "description": "Raw material cost per unit of product p"
+        },
+        {
+            "name": "unit_sales_price",
+            "symbol": "u_p",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "description": "Sales price per unit of product p"
+        },
+        {
+            "name": "demand_cap",
+            "symbol": "d_p",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "description": "Optional demand cap for product p; may be absent"
+        }
+    ],
+    "variables": [
+        {
+            "name": "assigned_quantity",
+            "symbol": "x_{p,s,m}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal S",
+                "\\mathcal M_s"
+            ],
+            "domain": "continuous",
+            "description": "Number of units of product p assigned to machine m at stage s"
+        },
+        {
+            "name": "finished_quantity",
+            "symbol": "q_p",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "domain": "continuous",
+            "description": "Total finished quantity of product p available for sale"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_assigned_quantity",
+            "description": "Assigned quantity must be nonnegative for all product-stage-machine combinations.",
+            "formula": "x_{p,s,m} \\ge 0",
+            "parameters": [
+                "products",
+                "stages",
+                "machines_by_stage"
+            ],
+            "variables": [
+                "assigned_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_finished_quantity",
+            "description": "Finished quantity must be nonnegative for all products.",
+            "formula": "q_p \\ge 0",
+            "parameters": [
+                "products"
+            ],
+            "variables": [
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "integer_quantity_requirement",
+            "description": "Assigned and finished quantities must be whole numbers.",
+            "formula": "x_{p,s,m},\\ q_p \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [
+                "products",
+                "stages",
+                "machines_by_stage"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_assignment",
+            "description": "Only compatible product-stage-machine combinations may receive assigned quantity; incompatible combinations must be fixed to zero.",
+            "formula": "x_{p,s,m} = 0 \\quad \\forall (p,s,m) \\text{ such that } \\delta_{p,s,m}=0",
+            "parameters": [
+                "compatibility",
+                "products",
+                "stages",
+                "machines_by_stage"
+            ],
+            "variables": [
+                "assigned_quantity"
+            ]
+        },
+        {
+            "name": "stage_flow_consistency",
+            "description": "For each product, total assigned quantity at stage A must equal total assigned quantity at stage B and equal finished quantity.",
+            "formula": "q_p = \\sum_{m \\in \\mathcal M_A} x_{p,A,m} = \\sum_{m \\in \\mathcal M_B} x_{p,B,m}",
+            "parameters": [
+                "products",
+                "machines_stage_a",
+                "machines_stage_b"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "no_stage_skipping",
+            "description": "Every manufactured unit must pass through both stages, so stage A and stage B completion quantities are identical to finished quantity.",
+            "formula": "\\sum_{m \\in \\mathcal M_A} x_{p,A,m} = q_p,\\ \\sum_{m \\in \\mathcal M_B} x_{p,B,m} = q_p",
+            "parameters": [
+                "products",
+                "machines_stage_a",
+                "machines_stage_b"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "machine_capacity_limit",
+            "description": "The total processing time consumed on each machine-stage pair cannot exceed available hours.",
+            "formula": "\\sum_{p \\in \\mathcal P} t_{p,s,m} x_{p,s,m} \\le H_{s,m}",
+            "parameters": [
+                "products",
+                "stages",
+                "machines_by_stage",
+                "available_machine_hours",
+                "processing_time_per_unit"
+            ],
+            "variables": [
+                "assigned_quantity"
+            ]
+        },
+        {
+            "name": "demand_cap_limit",
+            "description": "If a demand cap is provided, finished quantity for each product cannot exceed that cap.",
+            "formula": "q_p \\le d_p",
+            "parameters": [
+                "demand_cap",
+                "products"
+            ],
+            "variables": [
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "profit_components",
+            "description": "Profit is revenue minus raw material and processing expense; this is captured in the objective, not as a separate constraint.",
+            "formula": "\\Pi = \\sum_{p \\in \\mathcal P} u_p q_p - \\sum_{p \\in \\mathcal P} r_p q_p - \\sum_{s \\in \\mathcal S} \\sum_{m \\in \\mathcal M_s} \\sum_{p \\in \\mathcal P} c_{s,m} t_{p,s,m} x_{p,s,m}",
+            "parameters": [
+                "unit_sales_price",
+                "raw_material_cost",
+                "processing_cost_rate",
+                "processing_time_per_unit"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_enforcement",
+            "description": "Incompatible product-stage-machine combinations cannot receive any assigned quantity; this is equivalent to the compatibility assignment rule and is retained in linear indexed form.",
+            "formula": "x_{p,s,m} = 0 \\quad \\forall p \\in \\mathcal P,\\ s \\in \\mathcal S,\\ m \\in \\mathcal M_s:\\ \\delta_{p,s,m}=0",
+            "parameters": [
+                "compatibility",
+                "products",
+                "stages",
+                "machines_by_stage"
+            ],
+            "variables": [
+                "assigned_quantity"
+            ]
+        },
+        {
+            "name": "stage_bounded_flow",
+            "description": "For each product, the quantity completed at stage B equals the quantity completed at stage A, and the finished quantity equals that common flow.",
+            "formula": "q_p = \\sum_{m \\in \\mathcal M_A} x_{p,A,m} = \\sum_{m \\in \\mathcal M_B} x_{p,B,m}",
+            "parameters": [
+                "products",
+                "machines_stage_a",
+                "machines_stage_b"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "machine_capacity_consumption",
+            "description": "Total processing time used on each machine-stage pair cannot exceed the available machine hours.",
+            "formula": "\\sum_{p \\in \\mathcal P} t_{p,s,m} x_{p,s,m} \\le H_{s,m}",
+            "parameters": [
+                "products",
+                "stages",
+                "machines_by_stage",
+                "available_machine_hours",
+                "processing_time_per_unit"
+            ],
+            "variables": [
+                "assigned_quantity"
+            ]
+        },
+        {
+            "name": "demand_cap_enforcement",
+            "description": "If a demand cap is provided, finished quantity for each product cannot exceed that cap.",
+            "formula": "q_p \\le d_p",
+            "parameters": [
+                "demand_cap",
+                "products"
+            ],
+            "variables": [
+                "finished_quantity"
+            ]
+        },
+        {
+            "name": "nonnegativity_of_usage",
+            "description": "Assigned quantities and finished quantities are nonnegative.",
+            "formula": "x_{p,s,m} \\ge 0,\\ q_p \\ge 0",
+            "parameters": [
+                "products",
+                "stages",
+                "machines_by_stage"
+            ],
+            "variables": [
+                "assigned_quantity",
+                "finished_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize total profit over the single planning horizon, defined as sales revenue from finished units minus raw material expense and machine processing expense.",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit over the single planning horizon as revenue from finished units minus raw material expense and machine processing expense; this remains a single-objective MILP.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\sum_{p \\in \\mathcal P} u_p q_p - \\sum_{p \\in \\mathcal P} r_p q_p - \\sum_{s \\in \\mathcal S} \\sum_{m \\in \\mathcal M_s} \\sum_{p \\in \\mathcal P} c_{s,m} t_{p,s,m} x_{p,s,m}",
+        "parameters": [
+            "unit_sales_price",
+            "raw_material_cost",
+            "processing_cost_rate",
+            "processing_time_per_unit"
+        ],
+        "variables": [
+            "finished_quantity",
+            "assigned_quantity"
+        ]
+    }
+}

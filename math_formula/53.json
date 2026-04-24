@@ -1,0 +1,220 @@
+{
+    "problem": "Problem description\n- A factory produces a set $$\\mathcal{P}$$ of products over a monthly planning horizon $$\\mathcal{T}$$ using a set $$\\mathcal{M}$$ of equipment types.\n- Each product $$p\\in\\mathcal{P}$$ has a unit profit $$c_p$$.\n- Each unit of product $$p$$ requires processing time $$a_{m,p}$$ on equipment $$m\\in\\mathcal{M}$$.\n- Each equipment type $$m\\in\\mathcal{M}$$ has an available effective capacity $$u_m$$ during the planning horizon.\n- The planning goal is to choose production quantities $$x_p$$ so that total profit is maximized while respecting all equipment capacities and making practical use of the available machine time.\n- Business constraints:\n  - Only products in $$\\mathcal{P}$$ may be produced.\n  - The total processing time required on each equipment $$m$$ by all produced products must not exceed the available capacity $$u_m$$.\n  - Production quantities $$x_p$$ must be feasible output levels and cannot be negative.\n  - The production plan should prioritize the mix of products that yields the highest total profit under the capacity limits.\n- A solution is represented by:\n  - $$x_p$$: the planned production quantity of product $$p\\in\\mathcal{P}$$.\n  - $$z$$: the resulting total profit of the production plan.\n  - $$h_m$$: the total equipment time used on equipment $$m\\in\\mathcal{M}$$, if equipment utilization is reported.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"monthly planning horizon\",\n    \"structure\": \"single planning period\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"meaning\": \"set of products\",\n    \"structure\": \"indexed set with size $$P$$\"\n  },\n  \"equipment\": {\n    \"symbol\": \"$$\\\\mathcal{M}$$\",\n    \"meaning\": \"set of equipment types\",\n    \"structure\": \"indexed set with size $$M$$\"\n  },\n  \"processing_time\": {\n    \"symbol\": \"$$a_{m,p}$$\",\n    \"meaning\": \"processing time required on equipment $$m$$ for one unit of product $$p$$\",\n    \"shape\": \"$$M\\\\times P$$\"\n  },\n  \"available_capacity\": {\n    \"symbol\": \"$$u_m$$\",\n    \"meaning\": \"available effective hours for equipment $$m$$ in the planning horizon\",\n    \"shape\": \"$$M$$\"\n  },\n  \"unit_profit\": {\n    \"symbol\": \"$$c_p$$\",\n    \"meaning\": \"profit per unit of product $$p$$\",\n    \"shape\": \"$$P$$\"\n  },\n  \"decision_variables\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"meaning\": \"quantity of product $$p$$ to produce\",\n      \"shape\": \"$$P$$\"\n    }\n  },\n  \"objective\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximize total profit from all produced products\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_p$$\",\n    \"meaning\": \"optimal production quantity for each product $$p$$\",\n    \"shape\": \"$$P$$\"\n  },\n  \"equipment_usage\": {\n    \"symbol\": \"$$h_m$$\",\n    \"meaning\": \"total utilized hours on each equipment $$m$$\",\n    \"shape\": \"$$M$$\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximum achievable total profit\",\n    \"shape\": \"scalar\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"1 monthly period\",\n  \"products\": [\"I\", \"II\", \"III\"],\n  \"equipment\": [\"A\", \"B\", \"C\"],\n  \"processing_time\": [\n    [8, 2, 10],\n    [10, 5, 8],\n    [2, 13, 10]\n  ],\n  \"available_capacity\": [300, 400, 420],\n  \"unit_profit\": [3, 2, 2.9]\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Single monthly planning horizon length"
+        },
+        {
+            "name": "product_set_size",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the finite product set"
+        },
+        {
+            "name": "equipment_set_size",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of equipment types in the finite equipment set"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "c",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit for each product"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "a",
+            "shape": [
+                "M",
+                "P"
+            ],
+            "description": "Processing time consumed on each equipment type by each product"
+        },
+        {
+            "name": "available_capacity",
+            "symbol": "u",
+            "shape": [
+                "M"
+            ],
+            "description": "Available effective capacity for each equipment type over the planning horizon"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each product"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit from the chosen production quantities"
+        },
+        {
+            "name": "equipment_usage",
+            "symbol": "h",
+            "shape": [
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Total equipment usage on each equipment type"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "production_nonnegativity",
+            "description": "Production quantities must be nonnegative for all products.",
+            "formula": "x[p] \\ge 0 \\quad \\forall p \\in \\{0,\\dots,P-1\\}",
+            "parameters": [
+                "product_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "equipment_usage_nonnegativity",
+            "description": "Equipment usage values must be nonnegative for all equipment types.",
+            "formula": "h[m] \\ge 0 \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size"
+            ],
+            "variables": [
+                "equipment_usage"
+            ]
+        },
+        {
+            "name": "capacity_nonnegativity",
+            "description": "Available capacity must be nonnegative for all equipment types.",
+            "formula": "u[m] \\ge 0 \\quad \\forall m \\,\\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "available_capacity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "processing_time_nonnegativity",
+            "description": "Processing time coefficients must be nonnegative for all equipment types and products.",
+            "formula": "a[m][p] \\ge 0 \\quad \\forall m \\in \\{0,\\dots,M-1\\},\\ \\forall p \\in \\{0,\\dots,P-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "product_set_size",
+                "processing_time"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "Total profit is the sum of unit profits across all produced quantities.",
+            "formula": "z = \\sum_{p=0}^{P-1} c[p] x[p]",
+            "parameters": [
+                "product_set_size",
+                "unit_profit"
+            ],
+            "variables": [
+                "production_quantity",
+                "total_profit"
+            ]
+        },
+        {
+            "name": "equipment_capacity_limit_linearized",
+            "description": "Total processing time used on each equipment type must not exceed its available capacity.",
+            "formula": "\\sum_{p=0}^{P-1} a[m][p]x[p] \\le u[m] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "product_set_size",
+                "processing_time",
+                "available_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "equipment_usage_definition_linearized",
+            "description": "Reported equipment usage equals the total processing time consumed on each equipment type.",
+            "formula": "h[m] = \\sum_{p=0}^{P-1} a[m][p]x[p] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "product_set_size",
+                "processing_time"
+            ],
+            "variables": [
+                "production_quantity",
+                "equipment_usage"
+            ]
+        },
+        {
+            "name": "total_profit_definition_linearized",
+            "description": "Total profit equals the sum of unit profits across all produced quantities.",
+            "formula": "z = \\sum_{p=0}^{P-1} c[p]x[p]",
+            "parameters": [
+                "product_set_size",
+                "unit_profit"
+            ],
+            "variables": [
+                "production_quantity",
+                "total_profit"
+            ]
+        },
+        {
+            "name": "equipment_capacity_limit_fixed",
+            "description": "Total processing time used on each equipment type must not exceed its available capacity.",
+            "formula": "\\sum_{p=0}^{P-1} a[m][p]x[p] \\le u[m] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "product_set_size",
+                "processing_time",
+                "available_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "equipment_usage_definition_fixed",
+            "description": "Reported equipment usage equals the total processing time consumed on each equipment type.",
+            "formula": "h[m] = \\sum_{p=0}^{P-1} a[m][p]x[p] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "parameters": [
+                "equipment_set_size",
+                "product_set_size",
+                "processing_time"
+            ],
+            "variables": [
+                "production_quantity",
+                "equipment_usage"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit from the chosen production quantities",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit from production quantities, using the scalar total profit variable as the objective value.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "z",
+        "parameters": [],
+        "variables": [
+            "total_profit"
+        ]
+    }
+}

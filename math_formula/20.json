@@ -1,0 +1,254 @@
+{
+    "problem": "Problem description\n- There is a single-period procurement planning problem with a finite supplier set $$\\mathcal{S}$$ containing the designated suppliers $$A$$, $$B$$, and $$C$$.\n- Each supplier $$i \\in \\mathcal{S}$$ has an order cost parameter $$c_i$$ and a fixed lot-size parameter $$q_i$$, meaning one order from supplier $$i$$ provides exactly $$q_i$$ tables.\n- The restaurant chooses a nonnegative integer number of orders from each supplier, and may use supplier-activation indicators to express conditional purchasing rules.\n- The total number of tables obtained from all suppliers must be at least the minimum required demand level $$D^{\\min}$$ and must not exceed the maximum allowed supply level $$D^{\\max}$$.\n- If supplier $$A$$ is used, then supplier $$B$$ must provide at least the required minimum quantity $$L_{A \\rightarrow B}$$ of tables.\n- If supplier $$B$$ is used, then supplier $$C$$ must also be used.\n- The planning goal is to minimize the total procurement cost across all suppliers.\n- A solution is represented by:\n  - $$x_i$$: the nonnegative integer number of orders placed with supplier $$i \\in \\mathcal{S}$$.\n  - $$z_i$$: a binary indicator showing whether supplier $$i$$ is used.\n  - $$t_i$$: the total number of tables procured from supplier $$i$$.\n  - $$T$$: the total number of tables ordered across all suppliers.\n  - $$Z$$: the minimum total procurement cost achieved by the plan.\n\nInput Format\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\mathcal{S}$$\",\n    \"size\": \"$$S$$\",\n    \"elements\": \"A finite set of suppliers indexed by $$i \\\\in \\\\mathcal{S}$$\"\n  },\n  \"supplier_parameters\": [\n    {\n      \"id\": \"$$i$$\",\n      \"cost_per_order\": \"$$c_i$$\",\n      \"tables_per_order\": \"$$q_i$$\"\n    }\n  ],\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\mathcal{H}$$\",\n    \"size\": \"$$H$$\",\n    \"description\": \"The ordering horizon, which may be a single period or multiple periods\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$D^{\\\\min}$$\",\n    \"maximum_total_tables\": \"$$D^{\\\\max}$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$L_{ij}$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for all $$i \\\\in \\\\mathcal{S}$$\",\n    \"supplier_usage\": \"Binary for all $$i \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nOutput Format\n{\n  \"orders_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{x} = (x_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The integer number of orders placed with each supplier\"\n  },\n  \"supplier_usage\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{z} = (z_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The binary supplier-activation vector\"\n  },\n  \"tables_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{t} = (t_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The total number of tables procured from each supplier\"\n  },\n  \"total_tables\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$T$$\",\n    \"description\": \"The total number of tables ordered across all suppliers\"\n  },\n  \"total_cost\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$Z$$\",\n    \"description\": \"The minimum total procurement cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\{A,B,C\\\\}$$\",\n    \"size\": \"$$3$$\",\n    \"elements\": [\n      {\n        \"id\": \"$$A$$\",\n        \"cost_per_order\": \"$$120$$\",\n        \"tables_per_order\": \"$$20$$\"\n      },\n      {\n        \"id\": \"$$B$$\",\n        \"cost_per_order\": \"$$110$$\",\n        \"tables_per_order\": \"$$15$$\"\n      },\n      {\n        \"id\": \"$$C$$\",\n        \"cost_per_order\": \"$$100$$\",\n        \"tables_per_order\": \"$$15$$\"\n      }\n    ]\n  },\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\{1\\\\}$$\",\n    \"size\": \"$$1$$\",\n    \"description\": \"Single ordering period\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$150$$\",\n    \"maximum_total_tables\": \"$$600$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$A$$\",\n      \"required_supplier\": \"$$B$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$30$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$B$$\",\n      \"required_supplier\": \"$$C$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for each supplier\",\n    \"supplier_usage\": \"Binary for each supplier\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "supplier_set",
+            "symbol": "\\mathcal{S}",
+            "shape": [],
+            "description": "Finite supplier set containing the suppliers A, B, and C"
+        },
+        {
+            "name": "num_suppliers",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of suppliers in the supplier set"
+        },
+        {
+            "name": "order_cost",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "description": "Cost per order for each supplier"
+        },
+        {
+            "name": "tables_per_order",
+            "symbol": "q",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "description": "Number of tables obtained per order from each supplier"
+        },
+        {
+            "name": "min_total_tables",
+            "symbol": "D^{\\min}",
+            "shape": [],
+            "description": "Minimum allowed total tables procured"
+        },
+        {
+            "name": "max_total_tables",
+            "symbol": "D^{\\max}",
+            "shape": [],
+            "description": "Maximum allowed total tables procured"
+        },
+        {
+            "name": "min_tables_if_a_used_and_b_required",
+            "symbol": "L_{A\\rightarrow B}",
+            "shape": [],
+            "description": "Minimum number of tables supplier B must provide if supplier A is used"
+        }
+    ],
+    "variables": [
+        {
+            "name": "orders_by_supplier",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "domain": "integer",
+            "description": "Nonnegative integer number of orders placed with each supplier"
+        },
+        {
+            "name": "supplier_usage",
+            "symbol": "z",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if the corresponding supplier is used, otherwise 0"
+        },
+        {
+            "name": "tables_by_supplier",
+            "symbol": "t",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "domain": "continuous",
+            "description": "Total number of tables procured from each supplier"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_integer_orders",
+            "description": "Order counts are nonnegative integers for each supplier",
+            "formula": "x_i \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "orders_by_supplier"
+            ]
+        },
+        {
+            "name": "binary_supplier_usage",
+            "description": "Supplier usage indicators are binary for each supplier",
+            "formula": "z_i \\in \\{0,1\\}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "nonnegative_tables_by_supplier",
+            "description": "Tables procured from each supplier are nonnegative",
+            "formula": "t_i \\ge 0",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "tables_by_supplier"
+            ]
+        },
+        {
+            "name": "nonnegative_total_tables",
+            "description": "Total tables procured across all suppliers are nonnegative",
+            "formula": "T \\ge 0",
+            "parameters": [],
+            "variables": [
+                "total_tables"
+            ]
+        },
+        {
+            "name": "total_tables_bounds",
+            "description": "Total tables procured must stay within the minimum and maximum demand limits",
+            "formula": "D^{\\min} \\le T \\le D^{\\max}",
+            "parameters": [
+                "min_total_tables",
+                "max_total_tables"
+            ],
+            "variables": [
+                "total_tables"
+            ]
+        },
+        {
+            "name": "supplier_tables_from_orders",
+            "description": "Tables obtained from each supplier are determined exactly by the supplier order count and lot size.",
+            "formula": "t_i = q_i x_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "tables_per_order",
+                "supplier_set"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "orders_by_supplier"
+            ]
+        },
+        {
+            "name": "supplier_a_triggers_b_minimum_quantity",
+            "description": "If supplier A is used, supplier B must provide at least the specified minimum number of tables.",
+            "formula": "t_B \\ge L_{A\\rightarrow B} z_A",
+            "parameters": [
+                "min_tables_if_a_used_and_b_required"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "supplier_b_implies_supplier_c_usage",
+            "description": "If supplier B is used, supplier C must also be used.",
+            "formula": "z_B \\le z_C",
+            "parameters": [
+                "supplier_usage"
+            ],
+            "variables": [
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "tables_link_orders",
+            "description": "Tables procured from each supplier equal the number of orders times tables per order.",
+            "formula": "t_i = q_i x_i",
+            "parameters": [
+                "tables_per_order"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "orders_by_supplier"
+            ]
+        },
+        {
+            "name": "total_tables_definition",
+            "description": "Total tables equal the sum of tables procured from all suppliers.",
+            "formula": "T = \\sum_{i \\in \\mathcal{S}} t_i",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "total_tables",
+                "tables_by_supplier"
+            ]
+        },
+        {
+            "name": "usage_links_orders",
+            "description": "An order count can be positive only if the corresponding supplier is used.",
+            "formula": "x_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "orders_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "usage_links_tables",
+            "description": "Tables procured from a supplier are zero when the supplier is not used.",
+            "formula": "t_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "supplier_usage_implied_by_orders",
+            "description": "If a supplier receives any positive order, the supplier must be marked as used.",
+            "formula": "x_i \\ge z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "orders_by_supplier",
+                "supplier_usage"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_procurement_cost_minimization",
+            "description": "Minimize total procurement cost across all suppliers",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total procurement cost across all suppliers by summing each supplier's per-order cost times the number of orders placed.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{i \\in \\mathcal{S}} c_i x_i",
+        "parameters": [
+            "supplier_set",
+            "order_cost"
+        ],
+        "variables": [
+            "orders_by_supplier",
+            "total_cost"
+        ]
+    }
+}

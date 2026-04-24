@@ -1,0 +1,264 @@
+{
+    "problem": "Problem description\n- There are $$P$$ products indexed by $$p\\in\\mathcal{P}$$ and $$T$$ planning periods indexed by $$t\\in\\mathcal{T}$$, where the periods represent the quarterly planning horizon.\n- For each product and period, the reservation demand is given by $$D_{p,t}$$.\n- Each product has a unit processing time requirement of $$h_p$$ production hours, and each period has an available production capacity of $$H_t$$ hours.\n- Product availability may vary by period through the parameter $$A_{p,t}$$, where unavailable product-period combinations cannot be produced.\n- The initial inventory is given by $$S_p^{0}$$, and each product must end the planning horizon with at least $$S_p^{\\mathrm{req}}$$ units in stock.\n- If a reserved unit is not delivered in its reservation period, it becomes delayed demand and incurs a per-unit delay compensation of $$\\pi_p$$ for each period of delay until it is delivered.\n- Any unit produced earlier than its delivery period and carried forward in stock incurs an inventory holding cost of $$c_p^{\\mathrm{inv}}$$ per unit per period.\n- The planning goal is to choose a feasible production and delivery policy over all periods so that total delay compensation and total inventory holding cost are minimized.\n- The required business rules are:\n  - Demand reservations must be satisfied over time using production and available inventory.\n  - Production in each period must not exceed the available machine-hour capacity of that period.\n  - Products may only be produced in periods where availability is allowed.\n  - Inventory cannot be negative.\n  - Delayed demand may be carried forward across periods and is penalized until it is fulfilled.\n  - The ending inventory for each product must meet the required terminal stock level.\n- A solution is represented by:\n  - the production quantity plan $$x_{p,t}$$, where $$x_{p,t}$$ is the amount of product $$p$$ produced in period $$t$$,\n  - the end-of-period inventory level $$s_{p,t}$$, where $$s_{p,t}$$ is the remaining stock of product $$p$$ after period $$t$$,\n  - the delayed demand level $$b_{p,t}$$, where $$b_{p,t}$$ is the amount of product $$p$$ still undelivered after period $$t$$,\n  - the total cost value $$Z$$, representing the sum of all delay compensation and inventory holding costs.\n\nInput Format\n{\n  \"P\": \"$$P$$, the number of products\",\n  \"T\": \"$$T$$, the number of planning periods\",\n  \"products_index\": \"$$\\\\mathcal{P}=\\\\{1,2,\\\\ldots,P\\\\}$$\",\n  \"periods_index\": \"$$\\\\mathcal{T}=\\\\{1,2,\\\\ldots,T\\\\}$$\",\n  \"demand\": \"$$D\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$D_{p,t}$$ is the reservation demand of product $$p$$ in period $$t$$\",\n  \"initial_inventory\": \"$$S^{0}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$S^{0}_{p}$$ is the initial stock of product $$p$$\",\n  \"target_final_inventory\": \"$$S^{\\\\mathrm{req}}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$S^{\\\\mathrm{req}}_{p}$$ is the required ending stock of product $$p$$\",\n  \"capacity_hours\": \"$$H\\\\in\\\\mathbb{R}_{+}^{T}$$, where $$H_{t}$$ is the available production-hour capacity in period $$t$$\",\n  \"processing_hours\": \"$$h\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$h_{p}$$ is the production-hour requirement per unit of product $$p$$\",\n  \"availability\": \"$$A\\\\in\\\\{0,1\\\\}^{P\\\\times T}$$, where $$A_{p,t}=1$$ means product $$p$$ may be produced in period $$t$$ and $$A_{p,t}=0$$ means it may not\",\n  \"delay_penalty\": \"$$\\\\pi\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$\\\\pi_{p}$$ is the delay compensation per unit per period for product $$p$$\",\n  \"inventory_holding_cost\": \"$$c^{\\\\mathrm{inv}}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$c^{\\\\mathrm{inv}}_{p}$$ is the inventory holding cost per unit per period for product $$p$$\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"$$X\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$X_{p,t}$$ is the planned production quantity of product $$p$$ in period $$t$$\",\n  \"ending_inventory\": \"$$S\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$S_{p,t}$$ is the inventory level of product $$p$$ at the end of period $$t$$\",\n  \"delayed_demand\": \"$$B\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$B_{p,t}$$ is the amount of product $$p$$ demand still delayed after period $$t$$\",\n  \"total_cost\": \"$$Z\\\\in\\\\mathbb{R}_{+}$$, the minimized total cost of delay compensation and inventory holding\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 3,\n  \"T\": 4,\n  \"products\": [\"I\", \"II\", \"III\"],\n  \"periods\": [1, 2, 3, 4],\n  \"demand\": [\n    [1500, 1000, 2000, 1200],\n    [1500, 1500, 1200, 1500],\n    [1000, 2000, 1500, 2500]\n  ],\n  \"initial_inventory\": [0, 0, 0],\n  \"target_final_inventory\": [150, 150, 150],\n  \"capacity_hours\": [15000, 15000, 15000, 15000],\n  \"processing_hours\": [2, 4, 3],\n  \"availability\": [\n    [1, 0, 1, 1],\n    [1, 1, 1, 1],\n    [1, 1, 1, 1]\n  ],\n  \"delay_penalty\": [20, 20, 10],\n  \"inventory_holding_cost\": [5, 5, 5]\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods"
+        },
+        {
+            "name": "reservation_demand",
+            "symbol": "D",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Reservation demand of product p in period t"
+        },
+        {
+            "name": "machine_hours_per_unit",
+            "symbol": "h",
+            "shape": [
+                "P"
+            ],
+            "description": "Machine-hour requirement per unit of product p"
+        },
+        {
+            "name": "available_hours",
+            "symbol": "H",
+            "shape": [
+                "T"
+            ],
+            "description": "Available production-hour capacity in period t"
+        },
+        {
+            "name": "availability",
+            "symbol": "A",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Indicator whether product p may be produced in period t"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "S^0",
+            "shape": [
+                "P"
+            ],
+            "description": "Initial inventory of product p"
+        },
+        {
+            "name": "required_ending_inventory",
+            "symbol": "S^{req}",
+            "shape": [
+                "P"
+            ],
+            "description": "Required ending inventory of product p"
+        },
+        {
+            "name": "delay_compensation",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Delay compensation per unit per period for product p"
+        },
+        {
+            "name": "inventory_holding_cost",
+            "symbol": "c^{inv}",
+            "shape": [
+                "P"
+            ],
+            "description": "Inventory holding cost per unit per period for product p"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of product p in period t"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "s",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "End-of-period inventory of product p after period t"
+        },
+        {
+            "name": "delayed_demand",
+            "symbol": "b",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Delayed demand of product p remaining after period t"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total cost"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_production",
+            "description": "Production quantities must be nonnegative",
+            "formula": "x[p][t] \\ge 0",
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_inventory",
+            "description": "Ending inventory levels must be nonnegative",
+            "formula": "s[p][t] \\ge 0",
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "nonnegative_delayed_demand",
+            "description": "Delayed demand remaining after each period must be nonnegative",
+            "formula": "b[p][t] \\ge 0",
+            "variables": [
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "nonnegative_total_cost",
+            "description": "Total cost must be nonnegative",
+            "formula": "Z \\ge 0",
+            "variables": [
+                "total_cost"
+            ]
+        },
+        {
+            "name": "production_capacity",
+            "description": "Production in each period must respect available machine-hour capacity",
+            "formula": "h_p\\,x_{p,t} \\le H_t",
+            "parameters": [
+                "machine_hours_per_unit",
+                "available_hours"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "product_availability",
+            "description": "Production of a product in a period is allowed only when the availability indicator permits it, with capacity-scaled upper bound",
+            "formula": "x_{p,t} \\le A_{p,t}\\, H_t",
+            "parameters": [
+                "availability",
+                "available_hours"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "terminal_inventory_requirement",
+            "description": "Ending inventory for each product must meet the required terminal stock level",
+            "formula": "s_{p,T} \\ge S^{req}_p",
+            "parameters": [
+                "required_ending_inventory"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "delayed_demand_carryover",
+            "description": "Delayed demand remaining after each period equals prior unmet demand plus current reservation demand minus demand served in the current period",
+            "formula": "b_{p,t} = \\begin{cases} D_{p,t} - \\left(s_{p,t} - S^0_p - x_{p,t}\\right), & t=1 \\\\ b_{p,t-1} + D_{p,t} - \\left(s_{p,t} - s_{p,t-1} - x_{p,t}\\right), & t=2,\\ldots,T \\end{cases}",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory evolves across periods based on production and demand fulfillment, with backlog carried from the prior period",
+            "formula": "s_{p,t} = \\begin{cases} S^0_p + x_{p,t} - \\left(D_{p,t} - b_{p,t}\\right), & t=1 \\\\ s_{p,t-1} + x_{p,t} - \\left(D_{p,t} - b_{p,t}\\right), & t=2,\\ldots,T \\end{cases}",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "initial_inventory_link",
+            "description": "Inventory balance in the first period uses the initial inventory level",
+            "formula": "s_{p,1} = S^0_p + x_{p,1} - (D_{p,1} - b_{p,1})",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "initial_delayed_demand",
+            "description": "No demand is delayed before the first period, so initial backlog is zero",
+            "formula": "b_{p,0}=0",
+            "parameters": [],
+            "variables": [
+                "delayed_demand"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize total cost consisting of delay compensation and inventory holding cost over the planning horizon",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total cost consisting of total delay compensation across all products and periods plus total inventory holding cost across all products and periods.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{p=1}^{P}\\sum_{t=1}^{T} \\left( \\pi_p \\, b_{p,t} + c^{inv}_p \\, s_{p,t} \\right)",
+        "parameters": [
+            "delay_compensation",
+            "inventory_holding_cost"
+        ],
+        "variables": [
+            "delayed_demand",
+            "ending_inventory"
+        ]
+    }
+}

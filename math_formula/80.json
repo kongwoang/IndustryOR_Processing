@@ -1,0 +1,169 @@
+{
+    "problem": "Problem description\n- There is a finite set of vehicles indexed by $$i \\in \\mathcal{I}$$, with $$|\\mathcal{I}|=N$$.\n- Each vehicle $$i$$ has a known occupied length $$\\ell_i$$.\n- Parking is available on two street sides indexed by $$s \\in \\mathcal{S}$$, with $$\\mathcal{S}=\\{1,2\\}$$.\n- The planning problem is a single-period assignment problem, so the planning horizon is $$\\mathcal{T}=\\{1\\}$$.\n- The goal is to assign every vehicle to exactly one street side so that the occupied street length is as small as possible.\n- The occupied length of a side is determined by the total length of all vehicles assigned to that side.\n- The street length occupied by the fleet is determined by the longer of the two side occupancies, and this overall occupied length is what must be minimized.\n- Optionally, one or both street sides may have a maximum allowed occupied length $$u_s$$; if such a limit is active, the total occupied length on that side must not exceed its limit.\n- The business rules require that no vehicle be split across sides and that every vehicle be parked on one side only.\n- The model may include a side-specific capacity parameter to represent the case where cars on one side cannot occupy more than a specified length.\n- A solution is represented by:\n  - $$x_{is}$$: a binary assignment variable equal to $$1$$ if vehicle $$i$$ is parked on side $$s$$, and $$0$$ otherwise.\n  - $$L_s$$: the total occupied length on side $$s$$.\n  - $$Z$$: the total occupied street length to be minimized.\n\nInput Format\n{\n  \"N\": \"integer, number of vehicles, with vehicles indexed by $$i \\\\in \\\\mathcal{I}$$\",\n  \"S\": \"integer, number of parking sides, typically $$S=2$$, with sides indexed by $$s \\\\in \\\\mathcal{S}$$\",\n  \"lengths\": \"array of length $$N$$; entry $$\\\\ell_i$$ is the length of vehicle $$i$$\",\n  \"side_capacity\": \"optional scalar or array of length $$S$$; entry $$u_s$$ is the maximum occupied length allowed on side $$s$$, or $$+\\\\infty$$ if no limit applies\",\n  \"planning_horizon\": \"single-period planning set $$\\\\mathcal{T}=\\\\{1\\\\}$$\"\n}\n\nOutput Format\n{\n  \"assignment\": \"binary matrix $$x$$ of shape $$N \\\\times S$$; $$x_{is}=1$$ means vehicle $$i$$ is assigned to side $$s$$\",\n  \"side_occupancy\": \"array $$L$$ of length $$S$$; $$L_s$$ is the total occupied length on side $$s$$\",\n  \"total_occupied_length\": \"scalar $$Z$$; the minimized occupied street length\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 15,\n  \"S\": 2,\n  \"lengths\": [4, 4.5, 5, 4.1, 2.4, 5.2, 3.7, 3.5, 3.2, 4.5, 2.3, 3.3, 3.8, 4.6, 3.0],\n  \"side_capacity\": 30\n}",
+    "parameters": [
+        {
+            "name": "num_vehicles",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of vehicles in the fleet"
+        },
+        {
+            "name": "num_sides",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of street sides"
+        },
+        {
+            "name": "vehicle_lengths",
+            "symbol": "\\ell",
+            "shape": [
+                "N"
+            ],
+            "description": "Known occupied length of each vehicle"
+        },
+        {
+            "name": "side_capacity",
+            "symbol": "u",
+            "shape": [
+                "S"
+            ],
+            "description": "Maximum allowed occupied length on each street side when a capacity limit is active"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Single-period planning horizon indicator"
+        }
+    ],
+    "variables": [
+        {
+            "name": "assignment",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "S"
+            ],
+            "domain": "binary",
+            "description": "Binary assignment of each vehicle to a street side"
+        },
+        {
+            "name": "side_occupancy",
+            "symbol": "L",
+            "shape": [
+                "S"
+            ],
+            "domain": "continuous",
+            "description": "Total occupied length on each street side"
+        },
+        {
+            "name": "total_occupied_length",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Overall occupied street length to be minimized"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "assignment_exactly_one_side",
+            "description": "Each vehicle must be assigned to exactly one street side; no vehicle may be split across sides",
+            "formula": "\\sum_{s=0}^{S-1} x_{is} = 1 \\quad \\forall i=0,\\dots,N-1",
+            "parameters": [
+                "num_vehicles",
+                "num_sides"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "side_occupancy_definition",
+            "description": "The occupied length on each side is determined by the sum of vehicle lengths assigned to that side",
+            "formula": "L_s = \\sum_{i=0}^{N-1} \\ell_i x_{is} \\quad \\forall s=0,\\dots,S-1",
+            "parameters": [
+                "num_vehicles",
+                "num_sides",
+                "vehicle_lengths"
+            ],
+            "variables": [
+                "assignment",
+                "side_occupancy"
+            ]
+        },
+        {
+            "name": "overall_occupied_length_definition",
+            "description": "The total occupied street length represents the larger of the side occupancies",
+            "formula": "Z \\ge L_s \\quad \\forall s=0,\\dots,S-1",
+            "parameters": [
+                "num_sides"
+            ],
+            "variables": [
+                "side_occupancy",
+                "total_occupied_length"
+            ]
+        },
+        {
+            "name": "side_capacity_limit",
+            "description": "If a side-specific capacity is active, the occupied length on that side must not exceed its allowed limit",
+            "formula": "L_s \\le u_s \\quad \\forall s=0,\\dots,S-1",
+            "parameters": [
+                "num_sides",
+                "side_capacity"
+            ],
+            "variables": [
+                "side_occupancy"
+            ]
+        },
+        {
+            "name": "binary_assignment_domain",
+            "description": "Assignment variables are binary decisions indicating whether a vehicle is parked on a given side",
+            "formula": "x_{is} \\in \\{0,1\\}",
+            "parameters": [
+                "num_vehicles",
+                "num_sides"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "nonnegative_side_occupancy",
+            "description": "Side occupancy variables are nonnegative",
+            "formula": "L_s \\ge 0",
+            "parameters": [
+                "num_sides"
+            ],
+            "variables": [
+                "side_occupancy"
+            ]
+        },
+        {
+            "name": "nonnegative_total_occupied_length",
+            "description": "Overall occupied street length is nonnegative",
+            "formula": "Z \\ge 0",
+            "parameters": [],
+            "variables": [
+                "total_occupied_length"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_occupied_length",
+            "description": "Minimize the overall occupied street length, defined as the maximum of the two side occupancies",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the overall occupied street length, represented by the epigraph variable that upper-bounds all side occupancies.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_occupied_length"
+        ]
+    }
+}

@@ -1,0 +1,283 @@
+{
+    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of residential areas, and each area in $$\\mathcal{I}$$ is also a candidate location where a chain store may be opened.\n- The planning problem is static and single-period, with planning horizon $$\\mathcal{T}$$ treated as a singleton because no time phasing is involved.\n- A service radius $$R$$ limits how far a residential area may be from an opened store and still be considered covered.\n- For each candidate site $$i \\in \\mathcal{I}$$, the coverage set $$\\mathcal{N}_i \\subseteq \\mathcal{I}$$ lists all residential areas that can be served if a store is opened at $$i$$.\n- Each residential area has one unit of coverage requirement, meaning every area must be included in the service reach of at least one selected store.\n- Opening costs may be represented by parameters $$c_i$$ for candidate sites, and generalized capacity parameters may be represented by $$\\kappa_i$$ if an extended version limits how much service a store can provide; this instance is governed by coverage only.\n- The planning goal is to choose the smallest possible number of store locations, or equivalently the minimum total opening effort under unit opening cost, while ensuring complete coverage of all residential areas.\n- Stores may only be opened at candidate residential areas.\n- A residential area may be both a store location and a covered area.\n- A solution is represented by:\n  - binary opening decisions $$x_i$$ for each $$i \\in \\mathcal{I}$$, where $$x_i = 1$$ means a store is opened at area $$i$$ and $$x_i = 0$$ otherwise\n  - the selected location list containing all areas with $$x_i = 1$$\n  - the total number of opened stores, given by the count of selected locations\n\nInput Format\n{\n  \"$$\\mathcal{I}$$\": \"List of residential area identifiers, indexed by $$i$$, where each identifier is a candidate store location.\",\n  \"$$\\mathcal{T}$$\": \"Planning horizon; for this static coverage problem, $$\\mathcal{T}$$ is a singleton set.\",\n  \"$$R$$\": \"Maximum allowed service distance for coverage.\",\n  \"$$\\mathcal{N}_i$$\": \"For each $$i \\\\in \\\\mathcal{I}$$, the list of residential areas covered by a store opened at $$i$$.\",\n  \"$$q_j$$\": \"Coverage requirement for area $$j \\\\in \\\\mathcal{I}$$; this problem uses one unit of coverage requirement per area.\",\n  \"$$c_i$$\": \"Opening cost for candidate site $$i$$, used if a weighted objective is modeled; unit cost is implied when omitted.\",\n  \"$$\\\\kappa_i$$\": \"Optional capacity parameter for site $$i$$, used only in generalized extensions with service limits.\"\n}\n\nOutput Format\n{\n  \"$$\\\\mathbf{x}$$\": {\n    \"type\": \"binary vector\",\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"Selection status of each candidate site, where $$x_i = 1$$ indicates an opened store at area $$i$$.\"\n  },\n  \"$$S$$\": {\n    \"type\": \"list of area identifiers\",\n    \"meaning\": \"The selected store locations, consisting of all $$i \\\\in \\\\mathcal{I}$$ with $$x_i = 1$$.\"\n  },\n  \"$$K$$\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Total number of opened stores.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"$$R$$\": \"$$800\\\\,\\\\mathrm{m}$$\",\n  \"$$\\\\mathcal{I}$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$D$$\", \"$$E$$\", \"$$F$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n  \"$$\\\\mathcal{N}_i$$\": {\n    \"$$A$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$B$$\": [\"$$B$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$C$$\": [\"$$A$$\", \"$$C$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$D$$\": [\"$$D$$\", \"$$J$$\"],\n    \"$$E$$\": [\"$$A$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$F$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\"],\n    \"$$G$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$H$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$I$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$J$$\": [\"$$D$$\", \"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$K$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$L$$\": [\"$$J$$\", \"$$K$$\", \"$$L$$\"]\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_areas",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of residential areas and candidate store sites"
+        },
+        {
+            "name": "area_set",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "N"
+            ],
+            "description": "Set of residential area identifiers, each also a candidate store location"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Singleton planning horizon set for the static single-period problem"
+        },
+        {
+            "name": "service_radius",
+            "symbol": "R",
+            "shape": [],
+            "description": "Maximum allowed service distance for coverage"
+        },
+        {
+            "name": "coverage_sets",
+            "symbol": "\\mathcal{N}_i",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Coverage set for each candidate site i indicating which areas can be served by an opened store at i"
+        },
+        {
+            "name": "coverage_requirement",
+            "symbol": "q_j",
+            "shape": [
+                "N"
+            ],
+            "description": "Coverage requirement of each area j, equal to one unit per area"
+        },
+        {
+            "name": "opening_cost",
+            "symbol": "c_i",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional opening cost of each candidate site i"
+        },
+        {
+            "name": "site_capacity",
+            "symbol": "\\kappa_i",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional capacity parameter for each site i used in generalized extensions"
+        }
+    ],
+    "variables": [
+        {
+            "name": "open_store",
+            "symbol": "x_i",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary opening decision for each candidate site i; 1 indicates a store is opened at area i"
+        },
+        {
+            "name": "selected_locations",
+            "symbol": "S",
+            "shape": [
+                "N"
+            ],
+            "domain": "sos1",
+            "description": "Selected store locations, consisting of all areas i with x_i=1"
+        },
+        {
+            "name": "opened_store_count",
+            "symbol": "K",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of opened stores"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "binary_opening_decision",
+            "description": "The store opening decision for each candidate site is binary",
+            "formula": "x_i \\in \\{0,1\\}",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store"
+            ]
+        },
+        {
+            "name": "selected_locations_definition",
+            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
+            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "selected_locations"
+            ]
+        },
+        {
+            "name": "opened_store_count_definition",
+            "description": "The opened store count equals the sum of binary opening decisions.",
+            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "opened_store_count"
+            ]
+        },
+        {
+            "name": "coverage_requirement",
+            "description": "Every residential area must be covered by at least one selected store within the service radius.",
+            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
+            "parameters": [
+                "area_set",
+                "coverage_sets",
+                "coverage_requirement"
+            ],
+            "variables": [
+                "open_store"
+            ]
+        },
+        {
+            "name": "candidate_site_restriction",
+            "description": "Stores may only be opened at candidate sites belonging to the residential area set",
+            "formula": "i \\in \\mathcal{I}",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store"
+            ]
+        },
+        {
+            "name": "static_single_period_structure",
+            "description": "The model is static and single-period, so there are no time-indexed decisions over the planning horizon",
+            "formula": "\\mathcal{T} \\text{ is a singleton set}",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_set_membership",
+            "description": "Structural data assumption: each precomputed coverage set is a subset of the residential area set.",
+            "formula": "j \\in \\mathcal{N}_i",
+            "parameters": [
+                "coverage_sets",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "unit_coverage_requirement",
+            "description": "Each residential area has unit coverage demand.",
+            "formula": "q_j = 1 \\quad \\forall j \\in \\mathcal{I}",
+            "parameters": [
+                "coverage_requirement",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_service_radius",
+            "description": "The service radius is nonnegative.",
+            "formula": "R \\ge 0",
+            "parameters": [
+                "service_radius"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_set_subset",
+            "description": "Structural data assumption: each coverage set is a subset of the residential area set.",
+            "formula": "\\mathcal{N}_i \\subseteq \\mathcal{I}",
+            "parameters": [
+                "coverage_sets",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_parameters",
+            "description": "Optional opening costs and capacities are nonnegative when provided",
+            "formula": "c_i \\ge 0, \\kappa_i \\ge 0",
+            "parameters": [
+                "opening_cost",
+                "site_capacity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_constraint",
+            "description": "Every residential area j must be covered by at least one opened store i whose coverage set contains j.",
+            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
+            "parameters": [
+                "area_set",
+                "coverage_sets",
+                "coverage_requirement"
+            ],
+            "variables": [
+                "open_store"
+            ]
+        },
+        {
+            "name": "store_count_definition",
+            "description": "The total number of opened stores equals the sum of opening decisions.",
+            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "opened_store_count"
+            ]
+        },
+        {
+            "name": "selected_location_indicator_link",
+            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
+            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "selected_locations"
+            ]
+        },
+        {
+            "name": "nonnegative_optional_parameters",
+            "description": "Optional opening costs and capacities are nonnegative when present.",
+            "formula": "c_i \\ge 0,\\ \\kappa_i \\ge 0 \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "opening_cost",
+                "site_capacity",
+                "area_set"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_opened_stores",
+            "description": "Find a feasible selection of store locations that covers every residential area while minimizing the number of opened stores",
+            "sense": "minimize"
+        },
+        {
+            "name": "minimize_opening_effort",
+            "description": "Minimize total opening effort under unit opening cost for opened store locations",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the number of opened stores, equivalently the cardinality of the selected location set, in the single-period coverage problem.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i \\in \\mathcal{I}} x_i",
+        "parameters": [
+            "area_set"
+        ],
+        "variables": [
+            "open_store"
+        ]
+    }
+}

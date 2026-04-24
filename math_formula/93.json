@@ -1,0 +1,233 @@
+{
+    "problem": "Problem description\n- A single-period blending and procurement planning problem is given with a set of crude inputs $$\\mathcal{R}$$ and a set of gasoline outputs $$\\mathcal{G}$$.\n- One distinguished crude type $$r^\\star \\in \\mathcal{R}$$ must appear in each gasoline product at no less than a product-specific minimum share $$\\alpha_g$$ for every $$g \\in \\mathcal{G}$$.\n- Each finished gasoline type $$g \\in \\mathcal{G}$$ has a unit selling price $$s_g$$.\n- Each crude type $$r \\in \\mathcal{R}$$ has an initial inventory level $$I_r$$.\n- Some crude types may be purchasable from the market, with a total purchase cap $$\\bar P_r$$ for each purchasable crude type $$r$$.\n- Market purchases, when available, may be divided into ordered price blocks indexed by $$k \\in \\mathcal{K}_r$$, each with a block capacity $$U_{r,k}$$ and a unit purchase cost $$c_{r,k}$$.\n- The planning decision determines how much of each crude type to purchase from each price block and how much of each crude type to route into each gasoline product.\n- The optimization goal is to maximize total profit, defined in words as total gasoline sales revenue minus total crude procurement cost.\n- Required business rules:\n  - Each gasoline product must satisfy its minimum content requirement for the distinguished crude type $$r^\\star$$.\n  - The total amount of each crude type used in all gasoline production must not exceed the quantity available from inventory plus purchases.\n  - Purchases from each price block must respect the block capacity and the ordering structure of the tiered market price.\n  - If any product demand limits $$D_g$$ are provided, production and sales of each product must not exceed those limits.\n  - All decision quantities must be nonnegative.\n- A solution is represented by:\n  - $$p_{r,k}$$: the quantity of crude type $$r$$ purchased from market price block $$k$$.\n  - $$x_{r,g}$$: the quantity of crude type $$r$$ blended into gasoline product $$g$$.\n  - $$y_g$$: the total quantity of gasoline product $$g$$ produced.\n  - $$z$$: the achieved total profit.\n\nInput Format\n{\n  \"sets\": {\n    \"raw_materials\": \"List of identifiers for crude inputs, representing $$\\mathcal{R}$$.\",\n    \"products\": \"List of identifiers for gasoline outputs, representing $$\\mathcal{G}$$.\",\n    \"purchasable_raw_materials\": \"Subset of $$\\mathcal{R}$$ that can be bought from the market.\",\n    \"purchase_blocks\": \"For each purchasable crude type $$r$$, an ordered list of price blocks indexed by $$k \\\\in \\\\mathcal{K}_r$$.\"\n  },\n  \"planning_horizon\": {\n    \"horizon\": \"Single-period or multi-period planning set $$\\\\mathcal{T}$$. If the instance is single-period, $$|\\\\mathcal{T}| = 1$$.\"\n  },\n  \"parameters\": {\n    \"initial_inventory\": \"Vector $$I_r$$ for each $$r \\\\in \\\\mathcal{R}$$.\",\n    \"selling_price\": \"Vector $$s_g$$ for each $$g \\\\in \\\\mathcal{G}$$.\",\n    \"minimum_share\": \"Vector $$\\\\alpha_g$$ giving the minimum fraction of the distinguished crude $$r^\\\\star$$ required in each product $$g \\\\in \\\\mathcal{G}$$.\",\n    \"distinguished_crude\": \"Identifier $$r^\\\\star \\\\in \\\\mathcal{R}$$ subject to the minimum share rule.\",\n    \"block_unit_cost\": \"For each purchasable crude type $$r$$ and block $$k$$, the unit cost $$c_{r,k}$$.\",\n    \"block_capacity\": \"For each purchasable crude type $$r$$ and block $$k$$, the maximum purchasable amount $$U_{r,k}$$.\",\n    \"purchase_cap\": \"Optional total market purchase limit $$\\\\bar P_r$$ for each purchasable crude type $$r$$.\",\n    \"demand_upper_bound\": \"Optional sales or production limit $$D_g$$ for each product $$g \\\\in \\\\mathcal{G}$$.\"\n  },\n  \"decision_scope\": {\n    \"procurement\": \"Choose purchase quantities by crude type and price block.\",\n    \"blending\": \"Choose how much of each crude type is allocated to each gasoline product.\",\n    \"production\": \"Choose output quantities for each gasoline product.\"\n  }\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"shape\": \"Nested mapping or array of $$p_{r,k}$$ values, indexed by purchasable crude type $$r$$ and block $$k$$.\",\n    \"meaning\": \"Quantity purchased from each market price block.\"\n  },\n  \"blending_plan\": {\n    \"shape\": \"Matrix $$|\\\\mathcal{R}| \\\\times |\\\\mathcal{G}|$$ containing $$x_{r,g}$$.\",\n    \"meaning\": \"Quantity of each crude type blended into each gasoline product.\"\n  },\n  \"production_plan\": {\n    \"shape\": \"Vector of length $$|\\\\mathcal{G}|$$ containing $$y_g$$.\",\n    \"meaning\": \"Total production quantity of each gasoline product.\"\n  },\n  \"objective_value\": {\n    \"shape\": \"Scalar $$z$$.\",\n    \"meaning\": \"Optimal total profit.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"raw_materials\": [\"A\", \"B\"],\n    \"products\": [\"Type I\", \"Type II\"],\n    \"purchasable_raw_materials\": [\"A\"],\n    \"purchase_blocks\": {\n      \"A\": [\n        {\"block_id\": 1, \"upper_bound\": 500, \"unit_cost\": 10000},\n        {\"block_id\": 2, \"upper_bound\": 500, \"unit_cost\": 8000},\n        {\"block_id\": 3, \"upper_bound\": 500, \"unit_cost\": 6000}\n      ]\n    }\n  },\n  \"planning_horizon\": {\n    \"horizon\": [\"single_period\"]\n  },\n  \"parameters\": {\n    \"initial_inventory\": {\n      \"A\": 500,\n      \"B\": 1000\n    },\n    \"selling_price\": {\n      \"Type I\": 4800,\n      \"Type II\": 5600\n    },\n    \"minimum_share\": {\n      \"Type I\": 0.5,\n      \"Type II\": 0.6\n    },\n    \"distinguished_crude\": \"A\",\n    \"block_unit_cost\": {\n      \"A\": {\n        \"1\": 10000,\n        \"2\": 8000,\n        \"3\": 6000\n      }\n    },\n    \"block_capacity\": {\n      \"A\": {\n        \"1\": 500,\n        \"2\": 500,\n        \"3\": 500\n      }\n    },\n    \"purchase_cap\": {\n      \"A\": 1500\n    },\n    \"demand_upper_bound\": {}\n  },\n  \"decision_scope\": {\n    \"procurement\": \"Choose how much crude oil A to buy from each price block.\",\n    \"blending\": \"Choose how much crude oil A and crude oil B are blended into Type I and Type II gasoline.\",\n    \"production\": \"Choose the output quantities of Type I and Type II gasoline.\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "initial_inventory",
+            "symbol": "I",
+            "shape": [
+                "R"
+            ],
+            "description": "Initial inventory of each crude type"
+        },
+        {
+            "name": "selling_price",
+            "symbol": "s",
+            "shape": [
+                "G"
+            ],
+            "description": "Selling price of each gasoline product"
+        },
+        {
+            "name": "minimum_share",
+            "symbol": "\\alpha",
+            "shape": [
+                "G"
+            ],
+            "description": "Minimum required share of the distinguished crude in each gasoline product"
+        },
+        {
+            "name": "distinguished_crude",
+            "symbol": "r^\\star",
+            "shape": [],
+            "description": "Distinguished crude type that must be present in every gasoline product"
+        },
+        {
+            "name": "block_unit_cost",
+            "symbol": "c",
+            "shape": [
+                "R",
+                "K_r"
+            ],
+            "description": "Unit purchase cost for each crude type and purchase block"
+        },
+        {
+            "name": "block_capacity",
+            "symbol": "U",
+            "shape": [
+                "R",
+                "K_r"
+            ],
+            "description": "Maximum purchasable quantity in each purchase block for each crude type"
+        },
+        {
+            "name": "purchase_cap",
+            "symbol": "\\bar P",
+            "shape": [
+                "R"
+            ],
+            "description": "Optional total purchase cap for each crude type"
+        },
+        {
+            "name": "demand_upper_bound",
+            "symbol": "D",
+            "shape": [
+                "G"
+            ],
+            "description": "Optional upper bound on demand or sales for each gasoline product"
+        }
+    ],
+    "variables": [
+        {
+            "name": "purchase_quantity",
+            "symbol": "p",
+            "shape": [
+                "R",
+                "K_r"
+            ],
+            "domain": "continuous",
+            "description": "Purchase quantity from each block of each purchasable crude type"
+        },
+        {
+            "name": "blending_quantity",
+            "symbol": "x",
+            "shape": [
+                "R",
+                "G"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of each crude type blended into each gasoline product"
+        },
+        {
+            "name": "production_quantity",
+            "symbol": "y",
+            "shape": [
+                "G"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each gasoline product"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit objective value"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_purchase_quantity",
+            "description": "Purchase quantities must be nonnegative for every purchasable crude type and purchase block.",
+            "formula": "p_{rk} \\ge 0",
+            "parameters": [
+                "block_capacity"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_blending_quantity",
+            "description": "Blending quantities must be nonnegative for every crude type and gasoline product.",
+            "formula": "x_{rg} \\ge 0",
+            "parameters": [
+                "initial_inventory"
+            ],
+            "variables": [
+                "blending_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative for every gasoline product.",
+            "formula": "y_g \\ge 0",
+            "parameters": [
+                "selling_price"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "minimum_share_of_distinguished_crude",
+            "description": "For each gasoline product g, the distinguished crude r^\\star must appear in the blend at least at share alpha_g of total production.",
+            "formula": "x_{r^\\star g} \\ge \\alpha_g y_g",
+            "parameters": [
+                "minimum_share",
+                "distinguished_crude"
+            ],
+            "variables": [
+                "blending_quantity",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "crude_availability_balance",
+            "description": "For each crude type, total blending usage cannot exceed initial inventory plus purchases from all available blocks.",
+            "formula": "\\sum_{g\\in\\mathcal{G}} x_{rg} \\le I_r + \\sum_{k\\in\\mathcal{K}_r} p_{rk}",
+            "parameters": [
+                "initial_inventory"
+            ],
+            "variables": [
+                "blending_quantity",
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "purchase_block_capacity",
+            "description": "For each purchasable crude type and block, purchases cannot exceed the block capacity.",
+            "formula": "p_{rk} \\le U_{rk}",
+            "parameters": [
+                "block_capacity"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "purchase_cap_limit",
+            "description": "If a total purchase cap is provided, total purchases of each crude type across all blocks cannot exceed that cap.",
+            "formula": "\\sum_{k\\in\\mathcal{K}_r} p_{rk} \\le \\bar P_r",
+            "parameters": [
+                "purchase_cap"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "demand_upper_bound",
+            "description": "If demand upper bounds are provided, production of each gasoline product cannot exceed its demand limit.",
+            "formula": "y_g \\le D_g",
+            "parameters": [
+                "demand_upper_bound"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_definition",
+            "description": "Total production of each gasoline product equals total blended crude input.",
+            "formula": "y_g = \\sum_{r\\in\\mathcal{R}} x_{rg}",
+            "parameters": [],
+            "variables": [
+                "blending_quantity",
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize total profit defined as gasoline sales revenue minus crude procurement cost",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit, defined as total gasoline sales revenue minus total crude procurement cost. The problem has a single clear objective, so no objective-combination method is needed beyond a single-objective formulation.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "z = \\sum_{g\\in\\mathcal{G}} s_g y_g - \\sum_{r\\in\\mathcal{R}} \\sum_{k\\in\\mathcal{K}_r} c_{rk} p_{rk}",
+        "parameters": [
+            "selling_price",
+            "block_unit_cost"
+        ],
+        "variables": [
+            "production_quantity",
+            "purchase_quantity",
+            "total_profit"
+        ]
+    }
+}

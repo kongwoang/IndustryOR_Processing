@@ -1,0 +1,196 @@
+{
+    "problem": "Problem description\n- There is a finite set of courses $$\\mathcal{C}$$ and a finite set of academic categories $$\\mathcal{K}$$, with course index $$c \\in \\mathcal{C}$$ and category index $$k \\in \\mathcal{K}$$.\n- The planning problem is a single course-selection period over a horizon $$\\mathcal{T}$$.\n- Each course $$c$$ has a selection cost $$w_c$$, and the original objective is to minimize the total selection cost, which corresponds to minimizing the number of selected courses when all costs are unit costs.\n- Each course may be eligible for one or more categories, described by an eligibility relation $$a_{ck}$$.\n- Each category $$k$$ has a required minimum credit count $$d_k$$, meaning enough selected courses must be credited to that category.\n- Some courses have prerequisite relations, described by a precedence relation $$r_{ij}$$, meaning course $$j$$ must also be selected whenever course $$i$$ is selected.\n- A selected course may be credited to multiple categories if it is eligible for them, and it may satisfy more than one category requirement at the same time.\n- The same selected course may not be counted more than once toward the same category requirement.\n- The planning goal is to choose a smallest feasible set of courses that satisfies all category requirements and all prerequisite requirements.\n- A solution is represented by:\n  - $$x_c \\in \\{0,1\\}$$ for each $$c \\in \\mathcal{C}$$, where $$x_c=1$$ means course $$c$$ is selected.\n  - $$y_{ck} \\in \\{0,1\\}$$ for each eligible pair $$\\left(c,k\\right)$$, where $$y_{ck}=1$$ means selected course $$c$$ is credited toward category $$k$$.\n  - $$z$$, the total number of selected courses.\n\nInput Format\n{\n  \"course_count\": \"integer $$N$$, where $$N = \\left|\\mathcal{C}\\right|$$\",\n  \"category_count\": \"integer $$K$$, where $$K = \\left|\\mathcal{K}\\right|$$\",\n  \"time_horizon\": {\n    \"symbol\": \"$$\\mathcal{T}$$\",\n    \"description\": \"single selection period\"\n  },\n  \"courses\": [\n    {\n      \"id\": \"integer in $$\\\\{0,1,\\\\dots,N-1\\\\}$$\",\n      \"name\": \"string identifier of course $$c$$\",\n      \"selection_cost\": \"cost parameter $$w_c$$\",\n      \"eligible_categories\": \"subset of $$\\\\mathcal{K}$$ that course $$c$$ can satisfy\",\n      \"prerequisites\": \"subset of $$\\\\mathcal{C}$$ that must be selected before course $$c$$\"\n    }\n  ],\n  \"category_requirements\": {\n    \"shape\": \"$$K$$\",\n    \"entry\": \"$$d_k$$\",\n    \"meaning\": \"minimum number of courses that must be credited to category $$k$$\"\n  },\n  \"eligibility_matrix\": {\n    \"shape\": \"$$N \\\\times K$$\",\n    \"entry\": \"$$a_{ck}$$\",\n    \"meaning\": \"$$1$$ if course $$c$$ can satisfy category $$k$$, otherwise $$0$$\"\n  },\n  \"prerequisite_matrix\": {\n    \"shape\": \"$$N \\\\times N$$\",\n    \"entry\": \"$$r_{ij}$$\",\n    \"meaning\": \"$$1$$ if course $$j$$ is a prerequisite of course $$i$$, otherwise $$0$$\"\n  }\n}\n\nOutput Format\n{\n  \"selected_courses\": {\n    \"type\": \"array\",\n    \"meaning\": \"the chosen subset $$S \\\\subseteq \\\\mathcal{C}$$ of courses\"\n  },\n  \"selection_vector\": {\n    \"shape\": \"$$N$$\",\n    \"meaning\": \"$$x_c$$ for each course $$c \\\\in \\\\mathcal{C}$$\"\n  },\n  \"category_credit_matrix\": {\n    \"shape\": \"$$N \\\\times K$$\",\n    \"meaning\": \"$$y_{ck}$$ indicating whether selected course $$c$$ is credited to category $$k$$\"\n  },\n  \"total_selected_courses\": {\n    \"type\": \"integer\",\n    \"meaning\": \"the total number of selected courses $$z$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"course_count\": 7,\n  \"category_count\": 3,\n  \"time_horizon\": \"single selection period\",\n  \"categories\": [\n    \"Mathematics\",\n    \"Operations Research\",\n    \"Computer Science\"\n  ],\n  \"courses\": [\n    {\n      \"id\": 0,\n      \"name\": \"Calculus\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 1,\n      \"name\": \"Operations Research\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Data Structures\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Computer Science\"],\n      \"prerequisites\": [\"Computer Programming\"]\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Management Statistics\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": [\"Calculus\"]\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Computer Simulation\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Operations Research\", \"Computer Science\"],\n      \"prerequisites\": [\"Computer Programming\"]\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Computer Programming\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Computer Science\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 6,\n      \"name\": \"Forecasting\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": [\"Management Statistics\"]\n    }\n  ],\n  \"category_requirements\": {\n    \"Mathematics\": 2,\n    \"Operations Research\": 2,\n    \"Computer Science\": 2\n  }\n}",
+    "parameters": [
+        {
+            "name": "course_count",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of courses in the finite course set $\\mathcal{C}$"
+        },
+        {
+            "name": "category_count",
+            "symbol": "K",
+            "shape": [],
+            "description": "Number of academic categories in the finite category set $\\mathcal{K}$"
+        },
+        {
+            "name": "time_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single course-selection period"
+        },
+        {
+            "name": "selection_cost",
+            "symbol": "w_c",
+            "shape": [
+                "N"
+            ],
+            "description": "Selection cost of each course $c$"
+        },
+        {
+            "name": "eligibility_matrix",
+            "symbol": "a_{ck}",
+            "shape": [
+                "N",
+                "K"
+            ],
+            "description": "Binary eligibility indicator for course-category pairs; 1 if course $c$ can satisfy category $k$"
+        },
+        {
+            "name": "category_requirement",
+            "symbol": "d_k",
+            "shape": [
+                "K"
+            ],
+            "description": "Minimum required number of credited courses for each category $k$"
+        },
+        {
+            "name": "prerequisite_matrix",
+            "symbol": "r_{ij}",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Binary prerequisite indicator for course pairs; 1 if selecting course $i$ requires selecting course $j$"
+        }
+    ],
+    "variables": [
+        {
+            "name": "selected_course",
+            "symbol": "x_c",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary decision variable equal to 1 if course $c$ is selected"
+        },
+        {
+            "name": "category_credit",
+            "symbol": "y_{ck}",
+            "shape": [
+                "N",
+                "K"
+            ],
+            "domain": "binary",
+            "description": "Binary decision variable equal to 1 if selected course $c$ is credited toward category $k$"
+        },
+        {
+            "name": "total_selected_courses",
+            "symbol": "z",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of selected courses"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "selected_course_binary_domain",
+            "description": "The course selection variable is binary for each course",
+            "formula": "x_c \\in \\{0,1\\}",
+            "variables": [
+                "selected_course"
+            ]
+        },
+        {
+            "name": "category_credit_binary_domain",
+            "description": "The category credit variable is binary for each course-category pair",
+            "formula": "y_{ck} \\in \\{0,1\\}",
+            "parameters": [
+                "eligibility_matrix"
+            ],
+            "variables": [
+                "category_credit"
+            ]
+        },
+        {
+            "name": "total_selected_courses_integer_domain",
+            "description": "The total selected courses variable is a nonnegative integer",
+            "formula": "z \\in \\mathbb{Z}_{\\ge 0}",
+            "variables": [
+                "total_selected_courses"
+            ]
+        },
+        {
+            "name": "credit_only_if_selected",
+            "description": "A course may be credited to a category only if the course is selected",
+            "formula": "y_{ck} \\le x_c",
+            "parameters": [
+                "eligibility_matrix"
+            ],
+            "variables": [
+                "selected_course",
+                "category_credit"
+            ]
+        },
+        {
+            "name": "category_minimum_credit",
+            "description": "Each category must receive at least its required minimum number of credited courses",
+            "formula": "\\sum_{c=0}^{N-1} y_{ck} \\ge d_k \\quad \\forall k=0,\\dots,K-1",
+            "parameters": [
+                "category_requirement"
+            ],
+            "variables": [
+                "category_credit"
+            ]
+        },
+        {
+            "name": "prerequisite_selection",
+            "description": "Selecting a course requires selecting all of its prerequisite courses",
+            "formula": "x_i \\le x_j \\quad \\forall i,j\\in\\{0,\\dots,N-1\\} \\text{ such that } r_{ij}=1",
+            "parameters": [
+                "prerequisite_matrix"
+            ],
+            "variables": [
+                "selected_course"
+            ]
+        },
+        {
+            "name": "single_selection_period",
+            "description": "The model applies to one course-selection period only",
+            "formula": "\\mathcal{T} \\text{ is a single selection period",
+            "parameters": [
+                "time_horizon"
+            ]
+        },
+        {
+            "name": "eligibility_cap",
+            "description": "A course-category pair can receive credit only if the course is eligible for that category; ineligible pairs are forced to zero credit",
+            "formula": "y_{ck} \\le a_{ck}",
+            "parameters": [
+                "eligibility_matrix"
+            ],
+            "variables": [
+                "category_credit"
+            ]
+        },
+        {
+            "name": "total_selected_courses_definition",
+            "description": "Define the total number of selected courses as the sum of course selection variables",
+            "formula": "z = \\sum_{c=0}^{N-1} x_c",
+            "variables": [
+                "selected_course",
+                "total_selected_courses"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "selection_cost_minimization",
+            "description": "Minimize the total selection cost of the chosen courses; under unit costs, this is equivalent to minimizing the number of selected courses",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total selection cost of the chosen courses.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{c=0}^{N-1} w_c x_c",
+        "parameters": [
+            "selection_cost"
+        ],
+        "variables": [
+            "selected_course"
+        ]
+    }
+}

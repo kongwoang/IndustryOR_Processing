@@ -1,0 +1,250 @@
+{
+    "problem": "Problem description\n- This is a single-period production planning problem with a finite set of toy product types indexed by $$p \\in P$$, where $$|P|$$ is the number of available toy types.\n- Each product type $$p$$ has a unit profit $$r_p$$, a plastic consumption coefficient $$\\alpha_p$$, and an electronic-component consumption coefficient $$\\beta_p$$.\n- The available resource limits are a plastic capacity $$A$$ and an electronic-component capacity $$B$$.\n- The planning goal is to choose which toy types to manufacture and how many units of each type to produce so that total profit is maximized while respecting all resource limits and logical business rules.\n- The product portfolio contains distinguished product types corresponding to robots, model cars, building blocks, and dolls.\n- Manufacturing quantities are linked to binary activation decisions so that a product type is considered manufactured only when its production quantity is positive.\n- The available resource pools must not be exceeded by the total resource consumption of all manufactured products.\n- If the robot product type is manufactured, then the doll product type must not be manufactured.\n- If the model-car product type is manufactured, then the building-block product type must also be manufactured.\n- The number of dolls produced cannot exceed the number of model cars produced.\n- The objective is to maximize the total profit from all manufactured and sold toy units.\n- A solution is represented by:\n  - A production quantity vector $$x \\in \\mathbb{Z}_{\\ge 0}^{|P|}$$, where $$x_p$$ is the number of units produced for product type $$p$$.\n  - A binary manufacturing vector $$y \\in \\{0,1\\}^{|P|}$$, where $$y_p = 1$$ means product type $$p$$ is manufactured and $$y_p = 0$$ means it is not manufactured.\n  - Optionally, the total achieved profit $$Z$$ as a scalar output.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Number of planning periods $$H$$. For this problem, the instance is single-period, so $$H = 1$$.\"\n  },\n  \"products\": {\n    \"type\": \"array\",\n    \"meaning\": \"List of product identifiers indexed by $$p \\in P$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"unit_profit\": {\n    \"type\": \"array\",\n    \"meaning\": \"Unit profit vector $$r_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"resource_usage\": {\n    \"plastic\": {\n      \"type\": \"array\",\n      \"meaning\": \"Plastic usage coefficients $$\\alpha_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    },\n    \"electronics\": {\n      \"type\": \"array\",\n      \"meaning\": \"Electronic-component usage coefficients $$\\beta_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    }\n  },\n  \"resource_capacity\": {\n    \"plastic\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available plastic capacity $$A$$.\"\n    },\n    \"electronics\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available electronic-component capacity $$B$$.\"\n    }\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the robot product type is manufactured, the doll product type must not be manufactured.\"\n    },\n    \"model_car_requires_blocks\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the model-car product type is manufactured, the building-block product type must also be manufactured.\"\n    },\n    \"doll_quantity_limit_relative_to_model_cars\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"The production quantity of dolls must not exceed the production quantity of model cars.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"type\": \"array\",\n    \"meaning\": \"Optimal production quantity vector $$x_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"manufacture_indicator\": {\n    \"type\": \"array\",\n    \"meaning\": \"Binary manufacturing vector $$y_p$$ indicating whether each product type is manufactured.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"total_profit\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Maximum achievable profit $$Z$$ under all resource and logical constraints.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 1,\n  \"products\": [\"robot\", \"model_car\", \"building_blocks\", \"doll\"],\n  \"unit_profit\": [15, 8, 12, 5],\n  \"resource_usage\": {\n    \"plastic\": [30, 10, 20, 15],\n    \"electronics\": [8, 5, 3, 2]\n  },\n  \"resource_capacity\": {\n    \"plastic\": 1200,\n    \"electronics\": 800\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": [\"robot\", \"doll\"],\n    \"model_car_requires_blocks\": [\"model_car\", \"building_blocks\"],\n    \"doll_quantity_limit_relative_to_model_cars\": [\"doll\", \"model_car\"]\n  }\n}",
+    "parameters": [
+        {
+            "name": "product_types",
+            "symbol": "P",
+            "shape": [],
+            "description": "Finite set of product types indexed by p in P using 0-based indexing"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "r",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit of each product type p"
+        },
+        {
+            "name": "plastic_consumption",
+            "symbol": "\\alpha",
+            "shape": [
+                "P"
+            ],
+            "description": "Plastic consumption coefficient per unit of each product type p"
+        },
+        {
+            "name": "electronic_consumption",
+            "symbol": "\\beta",
+            "shape": [
+                "P"
+            ],
+            "description": "Electronic-component consumption coefficient per unit of each product type p"
+        },
+        {
+            "name": "plastic_capacity",
+            "symbol": "A",
+            "shape": [],
+            "description": "Total available plastic capacity"
+        },
+        {
+            "name": "electronic_capacity",
+            "symbol": "B",
+            "shape": [],
+            "description": "Total available electronic-component capacity"
+        },
+        {
+            "name": "robot_product",
+            "symbol": "p^{robot}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the robot"
+        },
+        {
+            "name": "model_car_product",
+            "symbol": "p^{car}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the model car"
+        },
+        {
+            "name": "building_blocks_product",
+            "symbol": "p^{blocks}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the building blocks"
+        },
+        {
+            "name": "doll_product",
+            "symbol": "p^{doll}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the doll"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "H",
+            "shape": [],
+            "description": "Planning horizon count, equal to 1 for this single-period problem"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P"
+            ],
+            "domain": "integer",
+            "description": "Number of units produced for each product type p"
+        },
+        {
+            "name": "manufacture_indicator",
+            "symbol": "y",
+            "shape": [
+                "P"
+            ],
+            "domain": "binary",
+            "description": "Binary manufacturing indicator for each product type p"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total achieved profit"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "big_m_production_bound",
+            "symbol": "M",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Product-specific upper bound used to linearize the link between production quantities and manufacturing indicators; set as a valid upper bound on x_p for each product p"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "plastic_capacity_limit",
+            "description": "Total plastic consumption across all products must not exceed available plastic capacity",
+            "formula": "\\sum_{p\\in P} \\alpha_p x_p \\le A",
+            "parameters": [
+                "plastic_consumption",
+                "plastic_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "electronic_capacity_limit",
+            "description": "Total electronic-component consumption across all products must not exceed available electronic-component capacity",
+            "formula": "\\sum_{p\\in P} \\beta_p x_p \\le B",
+            "parameters": [
+                "electronic_consumption",
+                "electronic_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_requires_activation",
+            "description": "Production is allowed only when the corresponding manufacturing indicator is active, and a product is considered manufactured only when its production quantity is positive",
+            "formula": "x_p \\le M_p y_p \\quad \\forall p\\in P",
+            "parameters": [
+                "product_types"
+            ],
+            "variables": [
+                "production_quantity",
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "robot_excludes_doll",
+            "description": "If the robot product type is manufactured, then the doll product type must not be manufactured",
+            "formula": "y_{p^{robot}} + y_{p^{doll}} \\le 1",
+            "parameters": [
+                "robot_product",
+                "doll_product"
+            ],
+            "variables": [
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "model_car_requires_building_blocks",
+            "description": "If the model-car product type is manufactured, then the building-block product type must also be manufactured",
+            "formula": "y_{p^{car}} \\le y_{p^{blocks}}",
+            "parameters": [
+                "model_car_product",
+                "building_blocks_product"
+            ],
+            "variables": [
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "doll_quantity_limit",
+            "description": "The production quantity of dolls must not exceed the production quantity of model cars",
+            "formula": "x_{p^{doll}} \\le x_{p^{car}}",
+            "parameters": [
+                "doll_product",
+                "model_car_product"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "single_period_decision",
+            "description": "The solution must choose manufacturing and production decisions for the single period",
+            "formula": "H = 1",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_integer_production",
+            "description": "Production quantities must be nonnegative integers",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall p\\in P",
+            "parameters": [
+                "product_types"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "binary_manufacturing_indicator",
+            "description": "Manufacturing indicators must be binary variables",
+            "formula": "y_p \\in \\{0,1\\} \\quad \\forall p\\in P",
+            "parameters": [
+                "product_types"
+            ],
+            "variables": [
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "nonnegative_capacities",
+            "description": "Resource capacities must be nonnegative",
+            "formula": "A \\ge 0,\\; B \\ge 0",
+            "parameters": [
+                "plastic_capacity",
+                "electronic_capacity"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize the total profit from all manufactured and sold toy units",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit from produced toy units across all product types.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p\\in P} r_p x_p",
+        "parameters": [
+            "unit_profit"
+        ],
+        "variables": [
+            "production_quantity",
+            "total_profit"
+        ]
+    }
+}

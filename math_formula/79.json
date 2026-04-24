@@ -1,0 +1,278 @@
+{
+    "problem": "Problem description\n- There is a finite set of tasks $$\\mathcal{I}$$ and a finite set of worker types $$\\mathcal{W}$$, with two distinguished worker types: skilled workers $$s$$ and laborers $$\\ell$$.\n- The planning horizon is a weekly horizon $$\\mathcal{T}$$, and the planning is to be carried out within this horizon.\n- Each task $$i \\in \\mathcal{I}$$ has a required amount of effective work $$H_i$$ that must be completed.\n- Each task $$i$$ has a finite set of feasible completion methods $$\\mathcal{M}_i$$, and exactly one method must be chosen for that task.\n- Every method $$m \\in \\mathcal{M}_i$$ specifies the worker-type mix needed to carry out task $$i$$, using a method composition parameter $$a_{i,m,w}$$ for each worker type $$w \\in \\mathcal{W}$$.\n- Some methods may also carry a fixed setup or coordination cost $$F_{i,m}$$ that is incurred only if that method is selected.\n- Each worker type $$w \\in \\mathcal{W}$$ has a weekly wage $$c_w$$ and a weekly effective-hour capacity $$h_w$$.\n- Hiring of each worker type is limited by an upper bound $$U_w$$.\n- The planning goal is to choose one method for each task and decide how many workers of each type to hire and assign, so that all task requirements are satisfied at minimum total weekly cost.\n- The total weekly cost includes wage payments for hired workers and any fixed setup costs of the selected methods.\n- The staffing plan must respect the hiring limits for each worker type.\n- The staffing plan must also respect all task-method compatibility rules, including exclusions between specific method pairs.\n- If a designated method is selected for a task, the assigned number of workers of the specified type must meet the required minimum staffing level $$L_{i,m,w}$$.\n- The number of skilled workers hired must not exceed a fraction $$\\alpha$$ of the number of laborers hired.\n- A solution is represented by:\n  - A method-selection indicator $$x_{i,m}$$ for each task-method pair, where the chosen method for each task is identified by a one-hot selection pattern.\n  - A hired-worker count $$y_w$$ for each worker type $$w \\in \\mathcal{W}$$.\n  - A task-method staffing count $$z_{i,m,w}$$ giving how many workers of type $$w$$ are assigned to task $$i$$ under method $$m$$.\n  - The minimized total weekly cost $$Z^*$$, if the output includes the objective value.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"$$|\\mathcal{T}|$$ weekly planning periods\"\n  },\n  \"worker_types\": {\n    \"shape\": \"$$|\\mathcal{W}|$$\",\n    \"items\": [\n      {\n        \"worker_type_id\": \"$$w$$\",\n        \"weekly_wage\": \"$$c_w$$\",\n        \"weekly_effective_hours\": \"$$h_w$$\",\n        \"max_hires\": \"$$U_w$$\"\n      }\n    ]\n  },\n  \"tasks\": {\n    \"shape\": \"$$|\\mathcal{I}|$$\",\n    \"items\": [\n      {\n        \"task_id\": \"$$i$$\",\n        \"required_effective_hours\": \"$$H_i$$\",\n        \"methods\": {\n          \"shape\": \"$$|\\mathcal{M}_i|$$\",\n          \"items\": [\n            {\n              \"method_id\": \"$$m$$\",\n              \"worker_mix\": {\n                \"shape\": \"$$|\\mathcal{W}|$$\",\n                \"meaning\": \"$$a_{i,m,w}$$, the number of workers of type $$w$$ required by one use of method $$m$$ for task $$i$$\"\n              },\n              \"fixed_setup_cost\": \"$$F_{i,m}$$\"\n            }\n          ]\n        }\n      }\n    ]\n  },\n  \"policy_rules\": {\n    \"skilled_share_limit\": \"$$\\\\alpha$$\",\n    \"minimum_skilled_assignments\": [\n      {\n        \"task_id\": \"$$i$$\",\n        \"method_id\": \"$$m$$\",\n        \"worker_type\": \"$$s$$\",\n        \"minimum_assigned\": \"$$L_{i,m,s}$$\"\n      }\n    ],\n    \"incompatible_method_pairs\": [\n      {\n        \"task_1\": \"$$i$$\",\n        \"method_1\": \"$$m$$\",\n        \"task_2\": \"$$j$$\",\n        \"method_2\": \"$$n$$\"\n      }\n    ]\n  }\n}\n\nOutput Format\n{\n  \"selected_methods\": {\n    \"shape\": \"$$|\\mathcal{I}|$$ records\",\n    \"meaning\": \"For each task $$i$$, the chosen method $$m_i$$\"\n  },\n  \"hired_workers\": {\n    \"shape\": \"$$|\\mathcal{W}|$$ records\",\n    \"meaning\": \"The number of hired workers of each type $$y_w$$\"\n  },\n  \"assigned_workers\": {\n    \"shape\": \"sparse list over feasible triples $$\\{(i,m,w)\\}$$\",\n    \"meaning\": \"The number of workers of type $$w$$ assigned to task $$i$$ under method $$m$$, denoted $$z_{i,m,w}$$\"\n  },\n  \"total_weekly_cost\": {\n    \"meaning\": \"The minimized objective value $$Z^*$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon_weeks\": 1,\n  \"worker_types\": {\n    \"skilled\": {\n      \"weekly_wage_yuan\": 100,\n      \"weekly_effective_hours\": 42,\n      \"max_hires\": 400\n    },\n    \"laborer\": {\n      \"weekly_wage_yuan\": 80,\n      \"weekly_effective_hours\": 36,\n      \"max_hires\": 800\n    }\n  },\n  \"tasks\": [\n    {\n      \"task_id\": 1,\n      \"required_effective_hours\": 8400,\n      \"methods\": [\n        {\n          \"method_id\": \"A\",\n          \"worker_mix\": {\n            \"skilled\": 1,\n            \"laborer\": 0\n          },\n          \"fixed_setup_cost_yuan\": 0\n        },\n        {\n          \"method_id\": \"B\",\n          \"worker_mix\": {\n            \"skilled\": 1,\n            \"laborer\": 2\n          },\n          \"fixed_setup_cost_yuan\": 500\n        }\n      ]\n    },\n    {\n      \"task_id\": 2,\n      \"required_effective_hours\": 10800,\n      \"methods\": [\n        {\n          \"method_id\": \"A\",\n          \"worker_mix\": {\n            \"skilled\": 1,\n            \"laborer\": 0\n          },\n          \"fixed_setup_cost_yuan\": 0\n        },\n        {\n          \"method_id\": \"B\",\n          \"worker_mix\": {\n            \"skilled\": 0,\n            \"laborer\": 1\n          },\n          \"fixed_setup_cost_yuan\": 0\n        }\n      ]\n    },\n    {\n      \"task_id\": 3,\n      \"required_effective_hours\": 18000,\n      \"methods\": [\n        {\n          \"method_id\": \"A\",\n          \"worker_mix\": {\n            \"skilled\": 0,\n            \"laborer\": 5\n          },\n          \"fixed_setup_cost_yuan\": 0\n        },\n        {\n          \"method_id\": \"B\",\n          \"worker_mix\": {\n            \"skilled\": 1,\n            \"laborer\": 3\n          },\n          \"fixed_setup_cost_yuan\": 0\n        }\n      ]\n    }\n  ],\n  \"policy_rules\": {\n    \"incompatible_method_pairs\": [\n      {\n        \"task_1\": 1,\n        \"method_1\": \"B\",\n        \"task_2\": 3,\n        \"method_2\": \"A\"\n      }\n    ],\n    \"minimum_skilled_assignments\": [\n      {\n        \"task_id\": 3,\n        \"method_id\": \"B\",\n        \"minimum_assigned\": 20\n      }\n    ],\n    \"skilled_share_limit\": 0.6\n  }\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Set of weekly planning periods; the planning horizon length |T| is the number of weekly periods"
+        },
+        {
+            "name": "tasks",
+            "symbol": "I",
+            "shape": [],
+            "description": "Finite set of tasks, indexed by i"
+        },
+        {
+            "name": "worker_types",
+            "symbol": "W",
+            "shape": [],
+            "description": "Finite set of worker types, indexed by w"
+        },
+        {
+            "name": "required_effective_work",
+            "symbol": "H",
+            "shape": [
+                "I"
+            ],
+            "description": "Required effective work for each task i"
+        },
+        {
+            "name": "methods",
+            "symbol": "M",
+            "shape": [
+                "I"
+            ],
+            "description": "Feasible completion methods for each task i"
+        },
+        {
+            "name": "worker_composition",
+            "symbol": "a",
+            "shape": [
+                "I",
+                "M_{i}",
+                "W"
+            ],
+            "description": "Number of workers of type w required by one use of method m for task i"
+        },
+        {
+            "name": "fixed_setup_cost",
+            "symbol": "F",
+            "shape": [
+                "I",
+                "M_{i}"
+            ],
+            "description": "Fixed setup or coordination cost incurred if method m is selected for task i"
+        },
+        {
+            "name": "weekly_wage",
+            "symbol": "c",
+            "shape": [
+                "W"
+            ],
+            "description": "Weekly wage of each worker type w"
+        },
+        {
+            "name": "weekly_capacity",
+            "symbol": "h",
+            "shape": [
+                "W"
+            ],
+            "description": "Weekly effective-hour capacity of each worker type w"
+        },
+        {
+            "name": "hiring_upper_bound",
+            "symbol": "U",
+            "shape": [
+                "W"
+            ],
+            "description": "Maximum number of workers of each type w that may be hired"
+        },
+        {
+            "name": "minimum_staffing",
+            "symbol": "L",
+            "shape": [
+                "I",
+                "M_{i}",
+                "W"
+            ],
+            "description": "Minimum number of workers of type w that must be assigned if method m is selected for task i when specified in policy rules"
+        },
+        {
+            "name": "skilled_share_limit",
+            "symbol": "\\alpha",
+            "shape": [],
+            "description": "Maximum allowed fraction relating hired skilled workers to hired laborers"
+        },
+        {
+            "name": "incompatible_method_pairs",
+            "symbol": "P",
+            "shape": [
+                "-",
+                "2",
+                "2"
+            ],
+            "description": "Set of incompatible method pairs ((i,m),(j,n)) given in the policy rules"
+        },
+        {
+            "name": "skilled_worker_type",
+            "symbol": "s",
+            "shape": [],
+            "description": "Distinguished skilled worker type identifier"
+        },
+        {
+            "name": "laborer_worker_type",
+            "symbol": "\\ell",
+            "shape": [],
+            "description": "Distinguished laborer worker type identifier"
+        }
+    ],
+    "variables": [
+        {
+            "name": "method_selection",
+            "symbol": "x",
+            "shape": [
+                "I",
+                "M_{i}"
+            ],
+            "domain": "binary",
+            "description": "Method-selection indicator for task i and method m"
+        },
+        {
+            "name": "hired_workers",
+            "symbol": "y",
+            "shape": [
+                "W"
+            ],
+            "domain": "integer",
+            "description": "Number of hired workers of type w"
+        },
+        {
+            "name": "assigned_workers",
+            "symbol": "z",
+            "shape": [
+                "I",
+                "M_{i}",
+                "W"
+            ],
+            "domain": "integer",
+            "description": "Number of workers of type w assigned to task i under method m"
+        },
+        {
+            "name": "total_weekly_cost",
+            "symbol": "Z^*",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Minimized total weekly cost"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "one_method_per_task",
+            "description": "Each task must select exactly one feasible completion method.",
+            "formula": "one-hot selection over x",
+            "parameters": [
+                "tasks",
+                "methods"
+            ],
+            "variables": [
+                "method_selection"
+            ]
+        },
+        {
+            "name": "worker_hiring_upper_bounds",
+            "description": "The number of hired workers of each type cannot exceed the type-specific hiring upper bound.",
+            "formula": "y bounded by U",
+            "parameters": [
+                "hiring_upper_bound",
+                "worker_types"
+            ],
+            "variables": [
+                "hired_workers"
+            ]
+        },
+        {
+            "name": "method_composition_requirements",
+            "description": "Assigned workers must match the required worker-type composition for each selected method.",
+            "formula": "z_{i,m,w} = a_{i,m,w} x_{i,m} \\qquad \\forall i\\in I,\\ \\forall m\\in M_i,\\ \\forall w\\in W",
+            "parameters": [
+                "worker_composition",
+                "tasks",
+                "methods",
+                "worker_types"
+            ],
+            "variables": [
+                "method_selection",
+                "assigned_workers"
+            ]
+        },
+        {
+            "name": "minimum_staffing_requirements",
+            "description": "Designated task-method-worker triples must meet the specified minimum staffing levels when the corresponding method is selected.",
+            "formula": "z meets L when applicable",
+            "parameters": [
+                "minimum_staffing",
+                "tasks",
+                "methods",
+                "worker_types"
+            ],
+            "variables": [
+                "method_selection",
+                "assigned_workers"
+            ]
+        },
+        {
+            "name": "incompatible_method_pairs",
+            "description": "Incompatible method pairs listed in policy rules cannot both be selected.",
+            "formula": "incompatible pairs in P cannot be jointly active",
+            "parameters": [
+                "incompatible_method_pairs"
+            ],
+            "variables": [
+                "method_selection"
+            ]
+        },
+        {
+            "name": "skilled_share_limit",
+            "description": "The number of hired skilled workers cannot exceed the allowed fraction of hired laborers.",
+            "formula": "y_s \\leq \\alpha y_{\\ell}",
+            "parameters": [
+                "skilled_share_limit",
+                "skilled_worker_type",
+                "laborer_worker_type"
+            ],
+            "variables": [
+                "hired_workers"
+            ]
+        },
+        {
+            "name": "task_work_requirement",
+            "description": "Each task's required effective work must be met by the selected method\u2019s assigned staff within the weekly horizon.",
+            "formula": "\\sum_{m\\in M_i}\\sum_{w\\in W} a_{i,m,w} h_w z_{i,m,w} \\geq H_i \\qquad \\forall i\\in I",
+            "parameters": [
+                "required_effective_work",
+                "worker_composition",
+                "weekly_capacity",
+                "tasks",
+                "methods",
+                "worker_types"
+            ],
+            "variables": [
+                "assigned_workers"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_weekly_cost_minimization",
+            "description": "Minimize the total weekly cost, including wage payments for hired workers and fixed setup costs for selected methods.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total weekly cost, consisting of wage payments for all hired workers and fixed setup costs for selected task methods.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z^* = \\sum_{w\\in W} c_w y_w + \\sum_{i\\in I} \\sum_{m\\in M_i} F_{i,m} x_{i,m}",
+        "parameters": [
+            "weekly_wage",
+            "fixed_setup_cost"
+        ],
+        "variables": [
+            "hired_workers",
+            "method_selection",
+            "total_weekly_cost"
+        ]
+    }
+}

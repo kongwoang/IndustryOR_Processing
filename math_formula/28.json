@@ -1,0 +1,238 @@
+{
+    "problem": "Problem description\n- There is a single-period staffing allocation problem with two indexed sets: branches $$\\mathcal R$$ and specialties $$\\mathcal S$$. Applicant groups are indexed by $$\\mathcal T$$.\n- Each branch-specialty pair has a required demand represented by the parameter $$d_{r,s}$$ for every $$r \\in \\mathcal R$$ and $$s \\in \\mathcal S$$.\n- Each applicant type has an available headcount represented by the parameter $$n_t$$ for every $$t \\in \\mathcal T$$.\n- Each applicant type $$t$$ can only be assigned to a subset of specialties, denoted by $$\\mathcal S_t^{\\mathrm{cap}} \\subseteq \\mathcal S$$.\n- Each applicant type $$t$$ has one preferred specialty, denoted by $$s_t^{\\mathrm{pref}} \\in \\mathcal S$$, and one preferred branch, denoted by $$r_t^{\\mathrm{pref}} \\in \\mathcal R$$.\n- The planning priorities are lexicographic and ordered as $$p_1 \\succ p_2 \\succ p_3$$.\n- Priority $$p_1$$ means that staffing demand for all branch-specialty requirements should be satisfied as fully as possible.\n- Priority $$p_2$$ means that as many recruited people as possible should be placed in their preferred specialty, up to the target count $$Q_2$$.\n- Priority $$p_3$$ means that as many recruited people as possible should be placed in their preferred branch, up to the target count $$Q_3$$.\n- The planning goal is to find an assignment that respects applicant availability and capability limits while optimizing the priorities in order.\n- Assignments that violate an applicant type\u2019s allowed specialties are not permitted.\n- No applicant type may be used beyond its available number $$n_t$$.\n- Demand shortfalls, specialty-preference shortfalls, and branch-preference shortfalls are tracked as deviation quantities for the goal-planning hierarchy.\n- A solution is represented by:\n  - $$x_{t,r,s}$$: the number of applicants of type $$t$$ assigned to branch $$r$$ in specialty $$s$$.\n  - $$u_{r,s}$$: the unmet demand remaining for branch $$r$$ and specialty $$s$$.\n  - $$v_2$$: the shortfall from the preferred-specialty target $$Q_2$$.\n  - $$v_3$$: the shortfall from the preferred-branch target $$Q_3$$.\n  - Optional reporting quantities may include the number of assigned applicants who satisfy $$p_2$$ and the number who satisfy $$p_3$$.\n\nInput Format\n{\n  \"branches\": \"$$\\\\mathcal R$$, the set of branch locations\",\n  \"specialties\": \"$$\\\\mathcal S$$, the set of professional specialties\",\n  \"applicant_types\": \"$$\\\\mathcal T$$, the set of applicant categories\",\n  \"demand\": \"matrix $$d_{r,s}$$ with shape $$R \\\\times S$$, where $$d_{r,s}$$ is the required headcount of specialty $$s$$ at branch $$r$$\",\n  \"available_supply\": \"vector $$n_t$$ with shape $$T$$, where $$n_t$$ is the number of applicants of type $$t$$\",\n  \"feasible_specialties\": \"list $$\\\\mathcal S_t^{\\\\mathrm{cap}}$$ for each $$t \\\\in \\\\mathcal T$$, giving the specialties that type $$t$$ can handle\",\n  \"preferred_specialty\": \"vector $$s_t^{\\\\mathrm{pref}}$$ with shape $$T$$, where $$s_t^{\\\\mathrm{pref}}$$ is the preferred specialty of type $$t$$\",\n  \"preferred_branch\": \"vector $$r_t^{\\\\mathrm{pref}}$$ with shape $$T$$, where $$r_t^{\\\\mathrm{pref}}$$ is the preferred branch of type $$t$$\",\n  \"priority_levels\": [\"$$p_1$$\", \"$$p_2$$\", \"$$p_3$$\"],\n  \"priority_targets\": {\n    \"preferred_specialty_target\": \"$$Q_2$$, the target number of recruits whose assigned specialty matches their preference\",\n    \"preferred_branch_target\": \"$$Q_3$$, the target number of recruits whose assigned branch matches their preference\"\n  }\n}\n\nOutput Format\n{\n  \"assignment\": \"tensor $$x_{t,r,s}$$ with shape $$T \\\\times R \\\\times S$$, giving the number of applicants of type $$t$$ assigned to branch $$r$$ and specialty $$s$$\",\n  \"unmet_demand\": \"matrix $$u_{r,s}$$ with shape $$R \\\\times S$$, giving the remaining unmet demand after assignment\",\n  \"priority_shortfall\": {\n    \"p_1\": \"overall demand shortfall summary for priority $$p_1$$\",\n    \"p_2\": \"shortfall $$v_2$$ from the preferred-specialty target $$Q_2$$\",\n    \"p_3\": \"shortfall $$v_3$$ from the preferred-branch target $$Q_3$$\"\n  },\n  \"priority_attainment_report\": {\n    \"preferred_specialty_matches\": \"count of assigned applicants whose specialty matches $$s_t^{\\\\mathrm{pref}}$$\",\n    \"preferred_branch_matches\": \"count of assigned applicants whose branch matches $$r_t^{\\\\mathrm{pref}}$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"branches\": [\"Donghai City\", \"Nanjiang City\"],\n  \"specialties\": [$$1$$, $$2$$, $$3$$],\n  \"applicant_types\": [$$1$$, $$2$$, $$3$$, $$4$$, $$5$$, $$6$$],\n  \"demand\": {\n    \"Donghai City\": {\n      $$1$$: $$1000$$,\n      $$2$$: $$2000$$,\n      $$3$$: $$1500$$\n    },\n    \"Nanjiang City\": {\n      $$1$$: $$2000$$,\n      $$2$$: $$1000$$,\n      $$3$$: $$1000$$\n    }\n  },\n  \"available_supply\": {\n    $$1$$: $$1500$$,\n    $$2$$: $$1500$$,\n    $$3$$: $$1500$$,\n    $$4$$: $$1500$$,\n    $$5$$: $$1500$$,\n    $$6$$: $$1500$$\n  },\n  \"feasible_specialties\": {\n    $$1$$: [$$1$$, $$2$$],\n    $$2$$: [$$2$$, $$3$$],\n    $$3$$: [$$1$$, $$3$$],\n    $$4$$: [$$1$$, $$3$$],\n    $$5$$: [$$2$$, $$3$$],\n    $$6$$: [$$3$$]\n  },\n  \"preferred_specialty\": {\n    $$1$$: $$1$$,\n    $$2$$: $$2$$,\n    $$3$$: $$1$$,\n    $$4$$: $$3$$,\n    $$5$$: $$3$$,\n    $$6$$: $$3$$\n  },\n  \"preferred_branch\": {\n    $$1$$: \"Donghai City\",\n    $$2$$: \"Donghai City\",\n    $$3$$: \"Nanjiang City\",\n    $$4$$: \"Nanjiang City\",\n    $$5$$: \"Donghai City\",\n    $$6$$: \"Nanjiang City\"\n  },\n  \"priority_targets\": {\n    \"preferred_specialty_target\": $$8000$$,\n    \"preferred_branch_target\": $$8000$$\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_branches",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of branches"
+        },
+        {
+            "name": "num_specialties",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of specialties"
+        },
+        {
+            "name": "num_applicant_types",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of applicant types"
+        },
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "R",
+                "S"
+            ],
+            "description": "Required demand for each branch-specialty pair"
+        },
+        {
+            "name": "available_supply",
+            "symbol": "n",
+            "shape": [
+                "T"
+            ],
+            "description": "Available headcount for each applicant type"
+        },
+        {
+            "name": "feasible_specialties",
+            "symbol": "\\mathcal S^{cap}",
+            "shape": [
+                "T",
+                "-"
+            ],
+            "description": "Feasible specialty subset for each applicant type"
+        },
+        {
+            "name": "preferred_specialty",
+            "symbol": "s^{pref}",
+            "shape": [
+                "T"
+            ],
+            "description": "Preferred specialty for each applicant type"
+        },
+        {
+            "name": "preferred_branch",
+            "symbol": "r^{pref}",
+            "shape": [
+                "T"
+            ],
+            "description": "Preferred branch for each applicant type"
+        },
+        {
+            "name": "preferred_specialty_target",
+            "symbol": "Q_2",
+            "shape": [],
+            "description": "Target number of applicants placed in their preferred specialty"
+        },
+        {
+            "name": "preferred_branch_target",
+            "symbol": "Q_3",
+            "shape": [],
+            "description": "Target number of applicants placed in their preferred branch"
+        }
+    ],
+    "variables": [
+        {
+            "name": "assignment",
+            "symbol": "x",
+            "shape": [
+                "T",
+                "R",
+                "S"
+            ],
+            "domain": "integer",
+            "description": "Number of applicants of type t assigned to branch r in specialty s"
+        },
+        {
+            "name": "unmet_demand",
+            "symbol": "u",
+            "shape": [
+                "R",
+                "S"
+            ],
+            "domain": "continuous",
+            "description": "Unmet demand for each branch-specialty pair"
+        },
+        {
+            "name": "preferred_specialty_shortfall",
+            "symbol": "v_2",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Shortfall from the preferred-specialty target"
+        },
+        {
+            "name": "preferred_branch_shortfall",
+            "symbol": "v_3",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Shortfall from the preferred-branch target"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "assignment_type_capacity",
+            "description": "Assignments are only permitted to specialties allowed for each applicant type.",
+            "formula": "x_{t,r,s} = 0 \\quad \\forall t=0,\\dots,T-1,\\;\\forall r=0,\\dots,R-1,\\;\\forall s \\notin \\mathcal S^{cap}_t",
+            "parameters": [
+                "feasible_specialties"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "assignment_supply_limit",
+            "description": "The total number of applicants assigned for each type cannot exceed its available supply.",
+            "formula": "\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} x_{t,r,s} \\le n_t \\quad \\forall t=0,\\dots,T-1",
+            "parameters": [
+                "available_supply"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "nonnegative_unmet_demand",
+            "description": "Unmet demand values must be nonnegative.",
+            "formula": "u_{r,s} \\ge 0 \\quad \\forall r,s",
+            "variables": [
+                "unmet_demand"
+            ]
+        },
+        {
+            "name": "nonnegative_preference_shortfalls",
+            "description": "Preference shortfall variables must be nonnegative.",
+            "formula": "v_2 \\ge 0,\\; v_3 \\ge 0",
+            "variables": [
+                "preferred_specialty_shortfall",
+                "preferred_branch_shortfall"
+            ]
+        },
+        {
+            "name": "demand_shortfall_tracking",
+            "description": "Each branch-specialty demand is matched by assigned applicants plus unmet demand, with no overstaffing.",
+            "formula": "\\sum_{t=0}^{T-1} x_{t,r,s} + u_{r,s} = d_{r,s} \\quad \\forall r=0,\\dots,R-1,\\;\\forall s=0,\\dots,S-1",
+            "parameters": [
+                "demand"
+            ],
+            "variables": [
+                "assignment",
+                "unmet_demand"
+            ]
+        },
+        {
+            "name": "lexicographic_priority_order",
+            "description": "Objectives are optimized in the order demand satisfaction, preferred specialty attainment, then preferred branch attainment.",
+            "formula": "p_1 \\succ p_2 \\succ p_3",
+            "parameters": [
+                "preferred_specialty_target",
+                "preferred_branch_target"
+            ],
+            "variables": [
+                "unmet_demand",
+                "preferred_specialty_shortfall",
+                "preferred_branch_shortfall"
+            ]
+        },
+        {
+            "name": "preferred_specialty_shortfall_definition",
+            "description": "The shortfall from the preferred-specialty target equals target minus the number of assigned applicants placed in their preferred specialty.",
+            "formula": "\\sum_{t=0}^{T-1}\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} \\mathbf{1}_{\\{s=s^{pref}_t\\}} x_{t,r,s} + v_2 = Q_2",
+            "parameters": [
+                "preferred_specialty",
+                "preferred_specialty_target"
+            ],
+            "variables": [
+                "assignment",
+                "preferred_specialty_shortfall"
+            ]
+        },
+        {
+            "name": "preferred_branch_shortfall_definition",
+            "description": "The shortfall from the preferred-branch target equals target minus the number of assigned applicants placed in their preferred branch.",
+            "formula": "\\sum_{t=0}^{T-1}\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} \\mathbf{1}_{\\{r=r^{pref}_t\\}} x_{t,r,s} + v_3 = Q_3",
+            "parameters": [
+                "preferred_branch",
+                "preferred_branch_target"
+            ],
+            "variables": [
+                "assignment",
+                "preferred_branch_shortfall"
+            ]
+        },
+        {
+            "name": "nonnegative_integer_assignment_domain",
+            "description": "Assignment variables must be nonnegative integers.",
+            "formula": "x_{t,r,s} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t,r,s",
+            "variables": [
+                "assignment"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "lexicographic_demand_and_preference_satisfaction",
+            "description": "Lexicographically prioritize satisfying staffing demand as fully as possible, then maximize placement in preferred specialties up to the target, then maximize placement in preferred branches up to the target.",
+            "sense": "feasibility"
+        }
+    ],
+    "final_objective": {
+        "description": "Use preemption optimization to prioritize minimizing total unmet staffing demand first, then minimizing preferred-specialty shortfall, and finally minimizing preferred-branch shortfall, reflecting lexicographic priorities p_1 \\succ p_2 \\succ p_3.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "minimize",
+        "formula": "\\left(\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} u_{r,s},\\; v_2,\\; v_3\\right)",
+        "parameters": [
+            "num_branches",
+            "num_specialties"
+        ],
+        "variables": [
+            "unmet_demand",
+            "preferred_specialty_shortfall",
+            "preferred_branch_shortfall"
+        ]
+    }
+}

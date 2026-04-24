@@ -1,0 +1,207 @@
+{
+    "problem": "Problem description\n- There is a finite set of batches $$\\mathcal{I}$$ and a finite set of dyeing vats $$\\mathcal{J}$$ arranged in a fixed processing order.\n- Each batch $$i \\in \\mathcal{I}$$ must be processed once in every vat $$j \\in \\mathcal{J}$$, and the processing stages must be completed in the same technological order for every batch.\n- The processing time of batch $$i$$ in vat $$j$$ is given by the parameter $$p_{i,j}$$.\n- The planning horizon is continuous time, and all scheduling decisions are made over that horizon.\n- The planning goal is to minimize the completion time of the last finished batch, i.e. the overall makespan.\n- Required business rules:\n  - Every batch must visit all vats in the prescribed order.\n  - A batch may start processing in a vat only after it has completed the previous vat.\n  - Each vat can process at most one batch at a time.\n  - A batch can be processed by at most one vat at a time.\n  - Processing, once started on a vat, is non-preemptive.\n  - All batches must be completed.\n- The objective is to find a schedule that minimizes the maximum completion time across all batches.\n- The relevant symbols are:\n  - $$N$$: number of batches.\n  - $$M$$: number of vats.\n  - $$\\mathcal{I}=\\{1,\\dots,N\\}$$: set of batch indices.\n  - $$\\mathcal{J}=\\{1,\\dots,M\\}$$: set of vat indices.\n  - $$p_{i,j}$$: processing time of batch $$i$$ in vat $$j$$.\n  - $$s_{i,j}$$: start time of batch $$i$$ in vat $$j$$.\n  - $$c_{i,j}$$: completion time of batch $$i$$ in vat $$j$$.\n  - $$\\pi$$: processing sequence of the batches.\n  - $$C_{\\max}$$: completion time of the last finished batch.\n- A solution is represented by:\n  - an ordered sequence $$\\pi$$ of the batches,\n  - start times $$s_{i,j}$$ for every batch-vat pair,\n  - completion times $$c_{i,j}$$ for every batch-vat pair,\n  - the makespan value $$C_{\\max}$$.\n\nInput Format\n- The input is a JSON-style object describing the scheduling instance.\n- Required fields:\n  - $$N$$: integer, the number of batches.\n  - $$M$$: integer, the number of vats.\n  - $$P$$: a matrix of size $$N \\times M$$, where $$P_{i,j}=p_{i,j}$$ is the processing time of batch $$i$$ in vat $$j$$.\n- Optional fields:\n  - $$\\mathcal{I}$$ and $$\\mathcal{J}$$ may be omitted if indices are implied by $$N$$ and $$M$$.\n- Schema:\n  - $$\\texttt{\\{}$$\n    - $$\\texttt{\"N\"}$$: $$N$$,\n    - $$\\texttt{\"M\"}$$: $$M$$,\n    - $$\\texttt{\"P\"}$$: $$[ [p_{1,1},\\dots,p_{1,M}], \\dots, [p_{N,1},\\dots,p_{N,M}] ]$$\n  - $$\\texttt{\\}}$$\n\nOutput Format\n- The output is a JSON-style object describing the schedule.\n- Required fields:\n  - $$\\pi$$: the chosen batch sequence, represented as a permutation of $$\\{1,\\dots,N\\}$$.\n  - $$S$$: a matrix of size $$N \\times M$$, where $$S_{i,j}=s_{i,j}$$ is the start time of batch $$i$$ in vat $$j$$.\n  - $$C$$: a matrix of size $$N \\times M$$, where $$C_{i,j}=c_{i,j}$$ is the completion time of batch $$i$$ in vat $$j$$.\n  - $$C_{\\max}$$: the makespan, equal to the final completion time of the schedule.\n- Schema:\n  - $$\\texttt{\\{}$$\n    - $$\\texttt{\"pi\"}$$: $$[\\pi_1,\\dots,\\pi_N]$$,\n    - $$\\texttt{\"S\"}$$: $$[ [s_{1,1},\\dots,s_{1,M}], \\dots, [s_{N,1},\\dots,s_{N,M}] ]$$,\n    - $$\\texttt{\"C\"}$$: $$[ [c_{1,1},\\dots,c_{1,M}], \\dots, [c_{N,1},\\dots,c_{N,M}] ]$$,\n    - $$\\texttt{\"Cmax\"}$$: $$C_{\\max}$$\n  - $$\\texttt{\\}}$$\n\nExample(s)\n\nInput 1\n{\n  \"N\": 5,\n  \"M\": 3,\n  \"P\": [\n    [3, 1, 1],\n    [2, 1.5, 1],\n    [3, 1.2, 1.3],\n    [2, 2, 2],\n    [2.1, 2, 3]\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_batches",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of batches; defines the batch index set $\\mathcal{I}=\\{0,1,\\dots,N-1\\}$."
+        },
+        {
+            "name": "num_vats",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of dyeing vats; defines the vat index set $\\mathcal{J}=\\{0,1,\\dots,M-1\\}$."
+        },
+        {
+            "name": "processing_time",
+            "symbol": "p",
+            "shape": [
+                "N",
+                "M"
+            ],
+            "description": "Processing time of batch $i$ in vat $j$."
+        }
+    ],
+    "variables": [
+        {
+            "name": "batch_sequence",
+            "symbol": "\\pi",
+            "shape": [
+                "N"
+            ],
+            "domain": "integer",
+            "description": "Ordered sequence (permutation) of the batches in processing order."
+        },
+        {
+            "name": "start_time",
+            "symbol": "s",
+            "shape": [
+                "N",
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Start time of batch $i$ in vat $j$."
+        },
+        {
+            "name": "completion_time",
+            "symbol": "c",
+            "shape": [
+                "N",
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Completion time of batch $i$ in vat $j$."
+        },
+        {
+            "name": "makespan",
+            "symbol": "C_{\\max}",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Completion time of the last finished batch."
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "positive_instance_sizes",
+            "description": "the number of batches and the number of vats must be positive integers",
+            "formula": "N, M \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "num_batches",
+                "num_vats"
+            ]
+        },
+        {
+            "name": "nonnegative_processing_times",
+            "description": "processing times must be nonnegative for all batch-vat pairs",
+            "formula": "p[i][j] \\ge 0",
+            "parameters": [
+                "processing_time"
+            ]
+        },
+        {
+            "name": "nonnegative_times",
+            "description": "Start times, completion times, and makespan must be nonnegative.",
+            "formula": "s_{i,j} \\ge 0,\\ c_{i,j} \\ge 0,\\ C_{\\max} \\ge 0\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
+            "variables": [
+                "start_time",
+                "completion_time",
+                "makespan"
+            ]
+        },
+        {
+            "name": "permutation_sequence",
+            "description": "The batch sequence variable must be a permutation of all batch indices.",
+            "formula": "\\pi \\in \\mathrm{Perm}(\\mathcal{I})",
+            "variables": [
+                "batch_sequence"
+            ]
+        },
+        {
+            "name": "nonpreemptive_processing",
+            "description": "once a batch starts in a vat it must run continuously until completion",
+            "formula": "non-preemptive processing",
+            "variables": [
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "fixed_vat_order",
+            "description": "each batch must visit the vats in the same prescribed technological order",
+            "formula": "j-1 \\rightarrow j",
+            "variables": [
+                "batch_sequence",
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "precedence_within_batch",
+            "description": "a batch may start in a vat only after it has completed the previous vat",
+            "formula": "s[i][j] after c[i][j-1]",
+            "variables": [
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "single_batch_per_vat",
+            "description": "each vat can process at most one batch at a time; enforced via the common batch sequence representation and non-overlap timing logic",
+            "formula": "\\text{No overlap of batches on any vat consistent with the common permutation }\\pi",
+            "variables": [
+                "batch_sequence",
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "single_vat_per_batch",
+            "description": "a batch can be processed by at most one vat at a time; this is already implied by the fixed technological order and stage-wise timing",
+            "formula": "\\text{Implied by } s_{i,j} \\ge c_{i,j-1}\\ \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}\\setminus\\{0\\}",
+            "variables": [
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "all_batches_completed",
+            "description": "All batches must be completed by the end of the schedule; this is enforced by the makespan definition.",
+            "formula": "C_{\\max} \\ge c_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
+            "variables": [
+                "completion_time",
+                "makespan"
+            ]
+        },
+        {
+            "name": "processing_time_consistency",
+            "description": "Completion times equal start times plus the fixed processing times for every batch-vat pair.",
+            "formula": "c_{i,j} = s_{i,j} + p_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
+            "parameters": [
+                "processing_time"
+            ],
+            "variables": [
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "within_batch_vat_order",
+            "description": "Each batch must start in vat j only after completing vat j-1, preserving the fixed technological order.",
+            "formula": "s_{i,j} \\ge c_{i,j-1}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}\\setminus\\{0\\}",
+            "parameters": [],
+            "variables": [
+                "start_time",
+                "completion_time"
+            ]
+        },
+        {
+            "name": "makespan_definition",
+            "description": "The makespan is at least the completion time of every batch in every vat.",
+            "formula": "C_{\\max} \\ge c_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
+            "parameters": [],
+            "variables": [
+                "completion_time",
+                "makespan"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "makespan_minimization",
+            "description": "minimize the completion time of the last finished batch",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the makespan, i.e., the completion time of the last finished batch.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "C_{\\max}",
+        "parameters": [],
+        "variables": [
+            "makespan"
+        ]
+    }
+}

@@ -1,0 +1,269 @@
+{
+    "problem": "Problem description\n- There are products indexed by $$p \\in \\mathcal{P}$$, workshops indexed by $$w \\in \\mathcal{W}$$, and planning periods indexed by $$t \\in \\mathcal{T}$$.\n- Each product $$p$$ requires a specified amount of workshop time in each workshop $$w$$ before it can be completed and sold; these processing requirements are given by $$a_{p,w}$$.\n- Each unit of product $$p$$ incurs a post-production inspection and sales cost given by $$c^{\\mathrm{ps}}_{p}$$.\n- Each workshop $$w$$ has regular available production hours in each period $$t$$, represented by $$H_{w,t}$$, and each hour used in that workshop has an operating cost given by $$c^{\\mathrm{hr}}_{w}$$.\n- Some workshops may allow overtime; if overtime is permitted in workshop $$w$$, the overtime usage in period $$t$$ is limited by $$O^{\\max}_{w,t}$$.\n- Minimum sales requirements or demand targets are given by $$d_{p,t}$$ for each product and period.\n- The planning goal is to determine a feasible periodic production-and-sales plan that satisfies all stated business rules.\n- Required business constraints, stated in words:\n  - The total inspection and sales cost in each period must not exceed the available budget $$B_t$$.\n  - The sold quantity of each product in each period must meet at least the required minimum demand.\n  - The production plan must respect the processing time requirements of every workshop for every product.\n  - The regular available hours in each workshop must be fully utilized in every period.\n  - Overtime, where allowed, must not exceed its corresponding limit.\n  - The number of units sold in a period cannot exceed the number of units produced and processed in that period.\n- A solution is represented by:\n  - $$x_{p,t}$$: the number of units of product $$p$$ produced in period $$t$$.\n  - $$s_{p,t}$$: the number of units of product $$p$$ sold in period $$t$$ after inspection and sales procedures.\n  - $$u_{w,t}$$: the regular hours used in workshop $$w$$ during period $$t$$.\n  - $$o_{w,t}$$: the overtime hours used in workshop $$w$$ during period $$t$$.\n  - $$Z$$: the resulting total operating cost, if the planning criterion includes cost evaluation.\n\nInput Format\n{\n  \"P\": \"integer $$|\\mathcal{P}|$$, number of products\",\n  \"W\": \"integer $$|\\mathcal{W}|$$, number of workshops\",\n  \"T\": \"integer $$|\\mathcal{T}|$$, number of planning periods\",\n  \"product_ids\": \"array of length $$P$$ listing product identifiers for $$p \\in \\mathcal{P}$$\",\n  \"workshop_ids\": \"array of length $$W$$ listing workshop identifiers for $$w \\in \\mathcal{W}$$\",\n  \"period_ids\": \"array of length $$T$$ listing period identifiers for $$t \\in \\mathcal{T}$$\",\n  \"processing_time\": \"matrix $$a_{p,w}$$ of shape $$P \\\\times W$$; required workshop time per unit of product $$p$$ in workshop $$w$$\",\n  \"unit_post_processing_cost\": \"vector $$c^{\\\\mathrm{ps}}_{p}$$ of length $$P$$; inspection and sales cost per unit of product $$p$$\",\n  \"regular_capacity\": \"matrix $$H_{w,t}$$ of shape $$W \\\\times T$$; regular available hours in workshop $$w$$ during period $$t$$\",\n  \"hour_cost\": \"vector $$c^{\\\\mathrm{hr}}_{w}$$ of length $$W$$; operating cost per hour in workshop $$w$$\",\n  \"minimum_sales\": \"matrix $$d_{p,t}$$ of shape $$P \\\\times T$$; minimum required sold units of product $$p$$ in period $$t$$\",\n  \"post_processing_budget\": \"vector $$B_t$$ of length $$T$$; maximum allowed inspection and sales cost in period $$t$$\",\n  \"overtime_limit\": \"matrix $$O^{\\\\max}_{w,t}$$ of shape $$W \\\\times T$$; maximum overtime allowed in workshop $$w$$ during period $$t$$\",\n  \"overtime_allowed\": \"subset of workshops $$\\\\mathcal{W}^{\\\\mathrm{ot}} \\\\subseteq \\\\mathcal{W}$$ where overtime may be used\"\n}\n\nOutput Format\n{\n  \"production\": \"matrix $$x_{p,t}$$ of shape $$P \\\\times T$$; produced quantity of each product in each period\",\n  \"sales\": \"matrix $$s_{p,t}$$ of shape $$P \\\\times T$$; sold quantity of each product in each period\",\n  \"regular_work_hours_used\": \"matrix $$u_{w,t}$$ of shape $$W \\\\times T$$; regular workshop hours used in each period\",\n  \"overtime_hours_used\": \"matrix $$o_{w,t}$$ of shape $$W \\\\times T$$; overtime hours used in each period\",\n  \"total_cost\": \"$$Z$$; total operating cost associated with the returned plan, if reported\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"W\": 2,\n  \"T\": 1,\n  \"product_ids\": [\"microwave_oven\", \"water_heater\"],\n  \"workshop_ids\": [\"A\", \"B\"],\n  \"period_ids\": [\"month_1\"],\n  \"processing_time\": [[2, 1], [1, 3]],\n  \"unit_post_processing_cost\": [30, 50],\n  \"regular_capacity\": [[250], [150]],\n  \"hour_cost\": [80, 20],\n  \"minimum_sales\": [[80], [50]],\n  \"post_processing_budget\": [5500],\n  \"overtime_limit\": [[20], [0]],\n  \"overtime_allowed\": [\"A\"]\n}",
+    "parameters": [
+        {
+            "name": "product_count",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the planning set"
+        },
+        {
+            "name": "workshop_count",
+            "symbol": "W",
+            "shape": [],
+            "description": "Number of workshops in the planning set"
+        },
+        {
+            "name": "period_count",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods"
+        },
+        {
+            "name": "product_ids",
+            "symbol": "I^{P}",
+            "shape": [
+                "P"
+            ],
+            "description": "Identifiers of products indexed by product position"
+        },
+        {
+            "name": "workshop_ids",
+            "symbol": "I^{W}",
+            "shape": [
+                "W"
+            ],
+            "description": "Identifiers of workshops indexed by workshop position"
+        },
+        {
+            "name": "period_ids",
+            "symbol": "I^{T}",
+            "shape": [
+                "T"
+            ],
+            "description": "Identifiers of planning periods indexed by period position"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "a",
+            "shape": [
+                "P",
+                "W"
+            ],
+            "description": "Processing time required in workshop w per unit of product p"
+        },
+        {
+            "name": "unit_post_processing_cost",
+            "symbol": "c^{ps}",
+            "shape": [
+                "P"
+            ],
+            "description": "Post-production inspection and sales cost per unit of product p"
+        },
+        {
+            "name": "regular_capacity",
+            "symbol": "H",
+            "shape": [
+                "W",
+                "T"
+            ],
+            "description": "Regular available hours in workshop w during period t"
+        },
+        {
+            "name": "hour_cost",
+            "symbol": "c^{hr}",
+            "shape": [
+                "W"
+            ],
+            "description": "Operating cost per regular hour in workshop w"
+        },
+        {
+            "name": "minimum_sales",
+            "symbol": "d",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Minimum required sold quantity of product p in period t"
+        },
+        {
+            "name": "post_processing_budget",
+            "symbol": "B",
+            "shape": [
+                "T"
+            ],
+            "description": "Maximum allowed inspection and sales budget in period t"
+        },
+        {
+            "name": "overtime_limit",
+            "symbol": "O^{max}",
+            "shape": [
+                "W",
+                "T"
+            ],
+            "description": "Maximum overtime allowed in workshop w during period t"
+        },
+        {
+            "name": "overtime_allowed",
+            "symbol": "W^{ot}",
+            "shape": [
+                "|W^{ot}|"
+            ],
+            "description": "Subset of workshops where overtime is permitted"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Number of units of product p produced in period t"
+        },
+        {
+            "name": "sales",
+            "symbol": "s",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Number of units of product p sold in period t"
+        },
+        {
+            "name": "regular_work_hours_used",
+            "symbol": "u",
+            "shape": [
+                "W",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Regular hours used in workshop w during period t"
+        },
+        {
+            "name": "overtime_hours_used",
+            "symbol": "o",
+            "shape": [
+                "W",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Overtime hours used in workshop w during period t"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total operating cost associated with the plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "minimum_sales_target",
+            "description": "Sold quantity for each product and period must meet the minimum required sales target",
+            "formula": "s_{p,t} \\geq d_{p,t} \\quad \\forall p,\\; \\forall t",
+            "parameters": [
+                "minimum_sales"
+            ],
+            "variables": [
+                "sales"
+            ]
+        },
+        {
+            "name": "production_processing_requirement",
+            "description": "Total workshop load induced by production must not exceed the hours available from regular and overtime usage in each workshop and period",
+            "formula": "\\sum_{p=1}^{P} a_{p,w} x_{p,t} \\leq u_{w,t} + o_{w,t} \\quad \\forall w,\\; \\forall t",
+            "parameters": [
+                "processing_time"
+            ],
+            "variables": [
+                "production",
+                "regular_work_hours_used",
+                "overtime_hours_used"
+            ]
+        },
+        {
+            "name": "regular_capacity_fully_used",
+            "description": "Regular available hours in each workshop and period are fully utilized",
+            "formula": "u_{w,t} = H_{w,t} \\quad \\forall w,\\; \\forall t",
+            "parameters": [
+                "regular_capacity"
+            ],
+            "variables": [
+                "regular_work_hours_used"
+            ]
+        },
+        {
+            "name": "overtime_capacity_limit",
+            "description": "Overtime hours in each workshop and period cannot exceed the overtime limit",
+            "formula": "o_{w,t} \\leq O^{max}_{w,t} \\quad \\forall w,\\; \\forall t",
+            "parameters": [
+                "overtime_limit"
+            ],
+            "variables": [
+                "overtime_hours_used"
+            ]
+        },
+        {
+            "name": "overtime_only_where_allowed",
+            "description": "Overtime must be zero for workshops that are not in the overtime-allowed subset",
+            "formula": "o_{w,t} = 0 \\quad \\forall w \\notin W^{ot},\\; \\forall t",
+            "parameters": [
+                "overtime_allowed"
+            ],
+            "variables": [
+                "overtime_hours_used"
+            ]
+        },
+        {
+            "name": "sales_cannot_exceed_production",
+            "description": "Sales in a period cannot exceed the number of units produced and processed in the same period",
+            "formula": "s_{p,t} \\leq x_{p,t} \\quad \\forall p,\\; \\forall t",
+            "parameters": [],
+            "variables": [
+                "production",
+                "sales"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Total operating cost aggregates the relevant plan cost components when reported",
+            "formula": "Z = \\sum_{p=1}^{P} \\sum_{t=1}^{T} c^{ps}_p s_{p,t} + \\sum_{w=1}^{W} \\sum_{t=1}^{T} c^{hr}_w u_{w,t}",
+            "parameters": [
+                "unit_post_processing_cost",
+                "hour_cost"
+            ],
+            "variables": [
+                "total_cost",
+                "sales",
+                "regular_work_hours_used"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "find_feasible_plan",
+            "description": "Find any feasible periodic production-and-sales plan satisfying all stated constraints; report total operating cost if needed",
+            "sense": "find_all"
+        }
+    ],
+    "final_objective": {
+        "description": "This is a feasibility problem: find any periodic production-and-sales plan satisfying all stated constraints, with total cost reported through an accounting variable rather than optimized.",
+        "objective_combination_method": "one_objective",
+        "sense": "find_all",
+        "formula": "\\text{find all } (x,s,u,o,Z) \\text{ satisfying the constraints}",
+        "parameters": [],
+        "variables": [
+            "production",
+            "sales",
+            "regular_work_hours_used",
+            "overtime_hours_used",
+            "total_cost"
+        ]
+    }
+}

@@ -1,0 +1,209 @@
+{
+    "problem": "Problem description\n- There is a finite set of inherited assets indexed by $$i \\in \\mathcal{I}$$, and each asset has a monetary value parameter $$v_i$$.\n- There is a finite set of recipients indexed by $$r \\in \\mathcal{R}$$ who must share the estate.\n- Some assets may belong to inseparable bundles indexed by $$b \\in \\mathcal{B}$$; all items in the same bundle must be assigned to the same recipient.\n- Each asset must be allocated to exactly one recipient, and no asset may be split across recipients.\n- Bundle integrity must be preserved, meaning that if an asset is part of a bundle, its assignment must match the assignment of the entire bundle.\n- This is a single-period allocation problem, so no time horizon $$t$$ is needed.\n- The planning goal is to divide the inheritance so that the total value received by the recipients is as balanced as possible.\n- The optimization objective is to minimize the value imbalance between the recipient parts.\n- A solution is represented by:\n  - $$x_{i,r}$$, a binary assignment indicator showing whether asset $$i$$ is allocated to recipient $$r$$.\n  - $$x_{b,r}$$, a binary bundle assignment indicator showing whether bundle $$b$$ is allocated to recipient $$r$$, with all bundle members moving together.\n  - $$V_r$$, the total value assigned to recipient $$r$$.\n  - $$\\Delta$$, the final imbalance measure between recipient totals that is minimized.\n\nInput Format\n{\n  \"recipients\": {\n    \"count\": \"$$R$$\",\n    \"index_set\": \"$$\\\\mathcal{R} = \\\\{r\\\\}$$\"\n  },\n  \"items\": {\n    \"count\": \"$$N$$\",\n    \"index_set\": \"$$\\\\mathcal{I} = \\\\{i\\\\}$$\",\n    \"values\": [\n      {\n        \"item_id\": \"$$i$$\",\n        \"value\": \"$$v_i$$\"\n      }\n    ]\n  },\n  \"bundles\": {\n    \"count\": \"$$B$$\",\n    \"index_set\": \"$$\\\\mathcal{B} = \\\\{b\\\\}$$\",\n    \"members\": [\n      {\n        \"bundle_id\": \"$$b$$\",\n        \"item_ids\": [\n          \"$$i$$\"\n        ]\n      }\n    ]\n  },\n  \"allocation_rules\": {\n    \"each_item_assigned_once\": \"$$\\\\text{yes}$$\",\n    \"bundle_members_must_stay_together\": \"$$\\\\text{yes}$$\"\n  },\n  \"objective\": {\n    \"goal\": \"$$\\\\text{minimize value imbalance among recipients}$$\",\n    \"imbalance_measure\": \"$$\\\\Delta$$\"\n  }\n}\n- The field $$N$$ is the number of assets.\n- The field $$R$$ is the number of recipients.\n- The field $$B$$ is the number of inseparable bundles.\n- The list $$\\\\{v_i\\\\}$$ contains the asset values.\n- The bundle membership lists specify which assets must remain together.\n- If no bundles exist, the bundle section may be empty.\n\nOutput Format\n{\n  \"assignment\": [\n    {\n      \"item_id\": \"$$i$$\",\n      \"recipient_id\": \"$$r$$\"\n    }\n  ],\n  \"bundle_assignment\": [\n    {\n      \"bundle_id\": \"$$b$$\",\n      \"recipient_id\": \"$$r$$\"\n    }\n  ],\n  \"total_value_by_recipient\": [\n    {\n      \"recipient_id\": \"$$r$$\",\n      \"total_value\": \"$$V_r$$\"\n    }\n  ],\n  \"imbalance\": \"$$\\\\Delta$$\",\n  \"objective_status\": \"$$\\\\text{minimized}$$\"\n}\n- The assignment list gives the recipient chosen for each asset.\n- The bundle assignment list gives the recipient chosen for each inseparable bundle, if bundles are used.\n- The total value by recipient reports the value accumulated by each recipient after allocation.\n- The imbalance reports the final difference measure used by the optimizer.\n- If the solution is represented only at bundle level, the item-level assignment must be consistent with the bundle assignment.\n\nExample(s)\n\nInput 1\n{\n  \"recipients\": {\n    \"count\": \"$$2$$\",\n    \"labels\": [\"$$\\\\text{son}_1$$\", \"$$\\\\text{son}_2$$\"]\n  },\n  \"items\": [\n    {\n      \"item_id\": \"$$\\\\text{painting\\\\_caillebotte}$$\",\n      \"value\": \"$$25000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{bust\\\\_diocletian}$$\",\n      \"value\": \"$$5000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{yuan\\\\_vase}$$\",\n      \"value\": \"$$20000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{porsche\\\\_911}$$\",\n      \"value\": \"$$40000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_1$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_2$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_3$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{louis\\\\_xv\\\\_sofa}$$\",\n      \"value\": \"$$3000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{jack\\\\_russell}_1$$\",\n      \"value\": \"$$3000$$\",\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{jack\\\\_russell}_2$$\",\n      \"value\": \"$$3000$$\",\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{sculpture\\\\_200ad}$$\",\n      \"value\": \"$$10000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{sailing\\\\_boat}$$\",\n      \"value\": \"$$15000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{harley\\\\_davidson}$$\",\n      \"value\": \"$$10000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{cavour\\\\_furniture}$$\",\n      \"value\": \"$$13000$$\"\n    }\n  ],\n  \"bundles\": [\n    {\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\",\n      \"members\": [\"$$\\\\text{jack\\\\_russell}_1$$\", \"$$\\\\text{jack\\\\_russell}_2$$\"]\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_assets",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of assets"
+        },
+        {
+            "name": "num_recipients",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of recipients"
+        },
+        {
+            "name": "num_bundles",
+            "symbol": "B",
+            "shape": [],
+            "description": "Number of inseparable bundles"
+        },
+        {
+            "name": "asset_values",
+            "symbol": "v",
+            "shape": [
+                "N"
+            ],
+            "description": "Monetary value of each asset"
+        },
+        {
+            "name": "bundle_members",
+            "symbol": "\\mathcal{M}",
+            "shape": [
+                "B",
+                "-"
+            ],
+            "description": "Asset indices contained in each inseparable bundle"
+        }
+    ],
+    "variables": [
+        {
+            "name": "asset_assignment",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "R"
+            ],
+            "domain": "binary",
+            "description": "Whether asset i is allocated to recipient r"
+        },
+        {
+            "name": "bundle_assignment",
+            "symbol": "y",
+            "shape": [
+                "B",
+                "R"
+            ],
+            "domain": "binary",
+            "description": "Whether bundle b is allocated to recipient r"
+        },
+        {
+            "name": "recipient_total_value",
+            "symbol": "V",
+            "shape": [
+                "R"
+            ],
+            "domain": "continuous",
+            "description": "Total value assigned to each recipient"
+        },
+        {
+            "name": "value_imbalance",
+            "symbol": "\\Delta",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Final value-imbalance measure"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "exactly_one_recipient_per_asset",
+            "description": "No asset may be split across recipients",
+            "formula": "asset assignment is binary and exclusive across recipients",
+            "parameters": [
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment"
+            ]
+        },
+        {
+            "name": "bundle_integrity",
+            "description": "All members of the same bundle must be allocated together to the same recipient",
+            "formula": "all assets in a bundle share one recipient assignment",
+            "parameters": [
+                "bundle_members",
+                "num_bundles",
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment",
+                "bundle_assignment"
+            ]
+        },
+        {
+            "name": "recipient_total_value_definition",
+            "description": "The allocation is single-period and has no time horizon index",
+            "formula": "no time index is used in the model",
+            "parameters": [],
+            "variables": []
+        },
+        {
+            "name": "value_imbalance_definition",
+            "description": "The imbalance measure equals the maximum difference between any recipient total values.",
+            "formula": "\\Delta \\geq V_r - V_{r'} \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R",
+            "parameters": [
+                "num_recipients"
+            ],
+            "variables": [
+                "recipient_total_value",
+                "value_imbalance"
+            ]
+        },
+        {
+            "name": "bundle_assignment_consistency",
+            "description": "Each bundle is assigned to exactly one recipient, and this assignment matches the common recipient of all assets in the bundle.",
+            "formula": "\\sum_{r=1}^{R} y_{br} = 1 \\quad \\forall b=1,\\dots,B",
+            "parameters": [
+                "num_bundles",
+                "num_recipients"
+            ],
+            "variables": [
+                "bundle_assignment"
+            ]
+        },
+        {
+            "name": "exactly_one_recipient_per_asset",
+            "description": "Each asset must be assigned to exactly one recipient",
+            "formula": "\\sum_{r=1}^{R} x_{ir} = 1 \\quad \\forall i=1,\\dots,N",
+            "parameters": [
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment"
+            ]
+        },
+        {
+            "name": "bundle_integrity",
+            "description": "If an asset belongs to bundle b, it must be assigned to the same recipient as that bundle",
+            "formula": "x_{ir} = y_{br} \\quad \\forall b=1,\\dots,B,\\ \\forall i \\in \\mathcal{M}_b,\\ \\forall r=1,\\dots,R",
+            "parameters": [
+                "bundle_members",
+                "num_bundles",
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment",
+                "bundle_assignment"
+            ]
+        },
+        {
+            "name": "recipient_total_value_definition",
+            "description": "The total value for each recipient equals the sum of the values of all assets assigned to that recipient",
+            "formula": "V_r = \\sum_{i=1}^{N} v_i x_{ir} \\quad \\forall r=1,\\dots,R",
+            "parameters": [
+                "asset_values",
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment",
+                "recipient_total_value"
+            ]
+        },
+        {
+            "name": "imbalance_absolute_gap_definition",
+            "description": "The imbalance measure is at least the absolute difference between every pair of recipient total values",
+            "formula": "\\Delta \\geq V_r - V_{r'} \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R\\qquad\\text{and}\\qquad \\Delta \\geq V_{r'} - V_r \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R",
+            "parameters": [
+                "num_recipients"
+            ],
+            "variables": [
+                "recipient_total_value",
+                "value_imbalance"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_value_imbalance",
+            "description": "Minimize the value imbalance measure Delta among recipient total values while satisfying assignment and bundle integrity requirements",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the value imbalance measure Delta, defined as the maximum absolute difference between any pair of recipient total values.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\min \\ \\Delta",
+        "parameters": [],
+        "variables": [
+            "value_imbalance"
+        ]
+    }
+}

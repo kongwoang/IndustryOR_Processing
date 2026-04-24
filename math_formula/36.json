@@ -1,0 +1,447 @@
+{
+    "problem": "Problem description\n- There is a factory that produces a set of products $$\\mathcal{P}$$ over a planning horizon $$\\mathcal{T}$$ using a set of shared production processes $$\\mathcal{R}$$.\n- Each product $$p \\in \\mathcal{P}$$ requires a known amount of processing time on each process $$r \\in \\mathcal{R}$$, represented by the parameter $$a_{r,p}$$.\n- Each product $$p \\in \\mathcal{P}$$ generates a unit profit $$\\pi_{p,t}$$ in period $$t \\in \\mathcal{T}$$.\n- Each process $$r \\in \\mathcal{R}$$ has a regular available capacity $$c_{r,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- Some processes may also allow overtime, with overtime availability or limit represented by the parameter $$\\Omega_{r,t}$$ when applicable.\n- The planning goal is to maximize total profit over the horizon while respecting production requirements and process utilization goals.\n- The total production of each product must meet or exceed its minimum required level $$\\ell_{p,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- The overall profit in each period must meet or exceed the target profit level $$G_t$$.\n- The operating time assigned to Process $$\\mathrm{I}$$ must match its required target utilization $$H_{\\mathrm{I},t}$$ exactly in each period $$t \\in \\mathcal{T}$$.\n- Process $$\\mathrm{II}$$ must be fully utilized at its regular capacity, and overtime may be used if needed and permitted for that process.\n- Production decisions must be feasible with respect to the available process times, and the processing time consumed by each product must be consistent with the product mix selected.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced in period $$t$$.\n  - $$u_{r,t}$$: regular hours assigned to process $$r$$ in period $$t$$.\n  - $$o_{r,t}$$: overtime hours assigned to process $$r$$ in period $$t$$, if overtime is allowed.\n  - Optional deviation variables for target shortfalls or excesses, if a goal-programming representation is used, such as deviations for profit, production minimums, and exact process utilization.\n\nInput Format\n{\n  \"products\": \"List of product identifiers, size $$P = |\\\\mathcal{P}|$$.\",\n  \"processes\": \"List of process identifiers, size $$R = |\\\\mathcal{R}|$$.\",\n  \"periods\": \"List of planning periods, size $$T = |\\\\mathcal{T}|$$.\",\n  \"processing_time\": \"Matrix $$a_{r,p}$$ of size $$R \\\\times P$$, where $$a_{r,p}$$ is the hours required on process $$r$$ for one unit of product $$p$$.\",\n  \"unit_profit\": \"Matrix or vector $$\\\\pi_{p,t}$$ of size $$P \\\\times T$$, where $$\\\\pi_{p,t}$$ is the profit per unit of product $$p$$ in period $$t$$.\",\n  \"regular_capacity\": \"Matrix $$c_{r,t}$$ of size $$R \\\\times T$$, where $$c_{r,t}$$ is the regular available hours of process $$r$$ in period $$t$$.\",\n  \"minimum_production\": \"Matrix $$\\\\ell_{p,t}$$ of size $$P \\\\times T$$, where $$\\\\ell_{p,t}$$ is the minimum required production of product $$p$$ in period $$t$$.\",\n  \"profit_target\": \"Vector $$G_t$$ of size $$T$$, where $$G_t$$ is the minimum required total profit in period $$t$$.\",\n  \"process_time_target\": \"Matrix $$H_{r,t}$$ of size $$R \\\\times T$$, where $$H_{r,t}$$ is the required utilization target for process $$r$$ in period $$t$$.\",\n  \"overtime_allowed\": \"Matrix of logical flags or limits $$\\\\Omega_{r,t}$$ indicating whether overtime is allowed for process $$r$$ in period $$t$$ and, if relevant, the maximum overtime available.\",\n  \"objective\": \"Maximize total profit over the planning horizon while satisfying the stated production and utilization requirements.\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"Matrix $$x_{p,t}$$ of size $$P \\\\times T$$, where $$x_{p,t}$$ is the production quantity of product $$p$$ in period $$t$$.\",\n  \"regular_process_usage\": \"Matrix $$u_{r,t}$$ of size $$R \\\\times T$$, where $$u_{r,t}$$ is the regular time used on process $$r$$ in period $$t$$.\",\n  \"overtime_plan\": \"Matrix $$o_{r,t}$$ of size $$R \\\\times T$$, where $$o_{r,t}$$ is the overtime time used on process $$r$$ in period $$t$$, if overtime is allowed.\",\n  \"goal_deviations\": \"Optional structured record of deviations from target profit and process utilization goals, if the model uses deviation variables.\",\n  \"total_profit\": \"Scalar value giving the achieved total profit over the planning horizon.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"$$A$$\", \"$$B$$\"],\n  \"processes\": [\"$$\\\\mathrm{I}$$\", \"$$\\\\mathrm{II}$$\"],\n  \"periods\": [\"$$\\\\mathrm{week1}$$\"],\n  \"processing_time\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$A$$\": \"$$4$$\", \"$$B$$\": \"$$6$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$A$$\": \"$$3$$\", \"$$B$$\": \"$$2$$\"}\n  },\n  \"regular_capacity\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$150$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$70$$\"}\n  },\n  \"unit_profit\": {\n    \"$$A$$\": {\"$$\\\\mathrm{week1}$$\": \"$$300$$\"},\n    \"$$B$$\": {\"$$\\\\mathrm{week1}$$\": \"$$450$$\"}\n  },\n  \"minimum_production\": {\n    \"$$A$$\": {\"$$\\\\mathrm{week1}$$\": \"$$10$$\"},\n    \"$$B$$\": {\"$$\\\\mathrm{week1}$$\": \"$$15$$\"}\n  },\n  \"profit_target\": {\n    \"$$\\\\mathrm{week1}$$\": \"$$10000$$\"\n  },\n  \"process_time_target\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$150$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$70$$\"}\n  },\n  \"overtime_allowed\": {\n    \"$$\\\\mathrm{I}$$\": \"$$false$$\",\n    \"$$\\\\mathrm{II}$$\": \"$$true$$\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in set $\\mathcal{P}$"
+        },
+        {
+            "name": "num_processes",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of processes in set $\\mathcal{R}$"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in set $\\mathcal{T}$"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "a",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "description": "Processing hours required on process r for one unit of product p"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Unit profit of product p in period t"
+        },
+        {
+            "name": "regular_capacity",
+            "symbol": "c",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "description": "Regular available hours of process r in period t"
+        },
+        {
+            "name": "minimum_production",
+            "symbol": "\\ell",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Minimum required production of product p in period t"
+        },
+        {
+            "name": "profit_target",
+            "symbol": "G",
+            "shape": [
+                "T"
+            ],
+            "description": "Minimum required total profit in period t"
+        },
+        {
+            "name": "process_time_target",
+            "symbol": "H",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "description": "Required utilization target for process r in period t"
+        },
+        {
+            "name": "overtime_availability",
+            "symbol": "\\Omega",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "description": "Overtime availability or maximum overtime hours for process r in period t when applicable"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product p produced in period t"
+        },
+        {
+            "name": "regular_process_usage",
+            "symbol": "u",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Regular hours assigned to process r in period t"
+        },
+        {
+            "name": "overtime_hours",
+            "symbol": "o",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Overtime hours assigned to process r in period t where overtime is allowed"
+        },
+        {
+            "name": "profit_shortfall",
+            "symbol": "d^-_G",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for shortfall from the profit target in period t"
+        },
+        {
+            "name": "profit_excess",
+            "symbol": "d^+_G",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for excess above the profit target in period t"
+        },
+        {
+            "name": "minimum_production_shortfall",
+            "symbol": "d^-_{\\ell}",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for shortfall from the minimum production target for product p in period t"
+        },
+        {
+            "name": "minimum_production_excess",
+            "symbol": "d^+_{\\ell}",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for excess above the minimum production target for product p in period t"
+        },
+        {
+            "name": "process_time_shortfall",
+            "symbol": "d^-_{H}",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for shortfall from the process utilization target for process r in period t"
+        },
+        {
+            "name": "process_time_excess",
+            "symbol": "d^+_{H}",
+            "shape": [
+                "R",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Nonnegative deviation variable for excess above the process utilization target for process r in period t"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Scalar achieved total profit over all periods"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_production_quantities",
+            "description": "Production quantities are nonnegative",
+            "formula": "x[p][t] \\ge 0",
+            "parameters": [
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_regular_process_usage",
+            "description": "Regular process-hour allocations are nonnegative",
+            "formula": "u[r][t] \\ge 0",
+            "parameters": [
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "regular_process_usage"
+            ]
+        },
+        {
+            "name": "nonnegative_overtime_hours",
+            "description": "Overtime hour allocations are nonnegative when overtime is allowed",
+            "formula": "o[r][t] \\ge 0",
+            "parameters": [
+                "num_processes",
+                "num_periods",
+                "overtime_availability"
+            ],
+            "variables": [
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "nonnegative_goal_deviations",
+            "description": "Deviation variables in the goal-programming representation are nonnegative",
+            "formula": "d^-_{G,t} \\ge 0,\\; d^+_{G,t} \\ge 0,\\; d^-_{\\ell,p,t} \\ge 0,\\; d^+_{\\ell,p,t} \\ge 0,\\; d^-_{H,r,t} \\ge 0,\\; d^+_{H,r,t} \\ge 0",
+            "parameters": [
+                "num_periods",
+                "num_products",
+                "num_processes"
+            ],
+            "variables": [
+                "profit_shortfall",
+                "profit_excess",
+                "minimum_production_shortfall",
+                "minimum_production_excess",
+                "process_time_shortfall",
+                "process_time_excess"
+            ]
+        },
+        {
+            "name": "minimum_production_requirement",
+            "description": "Each product must meet its minimum required production in every period",
+            "formula": "x[p][t] \\ge \\ell[p][t]",
+            "parameters": [
+                "minimum_production",
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "profit_target_requirement",
+            "description": "Total profit in each period must meet the required target",
+            "formula": "Z_t \\ge G_t",
+            "parameters": [
+                "profit_target",
+                "num_periods"
+            ],
+            "variables": [
+                "total_profit"
+            ]
+        },
+        {
+            "name": "process_i_exact_utilization",
+            "description": "Process I must use exactly its target operating time in each period",
+            "formula": "u_{\\mathrm{I},t} = H_{\\mathrm{I},t}",
+            "parameters": [
+                "process_time_target",
+                "num_periods"
+            ],
+            "variables": [
+                "regular_process_usage"
+            ]
+        },
+        {
+            "name": "process_ii_regular_capacity_utilization",
+            "description": "Process II must be fully utilized at its regular capacity in each period",
+            "formula": "u_{\\mathrm{II},t} = c_{\\mathrm{II},t}",
+            "parameters": [
+                "regular_capacity",
+                "num_periods"
+            ],
+            "variables": [
+                "regular_process_usage"
+            ]
+        },
+        {
+            "name": "process_time_feasibility",
+            "description": "Selected production must be feasible with respect to the process-time requirements implied by the product mix and the available regular and overtime hours",
+            "formula": "\\sum_{p=1}^{P} a_{r,p} x_{p,t} = u_{r,t} + o_{r,t}",
+            "parameters": [
+                "processing_time",
+                "num_products",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity",
+                "regular_process_usage",
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "overtime_limit_respected",
+            "description": "Overtime hours cannot exceed the permitted overtime availability for each process and period when overtime is allowed",
+            "formula": "o_{r,t} \\le \\Omega_{r,t}",
+            "parameters": [
+                "overtime_availability",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "overtime_disabled_when_not_allowed",
+            "description": "Overtime variables are zero for processes and periods where overtime is not permitted",
+            "formula": "o_{r,t} = 0 \\quad \\text{if } \\Omega_{r,t}=0",
+            "parameters": [
+                "overtime_availability",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "production_process_time_balance",
+            "description": "For each process and period, total processing time required by the production plan equals regular usage plus overtime hours.",
+            "formula": "\\sum_{p=1}^{P} a_{r,p} x_{p,t} = u_{r,t} + o_{r,t}",
+            "parameters": [
+                "processing_time",
+                "num_products",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity",
+                "regular_process_usage",
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "Define total profit as the sum of unit profit times production across all products and periods.",
+            "formula": "Z = \\sum_{t=1}^{T}\\sum_{p=1}^{P} \\pi_{p,t} x_{p,t}",
+            "parameters": [
+                "unit_profit",
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity",
+                "total_profit"
+            ]
+        },
+        {
+            "name": "profit_goal_balance",
+            "description": "Link achieved profit to the period profit target using positive and negative deviation variables in the goal-programming representation.",
+            "formula": "Z_t + d^-_{G,t} - d^+_{G,t} = G_t",
+            "parameters": [
+                "profit_target",
+                "num_periods"
+            ],
+            "variables": [
+                "profit_shortfall",
+                "profit_excess"
+            ]
+        },
+        {
+            "name": "minimum_production_goal_balance",
+            "description": "Link production quantity to the minimum production target using positive and negative deviation variables in the goal-programming representation.",
+            "formula": "x_{p,t} + d^-_{\\ell,p,t} - d^+_{\\ell,p,t} = \\ell_{p,t}",
+            "parameters": [
+                "minimum_production",
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity",
+                "minimum_production_shortfall",
+                "minimum_production_excess"
+            ]
+        },
+        {
+            "name": "regular_usage_capacity_limit",
+            "description": "Regular process usage cannot exceed the regular capacity available in each period.",
+            "formula": "u_{r,t} \\le c_{r,t}",
+            "parameters": [
+                "regular_capacity",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "regular_process_usage"
+            ]
+        },
+        {
+            "name": "overtime_nonnegativity_with_permissions",
+            "description": "Overtime hours are nonnegative and therefore implicitly zero when disallowed by the availability flag.",
+            "formula": "o_{r,t} \\ge 0",
+            "parameters": [
+                "overtime_availability",
+                "num_processes",
+                "num_periods"
+            ],
+            "variables": [
+                "overtime_hours"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit over the planning horizon while satisfying production and utilization requirements",
+            "sense": "maximize"
+        },
+        {
+            "name": "goal_programming_deviation_minimization",
+            "description": "Minimize deviation penalties for profit targets, minimum production targets, and process utilization targets in a goal-programming formulation",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total goal-programming deviations first, then maximize total profit as a secondary lexicographic criterion.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "minimize",
+        "formula": "\\left( \\sum_{t=1}^{T} \\left(d^-_{G,t} + d^+_{G,t}\\right) + \\sum_{p=1}^{P}\\sum_{t=1}^{T} \\left(d^-_{\\ell,p,t} + d^+_{\\ell,p,t}\\right) + \\sum_{r=1}^{R}\\sum_{t=1}^{T} \\left(d^-_{H,r,t} + d^+_{H,r,t}\\right) \\right) - \\varepsilon Z",
+        "parameters": [
+            "num_periods",
+            "num_products",
+            "num_processes"
+        ],
+        "variables": [
+            "profit_shortfall",
+            "profit_excess",
+            "minimum_production_shortfall",
+            "minimum_production_excess",
+            "process_time_shortfall",
+            "process_time_excess",
+            "total_profit"
+        ]
+    }
+}

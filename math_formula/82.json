@@ -1,0 +1,169 @@
+{
+    "problem": "Problem description\n- There is a cyclic staffing horizon of length $$H$$, divided into $$T$$ demand intervals indexed by $$t \\in \\mathcal{T}$$.\n- For each interval $$t$$, the restaurant requires at least $$d_t$$ waiters on duty.\n- There is a fixed shift length of $$L$$ hours for every waiter.\n- Feasible shift starts are indexed by $$s \\in \\mathcal{S}$$, and a shift may wrap around the end of the cyclic horizon.\n- The planning decision is to determine how many waiters should begin at each feasible shift start.\n- The optimization goal is to minimize the total number of waiters scheduled while ensuring that every demand interval is covered by enough overlapping shifts.\n- The business requirements are: every interval must meet or exceed its minimum staffing requirement; every waiter must work one uninterrupted shift of exactly $$L$$ hours; no waiter is split across multiple shifts within the same day; and the schedule must respect the full cyclic operating horizon.\n- A solution is represented by:\n  - $$x_s$$: the number of waiters assigned to start at feasible shift start $$s \\in \\mathcal{S}$$.\n  - $$Z$$: the total number of waiters scheduled across all feasible shift starts.\n\nInput Format\n{\n  \"H\": \"scalar; total cyclic planning horizon length\",\n  \"L\": \"scalar; fixed continuous shift length for each waiter\",\n  \"T\": \"integer; number of demand intervals\",\n  \"intervals\": [\n    {\n      \"id\": \"integer index $$t$$\",\n      \"start\": \"time point $$\\\\tau_t$$\",\n      \"end\": \"time point $$\\\\tau_{t+1}$$\",\n      \"demand\": \"minimum staffing requirement $$d_t$$\"\n    }\n  ],\n  \"S\": \"integer; number of feasible shift-start positions\",\n  \"shift_starts\": \"array of length $$S$$ containing the candidate shift start times $$s \\\\in \\\\mathcal{S}$$\",\n  \"coverage_information\": \"optional interval-to-shift coverage data describing which feasible shift starts cover each demand interval\"\n}\n\nOutput Format\n{\n  \"x\": \"array of length $$S$$; $$x_s$$ is the number of waiters assigned to shift start $$s$$\",\n  \"total_waiters\": \"scalar; the minimum total number of waiters scheduled\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"H\": 24,\n  \"L\": 8,\n  \"T\": 6,\n  \"intervals\": [\n    { \"id\": 1, \"start\": 2, \"end\": 6, \"demand\": 4 },\n    { \"id\": 2, \"start\": 6, \"end\": 10, \"demand\": 8 },\n    { \"id\": 3, \"start\": 10, \"end\": 14, \"demand\": 10 },\n    { \"id\": 4, \"start\": 14, \"end\": 18, \"demand\": 7 },\n    { \"id\": 5, \"start\": 18, \"end\": 22, \"demand\": 12 },\n    { \"id\": 6, \"start\": 22, \"end\": 2, \"demand\": 4 }\n  ],\n  \"shift_starts\": [2, 6, 10, 14, 18, 22]\n}",
+    "parameters": [
+        {
+            "name": "horizon_length",
+            "symbol": "H",
+            "shape": [],
+            "description": "Total cyclic planning horizon length"
+        },
+        {
+            "name": "shift_length",
+            "symbol": "L",
+            "shape": [],
+            "description": "Fixed shift length for each waiter"
+        },
+        {
+            "name": "num_demand_intervals",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of demand intervals"
+        },
+        {
+            "name": "demand_interval_indices",
+            "symbol": "\\mathcal{T}",
+            "shape": [
+                "T"
+            ],
+            "description": "Index set of demand intervals"
+        },
+        {
+            "name": "interval_start_time",
+            "symbol": "\\tau_t",
+            "shape": [
+                "T"
+            ],
+            "description": "Start time of each demand interval"
+        },
+        {
+            "name": "interval_end_time",
+            "symbol": "\\tau_{t+1}",
+            "shape": [
+                "T"
+            ],
+            "description": "End time of each demand interval"
+        },
+        {
+            "name": "min_staffing_requirement",
+            "symbol": "d_t",
+            "shape": [
+                "T"
+            ],
+            "description": "Minimum staffing requirement for each demand interval"
+        },
+        {
+            "name": "num_feasible_shift_starts",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of feasible shift-start positions"
+        },
+        {
+            "name": "feasible_shift_start_indices",
+            "symbol": "\\mathcal{S}",
+            "shape": [
+                "S"
+            ],
+            "description": "Index set of feasible shift starts"
+        },
+        {
+            "name": "shift_start_time",
+            "symbol": "\\sigma_s",
+            "shape": [
+                "S"
+            ],
+            "description": "Feasible shift start time for each shift-start position"
+        },
+        {
+            "name": "coverage_indicator",
+            "symbol": "c_{t,s}",
+            "shape": [
+                "T",
+                "S"
+            ],
+            "description": "Indicator that a shift starting at s covers demand interval t"
+        }
+    ],
+    "variables": [
+        {
+            "name": "waiter_starts",
+            "symbol": "x_s",
+            "shape": [
+                "S"
+            ],
+            "domain": "integer",
+            "description": "Number of waiters assigned to start at each feasible shift start"
+        },
+        {
+            "name": "total_waiters_scheduled",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of waiters scheduled across all feasible shift starts"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "minimum_staffing_coverage",
+            "description": "Every demand interval must be staffed at or above its minimum requirement by overlapping shifts",
+            "formula": "\\sum_{s \\in \\mathcal{S}} c_{t,s} x_s \\ge d_t \\qquad \\forall t \\in \\mathcal{T}",
+            "parameters": [
+                "demand_interval_indices",
+                "min_staffing_requirement",
+                "coverage_indicator",
+                "feasible_shift_start_indices"
+            ],
+            "variables": [
+                "waiter_starts"
+            ]
+        },
+        {
+            "name": "waiter_starts_domain",
+            "description": "Each shift-start decision variable is a nonnegative integer count of waiters starting at that shift start",
+            "formula": "x_s \\in \\mathbb{Z}_{\\ge 0} \\qquad \\forall s \\in \\mathcal{S}",
+            "parameters": [
+                "feasible_shift_start_indices"
+            ],
+            "variables": [
+                "waiter_starts"
+            ]
+        },
+        {
+            "name": "total_waiters_domain",
+            "description": "The total scheduled workforce is a nonnegative integer",
+            "formula": "Z \\in \\mathbb{Z}_{\\ge 0}",
+            "variables": [
+                "total_waiters_scheduled"
+            ]
+        },
+        {
+            "name": "total_waiters_balance",
+            "description": "The total number of scheduled waiters equals the sum of waiters assigned to all feasible shift starts",
+            "formula": "Z = \\sum_{s \\in \\mathcal{S}} x_s",
+            "parameters": [
+                "feasible_shift_start_indices"
+            ],
+            "variables": [
+                "total_waiters_scheduled",
+                "waiter_starts"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_waiters",
+            "description": "Minimize the total number of waiters scheduled across all feasible shift starts",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total number of waiters scheduled across all feasible shift starts.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_waiters_scheduled"
+        ]
+    }
+}

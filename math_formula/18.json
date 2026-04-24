@@ -1,0 +1,230 @@
+{
+    "problem": "Problem description\n- There is a single-period procurement planning problem for a furniture store that buys identical chairs from a finite set of manufacturers $$\\mathcal{M}$$.\n- For each manufacturer $$m \\in \\mathcal{M}$$, the parameter $$c_m$$ denotes the cost of placing one order, and the parameter $$q_m$$ denotes the number of chairs delivered by one order.\n- The store must choose integer numbers of orders from the available manufacturers, and each chosen manufacturer may also have an activation status indicating whether it is used at all.\n- The total number of chairs ordered must satisfy a lower bound $$D^{\\min}$$ and an upper bound $$D^{\\max}$$.\n- Some manufacturers may have prerequisite relations, represented by a set $$\\mathcal{R}$$ of ordered pairs. If a manufacturer is selected, the required manufacturer in the pair must also be selected and must satisfy the associated linked minimum quantity requirement.\n- The planning goal is to minimize the total procurement cost of all orders while respecting all quantity bounds and prerequisite relations.\n- A solution is represented by:\n  - $$x_m$$: the integer number of orders placed with manufacturer $$m \\in \\mathcal{M}$$\n  - $$y_m$$: a binary activation variable for manufacturer $$m \\in \\mathcal{M}$$, where $$1$$ means the manufacturer is used and $$0$$ means it is not used\n  - $$Q$$: the total number of chairs ordered across all manufacturers\n  - $$Z$$: the total ordering cost to be minimized\n\nInput Format\n{\n  \"manufacturers\": \"Array of manufacturer identifiers representing the set $$\\\\mathcal{M}$$.\",\n  \"order_costs\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its per-order cost $$c_m$$.\",\n  \"units_per_order\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its fixed order quantity $$q_m$$.\",\n  \"minimum_total_quantity\": \"Scalar lower bound $$D^{\\\\min}$$ on the total chairs ordered.\",\n  \"maximum_total_quantity\": \"Scalar upper bound $$D^{\\\\max}$$ on the total chairs ordered.\",\n  \"precedence_rules\": \"Array of rule objects. Each rule specifies a triggering manufacturer $$i$$, a required manufacturer $$j$$, and a linked minimum quantity $$\\\\ell_{ij}$$ that must be satisfied for $$j$$ whenever $$i$$ is selected.\"\n}\n\nOutput Format\n{\n  \"orders\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the integer decision $$x_m$$, giving the number of orders placed with manufacturer $$m$$.\",\n  \"selected\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the binary decision $$y_m$$, indicating whether manufacturer $$m$$ is used.\",\n  \"total_quantity\": \"Scalar $$Q$$ giving the total number of chairs ordered.\",\n  \"total_cost\": \"Scalar $$Z$$ giving the minimized total procurement cost.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"manufacturers\": [\"A\", \"B\", \"C\"],\n  \"order_costs\": {\n    \"A\": 50,\n    \"B\": 45,\n    \"C\": 40\n  },\n  \"units_per_order\": {\n    \"A\": 15,\n    \"B\": 10,\n    \"C\": 10\n  },\n  \"minimum_total_quantity\": 100,\n  \"maximum_total_quantity\": 500,\n  \"precedence_rules\": [\n    {\n      \"trigger\": \"A\",\n      \"requires\": \"B\",\n      \"linked_minimum_quantity\": 10\n    },\n    {\n      \"trigger\": \"B\",\n      \"requires\": \"C\",\n      \"linked_minimum_quantity\": 10\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "manufacturers_count",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of manufacturers in the ordered set \\(\\mathcal{M}\\)"
+        },
+        {
+            "name": "order_costs",
+            "symbol": "c",
+            "shape": [
+                "M"
+            ],
+            "description": "Cost of placing one order with each manufacturer"
+        },
+        {
+            "name": "units_per_order",
+            "symbol": "q",
+            "shape": [
+                "M"
+            ],
+            "description": "Number of chairs delivered by one order from each manufacturer"
+        },
+        {
+            "name": "minimum_total_quantity",
+            "symbol": "D^{\\min}",
+            "shape": [],
+            "description": "Lower bound on the total number of chairs ordered"
+        },
+        {
+            "name": "maximum_total_quantity",
+            "symbol": "D^{\\max}",
+            "shape": [],
+            "description": "Upper bound on the total number of chairs ordered"
+        },
+        {
+            "name": "precedence_rules_count",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of precedence rules in the ordered set \\(\\mathcal{R}\\)"
+        },
+        {
+            "name": "rule_triggers",
+            "symbol": "trigger",
+            "shape": [
+                "R"
+            ],
+            "description": "Triggering manufacturer index for each precedence rule"
+        },
+        {
+            "name": "rule_requires",
+            "symbol": "requires",
+            "shape": [
+                "R"
+            ],
+            "description": "Required manufacturer index for each precedence rule"
+        },
+        {
+            "name": "linked_minimum_quantities",
+            "symbol": "\\ell",
+            "shape": [
+                "R"
+            ],
+            "description": "Linked minimum quantity requirement for each precedence rule"
+        }
+    ],
+    "variables": [
+        {
+            "name": "order_counts",
+            "symbol": "x",
+            "shape": [
+                "M"
+            ],
+            "domain": "integer",
+            "description": "Integer number of orders placed with each manufacturer"
+        },
+        {
+            "name": "selected_manufacturers",
+            "symbol": "y",
+            "shape": [
+                "M"
+            ],
+            "domain": "binary",
+            "description": "Binary activation variable indicating whether each manufacturer is used"
+        },
+        {
+            "name": "total_quantity",
+            "symbol": "Q",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total number of chairs ordered across all manufacturers"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total procurement cost"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "big_m_order_upper_bound",
+            "symbol": "U",
+            "shape": [
+                "M"
+            ],
+            "domain": "integer",
+            "description": "Valid finite per-manufacturer upper bound on the number of orders that can be placed with each manufacturer for activation linking"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "total_quantity_definition",
+            "description": "The total quantity equals the sum of chairs delivered by all ordered manufacturer orders.",
+            "formula": "Q = \\sum_{m=1}^{M} q_m x_m",
+            "parameters": [
+                "units_per_order"
+            ],
+            "variables": [
+                "total_quantity",
+                "order_counts"
+            ]
+        },
+        {
+            "name": "total_quantity_bounds",
+            "description": "The procurement plan must keep the total quantity within the minimum and maximum demand bounds.",
+            "formula": "D^{\\min} \\le Q \\le D^{\\max}",
+            "parameters": [
+                "minimum_total_quantity",
+                "maximum_total_quantity"
+            ],
+            "variables": [
+                "total_quantity"
+            ]
+        },
+        {
+            "name": "manufacturer_activation_link",
+            "description": "Order counts are only allowed for manufacturers that are selected, enforced with a valid per-manufacturer finite upper bound linking orders to activation.",
+            "formula": "x_m \\le U_m y_m \\quad \\forall m \\in \\mathcal{M}",
+            "parameters": [],
+            "variables": [
+                "order_counts",
+                "selected_manufacturers"
+            ]
+        },
+        {
+            "name": "precedence_activation_requirement",
+            "description": "If a triggering manufacturer is selected, then the required manufacturer must also be selected for every precedence rule.",
+            "formula": "y_{trigger[r]} \\le y_{requires[r]} \\quad \\forall r \\in \\mathcal{R}",
+            "parameters": [
+                "rule_triggers",
+                "rule_requires"
+            ],
+            "variables": [
+                "selected_manufacturers"
+            ]
+        },
+        {
+            "name": "precedence_linked_minimum_quantity",
+            "description": "If a precedence relation is triggered, the required manufacturer must satisfy the linked minimum quantity requirement for every precedence rule.",
+            "formula": "x_{requires[r]} \\ge \\ell[r] \\, y_{trigger[r]} \\quad \\forall r \\in \\mathcal{R}",
+            "parameters": [
+                "linked_minimum_quantities",
+                "rule_requires",
+                "rule_triggers"
+            ],
+            "variables": [
+                "order_counts",
+                "selected_manufacturers"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "The total cost equals the sum of order costs across all manufacturers.",
+            "formula": "Z = \\sum_{m=1}^{M} c_m x_m",
+            "parameters": [
+                "order_costs"
+            ],
+            "variables": [
+                "total_cost",
+                "order_counts"
+            ]
+        },
+        {
+            "name": "order_count_integrality",
+            "description": "Order counts must be nonnegative integer values.",
+            "formula": "x_m \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall m \\in \\mathcal{M}",
+            "variables": [
+                "order_counts"
+            ]
+        },
+        {
+            "name": "manufacturer_selection_binary",
+            "description": "Manufacturer activation variables must be binary.",
+            "formula": "y_m \\in \\{0,1\\} \\quad \\forall m \\in \\mathcal{M}",
+            "variables": [
+                "selected_manufacturers"
+            ]
+        },
+        {
+            "name": "nonnegative_quantities",
+            "description": "Total quantity and total cost are nonnegative scalar quantities.",
+            "formula": "Q, Z \\ge 0",
+            "variables": [
+                "total_quantity",
+                "total_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_procurement_cost_minimization",
+            "description": "Minimize the total procurement cost while satisfying quantity bounds and precedence requirements",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total procurement cost across all manufacturers while satisfying total quantity bounds and precedence requirements.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_cost"
+        ]
+    }
+}

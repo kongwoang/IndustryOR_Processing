@@ -1,0 +1,262 @@
+{
+    "problem": "Problem description\n- There is a single-period production planning problem with a product set $$P$$ indexed by $$p \\in P$$, and a planning horizon $$\\mathcal{T}$$ with $$\\lvert \\mathcal{T} \\rvert = 1$$.\n- Each product $$p \\in P$$ has a unit profit $$\\pi_p$$, a wood requirement per unit $$a^{\\mathrm{wood}}_p$$, and a steel requirement per unit $$a^{\\mathrm{steel}}_p$$.\n- The manufacturer has total available wood $$W$$ and total available steel $$S$$.\n- The planning goal is to choose which product types to manufacture and how many units of each selected product to produce so that total profit is maximized.\n- Production quantities are nonnegative integers, and each product type is either manufactured or not manufactured.\n- The available wood and steel must not be exceeded by the total production plan.\n- If a product type is not selected for manufacture, its production quantity must be zero.\n- If a product type is selected, its production quantity must be compatible with the available resource limits.\n- The logical business rules are:\n  - if the truck product type is manufactured, the train product type must not be manufactured;\n  - if the boat product type is manufactured, the airplane product type must also be manufactured;\n  - the number of boats produced cannot exceed the number of trains produced.\n- A solution is represented by:\n  - $$x_p$$: the integer number of units produced of product $$p \\in P$$;\n  - $$y_p$$: a binary indicator showing whether product $$p \\in P$$ is manufactured;\n  - $$K$$: the number of product types that are manufactured.\n\nInput Format\n{\n  \"products\": {\n    \"symbol\": \"$$P$$\",\n    \"type\": \"array of product identifiers\",\n    \"description\": \"The set of product types indexed by $$p \\in P$$\"\n  },\n  \"unit_profit\": {\n    \"symbol\": \"$$\\\\pi_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Unit profit for each product $$p \\\\in P$$\"\n  },\n  \"wood_capacity\": {\n    \"symbol\": \"$$W$$\",\n    \"type\": \"number\",\n    \"description\": \"Total available wood\"\n  },\n  \"wood_requirement\": {\n    \"symbol\": \"$$a^{\\\\mathrm{wood}}_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Wood required per unit of product $$p \\\\in P$$\"\n  },\n  \"steel_capacity\": {\n    \"symbol\": \"$$S$$\",\n    \"type\": \"number\",\n    \"description\": \"Total available steel\"\n  },\n  \"steel_requirement\": {\n    \"symbol\": \"$$a^{\\\\mathrm{steel}}_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Steel required per unit of product $$p \\\\in P$$\"\n  },\n  \"market_demand\": {\n    \"symbol\": \"$$D_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"optional array of numbers\",\n    \"description\": \"Maximum sellable quantity for each product $$p \\\\in P$$; if omitted, no separate demand cap is imposed\"\n  },\n  \"forbidden_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{F}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that manufacturing $$p$$ prohibits manufacturing $$q$$\"\n  },\n  \"implication_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that manufacturing $$p$$ requires manufacturing $$q$$\"\n  },\n  \"quantity_ordering_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that the production quantity of $$p$$ cannot exceed the production quantity of $$q$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"symbol\": \"$$x_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of integers\",\n    \"description\": \"Optimal production quantity for each product $$p \\\\in P$$\"\n  },\n  \"manufacture_indicator\": {\n    \"symbol\": \"$$y_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of binary values\",\n    \"description\": \"Whether product $$p \\\\in P$$ is manufactured\"\n  },\n  \"manufactured_type_count\": {\n    \"symbol\": \"$$K$$\",\n    \"type\": \"integer\",\n    \"description\": \"Number of product types selected for manufacture\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$Z^*$$\",\n    \"type\": \"number\",\n    \"description\": \"Maximum achievable total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"truck\", \"airplane\", \"boat\", \"train\"],\n  \"unit_profit\": [5, 10, 8, 7],\n  \"wood_capacity\": 890,\n  \"wood_requirement\": [12, 20, 15, 10],\n  \"steel_capacity\": 500,\n  \"steel_requirement\": [6, 3, 5, 4],\n  \"forbidden_pairs\": [[\"truck\", \"train\"]],\n  \"implication_pairs\": [[\"boat\", \"airplane\"]],\n  \"quantity_ordering_pairs\": [[\"boat\", \"train\"]]\n}",
+    "parameters": [
+        {
+            "name": "product_types",
+            "symbol": "P",
+            "shape": [],
+            "description": "Set of product types"
+        },
+        {
+            "name": "time_periods",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Planning horizon with a single period"
+        },
+        {
+            "name": "wood_capacity",
+            "symbol": "W",
+            "shape": [],
+            "description": "Total available wood capacity"
+        },
+        {
+            "name": "steel_capacity",
+            "symbol": "S",
+            "shape": [],
+            "description": "Total available steel capacity"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit for each product type"
+        },
+        {
+            "name": "wood_requirement",
+            "symbol": "a^{\\mathrm{wood}}",
+            "shape": [
+                "P"
+            ],
+            "description": "Wood usage per unit for each product type"
+        },
+        {
+            "name": "steel_requirement",
+            "symbol": "a^{\\mathrm{steel}}",
+            "shape": [
+                "P"
+            ],
+            "description": "Steel usage per unit for each product type"
+        },
+        {
+            "name": "market_demand",
+            "symbol": "D",
+            "shape": [
+                "P"
+            ],
+            "description": "Optional maximum sellable quantity for each product type, if provided"
+        },
+        {
+            "name": "forbidden_pairs",
+            "symbol": "\\mathcal{F}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where manufacturing the first forbids manufacturing the second"
+        },
+        {
+            "name": "implication_pairs",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where manufacturing the first requires manufacturing the second"
+        },
+        {
+            "name": "quantity_ordering_pairs",
+            "symbol": "\\mathcal{R}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where the first product quantity cannot exceed the second"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P"
+            ],
+            "domain": "integer",
+            "description": "Production quantity for each product type"
+        },
+        {
+            "name": "manufacture_indicator",
+            "symbol": "y",
+            "shape": [
+                "P"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if the product type is manufactured and 0 otherwise"
+        },
+        {
+            "name": "manufactured_type_count",
+            "symbol": "K",
+            "shape": [],
+            "domain": "integer",
+            "description": "Number of product types manufactured"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "production_upper_bound",
+            "symbol": "U",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Per-product upper bound used in the selection-linking constraint, computed as the minimum of the resource-implied and demand-implied limits for each product."
+        }
+    ],
+    "constraints": [
+        {
+            "name": "wood_capacity_limit",
+            "description": "Total wood usage by all production quantities cannot exceed available wood capacity",
+            "formula": "\\sum_{p\\in P} a^{\\mathrm{wood}}_p x_p \\leq W",
+            "parameters": [
+                "wood_capacity",
+                "wood_requirement"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "steel_capacity_limit",
+            "description": "Total steel usage by all production quantities cannot exceed available steel capacity",
+            "formula": "\\sum_{p\\in P} a^{\\mathrm{steel}}_p x_p \\leq S",
+            "parameters": [
+                "steel_capacity",
+                "steel_requirement"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "link_production_to_selection",
+            "description": "Production is allowed only if a product is selected, and if selected it may produce at most the per-product upper bound.",
+            "formula": "x_p \\leq U_p y_p \\quad \\forall p\\in P",
+            "parameters": [
+                "wood_capacity",
+                "steel_capacity",
+                "market_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "market_demand_cap",
+            "description": "If a market demand cap is provided, production quantity for each product cannot exceed its demand limit.",
+            "formula": "x_p \\leq D_p \\quad \\forall p\\in P",
+            "parameters": [
+                "market_demand"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "forbidden_manufacturing_pairs",
+            "description": "For each forbidden pair, manufacturing the first product forbids manufacturing the second product",
+            "formula": "y_p + y_q \\leq 1 \\quad \\forall (p,q)\\in \\mathcal{F}",
+            "parameters": [
+                "forbidden_pairs"
+            ],
+            "variables": [
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "implication_manufacturing_pairs",
+            "description": "For each implication pair, manufacturing the first product requires manufacturing the second product",
+            "formula": "y_p \\leq y_q \\quad \\forall (p,q)\\in \\mathcal{I}",
+            "parameters": [
+                "implication_pairs"
+            ],
+            "variables": [
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "quantity_ordering_pairs",
+            "description": "For each quantity ordering pair, the production quantity of the first product cannot exceed the production quantity of the second product",
+            "formula": "x_p \\leq x_q \\quad \\forall (p,q)\\in \\mathcal{R}",
+            "parameters": [
+                "quantity_ordering_pairs"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "manufactured_type_count_definition",
+            "description": "The count variable equals the number of products with manufacture indicator equal to one",
+            "formula": "K = \\sum_{p\\in P} y_p",
+            "variables": [
+                "manufactured_type_count",
+                "manufacture_indicator"
+            ]
+        },
+        {
+            "name": "single_period_horizon",
+            "description": "The planning horizon is single-period with exactly one time period.",
+            "formula": "|\\mathcal{T}| = 1",
+            "parameters": [
+                "time_periods"
+            ]
+        },
+        {
+            "name": "production_upper_bound_definition",
+            "description": "Define the per-product upper bound used in the linking constraint as the minimum of the available resource-based and optional demand-based limits.",
+            "formula": "U_p = \\min\\left(\\left\\lfloor \\min\\left(\\frac{W}{a^{\\mathrm{wood}}_p},\\frac{S}{a^{\\mathrm{steel}}_p}\\right)\\right\\rfloor, D_p\\right) \\quad \\forall p\\in P",
+            "parameters": [
+                "wood_capacity",
+                "steel_capacity",
+                "wood_requirement",
+                "steel_requirement",
+                "market_demand"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit across all manufactured products",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit from produced quantities across all products in the single-period planning model.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\sum_{p\\in P} \\pi_p x_p",
+        "parameters": [
+            "product_types",
+            "unit_profit"
+        ],
+        "variables": [
+            "production_quantity"
+        ]
+    }
+}

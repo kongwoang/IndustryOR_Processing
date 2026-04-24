@@ -1,0 +1,202 @@
+{
+    "problem": "Problem description\n- There is a set of products $$\\mathcal{P}$$ indexed by $$p \\in \\mathcal{P}$$, a set of machines $$\\mathcal{M}$$ indexed by $$m \\in \\mathcal{M}$$, and a planning horizon of periods $$\\mathcal{T}$$ indexed by $$t \\in \\mathcal{T}$$.\n- Each product $$p$$ has a processing time requirement on each machine $$m$$, represented by $$a_{m,p}$$, measured in a consistent time unit per standardized lot.\n- Each machine $$m$$ has an available capacity in each period $$t$$, represented by $$K_{m,t}$$.\n- Each product $$p$$ has an initial on-hand inventory $$I^{0}_{p}$$ at the start of the planning horizon.\n- Each product $$p$$ has a forecast demand in each period $$t$$, represented by $$D_{p,t}$$.\n- Production is allowed in fractional lots, so the production decision is continuous rather than integer.\n- The planning objective is to maximize the total ending inventory across all products at the end of the planning horizon.\n- All demand must be satisfied from available initial inventory plus production, and inventory may not become negative at any point in the planning horizon.\n- Machine time usage created by production must not exceed the available capacity of each machine in each period.\n- Inventory is tracked separately for each product across periods, with beginning inventory carried forward from one period to the next after production and demand fulfillment.\n- No explicit cost or penalty terms are included in the objective for this instance.\n- A solution is represented by:\n  - The production quantity $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$.\n  - The ending inventory level $$I_{p,t}$$, giving the inventory of product $$p$$ remaining at the end of period $$t$$.\n  - The final objective value $$Z$$, giving the total ending inventory at the end of the horizon.\n\nInput Format\n{\n  \"P\": \"number of products $$|\\mathcal{P}|$$\",\n  \"M\": \"number of machines $$|\\mathcal{M}|$$\",\n  \"T\": \"number of planning periods $$|\\mathcal{T}|$$\",\n  \"products\": [\n    \"product identifiers for each $$p \\in \\mathcal{P}$$\"\n  ],\n  \"machines\": [\n    \"machine identifiers for each $$m \\in \\mathcal{M}$$\"\n  ],\n  \"periods\": [\n    \"period identifiers for each $$t \\in \\mathcal{T}$$\"\n  ],\n  \"processing_time\": {\n    \"shape\": \"$$M \\\\times P$$\",\n    \"meaning\": \"Matrix of processing times $$a_{m,p}$$, where each entry is the time required on machine $$m$$ to produce one standardized lot of product $$p$$\"\n  },\n  \"machine_capacity\": {\n    \"shape\": \"$$M \\\\times T$$\",\n    \"meaning\": \"Matrix of available machine capacities $$K_{m,t}$$ for each machine $$m$$ in each period $$t$$\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"Vector of starting inventories $$I^{0}_{p}$$ for each product $$p$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Demand matrix $$D_{p,t}$$ for each product $$p$$ in each period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"production\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Production plan $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Inventory plan $$I_{p,t}$$, giving the ending inventory of product $$p$$ in period $$t$$\"\n  },\n  \"objective_value\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"Total ending inventory $$Z$$ at the end of the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"M\": 2,\n  \"T\": 1,\n  \"products\": [\"liquid\", \"solid\"],\n  \"machines\": [\"Machine 1\", \"Machine 2\"],\n  \"periods\": [\"week 1\"],\n  \"processing_time\": [\n    [50, 24],\n    [30, 33]\n  ],\n  \"machine_capacity\": [\n    [40],\n    [35]\n  ],\n  \"initial_inventory\": [30, 90],\n  \"demand\": [\n    [75],\n    [95]\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the planning set"
+        },
+        {
+            "name": "num_machines",
+            "symbol": "M",
+            "shape": [],
+            "description": "Number of machines in the planning set"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in the horizon"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "a",
+            "shape": [
+                "M",
+                "P"
+            ],
+            "description": "Processing time required on machine m for product p per standardized lot produced"
+        },
+        {
+            "name": "machine_capacity",
+            "symbol": "K",
+            "shape": [
+                "M",
+                "T"
+            ],
+            "description": "Available capacity of machine m in period t"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I0",
+            "shape": [
+                "P"
+            ],
+            "description": "Initial inventory for each product p"
+        },
+        {
+            "name": "demand",
+            "symbol": "D",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Demand for each product p in each period t"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of product p in period t measured in standardized lots"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Inventory of product p at the end of period t"
+        },
+        {
+            "name": "objective_value",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total ending inventory at the end of the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "production_continuity",
+            "description": "Production quantity is continuous and may be fractional",
+            "formula": "x_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "inventory_nonnegativity",
+            "description": "Ending inventory must never be negative for any product and period",
+            "formula": "I_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "machine_capacity_limit",
+            "description": "Production in each period must not exceed available machine capacity on each machine",
+            "formula": "\\sum_{p=1}^{P} a_{m,p} x_{p,t} \\le K_{m,t} \\quad \\forall m=1,\\dots,M,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_machines",
+                "num_products",
+                "processing_time",
+                "machine_capacity"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "demand_fulfillment",
+            "description": "Demand for each product and period must be satisfied by beginning inventory plus current-period production, leaving nonnegative ending inventory.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\n\\dots,T",
+            "parameters": [
+                "num_products",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "inventory_carryover",
+            "description": "Ending inventory is defined period by period through cumulative balance with demand satisfaction and carryover.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "nonnegative_data",
+            "description": "Input quantities such as processing times, capacities, initial inventory, and demand must be nonnegative",
+            "formula": "a_{m,p} \\ge 0,\\; K_{m,t} \\ge 0,\\; I0_p \\ge 0,\\; D_{p,t} \\ge 0",
+            "parameters": [
+                "processing_time",
+                "machine_capacity",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": []
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory evolves by beginning inventory plus production minus demand in each period, ensuring demand is met and inventory carries forward correctly.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "maximize_total_ending_inventory",
+            "description": "Maximize the total ending inventory at the end of the planning horizon across all products",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize the total ending inventory at the end of the planning horizon across all products using the final-period inventory variables directly.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p=1}^{P} I_{p,T}",
+        "parameters": [
+            "num_products"
+        ],
+        "variables": [
+            "ending_inventory",
+            "objective_value"
+        ]
+    }
+}

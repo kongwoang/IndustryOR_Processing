@@ -1,0 +1,279 @@
+{
+    "problem": "Problem description\n- This is a single-period assignment-and-setup planning problem with a set of parts $$\\mathcal{P}$$ and a set of candidate machines $$\\mathcal{M}$$.\n- Each part $$p \\in \\mathcal{P}$$ has required quantity $$q_p$$ and must be processed exactly once on one machine.\n- The unit processing cost of assigning part $$p$$ to machine $$m$$ is $$c_{pm}$$.\n- Each machine $$m \\in \\mathcal{M}$$ has a fixed setup cost $$f_m$$ that is incurred once if the machine is used for at least one part.\n- Three machines are distinguished as $$m_A$$, $$m_B$$, and $$m_C$$.\n- Five parts are distinguished as $$p^{(1)}$$, $$p^{(2)}$$, $$p^{(3)}$$, $$p^{(4)}$$, and $$p^{(5)}$$ for special routing restrictions.\n- The planning goal is to minimize the total cost made up of all processing costs and all incurred setup costs.\n\n- Required business constraints:\n  - Every part demand must be fully satisfied.\n  - Each part must be assigned to exactly one machine.\n  - If $$p^{(1)}$$ is assigned to $$m_A$$, then $$p^{(2)}$$ must be assigned to either $$m_B$$ or $$m_C$$.\n  - If $$p^{(1)}$$ is assigned to either $$m_B$$ or $$m_C$$, then $$p^{(2)}$$ must be assigned to $$m_A$$.\n  - Part $$p^{(3)}$$ must be processed on $$m_A$$.\n  - Part $$p^{(4)}$$ must be processed on $$m_B$$.\n  - Part $$p^{(5)}$$ must be processed on $$m_C$$.\n  - The total number of parts assigned to $$m_C$$ must not exceed the capacity limit $$U_C$$.\n  - A machine becomes active if at least one part is assigned to it, and any active machine incurs its setup cost.\n\n- A solution is represented by:\n  - Binary assignment variables $$x_{pm}$$, where $$x_{pm} = 1$$ means part $$p$$ is assigned to machine $$m$$, and $$x_{pm} = 0$$ otherwise.\n  - Binary activation variables $$y_m$$, where $$y_m = 1$$ means machine $$m$$ is used, and $$y_m = 0$$ otherwise.\n  - The minimized total cost of processing plus machine setups.\n\nInput Format\n{\n  \"parts\": {\n    \"count\": \"$$P$$\",\n    \"indices\": \"$$\\\\mathcal{P}$$\"\n  },\n  \"machines\": {\n    \"count\": \"$$M$$\",\n    \"indices\": \"$$\\\\mathcal{M}$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"$$q_p$$ is the required quantity of part $$p$$\"\n  },\n  \"processing_cost\": {\n    \"shape\": \"$$P \\\\times M$$\",\n    \"meaning\": \"$$c_{pm}$$ is the unit processing cost of part $$p$$ on machine $$m$$\"\n  },\n  \"setup_cost\": {\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"$$f_m$$ is the fixed setup cost of machine $$m$$ if it is used\"\n  },\n  \"distinguished_machines\": {\n    \"A\": \"$$m_A$$\",\n    \"B\": \"$$m_B$$\",\n    \"C\": \"$$m_C$$\"\n  },\n  \"distinguished_parts\": {\n    \"first\": \"$$p^{(1)}$$\",\n    \"second\": \"$$p^{(2)}$$\",\n    \"third\": \"$$p^{(3)}$$\",\n    \"fourth\": \"$$p^{(4)}$$\",\n    \"fifth\": \"$$p^{(5)}$$\"\n  },\n  \"routing_rules\": {\n    \"meaning\": \"logical assignment dependencies involving $$p^{(1)}$$ and $$p^{(2)}$$\"\n  },\n  \"fixed_assignments\": {\n    \"meaning\": \"parts with mandatory machine choices\"\n  },\n  \"capacity_limits\": {\n    \"machine_C\": \"$$U_C$$\",\n    \"meaning\": \"maximum number of parts allowed on $$m_C$$\"\n  }\n}\n\nOutput Format\n{\n  \"assignment_matrix\": {\n    \"shape\": \"$$P \\\\times M$$\",\n    \"meaning\": \"$$x_{pm}$$ indicates whether part $$p$$ is assigned to machine $$m$$\"\n  },\n  \"machine_activation\": {\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"$$y_m$$ indicates whether machine $$m$$ is activated\"\n  },\n  \"total_cost\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"the minimized total cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"parts\": [\"$$1$$\", \"$$2$$\", \"$$3$$\", \"$$4$$\", \"$$5$$\", \"$$6$$\", \"$$7$$\", \"$$8$$\", \"$$9$$\", \"$$10$$\"],\n  \"machines\": [\"$$A$$\", \"$$B$$\", \"$$C$$\"],\n  \"processing_cost\": {\n    \"$$A$$\": [\"$$10$$\", \"$$20$$\", \"$$30$$\", \"$$40$$\", \"$$50$$\", \"$$60$$\", \"$$70$$\", \"$$80$$\", \"$$90$$\", \"$$100$$\"],\n    \"$$B$$\": [\"$$15$$\", \"$$25$$\", \"$$35$$\", \"$$45$$\", \"$$55$$\", \"$$65$$\", \"$$75$$\", \"$$85$$\", \"$$95$$\", \"$$105$$\"],\n    \"$$C$$\": [\"$$20$$\", \"$$30$$\", \"$$40$$\", \"$$50$$\", \"$$60$$\", \"$$70$$\", \"$$80$$\", \"$$90$$\", \"$$100$$\", \"$$110$$\"]\n  },\n  \"setup_cost\": {\n    \"$$A$$\": \"$$100$$\",\n    \"$$B$$\": \"$$135$$\",\n    \"$$C$$\": \"$$200$$\"\n  },\n  \"demand\": {\n    \"$$1$$\": \"$$1$$\",\n    \"$$2$$\": \"$$1$$\",\n    \"$$3$$\": \"$$1$$\",\n    \"$$4$$\": \"$$1$$\",\n    \"$$5$$\": \"$$1$$\",\n    \"$$6$$\": \"$$1$$\",\n    \"$$7$$\": \"$$1$$\",\n    \"$$8$$\": \"$$1$$\",\n    \"$$9$$\": \"$$1$$\",\n    \"$$10$$\": \"$$1$$\"\n  },\n  \"fixed_assignments\": [\n    {\n      \"part\": \"$$3$$\",\n      \"machine\": \"$$A$$\"\n    },\n    {\n      \"part\": \"$$4$$\",\n      \"machine\": \"$$B$$\"\n    },\n    {\n      \"part\": \"$$5$$\",\n      \"machine\": \"$$C$$\"\n    }\n  ],\n  \"conditional_rules\": [\n    {\n      \"if\": {\n        \"part\": \"$$1$$\",\n        \"machine\": \"$$A$$\"\n      },\n      \"then\": {\n        \"part\": \"$$2$$\",\n        \"machine_in\": [\"$$B$$\", \"$$C$$\"]\n      }\n    },\n    {\n      \"if\": {\n        \"part\": \"$$1$$\",\n        \"machine_in\": [\"$$B$$\", \"$$C$$\"]\n      },\n      \"then\": {\n        \"part\": \"$$2$$\",\n        \"machine\": \"$$A$$\"\n      }\n    }\n  ],\n  \"capacity_limits\": {\n    \"machine_C\": \"$$3$$\"\n  }\n}",
+    "parameters": [
+        {
+            "name": "num_parts",
+            "symbol": "P",
+            "shape": [],
+            "description": "Total number of parts in the set of parts"
+        },
+        {
+            "name": "num_machines",
+            "symbol": "M",
+            "shape": [],
+            "description": "Total number of candidate machines"
+        },
+        {
+            "name": "part_quantity",
+            "symbol": "q",
+            "shape": [
+                "P"
+            ],
+            "description": "Required quantity of each part"
+        },
+        {
+            "name": "processing_cost",
+            "symbol": "c",
+            "shape": [
+                "P",
+                "M"
+            ],
+            "description": "Unit processing cost for assigning each part to each machine"
+        },
+        {
+            "name": "setup_cost",
+            "symbol": "f",
+            "shape": [
+                "M"
+            ],
+            "description": "Fixed setup cost for each machine if it is used"
+        },
+        {
+            "name": "capacity_m_c",
+            "symbol": "U_C",
+            "shape": [],
+            "description": "Capacity limit on the number of parts assigned to distinguished machine m_C"
+        },
+        {
+            "name": "machine_a",
+            "symbol": "m_A",
+            "shape": [],
+            "description": "Distinguished machine label m_A for special routing rules"
+        },
+        {
+            "name": "machine_b",
+            "symbol": "m_B",
+            "shape": [],
+            "description": "Distinguished machine label m_B for special routing rules"
+        },
+        {
+            "name": "machine_c",
+            "symbol": "m_C",
+            "shape": [],
+            "description": "Distinguished machine label m_C for special routing rules"
+        },
+        {
+            "name": "part_1",
+            "symbol": "p^{(1)}",
+            "shape": [],
+            "description": "Distinguished part p^(1) for special routing rules"
+        },
+        {
+            "name": "part_2",
+            "symbol": "p^{(2)}",
+            "shape": [],
+            "description": "Distinguished part p^(2) for special routing rules"
+        },
+        {
+            "name": "part_3",
+            "symbol": "p^{(3)}",
+            "shape": [],
+            "description": "Distinguished part p^(3) that must be processed on m_A"
+        },
+        {
+            "name": "part_4",
+            "symbol": "p^{(4)}",
+            "shape": [],
+            "description": "Distinguished part p^(4) that must be processed on m_B"
+        },
+        {
+            "name": "part_5",
+            "symbol": "p^{(5)}",
+            "shape": [],
+            "description": "Distinguished part p^(5) that must be processed on m_C"
+        }
+    ],
+    "variables": [
+        {
+            "name": "assignment",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "M"
+            ],
+            "domain": "binary",
+            "description": "Binary assignment variable equal to 1 if part p is assigned to machine m, and 0 otherwise"
+        },
+        {
+            "name": "machine_active",
+            "symbol": "y",
+            "shape": [
+                "M"
+            ],
+            "domain": "binary",
+            "description": "Binary activation variable equal to 1 if machine m is used, and 0 otherwise"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "total_cost",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Auxiliary variable representing the total objective cost for reporting and solver output"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "binary_assignment_domain",
+            "description": "Assignment variables are binary",
+            "formula": "x[p][m] \\in \\{0,1\\}",
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "binary_activation_domain",
+            "description": "Activation variables are binary",
+            "formula": "y[m] \\in \\{0,1\\}",
+            "variables": [
+                "machine_active"
+            ]
+        },
+        {
+            "name": "one_machine_per_part",
+            "description": "Each part must be assigned to exactly one machine",
+            "formula": "\\sum_{m=1}^{M} x_{pm} = 1 \\quad \\forall p=1,\\dots,P",
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "machine_activation_link",
+            "description": "A machine is active if and only if at least one part is assigned to it",
+            "formula": "x_{pm} \\leq y_m \\quad \\forall p=1,\\dots,P,\\ \\forall m=1,\\dots,M",
+            "variables": [
+                "assignment",
+                "machine_active"
+            ]
+        },
+        {
+            "name": "conditional_routing_ab",
+            "description": "If part p^(1) is assigned to m_A, then part p^(2) must be assigned to m_B or m_C",
+            "formula": "x_{p^{(1)},m_A} \\leq x_{p^{(2)},m_B} + x_{p^{(2)},m_C}",
+            "parameters": [
+                "machine_a",
+                "machine_b",
+                "machine_c",
+                "part_1",
+                "part_2"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "conditional_routing_ba",
+            "description": "If part p^(1) is assigned to m_B or m_C, then part p^(2) must be assigned to m_A",
+            "formula": "x_{p^{(1)},m_B} + x_{p^{(1)},m_C} \\leq x_{p^{(2)},m_A}",
+            "parameters": [
+                "machine_a",
+                "machine_b",
+                "machine_c",
+                "part_1",
+                "part_2"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "fixed_machine_part_3",
+            "description": "Part p^(3) must be processed on m_A",
+            "formula": "x_{p^{(3)},m_A} = 1",
+            "parameters": [
+                "machine_a",
+                "part_3"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "fixed_machine_part_4",
+            "description": "Part p^(4) must be processed on m_B",
+            "formula": "x_{p^{(4)},m_B} = 1",
+            "parameters": [
+                "machine_b",
+                "part_4"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "fixed_machine_part_5",
+            "description": "Part p^(5) must be processed on m_C",
+            "formula": "x_{p^{(5)},m_C} = 1",
+            "parameters": [
+                "machine_c",
+                "part_5"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "machine_c_capacity",
+            "description": "The total number of parts assigned to m_C must not exceed the capacity limit U_C",
+            "formula": "\\sum_{p=1}^{P} x_{p,m_C} \\leq U_C",
+            "parameters": [
+                "capacity_m_c",
+                "machine_c"
+            ],
+            "variables": [
+                "assignment"
+            ]
+        },
+        {
+            "name": "explicit_part_quantity_nonuse",
+            "description": "The part quantity parameter q is not used in the binary assignment model; each part is treated as a single indivisible unit assigned exactly once.",
+            "formula": "\\text{No constraint added: q_p is not used in the MILP formulation}",
+            "parameters": [
+                "part_quantity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Define the reported total cost as the sum of processing and setup costs.",
+            "formula": "z = \\sum_{p=1}^{P}\\sum_{m=1}^{M} c_{pm} x_{pm} + \\sum_{m=1}^{M} f_m y_m",
+            "parameters": [
+                "processing_cost",
+                "setup_cost"
+            ],
+            "variables": [
+                "assignment",
+                "machine_active",
+                "total_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize the total cost consisting of processing costs and machine setup costs",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total processing and setup cost, and use the auxiliary total_cost variable to report the resulting objective value.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "z",
+        "parameters": [],
+        "variables": [
+            "total_cost"
+        ]
+    }
+}

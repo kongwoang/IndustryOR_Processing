@@ -1,0 +1,456 @@
+{
+    "problem": "Problem description\n- A staffing plan is required for a university computer lab over a planning horizon of $$T$$ days indexed by $$\\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- There is a set of students indexed by $$\\mathcal{I}=\\{1,2,\\ldots,N\\}$$, partitioned into undergraduates $$\\mathcal{U}$$ and graduate students $$\\mathcal{G}$$.\n- Each student $$i\\in\\mathcal{I}$$ has an hourly wage $$w_i$$ and a day-specific maximum assignable duty time $$a_{it}$$ for each day $$t\\in\\mathcal{T}$$.\n- The lab has an operating window on each day $$t$$, described by an opening time $$\\tau_t^{\\mathrm{open}}$$ and a closing time $$\\tau_t^{\\mathrm{close}}$$, and the lab must be continuously covered throughout that operating window.\n- The planning goal is to choose which students work on which days, how long they work, and the detailed daily duty ordering if needed, so that all coverage requirements are satisfied and total gross pay is minimized.\n- Required business constraints:\n  - The lab must have exactly one student on duty at every moment during each operating window.\n  - No more than $$m^{\\max}$$ students may be scheduled on any single day.\n  - Each student may work at most $$s^{\\max}$$ shifts per week.\n  - Each undergraduate student must accumulate at least $$L^{\\mathrm{U}}$$ working hours in the week.\n  - Each graduate student must accumulate at least $$L^{\\mathrm{G}}$$ working hours in the week.\n  - The duty hours assigned to student $$i$$ on day $$t$$ must not exceed that student\u2019s daily availability $$a_{it}$$.\n  - All assigned duty must lie within the operating window of the corresponding day.\n- A solution is represented by:\n  - $$x_{it}$$: a binary assignment indicator showing whether student $$i$$ is scheduled on day $$t$$.\n  - $$h_{it}$$: the number of duty hours assigned to student $$i$$ on day $$t$$.\n  - $$s_{it}$$ and $$e_{it}$$: the start and end times of student $$i$$\u2019s duty block on day $$t$$, if a detailed intra-day schedule is required.\n  - $$H_i$$: the total weekly hours assigned to student $$i$$.\n  - $$R_i$$: the total number of shifts assigned to student $$i$$.\n\nInput Format\n{\n  \"student_index_set\": \"$$\\\\mathcal{I}=\\\\{1,2,\\\\ldots,N\\\\}$$\",\n  \"undergraduate_subset\": \"$$\\\\mathcal{U}\\\\subseteq\\\\mathcal{I}$$\",\n  \"graduate_subset\": \"$$\\\\mathcal{G}\\\\subseteq\\\\mathcal{I}$$\",\n  \"day_index_set\": \"$$\\\\mathcal{T}=\\\\{1,2,\\ldots,T\\\\}$$\",\n  \"days\": \"An ordered list of the $$T$$ planning days\",\n  \"operating_window\": {\n    \"open_time\": \"$$\\\\tau_t^{\\\\mathrm{open}}$$ for each $$t\\\\in\\\\mathcal{T}$$\",\n    \"close_time\": \"$$\\\\tau_t^{\\\\mathrm{close}}$$ for each $$t\\\\in\\\\mathcal{T}$$\",\n    \"coverage_rule\": \"Continuous coverage by exactly one student during each operating window\"\n  },\n  \"student_data\": {\n    \"shape\": \"One record per student $$i\\\\in\\\\mathcal{I}$$\",\n    \"fields\": {\n      \"id\": \"Student index $$i$$\",\n      \"category\": \"Either undergraduate or graduate\",\n      \"wage\": \"$$w_i$$\",\n      \"daily_max_hours\": \"The vector $$\\\\{a_{it}: t\\\\in\\\\mathcal{T}\\\\}$$\"\n    }\n  },\n  \"wage_vector\": \"$$w\\\\in\\\\mathbb{R}_+^{N}$$ with entries $$w_i$$\",\n  \"availability_matrix\": \"$$A\\\\in\\\\mathbb{R}_+^{N\\\\times T}$$ with entries $$A_{it}=a_{it}$$\",\n  \"student_category_vector\": \"$$g\\\\in\\\\{\\\\mathrm{U},\\\\mathrm{G}\\\\}^{N}$$\",\n  \"minimum_weekly_hours\": {\n    \"undergraduate\": \"$$L^{\\\\mathrm{U}}$$\",\n    \"graduate\": \"$$L^{\\\\mathrm{G}}$$\"\n  },\n  \"max_shifts_per_week\": \"$$s^{\\\\max}$$\",\n  \"max_students_per_day\": \"$$m^{\\\\max}$$\",\n  \"coverage_hours\": \"$$q_t$$ for each $$t\\\\in\\\\mathcal{T}$$, where $$q_t$$ is the total required open-hours coverage on day $$t$$\",\n  \"objective\": \"Minimize total gross pay\"\n}\n\nOutput Format\n{\n  \"objective_value\": \"The minimum total gross pay attained by the schedule\",\n  \"schedule_by_day\": [\n    {\n      \"day\": \"$$t\\\\in\\\\mathcal{T}$$\",\n      \"duty_blocks\": [\n        {\n          \"block_index\": \"$$k$$\",\n          \"student_id\": \"$$i\\\\in\\\\mathcal{I}$$\",\n          \"start_time\": \"$$s_{tk}$$\",\n          \"end_time\": \"$$e_{tk}$$\",\n          \"hours\": \"$$h_{ik}$$\"\n        }\n      ],\n      \"number_of_scheduled_students\": \"$$\\\\le m^{\\\\max}$$\"\n    }\n  ],\n  \"student_summary\": [\n    {\n      \"student_id\": \"$$i\\\\in\\\\mathcal{I}$$\",\n      \"weekly_hours\": \"$$H_i$$\",\n      \"shift_count\": \"$$R_i$$\",\n      \"gross_pay\": \"$$w_i\\\\cdot H_i$$\"\n    }\n  ]\n}\n\nExample(s)\n\nInput 1\n{\n  \"days\": [\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"],\n  \"operating_window\": {\n    \"open_time\": \"08:00\",\n    \"close_time\": \"22:00\",\n    \"coverage_rule\": \"Continuous coverage by exactly one student during each operating window\"\n  },\n  \"student_data\": [\n    {\n      \"id\": 1,\n      \"category\": \"undergraduate\",\n      \"wage\": 10.0,\n      \"daily_max_hours\": [6, 0, 6, 0, 7]\n    },\n    {\n      \"id\": 2,\n      \"category\": \"undergraduate\",\n      \"wage\": 10.0,\n      \"daily_max_hours\": [0, 8, 9, 6, 0]\n    },\n    {\n      \"id\": 3,\n      \"category\": \"undergraduate\",\n      \"wage\": 9.9,\n      \"daily_max_hours\": [4, 8, 3, 0, 5]\n    },\n    {\n      \"id\": 4,\n      \"category\": \"undergraduate\",\n      \"wage\": 9.8,\n      \"daily_max_hours\": [5, 5, 6, 0, 4]\n    },\n    {\n      \"id\": 5,\n      \"category\": \"graduate\",\n      \"wage\": 10.8,\n      \"daily_max_hours\": [3, 0, 5, 8, 0]\n    },\n    {\n      \"id\": 6,\n      \"category\": \"graduate\",\n      \"wage\": 11.3,\n      \"daily_max_hours\": [0, 6, 0, 6, 5]\n    }\n  ],\n  \"minimum_weekly_hours\": {\n    \"undergraduate\": 8,\n    \"graduate\": 7\n  },\n  \"max_shifts_per_week\": 2,\n  \"max_students_per_day\": 3,\n  \"coverage_hours\": [14, 14, 14, 14, 14]\n}",
+    "parameters": [
+        {
+            "name": "planning_days",
+            "symbol": "T",
+            "shape": [],
+            "description": "number of planning days"
+        },
+        {
+            "name": "num_students",
+            "symbol": "N",
+            "shape": [],
+            "description": "number of students"
+        },
+        {
+            "name": "undergraduate_subset",
+            "symbol": "\\mathcal{U}",
+            "shape": [
+                "N"
+            ],
+            "description": "subset of students classified as undergraduates"
+        },
+        {
+            "name": "graduate_subset",
+            "symbol": "\\mathcal{G}",
+            "shape": [
+                "N"
+            ],
+            "description": "subset of students classified as graduates"
+        },
+        {
+            "name": "hourly_wage",
+            "symbol": "w",
+            "shape": [
+                "N"
+            ],
+            "description": "hourly wage of student i"
+        },
+        {
+            "name": "daily_max_duty_hours",
+            "symbol": "A",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "description": "maximum assignable duty hours for student i on day t"
+        },
+        {
+            "name": "daily_open_time",
+            "symbol": "\\tau^{\\mathrm{open}}",
+            "shape": [
+                "T"
+            ],
+            "description": "opening time on each day"
+        },
+        {
+            "name": "daily_close_time",
+            "symbol": "\\tau^{\\mathrm{close}}",
+            "shape": [
+                "T"
+            ],
+            "description": "closing time on each day"
+        },
+        {
+            "name": "max_students_per_day",
+            "symbol": "m^{\\max}",
+            "shape": [],
+            "description": "maximum number of students scheduled on any single day"
+        },
+        {
+            "name": "max_shifts_per_week",
+            "symbol": "s^{\u0000max}",
+            "shape": [],
+            "description": "maximum shifts per student per week"
+        },
+        {
+            "name": "min_weekly_hours_undergraduate",
+            "symbol": "L^{\\mathrm{U}}",
+            "shape": [],
+            "description": "minimum weekly hours required for each undergraduate student"
+        },
+        {
+            "name": "min_weekly_hours_graduate",
+            "symbol": "L^{\\mathrm{G}}",
+            "shape": [],
+            "description": "minimum weekly hours required for each graduate student"
+        },
+        {
+            "name": "daily_coverage_hours",
+            "symbol": "q",
+            "shape": [
+                "T"
+            ],
+            "description": "required total open-hours coverage on each day"
+        },
+        {
+            "name": "student_category",
+            "symbol": "g",
+            "shape": [
+                "N"
+            ],
+            "description": "category indicator for each student, undergraduate or graduate"
+        }
+    ],
+    "variables": [
+        {
+            "name": "assignment_indicator",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "binary",
+            "description": "binary assignment indicator equal to 1 if student i is scheduled on day t"
+        },
+        {
+            "name": "daily_duty_hours",
+            "symbol": "h",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "duty hours assigned to student i on day t"
+        },
+        {
+            "name": "duty_start_time",
+            "symbol": "s",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "start time of student i's duty block on day t"
+        },
+        {
+            "name": "duty_end_time",
+            "symbol": "e",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "end time of student i's duty block on day t"
+        },
+        {
+            "name": "weekly_hours_assigned",
+            "symbol": "H",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "total weekly hours assigned to student i"
+        },
+        {
+            "name": "weekly_shift_count",
+            "symbol": "R",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "total number of shifts assigned to student i"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "daily_coverage_indicator",
+            "symbol": "y",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "binary",
+            "description": "binary indicator used to model whether student i covers day t in the continuous coverage formulation"
+        },
+        {
+            "name": "student_order_indicator",
+            "symbol": "z",
+            "shape": [
+                "N",
+                "N",
+                "T"
+            ],
+            "domain": "binary",
+            "description": "binary ordering variable indicating whether student i is scheduled before student j on day t"
+        },
+        {
+            "name": "coverage_point_indicator",
+            "symbol": "u",
+            "shape": [
+                "T"
+            ],
+            "domain": "binary",
+            "description": "binary indicator for whether a coverage segment starts at a discretized point on day t"
+        },
+        {
+            "name": "shift_link_indicator",
+            "symbol": "r",
+            "shape": [
+                "N",
+                "T"
+            ],
+            "domain": "binary",
+            "description": "binary indicator equal to 1 if student i is assigned to work on day t"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "student_category_partition",
+            "description": "Undergraduate and graduate sets form a partition of all students",
+            "formula": "\\mathcal{U}\\cap\\mathcal{G}=\\emptyset,\\; \\mathcal{U}\\cup\\mathcal{G}=\\mathcal{I}",
+            "parameters": [
+                "undergraduate_subset",
+                "graduate_subset"
+            ],
+            "variables": []
+        },
+        {
+            "name": "wage_nonnegative",
+            "description": "Hourly wages must be nonnegative",
+            "formula": "w_i \\ge 0",
+            "parameters": [
+                "hourly_wage"
+            ],
+            "variables": []
+        },
+        {
+            "name": "availability_nonnegative",
+            "description": "Daily maximum assignable duty hours must be nonnegative",
+            "formula": "a_{it} \\ge 0",
+            "parameters": [
+                "daily_max_duty_hours"
+            ],
+            "variables": []
+        },
+        {
+            "name": "open_close_validity",
+            "description": "Daily opening time must be no later than daily closing time",
+            "formula": "\\tau_t^{open} \\le \\tau_t^{close}",
+            "parameters": [
+                "daily_open_time",
+                "daily_close_time"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_requirement",
+            "description": "Continuous one-student coverage is enforced through daily assignment and non-overlap of assigned duty blocks over the operating window",
+            "formula": "\\sum_{i\\in\\mathcal{I}} x_{it}=1 \\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "daily_open_time",
+                "daily_close_time"
+            ],
+            "variables": [
+                "assignment_indicator"
+            ]
+        },
+        {
+            "name": "max_students_per_day",
+            "description": "No more than the maximum number of students may be scheduled on any day",
+            "formula": "\\sum_{i\\in\\mathcal{I}} x_{it} \\le m^{\\max} \\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "max_students_per_day"
+            ],
+            "variables": [
+                "assignment_indicator"
+            ]
+        },
+        {
+            "name": "max_shifts_per_week",
+            "description": "Each student may work at most the allowed number of shifts per week",
+            "formula": "R_i \\le s^{max}",
+            "parameters": [
+                "max_shifts_per_week"
+            ],
+            "variables": [
+                "weekly_shift_count"
+            ]
+        },
+        {
+            "name": "minimum_weekly_hours_undergraduate",
+            "description": "Each undergraduate student must accumulate at least the required minimum weekly hours",
+            "formula": "H_i \\ge L^{U} \\;\\; \\forall i\\in\\mathcal{U}",
+            "parameters": [
+                "min_weekly_hours_undergraduate",
+                "undergraduate_subset"
+            ],
+            "variables": [
+                "weekly_hours_assigned"
+            ]
+        },
+        {
+            "name": "minimum_weekly_hours_graduate",
+            "description": "Each graduate student must accumulate at least the required minimum weekly hours",
+            "formula": "H_i \\ge L^{G} \\;\\; \\forall i\\in\\mathcal{G}",
+            "parameters": [
+                "min_weekly_hours_graduate",
+                "graduate_subset"
+            ],
+            "variables": [
+                "weekly_hours_assigned"
+            ]
+        },
+        {
+            "name": "daily_duty_within_availability",
+            "description": "Assigned duty hours for each student-day pair cannot exceed the student's availability on that day",
+            "formula": "h_{it} \\le a_{it}",
+            "parameters": [
+                "daily_max_duty_hours"
+            ],
+            "variables": [
+                "daily_duty_hours"
+            ]
+        },
+        {
+            "name": "duty_within_operating_window",
+            "description": "All assigned duty for each day must lie within the daily operating window",
+            "formula": "duty blocks within [\\tau_t^{open},\\tau_t^{close}]",
+            "parameters": [
+                "daily_open_time",
+                "daily_close_time"
+            ],
+            "variables": [
+                "duty_start_time",
+                "duty_end_time"
+            ]
+        },
+        {
+            "name": "one_student_at_a_time",
+            "description": "Assigned duty blocks do not overlap on the same day",
+            "formula": "s_{it} \\ge e_{jt} - M(1-z_{ijt}) \\;\\; \\forall i,j\\in\\mathcal{I}, i<j, \\forall t\\in\\mathcal{T};\\; z_{ijt}+z_{jit}=1",
+            "parameters": [
+                "daily_open_time",
+                "daily_close_time"
+            ],
+            "variables": [
+                "assignment_indicator",
+                "duty_start_time",
+                "duty_end_time"
+            ]
+        },
+        {
+            "name": "variable_nonnegativity",
+            "description": "Assigned hours and summary totals must be nonnegative",
+            "formula": "h_{it}, H_i \\ge 0,\\; R_i \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [],
+            "variables": [
+                "daily_duty_hours",
+                "weekly_hours_assigned",
+                "weekly_shift_count"
+            ]
+        },
+        {
+            "name": "binary_assignment_domain",
+            "description": "Assignment indicators must be binary",
+            "formula": "x_{it} \\in \\{0,1\\}",
+            "parameters": [],
+            "variables": [
+                "assignment_indicator"
+            ]
+        },
+        {
+            "name": "weekly_hours_definition",
+            "description": "Weekly hours are the sum of daily duty hours across the planning horizon",
+            "formula": "H_i = \\sum_{t\\in\\mathcal{T}} h_{it} \\quad \\forall i\\in\\mathcal{I}",
+            "parameters": [
+                "planning_days"
+            ],
+            "variables": [
+                "weekly_hours_assigned",
+                "daily_duty_hours"
+            ]
+        },
+        {
+            "name": "weekly_shift_count_definition",
+            "description": "Weekly shift count is the sum of daily assignment indicators across the planning horizon",
+            "formula": "R_i = \\sum_{t\\in\\mathcal{T}} x_{it} \\quad \\forall i\\in\\mathcal{I}",
+            "parameters": [
+                "planning_days"
+            ],
+            "variables": [
+                "weekly_shift_count",
+                "assignment_indicator"
+            ]
+        },
+        {
+            "name": "daily_duty_duration_definition",
+            "description": "Daily duty hours equal duty end time minus duty start time for each student-day assignment",
+            "formula": "h_{it} = e_{it} - s_{it} \\quad \\forall i\\in\\mathcal{I},\\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "planning_days"
+            ],
+            "variables": [
+                "daily_duty_hours",
+                "duty_end_time",
+                "duty_start_time"
+            ]
+        },
+        {
+            "name": "assignment_implies_positive_hours",
+            "description": "If a student is not assigned on a day, then their daily duty hours must be zero; if assigned, hours are bounded by availability",
+            "formula": "0 \\le h_{it} \\le a_{it} x_{it} \\quad \\forall i\\in\\mathcal{I},\\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "daily_max_duty_hours"
+            ],
+            "variables": [
+                "daily_duty_hours",
+                "assignment_indicator"
+            ]
+        },
+        {
+            "name": "duty_start_end_bounds",
+            "description": "Duty start and end times must lie within the operating window whenever a student is assigned",
+            "formula": "\\tau_t^{\\mathrm{open}} x_{it} \\le s_{it} \\le e_{it} \\le \\tau_t^{\\mathrm{close}} x_{it} + \\tau_t^{\\mathrm{close}}(1-x_{it}) \\quad \\forall i\\in\\mathcal{I},\\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "daily_open_time",
+                "daily_close_time"
+            ],
+            "variables": [
+                "assignment_indicator",
+                "duty_start_time",
+                "duty_end_time"
+            ]
+        },
+        {
+            "name": "binary_assignment_link",
+            "description": "Assignment indicators and auxiliary shift-link indicators are identical",
+            "formula": "x_{it} = r_{it} \\quad \\forall i\\in\\mathcal{I},\\forall t\\in\\mathcal{T}",
+            "parameters": [],
+            "variables": [
+                "assignment_indicator",
+                "shift_link_indicator"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "minimize_total_gross_pay",
+            "description": "Minimize total gross pay across all students, measured by the sum of each student's hourly wage times weekly assigned hours",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize total gross pay across all students, measured by the sum of each student's hourly wage times weekly assigned hours.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i\\in\\mathcal{I}} w_i H_i",
+        "parameters": [
+            "hourly_wage"
+        ],
+        "variables": [
+            "weekly_hours_assigned"
+        ]
+    }
+}

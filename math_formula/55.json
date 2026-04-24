@@ -1,0 +1,311 @@
+{
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- The firm trades one or more grain categories indexed by $$g \\in \\mathcal{G}=\\{1,2,\\ldots,G\\}$$.\n- The planning input includes initial inventory $$I_{g,0}$$ for each grain category and initial cash balance $$B_0$$.\n- Each period has an exogenous purchase price $$c_{g,t}$$ and selling price $$s_{g,t}$$ for each grain category.\n- The warehouse has a finite storage capacity $$K$$ for total on-hand inventory across all grain categories.\n- Purchases made in period $$t$$ are delivered in period $$t$$ and are paid for immediately upon delivery.\n- Goods purchased in period $$t$$ cannot be sold until period $$t+1$$ or later.\n- Sales in any period may only use inventory that is already eligible for sale at the start of that period.\n- The cash balance must remain feasible throughout the horizon, with no negative cash unless an explicit financing source is provided.\n- The inventory held in the warehouse at any time must never exceed the storage capacity $$K$$.\n- The ending inventory at the end of period $$T$$ must satisfy the required terminal inventory level $$I^{\\mathrm{req}}_g$$ for each grain category.\n- The optimization goal is to maximize total trading profit over the horizon, using the period-by-period purchase and sales decisions.\n\n- A solution is represented by:\n  - $$x_{g,t}$$, the quantity of grain category $$g$$ purchased in period $$t$$.\n  - $$y_{g,t}$$, the quantity of grain category $$g$$ sold in period $$t$$.\n  - $$I_{g,t}$$, the ending inventory of grain category $$g$$ after period $$t$$.\n  - $$B_t$$, the cash balance after period $$t$$.\n  - $$\\Pi$$, the total profit over the full planning horizon.\n\nInput Format\n{\n  \"T\": \"number of planning periods, indexed by $$t \\\\in \\\\mathcal{T}=\\\\{1,2,\\\\ldots,T\\\\}$$\",\n  \"G\": \"number of grain categories, indexed by $$g \\\\in \\\\mathcal{G}=\\\\{1,2,\\\\ldots,G\\\\}$$\",\n  \"K\": \"warehouse capacity for total inventory\",\n  \"B_0\": \"initial cash balance\",\n  \"I_0\": \"initial inventory vector with shape $$G$$, where $$I_{g,0}$$ is the initial stock of grain category $$g$$\",\n  \"I^{\\\\mathrm{req}}\": \"required ending inventory vector with shape $$G$$, where $$I^{\\\\mathrm{req}}_g$$ is the terminal stock requirement for grain category $$g$$\",\n  \"c\": \"purchase price matrix with shape $$G \\\\times T$$, where $$c_{g,t}$$ is the unit purchase cost of grain category $$g$$ in period $$t$$\",\n  \"s\": \"selling price matrix with shape $$G \\\\times T$$, where $$s_{g,t}$$ is the unit selling price of grain category $$g$$ in period $$t$$\",\n  \"receipt_lag\": \"sellability delay in periods; here the rule is that purchased goods become sellable only after one period\",\n  \"payment_rule\": \"purchase payment is due upon delivery in the purchase period\",\n  \"demand\": \"not exogenous in this problem; sales are decision variables limited by sellable inventory and timing rules\"\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$x_{g,t}$$, purchased quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"sales_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$y_{g,t}$$, sold quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$G$$\",\n    \"meaning\": \"$$I_{g,T}$$, ending inventory of each grain category after period $$T$$\"\n  },\n  \"ending_cash\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$B_T$$, cash balance at the end of period $$T$$\"\n  },\n  \"total_profit\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$\\\\Pi$$, total profit over the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"G\": 1,\n  \"K\": 5000,\n  \"B_0\": 20000,\n  \"I_0\": [1000],\n  \"I^{\\\\mathrm{req}}\": [2000],\n  \"c\": [[2.85, 3.05, 2.90]],\n  \"s\": [[3.10, 3.25, 2.95]],\n  \"receipt_lag\": 1,\n  \"payment_rule\": \"purchase payment is due upon delivery in the same month\"\n}",
+    "parameters": [
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of trading periods in the planning horizon"
+        },
+        {
+            "name": "num_grain_categories",
+            "symbol": "G",
+            "shape": [],
+            "description": "Number of grain categories"
+        },
+        {
+            "name": "warehouse_capacity",
+            "symbol": "K",
+            "shape": [],
+            "description": "Maximum total on-hand inventory that can be stored in the warehouse"
+        },
+        {
+            "name": "initial_cash_balance",
+            "symbol": "B_0",
+            "shape": [],
+            "description": "Initial cash balance"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [
+                "G"
+            ],
+            "description": "Initial inventory vector by grain category"
+        },
+        {
+            "name": "required_terminal_inventory",
+            "symbol": "I^{\\mathrm{req}}",
+            "shape": [
+                "G"
+            ],
+            "description": "Required ending inventory vector by grain category"
+        },
+        {
+            "name": "purchase_price",
+            "symbol": "c",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "description": "Purchase price matrix by grain category and period"
+        },
+        {
+            "name": "selling_price",
+            "symbol": "s",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "description": "Selling price matrix by grain category and period"
+        },
+        {
+            "name": "receipt_lag",
+            "symbol": "\u007fl",
+            "shape": [],
+            "description": "Number of periods before purchased inventory becomes eligible for sale"
+        },
+        {
+            "name": "payment_rule",
+            "symbol": "\u007fp",
+            "shape": [],
+            "description": "Timing rule indicating that purchases are paid upon delivery in the purchase period"
+        }
+    ],
+    "variables": [
+        {
+            "name": "purchase_quantity",
+            "symbol": "x",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of grain category purchased in each period"
+        },
+        {
+            "name": "sales_quantity",
+            "symbol": "y",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of grain category sold in each period"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Ending inventory of each grain category after each period"
+        },
+        {
+            "name": "cash_balance",
+            "symbol": "B",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Cash balance after each period"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit over the full planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "purchase_quantity_nonnegative",
+            "description": "Purchase quantities must be nonnegative",
+            "formula": "x[g][t]",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
+            "variables": [
+                "purchase_quantity"
+            ]
+        },
+        {
+            "name": "sales_quantity_nonnegative",
+            "description": "Sales quantities must be nonnegative",
+            "formula": "y[g][t]",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "ending_inventory_nonnegative",
+            "description": "Ending inventory must be nonnegative for each grain category and period",
+            "formula": "I[g][t]",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "cash_balance_nonnegative",
+            "description": "Cash balance must remain nonnegative throughout the horizon",
+            "formula": "B[t]",
+            "parameters": [
+                "num_periods",
+                "initial_cash_balance"
+            ],
+            "variables": [
+                "cash_balance"
+            ]
+        },
+        {
+            "name": "warehouse_capacity_limit",
+            "description": "Total on-hand inventory across all grain categories cannot exceed warehouse capacity",
+            "formula": "I[g][t]",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "warehouse_capacity"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "sale_eligibility_lag",
+            "description": "Inventory purchased in a period cannot be sold until the following period or later",
+            "formula": "x[g][t] and y[g][t] with receipt lag",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "receipt_lag"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "terminal_inventory_requirement",
+            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category",
+            "formula": "I[g][T]",
+            "parameters": [
+                "num_grain_categories",
+                "required_terminal_inventory"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory balance for each grain category and period, with purchases added and sales removed; for the first period, initial inventory is used as the starting level, and for later periods previous ending inventory is carried forward.",
+            "formula": "I_{g,t}=I_{g,t-1}+x_{g,t}-y_{g,t}\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "initial_inventory"
+            ],
+            "variables": [
+                "ending_inventory",
+                "purchase_quantity",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "cash_balance_update",
+            "description": "Cash balance evolution by period, assuming purchases are paid upon delivery in the same period and sales revenue is received in the same period.",
+            "formula": "B_t=B_{t-1}+\\sum_{g\\in\\mathcal{G}} s_{g,t}y_{g,t}-\\sum_{g\\in\\mathcal{G}} c_{g,t}x_{g,t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "purchase_price",
+                "selling_price",
+                "initial_cash_balance"
+            ],
+            "variables": [
+                "cash_balance",
+                "purchase_quantity",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "warehouse_capacity_total",
+            "description": "Total inventory across all grain categories at the end of each period cannot exceed warehouse capacity.",
+            "formula": "\\sum_{g\\in\\mathcal{G}} I_{g,t}\\le K\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "warehouse_capacity"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "terminal_inventory_satisfaction",
+            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category.",
+            "formula": "I_{g,T}\\ge I^{\\mathrm{req}}_g\\quad \\forall g\\in\\mathcal{G}",
+            "parameters": [
+                "num_grain_categories",
+                "required_terminal_inventory"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "purchase_sales_nonnegativity",
+            "description": "Decision variables for purchases and sales are nonnegative, and inventory and cash remain nonnegative over the horizon.",
+            "formula": "x_{g,t}\\ge 0,\\ y_{g,t}\\ge 0,\\ I_{g,t}\\ge 0,\\ B_t\\ge 0\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "cash_balance"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_trading_profit",
+            "description": "Maximize total trading profit over the planning horizon",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total trading profit over the planning horizon as final cash minus initial cash, equivalently cumulative sales revenue minus cumulative purchase cost.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\Pi = B_T - B_0 = \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} s_{g,t}y_{g,t} - \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} c_{g,t}x_{g,t}",
+        "parameters": [
+            "initial_cash_balance",
+            "purchase_price",
+            "selling_price",
+            "num_grain_categories",
+            "num_periods"
+        ],
+        "variables": [
+            "total_profit",
+            "cash_balance",
+            "purchase_quantity",
+            "sales_quantity"
+        ]
+    }
+}

@@ -1,0 +1,322 @@
+{
+    "problem": "Problem description\n- There is a single-period production planning problem for $$N$$ container types indexed by $$i,j \\in \\mathcal{N}=\\{1,\\ldots,N\\}$$.\n- Each container type $$i$$ is characterized by a volume parameter $$v_i$$, a demand parameter $$d_i$$, and a unit variable production cost $$c_i$$.\n- Each container type has its own dedicated equipment. A fixed setup cost $$f_i$$ is incurred whenever the equipment for type $$i$$ is activated. In this instance, the setup cost is common across types.\n- If a type is not produced, its equipment remains inactive and no setup cost is paid for that type.\n- A produced unit of type $$i$$ may be used to satisfy demand for type $$j$$ only when the volume of type $$i$$ is not smaller than the volume of type $$j$$.\n- Because the types are ordered by nondecreasing volume, larger-volume types may substitute for smaller-volume types, but not the other way around.\n- All demand must be fully met after allowing such substitutions among compatible types.\n- If an external production limit is provided, $$K_i$$ denotes the capacity of type $$i$$; otherwise, no separate capacity limit is specified beyond the demand and substitution rules.\n- The planning goal is to minimize the total cost over the single planning horizon $$\\mathcal{T}=\\{1\\}$$, combining all unit production costs and all setup costs.\n- A solution is represented by:\n  - $$q_i$$: the total quantity produced of container type $$i$$.\n  - $$y_i$$: a binary activation indicator for the equipment of type $$i$$, where $$y_i=1$$ means the equipment is activated.\n  - $$x_{i,j}$$: the quantity produced as type $$i$$ and assigned to satisfy demand of type $$j$$, defined only for compatible pairs.\n  - $$Z$$: the minimized total cost of the production plan.\n\nInput Format\n{\n  \"N\": \"integer, number of container types $$N$$\",\n  \"T\": \"single-period planning horizon $$\\mathcal{T}=\\{1\\}$$\",\n  \"v\": \"array of length $$N$$; $$v_i$$ is the volume of container type $$i$$, with indices ordered so that volumes are nondecreasing\",\n  \"d\": \"array of length $$N$$; $$d_i$$ is the demand for container type $$i$$\",\n  \"c\": \"array of length $$N$$; $$c_i$$ is the unit variable production cost for container type $$i$$\",\n  \"f\": \"scalar; common fixed setup cost incurred when a type's equipment is activated\",\n  \"K\": \"optional array of length $$N$$; $$K_i$$ is the production capacity of type $$i$$ if a capacity limit is supplied\",\n  \"compatibility_rule\": \"type $$i$$ may satisfy demand of type $$j$$ only when $$v_i \\\\ge v_j$$\"\n}\n\nOutput Format\n{\n  \"Z\": \"scalar, minimized total cost\",\n  \"q\": \"array of length $$N$$; $$q_i$$ is the total quantity produced of container type $$i$$\",\n  \"y\": \"binary array of length $$N$$; $$y_i$$ indicates whether the equipment for type $$i$$ is activated\",\n  \"x\": \"matrix of shape $$N \\\\times N$$; $$x_{i,j}$$ is the quantity produced as type $$i$$ and used to meet demand of type $$j$$, defined only for compatible pairs\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 6,\n  \"T\": 1,\n  \"v\": [1500, 2500, 4000, 6000, 9000, 12000],\n  \"d\": [500, 550, 700, 900, 400, 300],\n  \"c\": [5, 8, 10, 12, 16, 18],\n  \"f\": 1200\n}",
+    "parameters": [
+        {
+            "name": "num_container_types",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of container types in the single-period production planning problem"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single planning horizon containing one period"
+        },
+        {
+            "name": "common_setup_cost",
+            "symbol": "f",
+            "shape": [],
+            "description": "Common fixed setup cost incurred when a type is activated, if provided"
+        },
+        {
+            "name": "type_volumes",
+            "symbol": "v",
+            "shape": [
+                "N"
+            ],
+            "description": "Volume of each container type"
+        },
+        {
+            "name": "demands",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Demand of each container type"
+        },
+        {
+            "name": "unit_production_costs",
+            "symbol": "c",
+            "shape": [
+                "N"
+            ],
+            "description": "Unit production cost of each container type"
+        },
+        {
+            "name": "capacity_limits",
+            "symbol": "K",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional production capacity limit for each container type"
+        }
+    ],
+    "variables": [
+        {
+            "name": "total_production",
+            "symbol": "q",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Total quantity produced of each container type"
+        },
+        {
+            "name": "activation_indicator",
+            "symbol": "y",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary activation indicator for the equipment of each container type"
+        },
+        {
+            "name": "assignment_quantity",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Quantity produced as type i and assigned to satisfy demand of type j for compatible type pairs"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Minimized total cost over the single planning period"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "compatibility_mask",
+            "symbol": "a",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary mask equal to 1 when production type i can satisfy demand type j, i.e., when v[i] \\ge v[j], and 0 otherwise; fixed exogenously by the known volume ordering."
+        }
+    ],
+    "constraints": [
+        {
+            "name": "nonnegative_total_production",
+            "description": "Total production quantities must be nonnegative",
+            "formula": "q",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        },
+        {
+            "name": "binary_activation",
+            "description": "Equipment activation indicators must be binary",
+            "formula": "y",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "nonnegative_assignment_quantity",
+            "description": "Compatible assignment quantities must be nonnegative",
+            "formula": "x",
+            "parameters": [
+                "num_container_types",
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_total_cost",
+            "description": "Total cost must be nonnegative",
+            "formula": "Z",
+            "parameters": [],
+            "variables": [
+                "total_cost"
+            ]
+        },
+        {
+            "name": "demand_fulfillment",
+            "description": "All demand must be fully satisfied through compatible production assignments",
+            "formula": "d",
+            "parameters": [
+                "num_container_types",
+                "type_volumes",
+                "demands"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_rule",
+            "description": "Assignments are allowed only from producing type i to demand type j when the producing type volume is at least the demanded type volume",
+            "formula": "v[i] \\ge v[j]",
+            "parameters": [
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "activation_setup_link",
+            "description": "Producing a type activates its equipment and incurs the fixed setup cost; inactive equipment incurs no setup cost",
+            "formula": "y",
+            "parameters": [
+                "common_setup_cost"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "capacity_limit_if_provided",
+            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity",
+            "formula": "q",
+            "parameters": [
+                "capacity_limits"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        },
+        {
+            "name": "nonnegative_total_production_bounds",
+            "description": "Total production quantities must be nonnegative",
+            "formula": "q_i \\ge 0 \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        },
+        {
+            "name": "activation_binary_domain",
+            "description": "Equipment activation indicators must be binary",
+            "formula": "y_i \\in \\{0,1\\} \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "nonnegative_assignment_quantities",
+            "description": "Assignment quantities must be nonnegative for all compatible type pairs",
+            "formula": "x_{ij} \\ge 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Total cost equals production costs plus setup costs",
+            "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
+            "parameters": [
+                "unit_production_costs",
+                "common_setup_cost"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator",
+                "total_cost"
+            ]
+        },
+        {
+            "name": "demand_fulfillment_constraint",
+            "description": "All demand must be fully satisfied through compatible production assignments",
+            "formula": "\\sum_{i=0}^{N-1} x_{ij} = d_j \\quad \\forall j=0,\\ldots,N-1",
+            "parameters": [
+                "demands"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "production_definition",
+            "description": "Total production of each type equals the sum of compatible assignments produced as that type",
+            "formula": "q_i = \\sum_{j=0}^{N-1} x_{ij} \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "total_production",
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_fix_incompatible_pairs",
+            "description": "Incompatible assignments are fixed to zero and compatible pairs are left unrestricted by this rule; compatibility is determined by the known volume ordering.",
+            "formula": "x_{ij} = 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\} \\text{ with } v_i < v_j",
+            "parameters": [
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "activation_production_link",
+            "description": "Producing a type activates its equipment; total production is bounded by a finite big-M derived from demand totals when no explicit capacity is available.",
+            "formula": "q_i \\le U_i y_i \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "demands"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "capacity_limit_if_provided_constraint",
+            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity.",
+            "formula": "q_i \\le K_i \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "capacity_limits"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_cost_minimization",
+            "description": "Minimize the total single-period production and setup cost over the planning horizon",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total single-period cost, consisting of unit production costs and common setup costs for activated types.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
+        "parameters": [
+            "unit_production_costs",
+            "common_setup_cost"
+        ],
+        "variables": [
+            "total_production",
+            "activation_indicator",
+            "total_cost"
+        ]
+    }
+}

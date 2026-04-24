@@ -1,0 +1,264 @@
+{
+    "problem": "Problem description\n- There are $$N$$ factories indexed by $$i \\in \\mathcal{F}$$ and $$N$$ locations indexed by $$p \\in \\mathcal{L}$$, with $$|\\mathcal{F}| = |\\mathcal{L}| = N$$.\n- For each ordered factory pair $$\\left(i,j\\right)$$, the parameter $$d_{ij}$$ denotes the transportation volume between factories $$i$$ and $$j$$.\n- For each ordered location pair $$\\left(p,q\\right)$$, the parameter $$c_{pq}$$ denotes the unit transportation cost from location $$p$$ to location $$q$$.\n- The planning goal is to assign factories to locations so that the total transportation cost induced by all factory-to-factory volumes, after the assignment of factories to locations, is minimized.\n- The assignment must be one-to-one: each factory must be placed at exactly one location, and each location must be used by exactly one factory.\n- The decision must be integral, so the assignment choices are binary.\n- A solution is represented by:\n  - a binary assignment matrix $$X = \\left[x_{ip}\\right]$$, where $$x_{ip} = 1$$ if factory $$i$$ is assigned to location $$p$$, and $$x_{ip} = 0$$ otherwise;\n  - optionally, an equivalent assignment vector $$\\pi$$, where $$\\pi_i$$ is the location assigned to factory $$i$$;\n  - the resulting total transportation cost value.\n\nInput Format\n{\n  \"N\": \"integer; the common number of factories and locations, $$|\\mathcal{F}| = |\\mathcal{L}| = N$$\",\n  \"D\": {\n    \"shape\": \"$$N \\\\times N$$\",\n    \"type\": \"matrix of nonnegative values\",\n    \"meaning\": \"$$D = \\\\left[d_{ij}\\\\right]$$, where $$d_{ij}$$ is the transportation volume between factories $$i$$ and $$j$$\"\n  },\n  \"C\": {\n    \"shape\": \"$$N \\\\times N$$\",\n    \"type\": \"matrix of nonnegative values\",\n    \"meaning\": \"$$C = \\\\left[c_{pq}\\\\right]$$, where $$c_{pq}$$ is the unit transportation cost from location $$p$$ to location $$q$$\"\n  }\n}\n\nOutput Format\n{\n  \"assignment_matrix\": {\n    \"shape\": \"$$N \\\\times N$$\",\n    \"type\": \"binary matrix\",\n    \"meaning\": \"$$X = \\\\left[x_{ip}\\\\right]$$, where $$x_{ip} = 1$$ if factory $$i$$ is assigned to location $$p$$\"\n  },\n  \"assignment_vector\": {\n    \"shape\": \"$$N$$\",\n    \"type\": \"integer vector\",\n    \"meaning\": \"$$\\\\pi_i$$ is the location assigned to factory $$i$$\"\n  },\n  \"total_transportation_cost\": {\n    \"shape\": \"scalar\",\n    \"type\": \"nonnegative value\",\n    \"meaning\": \"the minimized total cost achieved by the assignment\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 2,\n  \"D\": [\n    [10, 20],\n    [30, 40]\n  ],\n  \"C\": [\n    [5, 8],\n    [6, 7]\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_entities",
+            "symbol": "N",
+            "shape": [],
+            "description": "Common number of factories and locations; index set size for factories and locations."
+        },
+        {
+            "name": "transport_volume",
+            "symbol": "D",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Transportation volume between factory $i$ and factory $j$ for all ordered factory pairs."
+        },
+        {
+            "name": "unit_transport_cost",
+            "symbol": "C",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Unit transportation cost from location $p$ to location $q$ for all ordered location pairs."
+        }
+    ],
+    "variables": [
+        {
+            "name": "assignment_matrix",
+            "symbol": "X",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary assignment matrix where $x_{ip}=1$ if factory $i$ is assigned to location $p$, and $0$ otherwise."
+        },
+        {
+            "name": "assignment_vector",
+            "symbol": "\\pi",
+            "shape": [
+                "N"
+            ],
+            "domain": "integer",
+            "description": "Integer assignment vector where $\\pi_i$ is the location assigned to factory $i$."
+        },
+        {
+            "name": "total_transportation_cost",
+            "symbol": "T",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total transportation cost achieved by the assignment."
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "assignment_pair_product",
+            "symbol": "Y",
+            "shape": [
+                "N",
+                "N",
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Auxiliary binary variable where y_{ijpq}=1 if factory i is assigned to location p and factory j is assigned to location q; used to linearize the quadratic transportation cost term."
+        }
+    ],
+    "constraints": [
+        {
+            "name": "positive_num_entities",
+            "description": "The number of factories and locations must be a positive integer",
+            "formula": "N",
+            "parameters": [
+                "num_entities"
+            ]
+        },
+        {
+            "name": "index_domain_bounds",
+            "description": "Factory and location indices must lie within the valid range from zero to N minus one",
+            "formula": "i,j,p,q",
+            "parameters": [
+                "num_entities"
+            ]
+        },
+        {
+            "name": "nonnegative_transport_volume",
+            "description": "Transportation volumes must be nonnegative for all valid factory pairs",
+            "formula": "D[i][j]",
+            "parameters": [
+                "transport_volume",
+                "num_entities"
+            ]
+        },
+        {
+            "name": "nonnegative_unit_transport_cost",
+            "description": "Unit transportation costs must be nonnegative for all valid location pairs",
+            "formula": "C[p][q]",
+            "parameters": [
+                "unit_transport_cost",
+                "num_entities"
+            ]
+        },
+        {
+            "name": "binary_assignment_matrix",
+            "description": "Assignment variables must be binary",
+            "formula": "x[i][p]",
+            "variables": [
+                "assignment_matrix"
+            ]
+        },
+        {
+            "name": "integer_assignment_vector",
+            "description": "Assignment vector entries must be integer-valued and represent valid location indices",
+            "formula": "pi[i]",
+            "variables": [
+                "assignment_vector"
+            ]
+        },
+        {
+            "name": "one_to_one_assignment",
+            "description": "Each factory must be assigned to exactly one location and each location must be used by exactly one factory",
+            "formula": "x[i][p]",
+            "variables": [
+                "assignment_matrix"
+            ]
+        },
+        {
+            "name": "nonnegative_total_cost",
+            "description": "The total transportation cost must be nonnegative",
+            "formula": "T",
+            "variables": [
+                "total_transportation_cost"
+            ]
+        },
+        {
+            "name": "assignment_cost_definition",
+            "description": "The total transportation cost is determined by the chosen factory-to-location assignment together with all factory-to-factory volumes and location-to-location costs",
+            "formula": "T, x[i][p], D[i][j], C[p][q]",
+            "parameters": [
+                "transport_volume",
+                "unit_transport_cost"
+            ],
+            "variables": [
+                "assignment_matrix",
+                "total_transportation_cost"
+            ]
+        },
+        {
+            "name": "one_to_one_assignment_row",
+            "description": "Each factory must be assigned to exactly one location.",
+            "formula": "\\sum_{p=1}^{N} x_{ip} = 1 \\quad \\forall i=1,\\dots,N",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix"
+            ]
+        },
+        {
+            "name": "one_to_one_assignment_column",
+            "description": "Each location must be used by exactly one factory.",
+            "formula": "\\sum_{i=1}^{N} x_{ip} = 1 \\quad \\forall p=1,\\dots,N",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix"
+            ]
+        },
+        {
+            "name": "assignment_vector_linking",
+            "description": "Link the assignment vector to the binary assignment matrix so that \\pi_i equals the unique location assigned to factory i.",
+            "formula": "\\pi_i = \\sum_{p=1}^{N} p\\,x_{ip} \\quad \\forall i=1,\\dots,N",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix",
+                "assignment_vector"
+            ]
+        },
+        {
+            "name": "assignment_vector_bounds",
+            "description": "Each assignment vector entry must lie within the valid location index range.",
+            "formula": "0 \\le \\pi_i \\le N-1 \\quad \\forall i=1,\\dots,N",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_vector"
+            ]
+        },
+        {
+            "name": "assignment_pair_product_definition_1",
+            "description": "Link each auxiliary product variable to the corresponding pair of assignment variables using a standard linearization upper bound.",
+            "formula": "y_{ijpq} \\le x_{ip} \\quad \\forall i,j,p,q",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix",
+                "assignment_pair_product"
+            ]
+        },
+        {
+            "name": "assignment_pair_product_definition_2",
+            "description": "Link each auxiliary product variable to the corresponding pair of assignment variables using a standard linearization upper bound.",
+            "formula": "y_{ijpq} \\le x_{jq} \\quad \\forall i,j,p,q",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix",
+                "assignment_pair_product"
+            ]
+        },
+        {
+            "name": "assignment_pair_product_definition_3",
+            "description": "Force the auxiliary product variable to be one when both assignment variables are one.",
+            "formula": "y_{ijpq} \\ge x_{ip}+x_{jq}-1 \\quad \\forall i,j,p,q",
+            "parameters": [
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_matrix",
+                "assignment_pair_product"
+            ]
+        },
+        {
+            "name": "total_transport_cost_definition_linearized",
+            "description": "Replace the quadratic cost definition with a linear expression using the auxiliary product variables.",
+            "formula": "T = \\sum_{i=1}^{N}\\sum_{j=1}^{N}\\sum_{p=1}^{N}\\sum_{q=1}^{N} d_{ij} c_{pq} y_{ijpq}",
+            "parameters": [
+                "transport_volume",
+                "unit_transport_cost",
+                "num_entities"
+            ],
+            "variables": [
+                "assignment_pair_product",
+                "total_transportation_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_transportation_cost_minimization",
+            "description": "Minimize the total transportation cost induced by the factory-to-location assignment",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total transportation cost induced by the factory-to-location assignment, using the linearized cost variable T.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "T",
+        "parameters": [],
+        "variables": [
+            "total_transportation_cost"
+        ]
+    }
+}

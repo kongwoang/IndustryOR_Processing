@@ -1,0 +1,197 @@
+{
+    "problem": "Problem description\n- There is a candidate set $$\\mathcal{C}$$ indexed by $$i \\in \\mathcal{C}$$.\n- The recruitment decision is made over one planning horizon $$\\mathcal{T}$$.\n- Each candidate $$i$$ has a hiring cost $$k_i$$, a work-experience value $$e_i$$, and a qualification label $$q_i \\in \\mathcal{Q}$$.\n- A binary attribute $$a_i \\in \\{0,1\\}$$ indicates whether candidate $$i$$ has an advanced degree level, meaning master\u2019s degree or doctoral degree.\n- The company wants to choose a subset of candidates that minimizes the total hiring cost.\n- The hiring plan must satisfy the following business rules:\n  - each candidate is either hired or not hired;\n  - the total number of hired candidates must stay between the minimum hiring requirement $$L$$ and the maximum hiring limit $$U$$;\n  - the total hiring cost must not exceed the available budget $$B$$;\n  - at least one selected candidate must have an advanced degree level;\n  - the total work experience of all selected candidates must be at least the required experience threshold $$E^{\\min}$$;\n  - for each incompatible pair of candidates in the conflict set $$\\mathcal{I}$$, at most one of the two may be selected.\n- A solution is represented by:\n  - binary selection variables $$x_i$$ for all $$i \\in \\mathcal{C}$$, where $$x_i=1$$ means candidate $$i$$ is hired and $$x_i=0$$ means candidate $$i$$ is not hired;\n  - the selected candidate subset $$\\mathcal{S} \\subseteq \\mathcal{C}$$ induced by the binary selection variables.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"name\": \"$$\\mathcal{T}$$\",\n    \"description\": \"Recruitment planning horizon\"\n  },\n  \"candidates\": {\n    \"name\": \"$$\\mathcal{C}$$\",\n    \"type\": \"array\",\n    \"shape\": \"$$n$$ entries, where $$n = |\\mathcal{C}|$$\",\n    \"fields\": {\n      \"id\": \"Candidate identifier\",\n      \"hiring_cost\": \"$$k_i$$, hiring cost of candidate $$i$$\",\n      \"experience\": \"$$e_i$$, work experience of candidate $$i$$\",\n      \"qualification\": \"$$q_i \\\\in \\\\mathcal{Q}$$, qualification label of candidate $$i$$\",\n      \"advanced_degree_flag\": \"$$a_i \\\\in \\\\{0,1\\\\}$$, equals $$1$$ if candidate $$i$$ has a master\u2019s degree or doctoral degree\"\n    }\n  },\n  \"budget\": \"$$B$$, maximum total hiring cost\",\n  \"minimum_hires\": \"$$L$$, minimum number of hires\",\n  \"maximum_hires\": \"$$U$$, maximum number of hires\",\n  \"minimum_advanced_degree_hires\": \"$$G$$, minimum number of selected candidates with $$a_i = 1$$\",\n  \"minimum_total_experience\": \"$$E^{\\min}$$, minimum total experience required from selected candidates\",\n  \"incompatible_pairs\": {\n    \"name\": \"$$\\mathcal{I}$$\",\n    \"type\": \"array\",\n    \"shape\": \"list of unordered index pairs $$\\\\{i,j\\\\}$$ with $$i,j \\\\in \\\\mathcal{C}$$\",\n    \"description\": \"Pairs of candidates that cannot both be selected\"\n  }\n}\n\nOutput Format\n{\n  \"selection\": {\n    \"name\": \"$$x$$\",\n    \"type\": \"array\",\n    \"shape\": \"$$n$$ binary entries, where $$n = |\\mathcal{C}|$$\",\n    \"description\": \"Binary hiring decision for each candidate $$i \\\\in \\\\mathcal{C}$$; $$x_i = 1$$ if candidate $$i$$ is selected and $$x_i = 0$$ otherwise\"\n  },\n  \"selected_candidates\": {\n    \"name\": \"$$\\\\mathcal{S}$$\",\n    \"type\": \"array\",\n    \"shape\": \"subset of $$\\\\mathcal{C}$$\",\n    \"description\": \"Indices or identifiers of the selected candidates\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"Recruitment period\",\n  \"candidates\": [\n    {\n      \"id\": \"A\",\n      \"hiring_cost\": 8100,\n      \"experience\": 3,\n      \"qualification\": \"Bachelor's degree\",\n      \"advanced_degree_flag\": 0\n    },\n    {\n      \"id\": \"B\",\n      \"hiring_cost\": 20000,\n      \"experience\": 10,\n      \"qualification\": \"Master's degree\",\n      \"advanced_degree_flag\": 1\n    },\n    {\n      \"id\": \"C\",\n      \"hiring_cost\": 21000,\n      \"experience\": 4,\n      \"qualification\": \"Doctoral degree\",\n      \"advanced_degree_flag\": 1\n    },\n    {\n      \"id\": \"D\",\n      \"hiring_cost\": 3000,\n      \"experience\": 3,\n      \"qualification\": \"No degree\",\n      \"advanced_degree_flag\": 0\n    },\n    {\n      \"id\": \"E\",\n      \"hiring_cost\": 8000,\n      \"experience\": 7,\n      \"qualification\": \"No degree\",\n      \"advanced_degree_flag\": 0\n    }\n  ],\n  \"budget\": 35000,\n  \"minimum_hires\": 2,\n  \"maximum_hires\": 3,\n  \"minimum_advanced_degree_hires\": 1,\n  \"minimum_total_experience\": 12,\n  \"incompatible_pairs\": [\n    [\"A\", \"E\"]\n  ]\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Single planning horizon over which the hiring decision is made"
+        },
+        {
+            "name": "candidate_count",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of candidates in the candidate set"
+        },
+        {
+            "name": "hiring_cost",
+            "symbol": "k",
+            "shape": [
+                "N"
+            ],
+            "description": "Hiring cost of each candidate"
+        },
+        {
+            "name": "experience",
+            "symbol": "e",
+            "shape": [
+                "N"
+            ],
+            "description": "Work experience value of each candidate"
+        },
+        {
+            "name": "qualification_label",
+            "symbol": "q",
+            "shape": [
+                "N"
+            ],
+            "description": "Qualification label of each candidate"
+        },
+        {
+            "name": "advanced_degree_flag",
+            "symbol": "a",
+            "shape": [
+                "N"
+            ],
+            "description": "Binary advanced-degree indicator for each candidate"
+        },
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Total budget cap for selected candidates"
+        },
+        {
+            "name": "minimum_hires",
+            "symbol": "L",
+            "shape": [],
+            "description": "Minimum number of hires required"
+        },
+        {
+            "name": "maximum_hires",
+            "symbol": "U",
+            "shape": [],
+            "description": "Maximum number of hires allowed"
+        },
+        {
+            "name": "minimum_advanced_degree_hires",
+            "symbol": "G",
+            "shape": [],
+            "description": "Minimum number of selected candidates with advanced degree flag equal to 1"
+        },
+        {
+            "name": "minimum_total_experience",
+            "symbol": "E^{\\min}",
+            "shape": [],
+            "description": "Minimum total experience required among selected candidates"
+        },
+        {
+            "name": "incompatible_pairs",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Set of unordered incompatible candidate pairs"
+        }
+    ],
+    "variables": [
+        {
+            "name": "selection",
+            "symbol": "x",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary selection variable indicating whether each candidate is selected"
+        },
+        {
+            "name": "selected_candidates",
+            "symbol": "\\mathcal{S}",
+            "shape": [
+                "-"
+            ],
+            "domain": "sos1",
+            "description": "Selected subset of candidates induced by the selection vector"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "binary_selection_domain",
+            "description": "Each candidate is either selected or not selected",
+            "formula": "x_i \\in \\{0,1\\}",
+            "variables": [
+                "selection"
+            ]
+        },
+        {
+            "name": "hire_count_bounds",
+            "description": "The number of selected candidates must lie between the minimum and maximum hire limits",
+            "formula": "L \\leq \\sum_{i=1}^{N} x_i \\leq U",
+            "parameters": [
+                "minimum_hires",
+                "maximum_hires"
+            ],
+            "variables": [
+                "selection"
+            ]
+        },
+        {
+            "name": "budget_cap",
+            "description": "The total hiring cost of selected candidates must not exceed the budget cap",
+            "formula": "\\sum_{i=1}^{N} k_i x_i \\leq B",
+            "parameters": [
+                "hiring_cost",
+                "budget"
+            ],
+            "variables": [
+                "selection"
+            ]
+        },
+        {
+            "name": "minimum_advanced_degree_hires",
+            "description": "At least the required number of selected candidates must have advanced degree flag equal to 1",
+            "formula": "\\sum_{i=1}^{N} a_i x_i \\geq G",
+            "parameters": [
+                "advanced_degree_flag",
+                "minimum_advanced_degree_hires"
+            ],
+            "variables": [
+                "selection"
+            ]
+        },
+        {
+            "name": "minimum_total_experience",
+            "description": "The total work experience of selected candidates must be at least the required minimum",
+            "formula": "\\sum_{i=1}^{N} e_i x_i \\geq E^{\\min}",
+            "parameters": [
+                "experience",
+                "minimum_total_experience"
+            ],
+            "variables": [
+                "selection"
+            ]
+        },
+        {
+            "name": "incompatible_pair_exclusion",
+            "description": "For every incompatible pair, both candidates cannot be selected together",
+            "formula": "x_i + x_j \\leq 1 \\quad \\forall (i,j) \\in \\mathcal{I}",
+            "parameters": [
+                "incompatible_pairs"
+            ],
+            "variables": [
+                "selection"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_hiring_cost_minimization",
+            "description": "Minimize the total hiring cost of the selected candidates",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total hiring cost of the selected candidates using the binary selection vector over the candidate set.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i=1}^{N} k_i x_i",
+        "parameters": [
+            "hiring_cost"
+        ],
+        "variables": [
+            "selection"
+        ]
+    }
+}

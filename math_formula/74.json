@@ -1,0 +1,222 @@
+{
+    "problem": "Problem description\n- There is a single planning horizon $$\\mathcal{H}$$ with a set of main products indexed by $$p \\in \\mathcal{P}$$, a set of reaction stages indexed by $$r \\in \\mathcal{R}$$, and a set of byproducts indexed by $$k \\in \\mathcal{K}$$.\n- Each unit of main product $$p$$ requires a fixed amount of processing time $$t_{rp}$$ at each reaction stage $$r$$.\n- Each reaction stage $$r$$ has an available time capacity $$T_r$$ within $$\\mathcal{H}$$.\n- Producing main product $$p$$ may generate byproduct $$k$$ according to a fixed yield coefficient $$a_{kp}$$, and byproduct generation does not add any extra production cost.\n- Each main product $$p$$ yields a unit profit $$\\pi_p$$ when sold.\n- Each byproduct $$k$$ yields a unit profit $$\\rho_k$$ when sold, may be sold only up to a limited amount $$L_k$$, and any remaining byproduct must be disposed of at unit cost $$c_k$$.\n- The planning goal is to choose production and byproduct disposition quantities so that total profit over $$\\mathcal{H}$$ is maximized.\n- Required business constraints:\n  - Every produced unit must respect the available time capacity of each reaction stage.\n  - Byproduct generation must be consistent with the chosen production quantities of the main products.\n  - Byproduct sales must not exceed the sale limit for each byproduct.\n  - Any byproduct that is not sold must be disposed of and incur disposal cost.\n  - All decision variables must be nonnegative.\n- A solution is represented by:\n  - $$x_p$$: quantity of main product $$p$$ produced and sold during $$\\mathcal{H}$$.\n  - $$y_k$$: quantity of byproduct $$k$$ sold during $$\\mathcal{H}$$.\n  - $$z_k$$: quantity of byproduct $$k$$ disposed of during $$\\mathcal{H}$$.\n  - $$Z$$: total profit achieved over $$\\mathcal{H}$$.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{H}$$\",\n    \"meaning\": \"single aggregate planning horizon\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"list of main products\"\n  },\n  \"byproducts\": {\n    \"symbol\": \"$$\\\\mathcal{K}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"list of byproducts\"\n  },\n  \"processes\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{R}|$$\",\n    \"meaning\": \"list of reaction stages\"\n  },\n  \"processing_time\": {\n    \"symbol\": \"$$t_{rp}$$\",\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n    \"meaning\": \"hours required at reaction stage $$r$$ for one unit of product $$p$$\"\n  },\n  \"process_capacity\": {\n    \"symbol\": \"$$T_r$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{R}|$$\",\n    \"meaning\": \"available hours for each reaction stage $$r$$\"\n  },\n  \"byproduct_yield\": {\n    \"symbol\": \"$$a_{kp}$$\",\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{K}| \\\\times |\\\\mathcal{P}|$$\",\n    \"meaning\": \"units of byproduct $$k$$ generated per unit of product $$p$$\"\n  },\n  \"main_product_profit\": {\n    \"symbol\": \"$$\\\\pi_p$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"profit per sold unit of main product $$p$$\"\n  },\n  \"byproduct_sale_profit\": {\n    \"symbol\": \"$$\\\\rho_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"profit per sold unit of byproduct $$k$$\"\n  },\n  \"byproduct_sale_limit\": {\n    \"symbol\": \"$$L_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"maximum sellable quantity of byproduct $$k$$\"\n  },\n  \"byproduct_disposal_cost\": {\n    \"symbol\": \"$$c_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"disposal cost per unit of byproduct $$k$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_p$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"produced and sold quantity of each main product $$p$$\"\n  },\n  \"byproduct_sales\": {\n    \"symbol\": \"$$y_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"sold quantity of each byproduct $$k$$\"\n  },\n  \"byproduct_disposal\": {\n    \"symbol\": \"$$z_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"disposed quantity of each byproduct $$k$$\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$Z$$\",\n    \"type\": \"scalar\",\n    \"meaning\": \"maximum total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"single_period\",\n  \"products\": [\"A\", \"B\"],\n  \"byproducts\": [\"C\"],\n  \"processes\": [\"reaction_1\", \"reaction_2\"],\n  \"processing_time\": {\n    \"A\": [2, 3],\n    \"B\": [3, 4]\n  },\n  \"process_capacity\": {\n    \"reaction_1\": 16,\n    \"reaction_2\": 24\n  },\n  \"byproduct_yield\": {\n    \"C\": {\n      \"A\": 0,\n      \"B\": 2\n    }\n  },\n  \"main_product_profit\": {\n    \"A\": 4,\n    \"B\": 10\n  },\n  \"byproduct_sale_profit\": {\n    \"C\": 3\n  },\n  \"byproduct_sale_limit\": {\n    \"C\": 5\n  },\n  \"byproduct_disposal_cost\": {\n    \"C\": 2\n  }\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{H}",
+            "shape": [],
+            "description": "Single planning horizon"
+        },
+        {
+            "name": "main_products",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Set of main products, indexed by p=0,...,|\\mathcal{P}|-1"
+        },
+        {
+            "name": "reaction_stages",
+            "symbol": "\\mathcal{R}",
+            "shape": [],
+            "description": "Set of reaction stages, indexed by r=0,...,|\\mathcal{R}|-1"
+        },
+        {
+            "name": "byproducts",
+            "symbol": "\\mathcal{K}",
+            "shape": [],
+            "description": "Set of byproducts, indexed by k=0,...,|\\mathcal{K}|-1"
+        },
+        {
+            "name": "processing_time",
+            "symbol": "t_{rp}",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{P}"
+            ],
+            "description": "Processing time required at stage r for one unit of product p"
+        },
+        {
+            "name": "stage_capacity",
+            "symbol": "T_r",
+            "shape": [
+                "\\mathcal{R}"
+            ],
+            "description": "Available time capacity of reaction stage r"
+        },
+        {
+            "name": "byproduct_yield",
+            "symbol": "a_{kp}",
+            "shape": [
+                "\\mathcal{K}",
+                "\\mathcal{P}"
+            ],
+            "description": "Byproduct yield coefficient of byproduct k generated per unit of product p"
+        },
+        {
+            "name": "main_product_profit",
+            "symbol": "\\pi_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Unit profit from selling one unit of main product p"
+        },
+        {
+            "name": "byproduct_profit",
+            "symbol": "\\rho_k",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "description": "Unit profit from selling one unit of byproduct k"
+        },
+        {
+            "name": "byproduct_sale_limit",
+            "symbol": "L_k",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "description": "Maximum sellable quantity of byproduct k"
+        },
+        {
+            "name": "byproduct_disposal_cost",
+            "symbol": "c_k",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "description": "Unit disposal cost for byproduct k"
+        }
+    ],
+    "variables": [
+        {
+            "name": "main_product_quantity",
+            "symbol": "x_p",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of main product p produced and sold during the planning horizon"
+        },
+        {
+            "name": "byproduct_sold_quantity",
+            "symbol": "y_k",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of byproduct k sold during the planning horizon"
+        },
+        {
+            "name": "byproduct_disposed_quantity",
+            "symbol": "z_k",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of byproduct k disposed of during the planning horizon"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit achieved over the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "stage_capacity_limit",
+            "description": "Total processing time used at each reaction stage must not exceed the available stage capacity over the planning horizon",
+            "formula": "\\sum_{p\\in\\mathcal{P}} t_{rp} x_p \\leq T_r \\quad \\forall r\\in\\mathcal{R}",
+            "parameters": [
+                "processing_time",
+                "stage_capacity",
+                "main_products",
+                "reaction_stages"
+            ],
+            "variables": [
+                "main_product_quantity"
+            ]
+        },
+        {
+            "name": "byproduct_yield_balance",
+            "description": "Byproduct quantities must be consistent with main-product production through the fixed byproduct yield coefficients",
+            "formula": "\\sum_{p\\in\\mathcal{P}} a_{kp} x_p = y_k + z_k \\quad \\forall k\\in\\mathcal{K}",
+            "parameters": [
+                "byproduct_yield",
+                "main_products",
+                "byproducts"
+            ],
+            "variables": [
+                "main_product_quantity",
+                "byproduct_sold_quantity",
+                "byproduct_disposed_quantity"
+            ]
+        },
+        {
+            "name": "byproduct_sale_limit",
+            "description": "Sold quantity of each byproduct cannot exceed its sale limit",
+            "formula": "y_k \\leq L_k \\quad \\forall k\\in\\mathcal{K}",
+            "parameters": [
+                "byproduct_sale_limit",
+                "byproducts"
+            ],
+            "variables": [
+                "byproduct_sold_quantity"
+            ]
+        },
+        {
+            "name": "nonnegativity_of_decision_variables",
+            "description": "All decision variables must be nonnegative",
+            "formula": "x_p \\geq 0,\\; y_k \\geq 0,\\; z_k \\geq 0,\\; Z \\in \\mathbb{R}_{\\geq 0}",
+            "variables": [
+                "main_product_quantity",
+                "byproduct_sold_quantity",
+                "byproduct_disposed_quantity",
+                "total_profit"
+            ]
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "Define total profit as main-product sales profit plus byproduct sales profit minus disposal cost for disposed byproducts",
+            "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{k\\in\\mathcal{K}} \\rho_k y_k - \\sum_{k\\in\\mathcal{K}} c_k z_k",
+            "parameters": [
+                "main_product_profit",
+                "byproduct_profit",
+                "byproduct_disposal_cost",
+                "main_products",
+                "byproducts"
+            ],
+            "variables": [
+                "main_product_quantity",
+                "byproduct_sold_quantity",
+                "byproduct_disposed_quantity",
+                "total_profit"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit over the planning horizon, including main-product sales profit, byproduct sales profit, and disposal cost effects",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit over the planning horizon, equal to main-product sales profit plus byproduct sales profit minus disposal cost for unsold byproducts.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{k\\in\\mathcal{K}} \\rho_k y_k - \\sum_{k\\in\\mathcal{K}} c_k z_k",
+        "parameters": [
+            "main_product_profit",
+            "byproduct_profit",
+            "byproduct_disposal_cost",
+            "main_products",
+            "byproducts"
+        ],
+        "variables": [
+            "main_product_quantity",
+            "byproduct_sold_quantity",
+            "byproduct_disposed_quantity",
+            "total_profit"
+        ]
+    }
+}

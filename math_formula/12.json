@@ -1,0 +1,177 @@
+{
+    "problem": "Problem description\n- There is a finite set of crops $$\\mathcal{C}$$, indexed by $$c \\in \\mathcal{C}$$, that can be allocated land on a farm.\n- The farm has a land capacity parameter $$L$$ measured in acres.\n- Each crop $$c \\in \\mathcal{C}$$ has a unit profit parameter $$\\pi_c$$, measured as profit per acre.\n- The planning horizon is a static horizon $$\\mathcal{T}$$, and the decision is a one-stage land allocation over that horizon.\n- A set of proportional land-allocation rules $$\\mathcal{R}$$ may be present; each rule links two crops and specifies a minimum acreage ratio between them.\n- The planning goal is to maximize the total profit obtained from allocating acres to crops.\n\n- The total acreage assigned to all crops must not exceed the available land capacity $$L$$.\n- The acreage assigned to each crop must be nonnegative.\n- Every proportional rule in $$\\mathcal{R}$$ must be respected in the land allocation.\n- For each rule, the designated left crop must receive at least the specified multiple of the acreage assigned to the designated right crop.\n- No additional costs, penalties, or demand requirements are imposed in this instance beyond the stated land-capacity and proportionality rules.\n- A solution is represented by:\n  - $$x_c$$: the acreage allocated to crop $$c \\in \\mathcal{C}$$.\n  - $$Z$$: the resulting total profit of the allocation.\n\nInput Format\n{\n  \"crops\": \"Set $$\\mathcal{C}$$ of crops, indexed by $$c \\in \\mathcal{C}$$.\",\n  \"available_land\": \"Total land capacity $$L$$ in acres.\",\n  \"profit_per_acre\": \"Profit vector $$\\pi$$, where $$\\pi_c$$ is the profit per acre for crop $$c \\in \\mathcal{C}$$.\",\n  \"proportional_rules\": \"Rule set $$\\mathcal{R}$$. Each rule $$r \\in \\mathcal{R}$$ contains left crop $$i_r \\in \\mathcal{C}$$, right crop $$j_r \\in \\mathcal{C}$$, and multiplier $$\\beta_r$$ meaning the acreage of $$i_r$$ must be at least $$\\beta_r$$ times the acreage of $$j_r$$.\",\n  \"planning_horizon\": \"Planning horizon $$\\mathcal{T}$$ for the allocation problem.\",\n  \"optional_demand_data\": \"Optional demand data $$d_{c,t}$$, if a generalized extension requires it; not used in this land-allocation instance.\"\n}\n\nOutput Format\n{\n  \"acreage_by_crop\": \"Allocation vector $$x$$ indexed by $$c \\in \\mathcal{C}$$, where $$x_c$$ is the acreage assigned to crop $$c$$.\",\n  \"total_profit\": \"Scalar $$Z$$ giving the achieved total profit.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"crops\": [\"corn\", \"wheat\", \"soybeans\", \"sorghum\"],\n  \"available_land\": 100,\n  \"profit_per_acre\": {\n    \"corn\": 1500,\n    \"wheat\": 1200,\n    \"soybeans\": 1800,\n    \"sorghum\": 1600\n  },\n  \"proportional_rules\": [\n    {\n      \"left_crop\": \"corn\",\n      \"right_crop\": \"wheat\",\n      \"multiplier\": 2\n    },\n    {\n      \"left_crop\": \"soybeans\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 0.5\n    },\n    {\n      \"left_crop\": \"wheat\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 3\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_crops",
+            "symbol": "C",
+            "shape": [],
+            "description": "Number of crops in the finite crop set"
+        },
+        {
+            "name": "num_rules",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of proportional land-allocation rules"
+        },
+        {
+            "name": "available_land",
+            "symbol": "L",
+            "shape": [],
+            "description": "Available land capacity in acres"
+        },
+        {
+            "name": "unit_profit_per_acre",
+            "symbol": "\\pi",
+            "shape": [
+                "C"
+            ],
+            "description": "Unit profit per acre for each crop"
+        },
+        {
+            "name": "left_crop_index",
+            "symbol": "i",
+            "shape": [
+                "R"
+            ],
+            "description": "Left crop index for each proportional rule"
+        },
+        {
+            "name": "right_crop_index",
+            "symbol": "j",
+            "shape": [
+                "R"
+            ],
+            "description": "Right crop index for each proportional rule"
+        },
+        {
+            "name": "min_acreage_multiplier",
+            "symbol": "\\beta",
+            "shape": [
+                "R"
+            ],
+            "description": "Minimum acreage multiplier for each proportional rule"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Static one-stage planning horizon descriptor"
+        }
+    ],
+    "variables": [
+        {
+            "name": "acreage_allocated",
+            "symbol": "x",
+            "shape": [
+                "C"
+            ],
+            "domain": "continuous",
+            "description": "Acreage allocated to each crop"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit of the land allocation"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "land_capacity_limit",
+            "description": "Total acreage allocated across all crops cannot exceed available land capacity",
+            "formula": "\\sum_{c=0}^{C-1} x_c \\leq L",
+            "parameters": [
+                "available_land"
+            ],
+            "variables": [
+                "acreage_allocated"
+            ]
+        },
+        {
+            "name": "proportional_rule_enforcement",
+            "description": "For each proportional rule, the acreage of the left crop must be at least the required multiplier times the acreage of the right crop",
+            "formula": "x_{i_r} \\geq \\beta_r x_{j_r} \\quad \\forall r=0,\\dots,R-1",
+            "parameters": [
+                "left_crop_index",
+                "right_crop_index",
+                "min_acreage_multiplier"
+            ],
+            "variables": [
+                "acreage_allocated"
+            ]
+        },
+        {
+            "name": "nonnegative_acreage",
+            "description": "No crop acreage may be negative",
+            "formula": "x_c \\geq 0 \\quad \\forall c=0,\\dots,C-1",
+            "parameters": [],
+            "variables": [
+                "acreage_allocated"
+            ]
+        },
+        {
+            "name": "valid_rule_indices",
+            "description": "Each proportional rule references valid crop indices within the crop set",
+            "formula": "0 \\leq i_r < C,\\; 0 \\leq j_r < C \\quad \\forall r=0,\u0000dots,R-1",
+            "parameters": [
+                "num_crops",
+                "left_crop_index",
+                "right_crop_index"
+            ],
+            "variables": []
+        },
+        {
+            "name": "parameter_domain_constraints",
+            "description": "Basic parameter validity conditions including nonnegative counts, nonnegative land capacity, nonnegative multipliers, and real-valued profits",
+            "formula": "C \\in \\mathbb{Z}_{\\geq 0},\\; R \\in \\mathbb{Z}_{\\geq 0},\\; L \\geq 0,\\; \\beta_r \\geq 0 \\quad \\forall r=0,\\dots,R-1",
+            "parameters": [
+                "num_crops",
+                "num_rules",
+                "available_land",
+                "unit_profit_per_acre",
+                "min_acreage_multiplier"
+            ],
+            "variables": []
+        },
+        {
+            "name": "planning_horizon_static",
+            "description": "The planning horizon is finite and static with no additional time-indexed decision structure used in this instance",
+            "formula": "\\mathcal{T}\\text{ is a static one-stage descriptor}",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "The total profit variable equals the sum of crop acreages times their unit profits",
+            "formula": "Z = \\sum_{c=0}^{C-1} \\pi_c x_c",
+            "parameters": [
+                "unit_profit_per_acre"
+            ],
+            "variables": [
+                "acreage_allocated",
+                "total_profit"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize the total profit from the land allocation",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize the total profit from the land allocation by maximizing the profit-defining variable Z, which is linked linearly to acreages and per-acre profits.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z",
+        "parameters": [],
+        "variables": [
+            "total_profit"
+        ]
+    }
+}

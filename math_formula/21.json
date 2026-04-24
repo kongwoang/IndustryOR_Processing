@@ -1,0 +1,204 @@
+{
+    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and a planning horizon of $$T$$ production days indexed by $$t \\in \\mathcal{T}$$.\n- For each product $$p$$, the input data include a demand ceiling $$D_p$$, a unit selling price $$S_p$$, a unit production cost $$C_p$$, a maximum daily production quota $$Q_p$$, a fixed daily activation cost $$F_p$$, and a minimum production batch size $$B_p$$.\n- All production quantities are measured in a common unit of output, and the production plan is made day by day across the horizon.\n- The planning goal is to choose which products to activate on which days and how much to produce so as to maximize total net profit from sales after accounting for production costs and fixed activation costs.\n- A product may be produced on a day only if its production line is activated for that day.\n- If a product is activated on a day, the produced quantity for that product on that day must be at least its minimum batch size.\n- If a product is activated on a day, its produced quantity on that day must not exceed its daily quota.\n- Over the full planning horizon, the total production assigned to each product must not exceed that product\u2019s demand ceiling.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced on day $$t$$.\n  - $$y_{p,t}$$: a binary activation decision, where $$y_{p,t}=1$$ means product $$p$$ is activated on day $$t$$ and $$y_{p,t}=0$$ otherwise.\n  - $$z$$: the total objective value of the selected production plan.\n\nInput Format\n{\n  \"T\": \"integer; number of planning days in the horizon.\",\n  \"P\": \"integer; number of products.\",\n  \"demand_ceiling\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of demand limits $$D_p$$, one value for each product $$p$$.\"\n  },\n  \"selling_price\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit selling prices $$S_p$$, one value for each product $$p$$.\"\n  },\n  \"production_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit production costs $$C_p$$, one value for each product $$p$$.\"\n  },\n  \"daily_quota\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of maximum daily production quotas $$Q_p$$, one value for each product $$p$$.\"\n  },\n  \"activation_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of fixed activation costs $$F_p$$, one value for each product $$p$$.\"\n  },\n  \"minimum_batch\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of minimum batch sizes $$B_p$$, one value for each product $$p$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Matrix $$x_{p,t}$$ giving the planned production quantity of product $$p$$ on day $$t$$.\"\n  },\n  \"activation_indicator\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Binary matrix $$y_{p,t}$$ indicating whether product $$p$$ is activated on day $$t$$.\"\n  },\n  \"objective_value\": {\n    \"shape\": [\"scalar\"],\n    \"meaning\": \"The total net objective value $$z$$ of the production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 22,\n  \"P\": 3,\n  \"demand_ceiling\": [5300, 4500, 5400],\n  \"selling_price\": [124, 109, 115],\n  \"production_cost\": [73.30, 52.90, 65.40],\n  \"daily_quota\": [500, 450, 550],\n  \"activation_cost\": [170000, 150000, 100000],\n  \"minimum_batch\": [20, 20, 16]\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Integer number of products, with products indexed by $p \\in \\mathcal{P} = \\{0,1,\\dots,P-1\\}$"
+        },
+        {
+            "name": "num_days",
+            "symbol": "T",
+            "shape": [],
+            "description": "Integer number of planning days, with days indexed by $t \\in \\mathcal{T} = \\{0,1,\\dots,T-1\\}$"
+        },
+        {
+            "name": "demand_ceiling",
+            "symbol": "D",
+            "shape": [
+                "P"
+            ],
+            "description": "Demand ceiling for product $p$"
+        },
+        {
+            "name": "selling_price",
+            "symbol": "S",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit selling price for product $p$"
+        },
+        {
+            "name": "production_cost",
+            "symbol": "C",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit production cost for product $p$"
+        },
+        {
+            "name": "daily_quota",
+            "symbol": "Q",
+            "shape": [
+                "P"
+            ],
+            "description": "Maximum daily production quota for product $p$"
+        },
+        {
+            "name": "activation_cost",
+            "symbol": "F",
+            "shape": [
+                "P"
+            ],
+            "description": "Fixed daily activation cost for product $p$"
+        },
+        {
+            "name": "minimum_batch",
+            "symbol": "B",
+            "shape": [
+                "P"
+            ],
+            "description": "Minimum production batch size for product $p$"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product $p$ produced on day $t$"
+        },
+        {
+            "name": "activation_indicator",
+            "symbol": "y",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "binary",
+            "description": "Binary activation indicator for product $p$ on day $t$"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantity must be nonnegative for each product-day pair",
+            "formula": "x_{p,t} \\ge 0",
+            "parameters": [
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "binary_activation_indicator",
+            "description": "Activation indicator must be binary for each product-day pair",
+            "formula": "y_{p,t} \\in \\{0,1\\}",
+            "parameters": [
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "activation_required_for_production",
+            "description": "Production is allowed only when the activation indicator is on for the same product-day pair",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "parameters": [
+                "daily_quota",
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "minimum_batch_when_activated",
+            "description": "If a product is activated on a day, its production that day must meet the minimum batch size",
+            "formula": "x_{p,t} \\ge B_p y_{p,t}",
+            "parameters": [
+                "minimum_batch",
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "daily_quota_when_activated",
+            "description": "If a product is activated on a day, its production that day must not exceed the daily quota",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "parameters": [
+                "daily_quota",
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "zero_production_when_inactive",
+            "description": "If a product is not activated on a day, production that day must be zero",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "parameters": [
+                "daily_quota",
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "total_production_demand_cap",
+            "description": "Total production of each product across all days must not exceed the product demand ceiling",
+            "formula": "\\sum_{t=0}^{T-1} x_{p,t} \\le D_p",
+            "parameters": [
+                "demand_ceiling",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs. Single-objective MILP formulation; no combination strategy is needed.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\sum_{p=0}^{P-1}\\sum_{t=0}^{T-1}\\left((S_p-C_p)x_{p,t}-F_p y_{p,t}\\right)",
+        "parameters": [
+            "selling_price",
+            "production_cost",
+            "activation_cost"
+        ],
+        "variables": [
+            "production_quantity",
+            "activation_indicator"
+        ]
+    }
+}

@@ -1,0 +1,212 @@
+{
+    "problem": "Problem description\n- There is a set $$\\mathcal{R}$$ of raw materials and a set $$\\mathcal{P}$$ of candy brands, planned over a time horizon $$\\mathcal{T}$$ of monthly periods.\n- Each raw material $$r \\in \\mathcal{R}$$ has a unit purchase cost $$c_r$$ and an available quantity limit $$\\bar{q}_{r,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- Each product $$p \\in \\mathcal{P}$$ has a unit processing fee $$f_p$$ and a unit selling price $$s_p$$.\n- The recipe of each product is governed by raw-material content requirements. For each pair $$\\left(r,p\\right)$$, the allowable fraction of raw material $$r$$ in product $$p$$ may have a lower bound $$\\underline{\\alpha}_{r,p}$$, an upper bound $$\\overline{\\alpha}_{r,p}$$, or both.\n- The planning goal is to choose monthly production quantities and feasible ingredient allocations so that total profit over $$\\mathcal{T}$$ is maximized.\n- The business rules are:\n  - Production quantities must be nonnegative.\n  - The ingredient mix used for each product must satisfy all applicable minimum and maximum content requirements.\n  - The total use of each raw material in any month must not exceed its available monthly limit.\n  - Revenue is earned from selling produced candy, while raw material purchase costs and processing fees are incurred.\n  - Any product or raw material pair without a stated bound is unrestricted except for feasibility and availability.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced in period $$t$$.\n  - $$y_{r,p,t}$$: the quantity of raw material $$r$$ allocated to product $$p$$ in period $$t$$, if ingredient allocation is modeled explicitly.\n  - $$z$$: the total profit achieved over the planning horizon.\n\nInput Format\n{\n  \"sets\": {\n    \"raw_materials\": \"$$\\mathcal{R}$$\",\n    \"products\": \"$$\\mathcal{P}$$\",\n    \"periods\": \"$$\\mathcal{T}$$\"\n  },\n  \"parameters\": {\n    \"composition_lower\": {\n      \"symbol\": \"$$\\\\underline{\\\\alpha}_{r,p}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|\\\\times|\\\\mathcal{P}|$$\",\n      \"meaning\": \"Minimum allowable fraction of raw material $$r$$ in product $$p$$; entries may be $$\\\\varnothing$$ when no lower bound exists.\"\n    },\n    \"composition_upper\": {\n      \"symbol\": \"$$\\\\overline{\\\\alpha}_{r,p}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|\\\\times|\\\\mathcal{P}|$$\",\n      \"meaning\": \"Maximum allowable fraction of raw material $$r$$ in product $$p$$; entries may be $$\\\\varnothing$$ when no upper bound exists.\"\n    },\n    \"raw_material_cost\": {\n      \"symbol\": \"$$c_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"Unit procurement cost of raw material $$r$$.\"\n    },\n    \"raw_material_availability\": {\n      \"symbol\": \"$$\\\\bar{q}_{r,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|\\\\times|\\\\mathcal{T}|$$\",\n      \"meaning\": \"Maximum quantity of raw material $$r$$ available in period $$t$$.\"\n    },\n    \"processing_fee\": {\n      \"symbol\": \"$$f_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"Unit processing fee for product $$p$$.\"\n    },\n    \"selling_price\": {\n      \"symbol\": \"$$s_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"Unit selling price for product $$p$$.\"\n    }\n  },\n  \"decision_variables\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_{p,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\"\n    },\n    \"ingredient_allocation\": {\n      \"symbol\": \"$$y_{r,p,t}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|\\\\times|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\"\n    },\n    \"objective_value\": {\n      \"symbol\": \"$$z$$\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_{p,t}$$\",\n    \"shape\": \"$$|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\",\n    \"meaning\": \"Optimal production quantity of each product $$p$$ in each period $$t$$.\"\n  },\n  \"ingredient_plan\": {\n    \"symbol\": \"$$y_{r,p,t}$$\",\n    \"shape\": \"$$|\\\\mathcal{R}|\\\\times|\\\\mathcal{P}|\\\\times|\\\\mathcal{T}|$$\",\n    \"meaning\": \"Optimal allocation of each raw material $$r$$ to each product $$p$$ in each period $$t$$, if explicitly reported.\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"Maximum profit over the full horizon $$\\\\mathcal{T}$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"raw_materials\": [\"A\", \"B\", \"C\"],\n  \"products\": [\"A\", \"B\", \"C\"],\n  \"periods\": [\"month_1\"],\n  \"composition_lower\": {\n    \"A\": {\n      \"A\": 0.60,\n      \"B\": 0.15,\n      \"C\": null\n    },\n    \"B\": {\n      \"A\": null,\n      \"B\": null,\n      \"C\": null\n    },\n    \"C\": {\n      \"A\": null,\n      \"B\": null,\n      \"C\": null\n    }\n  },\n  \"composition_upper\": {\n    \"A\": {\n      \"A\": null,\n      \"B\": null,\n      \"C\": 0.20\n    },\n    \"B\": {\n      \"A\": null,\n      \"B\": null,\n      \"C\": 0.60\n    },\n    \"C\": {\n      \"A\": null,\n      \"B\": null,\n      \"C\": 0.50\n    }\n  },\n  \"raw_material_cost\": {\n    \"A\": 2.00,\n    \"B\": 1.50,\n    \"C\": 1.00\n  },\n  \"raw_material_availability\": {\n    \"A\": 2000,\n    \"B\": 2500,\n    \"C\": 1200\n  },\n  \"processing_fee\": {\n    \"A\": 0.50,\n    \"B\": 0.40,\n    \"C\": 0.30\n  },\n  \"selling_price\": {\n    \"A\": 3.40,\n    \"B\": 2.85,\n    \"C\": 2.25\n  }\n}",
+    "parameters": [
+        {
+            "name": "raw_materials",
+            "symbol": "\\mathcal{R}",
+            "shape": [],
+            "description": "Set of raw materials"
+        },
+        {
+            "name": "products",
+            "symbol": "\\mathcal{P}",
+            "shape": [],
+            "description": "Set of products"
+        },
+        {
+            "name": "periods",
+            "symbol": "\\mathcal{T}",
+            "shape": [],
+            "description": "Set of monthly periods"
+        },
+        {
+            "name": "unit_purchase_cost",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{R}"
+            ],
+            "description": "Unit purchase cost for each raw material"
+        },
+        {
+            "name": "raw_material_availability",
+            "symbol": "\\bar q",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{T}"
+            ],
+            "description": "Monthly availability limit of each raw material in each period"
+        },
+        {
+            "name": "unit_processing_fee",
+            "symbol": "f",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Unit processing fee for each product"
+        },
+        {
+            "name": "unit_selling_price",
+            "symbol": "s",
+            "shape": [
+                "\\mathcal{P}"
+            ],
+            "description": "Unit selling price for each product"
+        },
+        {
+            "name": "composition_lower_bound",
+            "symbol": "\\underline{\\alpha}",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{P}"
+            ],
+            "description": "Lower bound on raw-material composition fraction for each raw material-product pair, where specified"
+        },
+        {
+            "name": "composition_upper_bound",
+            "symbol": "\\overline{\\alpha}",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{P}"
+            ],
+            "description": "Upper bound on raw-material composition fraction for each raw material-product pair, where specified"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each product in each period"
+        },
+        {
+            "name": "ingredient_allocation",
+            "symbol": "y",
+            "shape": [
+                "\\mathcal{R}",
+                "\\mathcal{P}",
+                "\\mathcal{T}"
+            ],
+            "domain": "continuous",
+            "description": "Ingredient allocation of each raw material to each product in each period"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit over the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "raw_material_availability_limit",
+            "description": "Total raw material use in each period cannot exceed the available supply for that raw material and period",
+            "formula": "raw material use is bounded by \\bar q_{r,t}",
+            "parameters": [
+                "raw_material_availability"
+            ],
+            "variables": [
+                "ingredient_allocation"
+            ]
+        },
+        {
+            "name": "composition_lower_bound",
+            "description": "When specified, the ingredient allocation for a raw material in a product must satisfy the lower composition requirement",
+            "formula": "lower composition requirement using \\underline{\\alpha}_{r,p}",
+            "parameters": [
+                "composition_lower_bound"
+            ],
+            "variables": [
+                "ingredient_allocation",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "composition_upper_bound",
+            "description": "When specified, the ingredient allocation for a raw material in a product must satisfy the upper composition requirement",
+            "formula": "upper composition requirement using \\overline{\\alpha}_{r,p}",
+            "parameters": [
+                "composition_upper_bound"
+            ],
+            "variables": [
+                "ingredient_allocation",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_nonnegativity",
+            "description": "Production quantities must be nonnegative",
+            "formula": "x_{p,t} \\ge 0",
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "ingredient_allocation_nonnegativity",
+            "description": "Ingredient allocations must be nonnegative",
+            "formula": "y_{r,p,t} \\ge 0",
+            "variables": [
+                "ingredient_allocation"
+            ]
+        },
+        {
+            "name": "production_allocation_consistency",
+            "description": "Ingredient allocations must be consistent with the production quantity under the composition model",
+            "formula": "production and allocation consistency using x_{p,t} and y_{r,p,t}",
+            "variables": [
+                "production_quantity",
+                "ingredient_allocation"
+            ]
+        },
+        {
+            "name": "profit_definition",
+            "description": "Define total profit as revenue minus raw-material purchase costs and processing fees over all periods and products.",
+            "formula": "z = \\sum_{t\\in\\mathcal{T}}\\sum_{p\\in\\mathcal{P}} (s_p - f_p)x_{p,t} - \\sum_{t\\in\\mathcal{T}}\\sum_{r\\in\\mathcal{R}} c_r\\sum_{p\\in\\mathcal{P}} y_{r,p,t}",
+            "parameters": [
+                "unit_selling_price",
+                "unit_processing_fee",
+                "unit_purchase_cost"
+            ],
+            "variables": [
+                "total_profit",
+                "production_quantity",
+                "ingredient_allocation"
+            ]
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "Total profit is a continuous scalar variable used to record the objective value.",
+            "formula": "z \\in \\mathbb{R}",
+            "variables": [
+                "total_profit"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "profit_maximization",
+            "description": "Maximize total profit over the planning horizon",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit over the planning horizon, defined as total revenue from sales minus raw-material purchase costs and processing fees.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\sum_{t\\in\\mathcal{T}}\\sum_{p\\in\\mathcal{P}} (s_p - f_p)x_{p,t} - \\sum_{t\\in\\mathcal{T}}\\sum_{r\\in\\mathcal{R}} c_r\\sum_{p\\in\\mathcal{P}} y_{r,p,t}",
+        "parameters": [
+            "unit_selling_price",
+            "unit_processing_fee",
+            "unit_purchase_cost"
+        ],
+        "variables": [
+            "production_quantity",
+            "ingredient_allocation"
+        ]
+    }
+}

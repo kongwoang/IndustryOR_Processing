@@ -1,0 +1,195 @@
+{
+    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of non-preemptive activities, indexed by $$i \\in \\mathcal{I}$$, each with a fixed duration $$d_i$$ measured in days.\n- The activities form a precedence network described by a set of immediate precedence pairs $$\\mathcal{P} \\subseteq \\mathcal{I} \\times \\mathcal{I}$$, where each pair means that the predecessor must finish before the successor can begin.\n- The schedule is planned over a time horizon $$T$$ measured in days.\n- A uniform work cost is incurred at rate $$c_{\\mathrm{work}}$$ per day for the project timeline.\n- A special machine must be rented continuously over a designated interval determined by two anchor activities, one that marks the rental start and one that marks the rental end.\n- The machine rental cost is incurred at rate $$c_{\\mathrm{mach}}$$ per day over that rental interval.\n- The planning goal is to choose feasible activity start times so that all precedence requirements are respected and the total cost from work time and machine rental time is minimized.\n- A solution is represented by:\n  - $$s_i$$, the start time of activity $$i \\in \\mathcal{I}$$,\n  - $$f_i$$, the finish time of activity $$i \\in \\mathcal{I}$$,\n  - $$C_{\\max}$$, the project completion time,\n  - $$r_{\\mathrm{mach}}$$, the total rental duration of the special machine,\n  - $$Z$$, the total project cost.\n\nInput Format\n{\n  \"activities\": {\n    \"type\": \"array\",\n    \"description\": \"List of activities in $$\\\\mathcal{I}$$, indexed by $$i$$.\",\n    \"items\": {\n      \"id\": \"activity identifier\",\n      \"duration\": \"processing time $$d_i$$ in days\"\n    }\n  },\n  \"precedence_arcs\": {\n    \"type\": \"array\",\n    \"description\": \"List of ordered pairs in $$\\\\mathcal{P}$$, where each pair indicates that the first activity must finish before the second activity starts.\",\n    \"items\": {\n      \"predecessor\": \"activity index $$i$$\",\n      \"successor\": \"activity index $$j$$\"\n    }\n  },\n  \"work_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily work cost $$c_{\\\\mathrm{work}}$$.\"\n  },\n  \"machine_rental_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily rental cost $$c_{\\\\mathrm{mach}}$$ for the special machine.\"\n  },\n  \"machine_start_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{s}}$$ whose start time defines the beginning of the machine rental interval.\"\n  },\n  \"machine_end_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{e}}$$ whose finish time defines the end of the machine rental interval.\"\n  },\n  \"time_horizon\": {\n    \"type\": \"number\",\n    \"description\": \"Planning horizon $$T$$ in days, if an upper bound on completion time is needed.\"\n  },\n  \"time_unit\": {\n    \"type\": \"string\",\n    \"description\": \"Time is measured in days.\"\n  }\n}\n\nOutput Format\n{\n  \"start_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned start time $$s_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"finish_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned finish time $$f_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"project_completion_time\": {\n    \"type\": \"number\",\n    \"description\": \"Project completion time $$C_{\\\\max}$$.\"\n  },\n  \"machine_rental_duration\": {\n    \"type\": \"number\",\n    \"description\": \"Total machine rental duration $$r_{\\\\mathrm{mach}}$$.\"\n  },\n  \"total_cost\": {\n    \"type\": \"number\",\n    \"description\": \"Minimum total cost $$Z$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"activities\": [\n    {\n      \"id\": \"A\",\n      \"duration\": 4\n    },\n    {\n      \"id\": \"B\",\n      \"duration\": 3\n    },\n    {\n      \"id\": \"C\",\n      \"duration\": 5\n    },\n    {\n      \"id\": \"D\",\n      \"duration\": 2\n    },\n    {\n      \"id\": \"E\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"F\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"G\",\n      \"duration\": 1\n    }\n  ],\n  \"precedence_arcs\": [\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"G\"\n    },\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"D\"\n    },\n    {\n      \"predecessor\": \"E\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"G\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"D\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"B\"\n    }\n  ],\n  \"work_cost_per_day\": 1000,\n  \"machine_rental_cost_per_day\": 5000,\n  \"machine_start_activity\": \"A\",\n  \"machine_end_activity\": \"B\",\n  \"time_unit\": \"day\"\n}",
+    "parameters": [
+        {
+            "name": "num_activities",
+            "symbol": "N",
+            "shape": [],
+            "description": "The number of activities in the project network"
+        },
+        {
+            "name": "num_precedence_arcs",
+            "symbol": "P",
+            "shape": [],
+            "description": "The number of immediate precedence arcs"
+        },
+        {
+            "name": "activity_durations",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Duration of activity $i$ in days"
+        },
+        {
+            "name": "precedence_arcs",
+            "symbol": "p",
+            "shape": [
+                "P",
+                "2"
+            ],
+            "description": "The precedence arc list where each arc stores predecessor and successor activity indices"
+        },
+        {
+            "name": "time_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Planning horizon in days"
+        },
+        {
+            "name": "work_cost_per_day",
+            "symbol": "c_{\\mathrm{work}}",
+            "shape": [],
+            "description": "Uniform work cost rate per day over the project timeline"
+        },
+        {
+            "name": "machine_rental_cost_per_day",
+            "symbol": "c_{\\mathrm{mach}}",
+            "shape": [],
+            "description": "Machine rental cost rate per day over the rental interval"
+        },
+        {
+            "name": "machine_start_activity",
+            "symbol": "i^{\\mathrm{s}}",
+            "shape": [],
+            "description": "Index of the anchor activity whose start time defines the beginning of the machine rental interval"
+        },
+        {
+            "name": "machine_end_activity",
+            "symbol": "i^{\\mathrm{e}}",
+            "shape": [],
+            "description": "Index of the anchor activity whose finish time defines the end of the machine rental interval"
+        }
+    ],
+    "variables": [
+        {
+            "name": "start_times",
+            "symbol": "s",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Start time of each activity"
+        },
+        {
+            "name": "finish_times",
+            "symbol": "f",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Finish time of each activity"
+        },
+        {
+            "name": "project_completion_time",
+            "symbol": "C_{\\max}",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Project completion time"
+        },
+        {
+            "name": "machine_rental_duration",
+            "symbol": "r_{\\mathrm{mach}}",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total machine rental duration"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total project cost"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "precedence_feasibility",
+            "description": "Each immediate precedence relation must be respected so a predecessor finishes before its successor starts.",
+            "formula": "s_j \\ge f_i \\qquad \\forall (i,j) \\in \\mathcal{P}",
+            "parameters": [
+                "precedence_arcs"
+            ],
+            "variables": [
+                "start_times",
+                "finish_times"
+            ]
+        },
+        {
+            "name": "activity_timing_definitions",
+            "description": "Start and finish times are linked by fixed durations, with nonnegative start times and an upper bound by the planning horizon.",
+            "formula": "f_i = s_i + d_i,\\quad 0 \\le s_i \\le T,\\quad 0 \\le f_i \\le T\\qquad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "activity_durations",
+                "time_horizon"
+            ],
+            "variables": [
+                "start_times",
+                "finish_times"
+            ]
+        },
+        {
+            "name": "project_completion_time_definition",
+            "description": "The project completion time equals the latest activity finish time and is bounded by the planning horizon.",
+            "formula": "C_{\\max} \\ge f_i \\qquad \\forall i \\in \\mathcal{I},\\qquad C_{\\max} \\le T",
+            "parameters": [
+                "time_horizon"
+            ],
+            "variables": [
+                "finish_times",
+                "project_completion_time"
+            ]
+        },
+        {
+            "name": "machine_rental_duration_definition",
+            "description": "The machine rental duration is the nonnegative difference between the designated end-anchor finish time and start-anchor start time.",
+            "formula": "r_{\\mathrm{mach}} = f_{i^{\\mathrm{e}}} - s_{i^{\\mathrm{s}}},\\qquad r_{\\mathrm{mach}} \\ge 0",
+            "parameters": [
+                "machine_start_activity",
+                "machine_end_activity"
+            ],
+            "variables": [
+                "start_times",
+                "finish_times",
+                "machine_rental_duration"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "The total cost equals work-time cost over the project completion time plus machine rental cost over the rental duration.",
+            "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
+            "parameters": [
+                "work_cost_per_day",
+                "machine_rental_cost_per_day"
+            ],
+            "variables": [
+                "project_completion_time",
+                "machine_rental_duration",
+                "total_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_project_cost_minimization",
+            "description": "Minimize the total project cost composed of work-time cost and machine rental cost",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total project cost, defined as the sum of uniform work-time cost over the project completion time and machine rental cost over the rental duration.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
+        "parameters": [
+            "work_cost_per_day",
+            "machine_rental_cost_per_day"
+        ],
+        "variables": [
+            "project_completion_time",
+            "machine_rental_duration",
+            "total_cost"
+        ]
+    }
+}

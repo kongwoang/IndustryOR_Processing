@@ -1,0 +1,231 @@
+{
+    "problem": "Problem description\n- There is a planning horizon of $$T$$ months, indexed by $$t \\in \\mathcal{T} = \\{1,2,\\ldots,T\\}$$.\n- A family of rental contract lengths is available, indexed by $$\\ell \\in \\mathcal{L} = \\{1,2,\\ldots,L\\}$$.\n- The required warehouse area in month $$t$$ is given by demand data $$d_t$$.\n- Rental cost depends on contract length. The unit fee for one billing unit of area under length $$\\ell$$ is $$c_\\ell$$.\n- One billing unit represents an area of $$b$$ square meters.\n- A contract of length $$\\ell$$, once selected, covers consecutive months starting from month $$1$$ through month $$\\ell$$.\n- Multiple warehouse contracts may be rented in parallel, and the rented area under each contract length may be chosen in integer billing units.\n- The combined rented area available in each month must exactly match that month\u2019s demand, with no shortage and no excess.\n- The number of distinct active contract lengths must be at least $$K^{\\min}$$ and at most $$K^{\\max}$$.\n- Some contract lengths may be mutually exclusive; if one length in an incompatible pair is active, the other length in that pair cannot be active as well.\n- In the given business rule set, the shortest and longest contract lengths are incompatible.\n- The planning goal is to minimize the total rental cost over the full horizon.\n\n- A solution is represented by:\n  - $$x_\\ell$$: the integer number of billing units rented under contract length $$\\ell$$.\n  - $$y_\\ell$$: a binary indicator that equals $$1$$ if contract length $$\\ell$$ is used and $$0$$ otherwise.\n  - $$Z$$: the total rental cost of the selected rental plan.\n\nInput Format\n{\n  \"T\": \"integer $$T$$, number of planning months\",\n  \"L\": \"integer $$L$$, number of available contract lengths\",\n  \"demand\": \"array $$[d_1,d_2,\\ldots,d_T]$$ of length $$T$$, where $$d_t$$ is the required area in month $$t$$\",\n  \"fee_per_billing_unit\": \"array $$[c_1,c_2,\\ldots,c_L]$$ of length $$L$$, where $$c_\\ell$$ is the rental fee for one billing unit of area under contract length $$\\ell$$\",\n  \"billing_unit_area\": \"scalar $$b$$, area represented by one billing unit\",\n  \"min_active_lengths\": \"integer $$K^{\\min}$$, minimum number of distinct active contract lengths\",\n  \"max_active_lengths\": \"integer $$K^{\\max}$$, maximum number of distinct active contract lengths\",\n  \"incompatible_length_pairs\": \"list of pairs $$\\left(\\ell_1,\\ell_2\\right)$$ such that both lengths cannot be active at the same time\"\n}\n\nOutput Format\n{\n  \"total_cost\": \"optimal value $$Z$$ of the rental-cost objective\",\n  \"selected_contracts\": [\n    {\n      \"length\": \"contract length $$\\ell$$\",\n      \"quantity\": \"integer $$x_\\ell$$, number of billing units rented under length $$\\ell$$\",\n      \"active\": \"binary $$y_\\ell$$, whether length $$\\ell$$ is used\"\n    }\n  ]\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 4,\n  \"L\": 4,\n  \"demand\": [1500, 1000, 2000, 1200],\n  \"fee_per_billing_unit\": [4000, 7500, 10500, 13000],\n  \"billing_unit_area\": 100,\n  \"min_active_lengths\": 2,\n  \"max_active_lengths\": 3,\n  \"incompatible_length_pairs\": [[1, 4]]\n}",
+    "parameters": [
+        {
+            "name": "num_planning_months",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning months in the horizon"
+        },
+        {
+            "name": "num_contract_lengths",
+            "symbol": "L",
+            "shape": [],
+            "description": "Number of available contract lengths"
+        },
+        {
+            "name": "monthly_demand",
+            "symbol": "d",
+            "shape": [
+                "T"
+            ],
+            "description": "Required warehouse area in each month"
+        },
+        {
+            "name": "contract_fee",
+            "symbol": "c",
+            "shape": [
+                "L"
+            ],
+            "description": "Fee per billing unit for each contract length"
+        },
+        {
+            "name": "billing_unit_area",
+            "symbol": "b",
+            "shape": [],
+            "description": "Area represented by one billing unit"
+        },
+        {
+            "name": "min_active_lengths",
+            "symbol": "K^{\\min}",
+            "shape": [],
+            "description": "Minimum number of distinct active contract lengths"
+        },
+        {
+            "name": "max_active_lengths",
+            "symbol": "K^{\\max}",
+            "shape": [],
+            "description": "Maximum number of distinct active contract lengths"
+        },
+        {
+            "name": "incompatible_length_pairs",
+            "symbol": "P",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Set of incompatible unordered pairs of contract length indices"
+        }
+    ],
+    "variables": [
+        {
+            "name": "billing_units_rented",
+            "symbol": "x",
+            "shape": [
+                "L"
+            ],
+            "domain": "integer",
+            "description": "Integer number of billing units rented under each contract length"
+        },
+        {
+            "name": "contract_length_used",
+            "symbol": "y",
+            "shape": [
+                "L"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if a contract length is active, and 0 otherwise"
+        },
+        {
+            "name": "total_rental_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total rental cost of the selected rental plan"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "monthly_demand_coverage",
+            "description": "For each month t, the total rented area from all contract lengths covering month t must exactly equal the demand in that month.",
+            "formula": "\\sum_{\\ell=t}^{L-1} b\\,x_{\\ell} = d_t \\qquad \\forall t=0,1,\\ldots,T-1",
+            "parameters": [
+                "monthly_demand",
+                "billing_unit_area",
+                "num_contract_lengths",
+                "num_planning_months"
+            ],
+            "variables": [
+                "billing_units_rented"
+            ]
+        },
+        {
+            "name": "contract_length_span_coverage",
+            "description": "A contract length contributes coverage only in the months it spans under the 0-based indexing convention",
+            "formula": "length \\ell covers months 0 through \\ell",
+            "parameters": [
+                "num_contract_lengths"
+            ],
+            "variables": [
+                "billing_units_rented"
+            ]
+        },
+        {
+            "name": "activation_linking",
+            "description": "A contract length can be active only if it has positive rented billing units, enforced with a Big-M link using the maximum monthly demand.",
+            "formula": "x_{\\ell} \\le \\left(\\frac{\\sum_{t=0}^{T-1} d_t}{b}\\right) y_{\\ell} \\qquad \\forall \\ell=0,1,\\ldots,L-1",
+            "parameters": [
+                "monthly_demand",
+                "billing_unit_area",
+                "num_contract_lengths",
+                "num_planning_months"
+            ],
+            "variables": [
+                "billing_units_rented",
+                "contract_length_used"
+            ]
+        },
+        {
+            "name": "active_length_count_bounds",
+            "description": "The number of distinct active contract lengths must be between the minimum and maximum allowed values, inclusive.",
+            "formula": "K^{\\min} \\le \\sum_{\\ell=0}^{L-1} y_{\\ell} \\le K^{\\max}",
+            "parameters": [
+                "min_active_lengths",
+                "max_active_lengths",
+                "num_contract_lengths"
+            ],
+            "variables": [
+                "contract_length_used"
+            ]
+        },
+        {
+            "name": "incompatible_length_pairs",
+            "description": "Any pair of incompatible contract lengths cannot both be active at the same time.",
+            "formula": "y_{\\ell_1} + y_{\\ell_2} \\le 1 \\qquad \\forall (\\ell_1,\\ell_2) \\in P",
+            "parameters": [
+                "incompatible_length_pairs"
+            ],
+            "variables": [
+                "contract_length_used"
+            ]
+        },
+        {
+            "name": "shortest_longest_incompatibility",
+            "description": "The shortest and longest contract lengths are incompatible and cannot both be active; enforce directly in case the pair is not present in P.",
+            "formula": "y_0 + y_{L-1} \\le 1",
+            "parameters": [
+                "num_contract_lengths"
+            ],
+            "variables": [
+                "contract_length_used"
+            ]
+        },
+        {
+            "name": "nonnegative_demand_and_cost",
+            "description": "Demand and contract fees are nonnegative, and billing unit area is positive.",
+            "formula": "d_t \\ge 0,\\; c_{\\ell} \\ge 0,\\; b > 0",
+            "parameters": [
+                "monthly_demand",
+                "contract_fee",
+                "billing_unit_area"
+            ],
+            "variables": []
+        },
+        {
+            "name": "variable_domains",
+            "description": "Billing units rented must be nonnegative integers and contract usage indicators must be binary.",
+            "formula": "x_{\\ell} \\in \\mathbb{Z}_{\\ge 0},\\; y_{\\ell} \\in \\{0,1\\} \\qquad \\forall \\ell=0,1,\\ldots,L-1",
+            "variables": [
+                "billing_units_rented",
+                "contract_length_used"
+            ]
+        },
+        {
+            "name": "index_and_parameter_bounds",
+            "description": "Planning horizon and number of contract lengths are positive integers, and the active-length bounds are valid.",
+            "formula": "T, L \\in \\mathbb{Z}_{>0};\\; 0 \\le K^{\\min} \\le K^{\\max} \\le L",
+            "parameters": [
+                "num_planning_months",
+                "num_contract_lengths",
+                "min_active_lengths",
+                "max_active_lengths"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Define total rental cost as the linear aggregation of fee per billing unit times the rented billing units.",
+            "formula": "Z = \\sum_{\\ell=0}^{L-1} c_{\\ell} x_{\\ell}",
+            "parameters": [
+                "contract_fee",
+                "num_contract_lengths"
+            ],
+            "variables": [
+                "billing_units_rented",
+                "total_rental_cost"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_rental_cost_minimization",
+            "description": "Minimize the total rental cost of the warehouse rental plan over the full horizon",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total rental cost of the warehouse rental plan over the full horizon.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\min\\; Z = \\sum_{\\ell=0}^{L-1} c_{\\ell} x_{\\ell}",
+        "parameters": [
+            "contract_fee",
+            "num_contract_lengths"
+        ],
+        "variables": [
+            "billing_units_rented",
+            "total_rental_cost"
+        ]
+    }
+}

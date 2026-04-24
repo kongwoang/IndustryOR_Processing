@@ -1,0 +1,211 @@
+{
+    "problem": "Problem description\n- This is a single-period land-allocation optimization problem on a farm with total available land $$L$$.\n- There is a set of candidate crops $$\\mathcal{P}$$, indexed by $$p \\in \\mathcal{P}$$, and each crop has a per-acre profit parameter $$\\pi_p$$.\n- The planning goal is to choose how many acres to assign to each crop so that total profit is maximized.\n- There is no demand-driven sales requirement in this instance; the limiting factor is land availability together with crop-mix rules.\n- The total planted acreage across all crops cannot exceed the available land $$L$$.\n- No more than $$K$$ distinct crop types may be grown.\n- Crop selection and acreage must be consistent, meaning that any crop not selected must receive zero acreage.\n- There is a set of pairwise land-ratio rules $$\\mathcal{R}$$. For each rule, one specified crop must use at least a stated multiple of the acreage of another specified crop.\n- A solution is represented by:\n    - $$x_p$$: the acreage assigned to crop $$p$$ for each $$p \\in \\mathcal{P}$$.\n    - $$y_p$$: a binary indicator equal to $$1$$ if crop $$p$$ is grown and $$0$$ otherwise.\n    - $$Z$$: the total profit obtained from the chosen land allocation.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"description\": \"Single planning period with $$|\\\\mathcal{T}|=1$$.\"\n  },\n  \"crops\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"description\": \"Array of crop identifiers; the number of crops is $$|\\\\mathcal{P}|$$.\"\n  },\n  \"profit_per_acre\": {\n    \"symbol\": \"$$\\\\pi \\\\in \\\\mathbb{R}_+^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Per-acre profit vector, where $$\\\\pi_p$$ is the profit earned per acre of crop $$p$$.\"\n  },\n  \"land_capacity\": {\n    \"symbol\": \"$$L$$\",\n    \"description\": \"Total available land in acres.\"\n  },\n  \"max_distinct_crops\": {\n    \"symbol\": \"$$K$$\",\n    \"description\": \"Maximum number of crop types that may be grown.\"\n  },\n  \"ratio_rules\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"description\": \"Array of pairwise acreage rules. Each rule contains $$i$$, $$j$$, and $$\\\\alpha_{ij}$$, meaning crop $$i$$ must be grown on at least $$\\\\alpha_{ij}$$ times the acreage of crop $$j$$.\"\n  }\n}\n\nOutput Format\n{\n  \"acreage_by_crop\": {\n    \"symbol\": \"$$x \\\\in \\\\mathbb{R}_+^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Acreage assigned to each crop, listed in the same order as $$\\\\mathcal{P}$$.\"\n  },\n  \"selected_crop_indicator\": {\n    \"symbol\": \"$$y \\\\in \\\\{0,1\\\\}^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Binary selection vector, where $$y_p=1$$ indicates that crop $$p$$ is grown.\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$Z$$\",\n    \"description\": \"Maximum achievable profit for the chosen allocation.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"crop_order\": [\"apples\", \"pears\", \"oranges\", \"lemons\"],\n  \"profit_per_acre\": [\"$$2000$$\", \"$$1800$$\", \"$$2200$$\", \"$$3000$$\"],\n  \"land_capacity\": \"$$120$$\",\n  \"max_distinct_crops\": \"$$2$$\",\n  \"ratio_rules\": [\n    {\n      \"lhs_crop\": \"apples\",\n      \"rhs_crop\": \"pears\",\n      \"minimum_multiple\": \"$$2$$\"\n    },\n    {\n      \"lhs_crop\": \"apples\",\n      \"rhs_crop\": \"lemons\",\n      \"minimum_multiple\": \"$$3$$\"\n    },\n    {\n      \"lhs_crop\": \"oranges\",\n      \"rhs_crop\": \"lemons\",\n      \"minimum_multiple\": \"$$2$$\"\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_crops",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of candidate crops"
+        },
+        {
+            "name": "num_ratio_rules",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of pairwise land-ratio rules"
+        },
+        {
+            "name": "profit_per_acre",
+            "symbol": "\\pi",
+            "shape": [
+                "N"
+            ],
+            "description": "Per-acre profit for each crop"
+        },
+        {
+            "name": "total_land",
+            "symbol": "L",
+            "shape": [],
+            "description": "Total available land in acres"
+        },
+        {
+            "name": "max_distinct_crops",
+            "symbol": "K",
+            "shape": [],
+            "description": "Maximum number of distinct crop types allowed"
+        },
+        {
+            "name": "ratio_rule_lhs",
+            "symbol": "lhs",
+            "shape": [
+                "R"
+            ],
+            "description": "Left-hand crop index for each ratio rule"
+        },
+        {
+            "name": "ratio_rule_rhs",
+            "symbol": "rhs",
+            "shape": [
+                "R"
+            ],
+            "description": "Right-hand crop index for each ratio rule"
+        },
+        {
+            "name": "ratio_rule_multiple",
+            "symbol": "\\alpha",
+            "shape": [
+                "R"
+            ],
+            "description": "Required minimum acreage multiple for each ratio rule"
+        }
+    ],
+    "variables": [
+        {
+            "name": "crop_acreage",
+            "symbol": "x",
+            "shape": [
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Acreage assigned to each crop"
+        },
+        {
+            "name": "crop_selected",
+            "symbol": "y",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if a crop is selected for planting, 0 otherwise"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total profit from the land allocation"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_acreage",
+            "description": "Crop acreage must be nonnegative for each crop",
+            "formula": "x[p] \\ge 0",
+            "parameters": [
+                "num_crops"
+            ],
+            "variables": [
+                "crop_acreage"
+            ]
+        },
+        {
+            "name": "binary_crop_selection",
+            "description": "Crop selection indicator must be binary for each crop",
+            "formula": "y[p] \\in \\{0,1\\}",
+            "parameters": [
+                "num_crops"
+            ],
+            "variables": [
+                "crop_selected"
+            ]
+        },
+        {
+            "name": "total_land_limit",
+            "description": "Total planted acreage across all crops cannot exceed available land",
+            "formula": "\\sum x[p] \\le L",
+            "parameters": [
+                "total_land",
+                "num_crops"
+            ],
+            "variables": [
+                "crop_acreage"
+            ]
+        },
+        {
+            "name": "distinct_crop_limit",
+            "description": "No more than K distinct crop types may be selected",
+            "formula": "\\sum y[p] \\le K",
+            "parameters": [
+                "max_distinct_crops",
+                "num_crops"
+            ],
+            "variables": [
+                "crop_selected"
+            ]
+        },
+        {
+            "name": "selection_acreage_consistency",
+            "description": "If a crop is selected then its acreage may be positive; if it is not selected, acreage must be zero. This is enforced by a linear upper bound using total land.",
+            "formula": "x[p] \\le L\\, y[p]",
+            "parameters": [
+                "total_land",
+                "num_crops"
+            ],
+            "variables": [
+                "crop_acreage",
+                "crop_selected"
+            ]
+        },
+        {
+            "name": "ratio_rule_minimum_multiple",
+            "description": "For each ratio rule, the lhs crop must use at least the specified multiple of the rhs crop acreage",
+            "formula": "x[lhs[r]] \\ge \\alpha[r] x[rhs[r]]",
+            "parameters": [
+                "num_ratio_rules",
+                "ratio_rule_lhs",
+                "ratio_rule_rhs",
+                "ratio_rule_multiple"
+            ],
+            "variables": [
+                "crop_acreage"
+            ]
+        },
+        {
+            "name": "selection_acreage_consistency_big_m",
+            "description": "If a crop is not selected, its acreage must be zero, enforced with a big-M upper bound using total available land",
+            "formula": "x[p] \\le L\\, y[p]",
+            "parameters": [
+                "total_land",
+                "num_crops"
+            ],
+            "variables": [
+                "crop_acreage",
+                "crop_selected"
+            ]
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "Define total profit as the sum of per-acre profits times allocated acreage.",
+            "formula": "Z = \\sum_{p=1}^{N} \\pi_p x_p",
+            "parameters": [
+                "num_crops",
+                "profit_per_acre"
+            ],
+            "variables": [
+                "crop_acreage",
+                "total_profit"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit from the chosen crop allocation",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total profit from the chosen crop allocation; keep Z as a decision variable defined by the linear profit balance.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p=1}^{N} \\pi_p x_p",
+        "parameters": [
+            "num_crops",
+            "profit_per_acre"
+        ],
+        "variables": [
+            "crop_acreage",
+            "total_profit"
+        ]
+    }
+}

@@ -1,0 +1,331 @@
+{
+    "problem": "Problem description\n- There is a set of cities $$\\mathcal{N}$$ indexed by $$i,j \\in \\mathcal{N}$$, with a designated start and end city $$s \\in \\mathcal{N}$$.\n- Travel costs are given by a cost matrix $$D \\in \\mathbb{R}^{|\\mathcal{N}| \\times |\\mathcal{N}|}$$, where $$D_{ij}$$ is the distance or travel cost from city $$i$$ to city $$j$$.\n- The planning horizon is a single closed tour, represented by visit positions $$k \\in \\mathcal{K} = \\{1,\\ldots,|\\mathcal{N}|\\}$$.\n- Each city has a unit visit requirement $$r_i$$, meaning every city must be included exactly once in the tour.\n- The planning goal is to minimize the total travel distance of the complete closed route.\n- The route must start at $$s$$, visit every city exactly once, and return to $$s$$.\n- No city may be skipped, repeated, or visited more than once.\n- The selected travel links must form one continuous tour and must not contain disconnected subtours.\n- The travel-cost data may be asymmetric, so $$D_{ij}$$ and $$D_{ji}$$ may differ.\n- No capacity, inventory, workforce, or demand-allocation limits are present beyond the single-visit requirement for each city.\n- A solution is represented by:\n  - $$\\pi_k$$: the city visited at route position $$k$$.\n  - $$x_{ij}$$: a binary indicator showing whether direct travel from city $$i$$ to city $$j$$ is used.\n  - $$L$$: the total distance of the selected closed tour.\n\nInput Format\n{\n  \"n\": {\n    \"type\": \"integer\",\n    \"description\": \"Number of cities in $$\\\\mathcal{N}$$.\"\n  },\n  \"s\": {\n    \"type\": \"integer\",\n    \"description\": \"Index of the designated start and end city $$s$$.\"\n  },\n  \"D\": {\n    \"type\": \"matrix\",\n    \"shape\": \"[$$n$$, $$n$$]\",\n    \"description\": \"Travel cost matrix $$D$$, where $$D_{ij}$$ is the direct travel cost from city $$i$$ to city $$j$$.\"\n  },\n  \"r\": {\n    \"type\": \"vector\",\n    \"shape\": \"[$$n$$]\",\n    \"description\": \"Required visit counts $$r_i$$ for each city; in the standard TSP setting, each entry is unit-valued.\"\n  }\n}\n\nOutput Format\n{\n  \"route\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$n+1$$]\",\n    \"description\": \"Ordered list of city indices representing the closed tour; the first and last entries are $$s$$.\"\n  },\n  \"selected_arcs\": {\n    \"type\": \"matrix\",\n    \"shape\": \"[$$n$$, $$n$$]\",\n    \"description\": \"Binary travel-selection matrix $$X$$, where $$X_{ij} = 1$$ if the tour goes directly from city $$i$$ to city $$j$$, and $$0$$ otherwise.\"\n  },\n  \"total_distance\": {\n    \"type\": \"number\",\n    \"description\": \"Total travel distance of the selected tour.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"n\": 4,\n  \"s\": 1,\n  \"D\": [\n    [0, 10, 20, 12],\n    [10, 0, 5, 10],\n    [20, 5, 0, 8],\n    [15, 12, 8, 0]\n  ],\n  \"r\": [1, 1, 1, 1]\n}",
+    "parameters": [
+        {
+            "name": "num_cities",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of cities in the tour problem"
+        },
+        {
+            "name": "start_city",
+            "symbol": "s",
+            "shape": [],
+            "description": "Designated start and end city index"
+        },
+        {
+            "name": "travel_costs",
+            "symbol": "D",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "description": "Matrix of direct travel costs from city i to city j"
+        },
+        {
+            "name": "visit_requirements",
+            "symbol": "r",
+            "shape": [
+                "N"
+            ],
+            "description": "Required visit count for each city"
+        },
+        {
+            "name": "route_position_set",
+            "symbol": "K",
+            "shape": [
+                "N"
+            ],
+            "description": "Route-position index set for 0-based indexing"
+        }
+    ],
+    "variables": [
+        {
+            "name": "route",
+            "symbol": "\\pi",
+            "shape": [
+                "N+1"
+            ],
+            "domain": "integer",
+            "description": "City visited at each route position, including repeated start city at the final position"
+        },
+        {
+            "name": "selected_arcs",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator of whether direct travel from city i to city j is used in the tour"
+        },
+        {
+            "name": "total_distance",
+            "symbol": "L",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total distance of the selected closed tour"
+        }
+    ],
+    "auxiliary_variables": [
+        {
+            "name": "mtz_order",
+            "symbol": "u",
+            "shape": [
+                "N"
+            ],
+            "domain": "integer",
+            "description": "MTZ ordering variables used to eliminate subtours in the selected tour"
+        },
+        {
+            "name": "route_assignment",
+            "symbol": "y",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary assignment variable indicating whether city i is placed at route position k"
+        },
+        {
+            "name": "route_position_order",
+            "symbol": "u",
+            "shape": [
+                "N"
+            ],
+            "domain": "integer",
+            "description": "MTZ ordering variables used to eliminate subtours in the selected tour"
+        }
+    ],
+    "constraints": [
+        {
+            "name": "single_continuous_closed_tour",
+            "description": "The selected arcs must form one continuous closed tour over all cities",
+            "formula": "Selected arcs form a single cycle through all cities",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "respect_visit_requirements",
+            "description": "The tour must respect the required visit count for each city",
+            "formula": "visit count for each city follows r[i]",
+            "parameters": [
+                "visit_requirements",
+                "num_cities"
+            ],
+            "variables": [
+                "route",
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "no_disconnected_subtours",
+            "description": "Disconnected subtours are not allowed",
+            "formula": "No subtours disconnected from the main tour",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "binary_selected_arcs",
+            "description": "The arc selection variables are binary",
+            "formula": "selected_arcs[i][j] in {0,1}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "integer_route_positions",
+            "description": "The route position variable takes city indices as integers",
+            "formula": "route[k] is an integer city index",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "route"
+            ]
+        },
+        {
+            "name": "nonnegative_total_distance",
+            "description": "The total tour distance is nonnegative",
+            "formula": "total_distance >= 0",
+            "parameters": [],
+            "variables": [
+                "total_distance"
+            ]
+        },
+        {
+            "name": "asymmetric_travel_costs_allowed",
+            "description": "The travel cost matrix may be asymmetric and direct travel costs are taken from D",
+            "formula": "D[i][j] may differ from D[j][i]",
+            "parameters": [
+                "travel_costs",
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs",
+                "total_distance"
+            ]
+        },
+        {
+            "name": "fix_total_distance_definition",
+            "description": "Define the total distance as the sum of costs over all selected arcs.",
+            "formula": "L = \\sum_{i=0}^{N-1}\\sum_{j=0}^{N-1} D_{ij} x_{ij}",
+            "parameters": [
+                "travel_costs",
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs",
+                "total_distance"
+            ]
+        },
+        {
+            "name": "one_outgoing_arc_per_city",
+            "description": "Each city has exactly one outgoing selected arc in the tour.",
+            "formula": "\\sum_{j=0}^{N-1} x_{ij} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "one_incoming_arc_per_city",
+            "description": "Each city has exactly one incoming selected arc in the tour.",
+            "formula": "\\sum_{i=0}^{N-1} x_{ij} = 1 \\quad \\forall j \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "route_positions_are_a_permutation_of_cities",
+            "description": "Each city must appear exactly once in the route positions using assignment variables to keep the formulation linear.",
+            "formula": "\\sum_{k=0}^{N-1} y_{ik} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\},\\qquad \\sum_{i=0}^{N-1} y_{ik} = 1 \\quad \\forall k \\in \\{0,\\ldots,N-1\\},\\qquad \\pi_k = \\sum_{i=0}^{N-1} i\\, y_{ik} \\quad \\forall k \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "route"
+            ]
+        },
+        {
+            "name": "forbid_self_loops",
+            "description": "No city may be traveled to itself.",
+            "formula": "x_{ii} = 0 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "selected_arcs"
+            ]
+        },
+        {
+            "name": "mtz_order_bounds",
+            "description": "Bounds on MTZ ordering variables for non-start cities.",
+            "formula": "1 \\leq u_i \\leq N-1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\} \\setminus \\{s\\}",
+            "parameters": [
+                "num_cities",
+                "start_city"
+            ],
+            "variables": [
+                "mtz_order"
+            ]
+        },
+        {
+            "name": "fix_start_city_mtz_order",
+            "description": "Anchor the MTZ order at the start city to support a consistent ordering scale.",
+            "formula": "u_s = 0",
+            "parameters": [
+                "start_city"
+            ],
+            "variables": [
+                "mtz_order"
+            ]
+        },
+        {
+            "name": "visit_each_city_exactly_once_by_route_positions",
+            "description": "Each city must be visited exactly once in the closed tour via route positions.",
+            "formula": "\\sum_{k=0}^{N-1} y_{ik} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "route_assignment"
+            ]
+        },
+        {
+            "name": "route_positions_linked_to_assignment_variables",
+            "description": "Each route position is linked to a unique city through assignment variables.",
+            "formula": "\\pi_k = \\sum_{i=0}^{N-1} i\\, y_{ik} \\quad \\forall k \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_cities"
+            ],
+            "variables": [
+                "route",
+                "route_assignment"
+            ]
+        },
+        {
+            "name": "mtz_subtour_elimination",
+            "description": "Prevent disconnected subtours by enforcing Miller-Tucker-Zemlin ordering constraints on non-start cities.",
+            "formula": "u_i - u_j + N x_{ij} \\leq N-1 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\},\\; i \\neq j,\\; i \\neq s,\\; j \\neq s",
+            "parameters": [
+                "num_cities",
+                "start_city"
+            ],
+            "variables": [
+                "selected_arcs",
+                "route_position_order"
+            ]
+        },
+        {
+            "name": "route_starts_and_ends_at_start_city_and_order_anchor",
+            "description": "The route must start and end at the designated start city, and the MTZ order is anchored at the start city.",
+            "formula": "\\pi_0 = s,\\; \\pi_N = s,\\; u_s = 0",
+            "parameters": [
+                "start_city",
+                "num_cities"
+            ],
+            "variables": [
+                "route",
+                "route_position_order"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_travel_distance_minimization",
+            "description": "Minimize the total travel distance of the complete closed tour",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total travel distance of the closed tour. This is a single-objective TSP-style model, so no objective combination is needed.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "L = \\sum_{i=0}^{N-1}\\sum_{j=0}^{N-1} D_{ij} x_{ij}",
+        "parameters": [
+            "travel_costs",
+            "num_cities"
+        ],
+        "variables": [
+            "selected_arcs",
+            "total_distance"
+        ]
+    }
+}

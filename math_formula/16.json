@@ -1,0 +1,179 @@
+{
+    "problem": "Problem description\n- There is a single mission planning horizon $$\\mathcal{T}$$ for a bombing operation over a set of target parts $$\\mathcal{I}$$, with bomb types indexed by $$\\mathcal{K}$$.\n- For each target part $$i \\in \\mathcal{I}$$, the distance from the airport is given by $$d_i$$.\n- For each target part $$i \\in \\mathcal{I}$$ and bomb type $$k \\in \\mathcal{K}$$, the probability that one bomb of type $$k$$ destroys target part $$i$$ is given by $$p_{ik}$$.\n- The available bomb stock is limited by bomb-type capacities $$B_k$$.\n- The total fuel available for the mission is limited by $$F^{\\max}$$.\n- Fuel usage depends on the selected bomb type and target distance through the loaded-flight efficiency $$r_k^{\\text{load}}$$, the empty-aircraft efficiency $$r^{\\text{empty}}$$, and the fixed sortie overhead fuel $$f^{\\text{oh}}$$ for takeoff and landing.\n- Each sortie carries exactly one bomb and is assigned to at most one target part.\n- The total number of bombs of each type used in the plan cannot exceed the available stock of that type.\n- The total fuel consumed by all planned sorties cannot exceed the mission fuel budget.\n- The mission is considered successful if at least $$m$$ target parts are destroyed.\n- The optimization goal is to choose which target parts to attack and with which bomb type so that the probability of mission success is maximized.\n- A solution is represented by:\n  - $$x_{ik}$$, a binary assignment variable that equals $$1$$ if target part $$i$$ is attacked with bomb type $$k$$, and $$0$$ otherwise.\n  - $$P^{\\star}$$, the maximum achievable probability that at least $$m$$ target parts are destroyed.\n\nInput Format\n{\n  \"$$\\mathcal{I}$$\": {\n    \"description\": \"Set of target parts indexed by $$i$$\",\n    \"shape\": \"$$|\\mathcal{I}|$$\"\n  },\n  \"$$\\mathcal{K}$$\": {\n    \"description\": \"Set of bomb types indexed by $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$d_i$$\": {\n    \"description\": \"Distance from the airport to target part $$i$$ for each $$i \\\\in \\\\mathcal{I}$$\",\n    \"shape\": \"$$|\\mathcal{I}|$$\"\n  },\n  \"$$p_{ik}$$\": {\n    \"description\": \"Probability that one bomb of type $$k$$ destroys target part $$i$$\",\n    \"shape\": \"$$|\\mathcal{I}| \\\\times |\\mathcal{K}|$$\"\n  },\n  \"$$B_k$$\": {\n    \"description\": \"Available stock of bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$F^{\\\\max}$$\": {\n    \"description\": \"Maximum total fuel available for the mission\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$r_k^{\\\\text{load}}$$\": {\n    \"description\": \"Distance covered per liter when carrying bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$r^{\\\\text{empty}}$$\": {\n    \"description\": \"Distance covered per liter when the aircraft is empty\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$f^{\\\\text{oh}}$$\": {\n    \"description\": \"Fixed fuel overhead per sortie for takeoff and landing\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$m$$\": {\n    \"description\": \"Minimum number of target parts that must be destroyed for mission success\",\n    \"shape\": \"$$1$$\"\n  }\n}\n\nOutput Format\n{\n  \"$$x_{ik}$$\": {\n    \"description\": \"Binary assignment matrix indicating whether target part $$i$$ is attacked with bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{I}| \\\\times |\\mathcal{K}|$$\"\n  },\n  \"$$P^{\\\\star}$$\": {\n    \"description\": \"Maximum probability that at least $$m$$ target parts are destroyed\",\n    \"shape\": \"$$1$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"$$\\\\mathcal{I}$$\": [1, 2, 3, 4],\n  \"$$\\\\mathcal{K}$$\": [\"heavy\", \"light\"],\n  \"$$d_i$$\": {\n    \"1\": 450,\n    \"2\": 480,\n    \"3\": 540,\n    \"4\": 600\n  },\n  \"$$p_{ik}$$\": {\n    \"heavy\": {\n      \"1\": 0.03,\n      \"2\": 0.10,\n      \"3\": 0.05,\n      \"4\": 0.05\n    },\n    \"light\": {\n      \"1\": 0.08,\n      \"2\": 0.11,\n      \"3\": 0.12,\n      \"4\": 0.09\n    }\n  },\n  \"$$B_k$$\": {\n    \"heavy\": 28,\n    \"light\": 12\n  },\n  \"$$F^{\\\\max}$$\": 10000,\n  \"$$r_k^{\\\\text{load}}$$\": {\n    \"heavy\": 2,\n    \"light\": 3\n  },\n  \"$$r^{\\\\text{empty}}$$\": 4,\n  \"$$f^{\\\\text{oh}}$$\": 100,\n  \"$$m$$\": 2\n}",
+    "parameters": [
+        {
+            "name": "n_targets",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of target parts in the bombing operation"
+        },
+        {
+            "name": "n_bomb_types",
+            "symbol": "K",
+            "shape": [],
+            "description": "Number of bomb types available"
+        },
+        {
+            "name": "target_distance",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Airport distance for each target part"
+        },
+        {
+            "name": "destruction_probability",
+            "symbol": "p",
+            "shape": [
+                "N",
+                "K"
+            ],
+            "description": "Destruction probability when using bomb type k against target part i"
+        },
+        {
+            "name": "bomb_stock",
+            "symbol": "B",
+            "shape": [
+                "K"
+            ],
+            "description": "Available stock for each bomb type"
+        },
+        {
+            "name": "fuel_budget",
+            "symbol": "F^{\\max}",
+            "shape": [],
+            "description": "Total mission fuel budget"
+        },
+        {
+            "name": "loaded_flight_efficiency",
+            "symbol": "r^{\\text{load}}",
+            "shape": [
+                "K"
+            ],
+            "description": "Loaded-flight efficiency for each bomb type"
+        },
+        {
+            "name": "empty_aircraft_efficiency",
+            "symbol": "r^{\\text{empty}}",
+            "shape": [],
+            "description": "Empty-aircraft efficiency"
+        },
+        {
+            "name": "sortie_overhead_fuel",
+            "symbol": "f^{\\text{oh}}",
+            "shape": [],
+            "description": "Fixed sortie overhead fuel consumption"
+        },
+        {
+            "name": "minimum_destroyed_targets",
+            "symbol": "m",
+            "shape": [],
+            "description": "Minimum number of target parts that must be destroyed for mission success"
+        }
+    ],
+    "variables": [
+        {
+            "name": "attack_assignment",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "K"
+            ],
+            "domain": "binary",
+            "description": "Binary decision indicating whether target part i is attacked with bomb type k"
+        },
+        {
+            "name": "optimal_success_probability",
+            "symbol": "P^{\\star}",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Maximum achievable probability that at least m target parts are destroyed"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "single_bomb_per_sortie",
+            "description": "Each sortie carries exactly one bomb and is assigned to at most one target part, so each selected (i,k) pair represents one bomb use",
+            "formula": "x_{ik} \\in \\{0,1\\}",
+            "parameters": [
+                "n_targets",
+                "n_bomb_types"
+            ],
+            "variables": [
+                "attack_assignment"
+            ]
+        },
+        {
+            "name": "attack_assignment_binary",
+            "description": "Binary decision variables for assigning target part i to bomb type k",
+            "formula": "x_{ik} \\in \\{0,1\\} \\quad \\forall i=1,\\dots,N,\\ \\forall k=1,\\dots,K",
+            "parameters": [
+                "n_targets",
+                "n_bomb_types"
+            ],
+            "variables": [
+                "attack_assignment"
+            ]
+        },
+        {
+            "name": "one_bomb_type_per_target",
+            "description": "Each target part can be attacked with at most one bomb type",
+            "formula": "\\sum_{k=1}^{K} x_{ik} \\leq 1 \\quad \\forall i=1,\\dots,N",
+            "parameters": [
+                "n_targets",
+                "n_bomb_types"
+            ],
+            "variables": [
+                "attack_assignment"
+            ]
+        },
+        {
+            "name": "bomb_stock_limit",
+            "description": "The number of bombs of each type used across all selected target parts cannot exceed available stock",
+            "formula": "\\sum_{i=1}^{N} x_{ik} \\leq B_k \\quad \\forall k=1,\\dots,K",
+            "parameters": [
+                "bomb_stock",
+                "n_targets",
+                "n_bomb_types"
+            ],
+            "variables": [
+                "attack_assignment"
+            ]
+        },
+        {
+            "name": "fuel_budget_limit",
+            "description": "The total fuel consumed by all selected sorties, including loaded-flight, empty-aircraft, and sortie overhead components, cannot exceed the total fuel budget",
+            "formula": "\\sum_{i=1}^{N}\\sum_{k=1}^{K} \\left(f^{\\text{oh}} + d_i\\left(r_k^{\\text{load}} + r^{\\text{empty}}\\right)\\right)x_{ik} \\leq F^{\\max}",
+            "parameters": [
+                "target_distance",
+                "loaded_flight_efficiency",
+                "empty_aircraft_efficiency",
+                "sortie_overhead_fuel",
+                "fuel_budget",
+                "n_targets",
+                "n_bomb_types"
+            ],
+            "variables": [
+                "attack_assignment"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "mission_success_probability_maximization",
+            "description": "Maximize the probability that at least m target parts are destroyed",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize the mission success probability surrogate represented by the scalar variable P^{\\star}. No exact algebraic probability-composition formula is provided in the problem data, so the MILP objective remains a direct maximization of the reported success-probability variable.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "P^{\\star}",
+        "parameters": [],
+        "variables": [
+            "optimal_success_probability"
+        ]
+    }
+}

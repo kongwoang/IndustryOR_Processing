@@ -1,0 +1,128 @@
+{
+    "problem": "Problem description\n- There is a single-period fleet rental planning problem with truck types indexed by $$t \\in \\mathcal{T}$$ and cargo classes indexed by $$k \\in \\mathcal{K}$$.\n- The planning horizon is represented by $$\\mathcal{H}$$ and contains one rental planning period.\n- The input provides a demand vector $$d_k$$ for each cargo class, a capacity matrix $$A_{t,k}$$ for each truck type and cargo class, and a per-kilometer rental cost vector $$c_t$$ for each truck type.\n- The planning goal is to choose how many trucks of each type to rent so that all cargo demand is covered at minimum total rental cost.\n- Some truck types may have different capacities across cargo classes, while others may have equal capacities across cargo classes as specified by the input data.\n- Only whole trucks may be rented, and the rented fleet must be sufficient for every cargo class simultaneously.\n- A solution is represented by:\n  - $$x_t$$: the nonnegative integer number of trucks of type $$t$$ to rent.\n  - $$z$$: the minimized total rental cost, expressed per kilometer unless an explicit travel distance parameter is provided.\n\nInput Format\n{\n  \"sets\": {\n    \"truck_types\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Set of available truck types.\"\n    },\n    \"cargo_classes\": {\n      \"symbol\": \"$$\\\\mathcal{K}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Set of cargo classes, such as $$\\\\{\\\\mathrm{ref},\\\\mathrm{dry}\\\\}$$.\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{H}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Single-period planning horizon.\"\n    }\n  },\n  \"parameters\": {\n    \"demand\": {\n      \"symbol\": \"$$d_k$$\",\n      \"shape\": \"$$|\\\\mathcal{K}|$$\",\n      \"description\": \"Required amount of cargo for each class $$k$$.\"\n    },\n    \"capacity\": {\n      \"symbol\": \"$$A_{t,k}$$\",\n      \"shape\": \"$$|\\\\mathcal{T}| \\\\times |\\\\mathcal{K}|$$\",\n      \"description\": \"Capacity of truck type $$t$$ for cargo class $$k$$.\"\n    },\n    \"rental_cost_rate\": {\n      \"symbol\": \"$$c_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Rental cost per kilometer for truck type $$t$$.\"\n    }\n  },\n  \"decision_variables\": {\n    \"truck_count\": {\n      \"symbol\": \"$$x_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Number of trucks of type $$t$$ to rent as a nonnegative integer.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"truck_count\": {\n      \"symbol\": \"$$x_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Optimal number of trucks of each type to rent.\"\n    },\n    \"total_cost\": {\n      \"symbol\": \"$$z$$\",\n      \"shape\": \"Scalar\",\n      \"description\": \"Minimum total rental cost, expressed per kilometer.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"truck_types\": [\"Type A\", \"Type B\"],\n  \"cargo_classes\": [\"refrigerated\", \"non_refrigerated\"],\n  \"planning_horizon\": [\"single_period\"],\n  \"demand\": {\n    \"refrigerated\": 3000,\n    \"non_refrigerated\": 4000\n  },\n  \"capacity\": {\n    \"Type A\": {\n      \"refrigerated\": 20,\n      \"non_refrigerated\": 40\n    },\n    \"Type B\": {\n      \"refrigerated\": 30,\n      \"non_refrigerated\": 30\n    }\n  },\n  \"rental_cost_rate\": {\n    \"Type A\": 30,\n    \"Type B\": 40\n  }\n}",
+    "parameters": [
+        {
+            "name": "truck_types",
+            "symbol": "\\mathcal{T}",
+            "shape": [
+                "-"
+            ],
+            "description": "Set of truck types, indexed by t=0,\\dots,|\\mathcal{T}|-1"
+        },
+        {
+            "name": "cargo_classes",
+            "symbol": "\\mathcal{K}",
+            "shape": [
+                "-"
+            ],
+            "description": "Set of cargo classes, indexed by k=0,\\dots,|\\mathcal{K}|-1"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{H}",
+            "shape": [],
+            "description": "Single-period planning horizon containing one rental planning period"
+        },
+        {
+            "name": "demand",
+            "symbol": "d",
+            "shape": [
+                "\\mathcal{K}"
+            ],
+            "description": "Required demand for each cargo class k"
+        },
+        {
+            "name": "capacity",
+            "symbol": "A",
+            "shape": [
+                "\\mathcal{T}",
+                "\\mathcal{K}"
+            ],
+            "description": "Capacity of truck type t for cargo class k"
+        },
+        {
+            "name": "rental_cost_rate",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{T}"
+            ],
+            "description": "Per-kilometer rental cost rate for each truck type t"
+        }
+    ],
+    "variables": [
+        {
+            "name": "truck_count",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{T}"
+            ],
+            "domain": "integer",
+            "description": "Nonnegative integer number of trucks of each type t to rent"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Minimized total rental cost, expressed per kilometer unless a travel distance parameter is provided"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "truck_count_integrality",
+            "description": "Truck counts are nonnegative integers, so only whole trucks may be rented.",
+            "formula": "x_t \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "truck_types"
+            ],
+            "variables": [
+                "truck_count"
+            ]
+        },
+        {
+            "name": "cargo_demand_coverage",
+            "description": "For each cargo class k, the total capacity provided by all rented trucks must meet or exceed the required demand d_k.",
+            "formula": "\\sum_{t\\in\\mathcal{T}} A_{t,k} x_t \\ge d_k \\quad \\forall k\\in\\mathcal{K}",
+            "parameters": [
+                "truck_types",
+                "cargo_classes",
+                "demand",
+                "capacity"
+            ],
+            "variables": [
+                "truck_count"
+            ]
+        },
+        {
+            "name": "single_period_horizon_structural_assumption",
+            "description": "The planning horizon contains exactly one rental period; this is a structural property of the instance rather than an optimization restriction.",
+            "formula": "|\\mathcal{H}| = 1",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_rental_cost_minimization",
+            "description": "Minimize the total rental cost while ensuring all cargo class demands are covered simultaneously.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total per-kilometer rental cost of the rented truck fleet. Since no travel distance parameter is provided, the objective remains the linear per-kilometer total cost \\(\\sum_{t\\in\\mathcal{T}} c_t x_t\\).",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "z = \\sum_{t\\in\\mathcal{T}} c_t x_t",
+        "parameters": [
+            "truck_types",
+            "rental_cost_rate"
+        ],
+        "variables": [
+            "truck_count",
+            "total_cost"
+        ]
+    }
+}

@@ -1,0 +1,221 @@
+{
+    "problem": "Problem description\n- There is a finite set $$\\mathcal{P}$$ of protein options and a finite set $$\\mathcal{V}$$ of vegetable options, with items indexed by $$i \\in \\mathcal{P}$$ and $$j \\in \\mathcal{V}$$.\n- Each protein option has a unit price coefficient $$c_i$$ measured per $$100$$ grams.\n- Each vegetable option has a unit price coefficient $$c_j$$ measured per $$100$$ grams and a fiber coefficient $$f_j$$ measured per $$100$$ grams.\n- The meal must use a total amount of food equal to $$Q$$ grams.\n- The total purchase cost must stay within a budget limit of $$B$$.\n- Exactly one protein option must be selected from $$\\mathcal{P}$$.\n- At least $$K$$ distinct vegetable options must be selected from $$\\mathcal{V}$$.\n- Food quantities may be purchased only for selected items; unselected items must have zero purchased quantity.\n- The planning goal is to maximize total fiber intake while satisfying the budget, total mass, and category-selection rules.\n- A solution is represented by:\n  - purchased quantity variables $$x_i$$ for each protein option $$i \\in \\mathcal{P}$$ and $$x_j$$ for each vegetable option $$j \\in \\mathcal{V}$$, measured in grams;\n  - binary selection variables $$y_i$$ for each protein option $$i \\in \\mathcal{P}$$ and $$y_j$$ for each vegetable option $$j \\in \\mathcal{V}$$, indicating whether the item is included in the meal;\n  - an optimal fiber value representing the best achievable total fiber intake.\n\nInput Format\n{\n  \"proteins\": {\n    \"type\": \"array\",\n    \"length\": \"$$|\\\\mathcal{P}|$$\",\n    \"items\": {\n      \"name\": \"string\",\n      \"price_per_100g\": \"$$c_i$$\"\n    }\n  },\n  \"vegetables\": {\n    \"type\": \"array\",\n    \"length\": \"$$|\\\\mathcal{V}|$$\",\n    \"items\": {\n      \"name\": \"string\",\n      \"price_per_100g\": \"$$c_j$$\",\n      \"fiber_per_100g\": \"$$f_j$$\"\n    }\n  },\n  \"budget\": \"$$B$$\",\n  \"total_mass_grams\": \"$$Q$$\",\n  \"min_selected_vegetable_types\": \"$$K$$\"\n}\n\nOutput Format\n{\n  \"proteins\": {\n    \"type\": \"array\",\n    \"length\": \"$$|\\\\mathcal{P}|$$\",\n    \"items\": {\n      \"name\": \"string\",\n      \"selected\": \"$$y_i \\\\in \\\\{0,1\\\\}$$\",\n      \"quantity_grams\": \"$$x_i \\\\ge 0$$\"\n    }\n  },\n  \"vegetables\": {\n    \"type\": \"array\",\n    \"length\": \"$$|\\\\mathcal{V}|$$\",\n    \"items\": {\n      \"name\": \"string\",\n      \"selected\": \"$$y_j \\\\in \\\\{0,1\\\\}$$\",\n      \"quantity_grams\": \"$$x_j \\\\ge 0$$\"\n    }\n  },\n  \"total_fiber\": \"$$Z^\\\\star$$\",\n  \"total_cost\": \"$$C^\\\\star$$\",\n  \"total_mass_grams\": \"$$Q$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"proteins\": [\n    {\n      \"name\": \"salmon\",\n      \"price_per_100g\": 4.0\n    },\n    {\n      \"name\": \"beef\",\n      \"price_per_100g\": 3.6\n    },\n    {\n      \"name\": \"pork\",\n      \"price_per_100g\": 1.8\n    }\n  ],\n  \"vegetables\": [\n    {\n      \"name\": \"okra\",\n      \"price_per_100g\": 2.6,\n      \"fiber_per_100g\": 3.2\n    },\n    {\n      \"name\": \"carrots\",\n      \"price_per_100g\": 1.2,\n      \"fiber_per_100g\": 2.7\n    },\n    {\n      \"name\": \"celery\",\n      \"price_per_100g\": 1.6,\n      \"fiber_per_100g\": 1.6\n    },\n    {\n      \"name\": \"cabbage\",\n      \"price_per_100g\": 2.3,\n      \"fiber_per_100g\": 2.0\n    }\n  ],\n  \"budget\": 15.0,\n  \"total_mass_grams\": 600,\n  \"min_selected_vegetable_types\": 2\n}",
+    "parameters": [
+        {
+            "name": "num_protein_options",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of protein options in the finite set of proteins"
+        },
+        {
+            "name": "num_vegetable_options",
+            "symbol": "V",
+            "shape": [],
+            "description": "Number of vegetable options in the finite set of vegetables"
+        },
+        {
+            "name": "protein_price_per_100g",
+            "symbol": "c_i",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit price coefficient for each protein option, measured per 100 grams"
+        },
+        {
+            "name": "vegetable_price_per_100g",
+            "symbol": "c_j",
+            "shape": [
+                "V"
+            ],
+            "description": "Unit price coefficient for each vegetable option, measured per 100 grams"
+        },
+        {
+            "name": "vegetable_fiber_per_100g",
+            "symbol": "f_j",
+            "shape": [
+                "V"
+            ],
+            "description": "Fiber coefficient for each vegetable option, measured per 100 grams"
+        },
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Maximum allowed total purchase cost"
+        },
+        {
+            "name": "total_meal_mass_grams",
+            "symbol": "Q",
+            "shape": [],
+            "description": "Required total meal mass in grams"
+        },
+        {
+            "name": "min_selected_vegetable_types",
+            "symbol": "K",
+            "shape": [],
+            "description": "Minimum number of distinct selected vegetable options"
+        }
+    ],
+    "variables": [
+        {
+            "name": "purchased_protein_quantity_grams",
+            "symbol": "x_i",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Purchased quantity for each protein option, in grams"
+        },
+        {
+            "name": "purchased_vegetable_quantity_grams",
+            "symbol": "x_j",
+            "shape": [
+                "V"
+            ],
+            "domain": "continuous",
+            "description": "Purchased quantity for each vegetable option, in grams"
+        },
+        {
+            "name": "protein_selected",
+            "symbol": "y_i",
+            "shape": [
+                "P"
+            ],
+            "domain": "binary",
+            "description": "Binary selection variable indicating whether each protein option is selected"
+        },
+        {
+            "name": "vegetable_selected",
+            "symbol": "y_j",
+            "shape": [
+                "V"
+            ],
+            "domain": "binary",
+            "description": "Binary selection variable indicating whether each vegetable option is selected"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_purchase_quantities",
+            "description": "Purchased protein and vegetable quantities must be nonnegative",
+            "formula": "x_i \\ge 0,\\ x_j \\ge 0",
+            "parameters": [
+                "protein_price_per_100g",
+                "vegetable_price_per_100g",
+                "vegetable_fiber_per_100g",
+                "budget",
+                "total_meal_mass_grams",
+                "min_selected_vegetable_types"
+            ],
+            "variables": [
+                "purchased_protein_quantity_grams",
+                "purchased_vegetable_quantity_grams"
+            ]
+        },
+        {
+            "name": "binary_selection_variables",
+            "description": "Protein and vegetable selection variables must be binary",
+            "formula": "y_i \\in \\{0,1\\},\\ y_j \\in \\{0,1\\}",
+            "parameters": [
+                "num_protein_options",
+                "num_vegetable_options"
+            ],
+            "variables": [
+                "protein_selected",
+                "vegetable_selected"
+            ]
+        },
+        {
+            "name": "total_mass_requirement",
+            "description": "The total purchased mass across all selected proteins and vegetables must equal the required meal mass",
+            "formula": "\\sum_{i=1}^{P} x_i + \\sum_{j=1}^{V} x_j = Q",
+            "parameters": [
+                "total_meal_mass_grams"
+            ],
+            "variables": [
+                "purchased_protein_quantity_grams",
+                "purchased_vegetable_quantity_grams"
+            ]
+        },
+        {
+            "name": "budget_limit",
+            "description": "The total purchase cost computed from purchased quantities and per-100-gram prices must not exceed the budget",
+            "formula": "\\sum_{i=1}^{P} \\frac{c_i}{100}x_i + \\sum_{j=1}^{V} \\frac{c_j}{100}x_j \\le B",
+            "parameters": [
+                "protein_price_per_100g",
+                "vegetable_price_per_100g",
+                "budget"
+            ],
+            "variables": [
+                "purchased_protein_quantity_grams",
+                "purchased_vegetable_quantity_grams"
+            ]
+        },
+        {
+            "name": "single_protein_selection",
+            "description": "Exactly one protein option must be selected",
+            "formula": "\\sum_{i=1}^{P} y_i = 1",
+            "parameters": [
+                "num_protein_options"
+            ],
+            "variables": [
+                "protein_selected"
+            ]
+        },
+        {
+            "name": "minimum_vegetable_selection",
+            "description": "At least K distinct vegetable options must be selected",
+            "formula": "\\sum_{j=1}^{V} y_j \\ge K",
+            "parameters": [
+                "min_selected_vegetable_types"
+            ],
+            "variables": [
+                "vegetable_selected"
+            ]
+        },
+        {
+            "name": "selection_quantity_link_protein",
+            "description": "If a protein is not selected, its purchased quantity must be zero; purchased protein quantity is allowed only when selected",
+            "formula": "x_i \\le Q y_i \\quad \\forall i \\in \\{1,\u00021,\u0002\\dots,P\\}",
+            "parameters": [
+                "total_meal_mass_grams"
+            ],
+            "variables": [
+                "purchased_protein_quantity_grams",
+                "protein_selected"
+            ]
+        },
+        {
+            "name": "selection_quantity_link_vegetable",
+            "description": "If a vegetable is not selected, its purchased quantity must be zero; purchased vegetable quantity is allowed only when selected",
+            "formula": "x_j \\le Q y_j \\quad \\forall j \\in \\{1,\u00021,\u0002\\dots,V\\}",
+            "parameters": [
+                "total_meal_mass_grams"
+            ],
+            "variables": [
+                "purchased_vegetable_quantity_grams",
+                "vegetable_selected"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "fiber_maximization",
+            "description": "maximize total fiber intake from the selected and purchased vegetable quantities",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "maximize total fiber intake from vegetables; single linear objective",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\sum_{j=1}^{V} \\frac{f_j}{100} x_j",
+        "parameters": [
+            "vegetable_fiber_per_100g"
+        ],
+        "variables": [
+            "purchased_vegetable_quantity_grams"
+        ]
+    }
+}

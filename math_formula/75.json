@@ -1,0 +1,247 @@
+{
+    "problem": "Problem description\n- There are $$T$$ ordered planning periods indexed by $$t \\in \\mathcal{T}$$, representing the quarterly planning horizon for timber purchasing, storage, and sales.\n- The company has one warehouse with storage capacity $$K$$ measured in timber volume units.\n- Timber may be purchased at the beginning of each period, then sold in the same period or stored for later periods.\n- The selling price, purchase price, and estimated maximum sales volume may vary by period.\n- The storage charge per unit depends on the number of periods the timber remains in storage, with a base parameter $$a$$ and an age-dependent parameter $$b$$.\n- The planning goal is to maximize total annual profit from timber purchases, storage, and sales.\n- Inventory held in the warehouse must never exceed the storage capacity.\n- Sales in each period must not exceed the estimated maximum sales volume for that period.\n- Timber is not suitable for long-term storage, so all remaining inventory must be cleared by the end of the final period $$T$$.\n- Inventory flow must remain consistent across periods, so timber available in each period can only come from current purchases and previously stored inventory.\n- Storage cost must reflect the time each unit of timber spends in the warehouse.\n- A solution is represented by:\n  - $$x_t$$: the quantity of timber purchased at the beginning of period $$t$$.\n  - $$y_t$$: the quantity of timber sold during period $$t$$.\n  - $$I_t$$: the inventory remaining at the end of period $$t$$.\n  - $$z_{t,\\tau}$$: the quantity purchased in period $$\\tau$$ and sold in period $$t$$, used to track storage age and age-based holding cost, where $$\\tau \\le t$$.\n  - $$Z$$: the total annual profit obtained by the plan.\n\nInput Format\n{\n  \"T\": {\n    \"description\": \"Number of planning periods in the horizon.\",\n    \"symbol\": \"$$T$$\",\n    \"type\": \"integer\"\n  },\n  \"periods\": {\n    \"description\": \"Ordered set of periods indexed by $$t \\\\in \\\\mathcal{T}$$.\",\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"warehouse_capacity\": {\n    \"description\": \"Maximum inventory that can be stored in the warehouse.\",\n    \"symbol\": \"$$K$$\",\n    \"type\": \"scalar\"\n  },\n  \"storage_cost_parameters\": {\n    \"description\": \"Parameters governing per-unit storage charge as a function of storage age.\",\n    \"fields\": {\n      \"base_cost\": {\n        \"symbol\": \"$$a$$\",\n        \"type\": \"scalar\"\n      },\n      \"age_slope\": {\n        \"symbol\": \"$$b$$\",\n        \"type\": \"scalar\"\n      }\n    }\n  },\n  \"initial_inventory\": {\n    \"description\": \"Inventory available before the first period begins.\",\n    \"symbol\": \"$$I_0$$\",\n    \"type\": \"scalar\"\n  },\n  \"final_inventory_requirement\": {\n    \"description\": \"Required inventory remaining after the last period.\",\n    \"symbol\": \"$$I_T$$\",\n    \"type\": \"scalar\"\n  },\n  \"period_data\": {\n    \"description\": \"Period-wise prices and sales limits.\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array of objects\",\n    \"fields\": {\n      \"purchase_price\": {\n        \"description\": \"Unit purchase price in period $$t$$.\",\n        \"symbol\": \"$$c_t^{\\\\mathrm{buy}}$$\",\n        \"type\": \"scalar\"\n      },\n      \"sale_price\": {\n        \"description\": \"Unit sale price in period $$t$$.\",\n        \"symbol\": \"$$c_t^{\\\\mathrm{sell}}$$\",\n        \"type\": \"scalar\"\n      },\n      \"max_sales_volume\": {\n        \"description\": \"Maximum amount that can be sold in period $$t$$.\",\n        \"symbol\": \"$$d_t$$\",\n        \"type\": \"scalar\"\n      }\n    }\n  }\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"description\": \"Optimal quantity purchased at the beginning of each period.\",\n    \"symbol\": \"$$x_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"sales_plan\": {\n    \"description\": \"Optimal quantity sold in each period.\",\n    \"symbol\": \"$$y_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"ending_inventory\": {\n    \"description\": \"Inventory remaining at the end of each period.\",\n    \"symbol\": \"$$I_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"age_tracked_sales\": {\n    \"description\": \"Optional age-tracked sales quantities for timber purchased in period $$\\\\tau$$ and sold in period $$t$$.\",\n    \"symbol\": \"$$z_{t,\\\\tau}$$\",\n    \"shape\": \"$$T \\\\times T$$\",\n    \"type\": \"lower-triangular array\"\n  },\n  \"objective_value\": {\n    \"description\": \"Maximum total annual profit achieved by the plan.\",\n    \"symbol\": \"$$Z$$\",\n    \"type\": \"scalar\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 4,\n  \"periods\": [\"Winter\", \"Spring\", \"Summer\", \"Autumn\"],\n  \"warehouse_capacity\": 200000,\n  \"storage_cost_parameters\": {\n    \"base_cost\": 70,\n    \"age_slope\": 100\n  },\n  \"initial_inventory\": 0,\n  \"final_inventory_requirement\": 0,\n  \"period_data\": [\n    {\n      \"period\": \"Winter\",\n      \"purchase_price\": 410,\n      \"sale_price\": 425,\n      \"max_sales_volume\": 100\n    },\n    {\n      \"period\": \"Spring\",\n      \"purchase_price\": 430,\n      \"sale_price\": 440,\n      \"max_sales_volume\": 140\n    },\n    {\n      \"period\": \"Summer\",\n      \"purchase_price\": 460,\n      \"sale_price\": 465,\n      \"max_sales_volume\": 200\n    },\n    {\n      \"period\": \"Autumn\",\n      \"purchase_price\": 450,\n      \"sale_price\": 455,\n      \"max_sales_volume\": 160\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "planning_horizon_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of planning periods in the horizon"
+        },
+        {
+            "name": "period_set",
+            "symbol": "\\mathcal{T}",
+            "shape": [
+                "T"
+            ],
+            "description": "Ordered set of planning periods indexed from 0 to T-1"
+        },
+        {
+            "name": "warehouse_capacity",
+            "symbol": "K",
+            "shape": [],
+            "description": "Warehouse storage capacity"
+        },
+        {
+            "name": "base_storage_cost",
+            "symbol": "a",
+            "shape": [],
+            "description": "Base storage cost parameter"
+        },
+        {
+            "name": "age_dependent_storage_cost",
+            "symbol": "b",
+            "shape": [],
+            "description": "Age-dependent storage cost parameter"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [],
+            "description": "Initial inventory before period 0"
+        },
+        {
+            "name": "final_inventory_requirement",
+            "symbol": "I_T",
+            "shape": [],
+            "description": "Required inventory after period T-1"
+        },
+        {
+            "name": "purchase_price",
+            "symbol": "c^{\\mathrm{buy}}",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit purchase price in each period"
+        },
+        {
+            "name": "sale_price",
+            "symbol": "c^{\\mathrm{sell}}",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit sale price in each period"
+        },
+        {
+            "name": "max_sales_volume",
+            "symbol": "d",
+            "shape": [
+                "T"
+            ],
+            "description": "Maximum sales volume in each period"
+        }
+    ],
+    "variables": [
+        {
+            "name": "purchase_quantity",
+            "symbol": "x",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity purchased at the beginning of each period"
+        },
+        {
+            "name": "sales_quantity",
+            "symbol": "y",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity sold during each period"
+        },
+        {
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Inventory remaining at the end of each period"
+        },
+        {
+            "name": "age_tracked_sales",
+            "symbol": "z",
+            "shape": [
+                "T",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity purchased in period tau and sold in period t, defined only for valid pairs with tau <= t"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total annual profit"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_inventory_and_flows",
+            "description": "Purchase, sales, inventory, and age-tracked sales quantities are nonnegative.",
+            "formula": "x_t \\geq 0,\\; y_t \\geq 0,\\; I_t \\geq 0,\\; z_{t,\\tau} \\geq 0 \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau \\leq t",
+            "parameters": [
+                "period_set"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "age_tracked_sales"
+            ]
+        },
+        {
+            "name": "lower_triangular_age_tracking",
+            "description": "Age-tracked sales are defined only for valid period pairs where the purchase period is not later than the sale period.",
+            "formula": "z_{t,\\tau} = 0 \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau > t",
+            "parameters": [
+                "period_set"
+            ],
+            "variables": [
+                "age_tracked_sales"
+            ]
+        },
+        {
+            "name": "integrality_if_required",
+            "description": "Decision quantities are treated as continuous nonnegative quantities in the baseline because integrality is not required by the problem statement.",
+            "formula": "x_t \\in \\mathbb{R}_{\\ge 0},\\; y_t \\in \\mathbb{R}_{\\ge 0},\\; I_t \\in \\mathbb{R}_{\\ge 0},\\; z_{t,\\tau} \\in \\mathbb{R}_{\\ge 0} \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau \\le t",
+            "parameters": [
+                "period_set"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "age_tracked_sales"
+            ]
+        },
+        {
+            "name": "warehouse_capacity_limit",
+            "description": "Inventory held in the warehouse cannot exceed the storage capacity in any period.",
+            "formula": "I_t \\le K \\quad \\forall t \\in \\mathcal{T}",
+            "parameters": [
+                "warehouse_capacity",
+                "period_set"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "sales_volume_limit",
+            "description": "Sales in each period cannot exceed the period-specific maximum sales volume.",
+            "formula": "y_t \\le d_t \\quad \\forall t \\in \\mathcal{T}",
+            "parameters": [
+                "max_sales_volume",
+                "period_set"
+            ],
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "inventory_flow_consistency",
+            "description": "Inventory must follow period-by-period flow consistency between purchases, sales, and carried inventory.",
+            "formula": "I_t = I_{t-1} + x_t - y_t \\quad \\forall t=0,\\dots,T-1,\\; I_{-1}=I_0",
+            "parameters": [
+                "initial_inventory",
+                "planning_horizon_periods"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "age_based_storage_cost_tracking",
+            "description": "Storage cost is represented directly in the objective through age-tracked quantities, with cost increasing linearly by age.",
+            "formula": "\\sum_{t=0}^{T-1} \\sum_{\\tau=0}^{t} \\left(a + b(t-\\tau)\\right) z_{t,\\tau}",
+            "parameters": [
+                "base_storage_cost",
+                "age_dependent_storage_cost"
+            ],
+            "variables": [
+                "age_tracked_sales"
+            ]
+        },
+        {
+            "name": "final_inventory_cleared",
+            "description": "All remaining inventory must be cleared by the end of the final period, matching the required ending inventory at the horizon end.",
+            "formula": "I_{T-1}=I_T",
+            "parameters": [
+                "final_inventory_requirement"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_annual_profit_maximization",
+            "description": "Maximize total annual profit from timber purchases, sales, and storage",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize total annual profit from timber purchases, sales, and age-dependent storage costs.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{t=0}^{T-1} c_t^{\\mathrm{sell}} y_t - \\sum_{t=0}^{T-1} c_t^{\\mathrm{buy}} x_t - \\sum_{t=0}^{T-1} \\sum_{\\tau=0}^{t} \\left(a + b(t-\\tau)\\right) z_{t,\\tau}",
+        "parameters": [
+            "sale_price",
+            "purchase_price",
+            "base_storage_cost",
+            "age_dependent_storage_cost"
+        ],
+        "variables": [
+            "total_profit",
+            "sales_quantity",
+            "purchase_quantity",
+            "age_tracked_sales"
+        ]
+    }
+}

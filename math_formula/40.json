@@ -1,0 +1,223 @@
+{
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ yearly decision periods, indexed by $$t\\in\\mathcal T=\\{1,\\ldots,T\\}$$.\n- There are $$P$$ investment products, indexed by $$p\\in\\mathcal P=\\{1,\\ldots,P\\}$$.\n- The planner starts with initial liquid capital $$C_0$$ at the beginning of period $$1$$.\n- Each product $$p$$ has a set of periods when it can be purchased, a fixed gross payout multiplier at maturity, a maturity delay measured in periods, and a maximum investable amount.\n- At the beginning of each period, only the cash currently on hand may be allocated. Cash on hand includes the initial capital and any proceeds from investments that have already matured.\n- No borrowing, leverage, or negative cash positions are allowed.\n- A product may only receive investment in periods when it is available.\n- Investments in each product must respect its capacity; a product with unlimited capacity may accept any nonnegative amount of available cash.\n- Cash that is not invested in a period remains liquid and may be used in later periods.\n- Proceeds are received at the specified maturity time and become part of the cash available at the appropriate later decision time.\n- The planning goal is to choose the investment amounts so that the total wealth at the end of period $$T$$ is maximized.\n- A solution is represented by:\n  - $$x_{p,t}$$: the amount invested in product $$p$$ at the beginning of period $$t$$.\n  - $$b_t$$: the liquid cash available at the beginning of period $$t$$.\n  - $$W_T$$: the total wealth at the end of period $$T$$.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"type\": \"$$\\\\mathbb{Z}_{>0}$$\",\n    \"meaning\": \"number of yearly decision periods\"\n  },\n  \"initial_capital\": {\n    \"symbol\": \"$$C_0$$\",\n    \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}$$\",\n    \"meaning\": \"cash available at the beginning of period $$1$$\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal P$$\",\n    \"type\": \"array of length $$P$$\",\n    \"meaning\": \"investment products\"\n  },\n  \"product_fields\": {\n    \"available_periods\": {\n      \"symbol\": \"$$\\\\mathcal A_p\\\\subseteq\\\\mathcal T$$\",\n      \"type\": \"list of integers\",\n      \"meaning\": \"periods when product $$p$$ can be purchased\"\n    },\n    \"maturity_delay\": {\n      \"symbol\": \"$$d_p$$\",\n      \"type\": \"$$\\\\mathbb{Z}_{\\\\ge 0}$$\",\n      \"meaning\": \"number of periods from purchase to payout\"\n    },\n    \"gross_multiplier\": {\n      \"symbol\": \"$$\\\\alpha_p$$\",\n      \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}$$\",\n      \"meaning\": \"cash received per unit invested at maturity\"\n    },\n    \"capacity\": {\n      \"symbol\": \"$$U_p$$\",\n      \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}\\\\cup\\\\{+\\\\infty\\\\}$$\",\n      \"meaning\": \"maximum amount that may be invested in product $$p$$ in one purchase period\"\n    }\n  },\n  \"planning_goal\": {\n    \"symbol\": \"$$\\\\max W_T$$\",\n    \"meaning\": \"maximize total wealth at the end of period $$T$$\"\n  }\n}\n\nOutput Format\n{\n  \"investment_plan\": {\n    \"symbol\": \"$$X=[x_{p,t}]$$\",\n    \"shape\": \"$$P\\\\times T$$\",\n    \"meaning\": \"investment amount in each product $$p$$ at each period $$t$$\"\n  },\n  \"cash_balance\": {\n    \"symbol\": \"$$b_t$$\",\n    \"shape\": \"$$T+1$$\",\n    \"meaning\": \"liquid cash available at each decision time, including the initial time and the final time\"\n  },\n  \"terminal_wealth\": {\n    \"symbol\": \"$$W_T$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"total wealth at the end of period $$T$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 3,\n  \"initial_capital\": 500000,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"available_periods\": [1, 2, 3],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.20,\n      \"capacity\": \"unlimited\"\n    },\n    {\n      \"id\": 2,\n      \"available_periods\": [1],\n      \"maturity_delay\": 1,\n      \"gross_multiplier\": 1.50,\n      \"capacity\": 120000\n    },\n    {\n      \"id\": 3,\n      \"available_periods\": [2],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.60,\n      \"capacity\": 150000\n    },\n    {\n      \"id\": 4,\n      \"available_periods\": [3],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.40,\n      \"capacity\": 100000\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "time_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of decision periods in the planning horizon"
+        },
+        {
+            "name": "initial_capital",
+            "symbol": "C_0",
+            "shape": [],
+            "description": "Initial liquid capital available at time 0"
+        },
+        {
+            "name": "product_count",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of investment products"
+        },
+        {
+            "name": "availability_sets",
+            "symbol": "\\mathcal A",
+            "shape": [
+                "P"
+            ],
+            "description": "Allowed investment periods for each product"
+        },
+        {
+            "name": "maturity_delays",
+            "symbol": "d",
+            "shape": [
+                "P"
+            ],
+            "description": "Maturity delay for each product in periods"
+        },
+        {
+            "name": "gross_multipliers",
+            "symbol": "\\alpha",
+            "shape": [
+                "P"
+            ],
+            "description": "Gross payout multiplier at maturity for each product"
+        },
+        {
+            "name": "capacities",
+            "symbol": "U",
+            "shape": [
+                "P"
+            ],
+            "description": "Investment capacity for each product; may be finite or unlimited"
+        }
+    ],
+    "variables": [
+        {
+            "name": "investment_amounts",
+            "symbol": "x",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Amount invested in product p at the beginning of period t"
+        },
+        {
+            "name": "liquid_cash_balances",
+            "symbol": "b",
+            "shape": [
+                "T+1"
+            ],
+            "domain": "continuous",
+            "description": "Liquid cash available at the beginning of each decision time t"
+        },
+        {
+            "name": "terminal_wealth",
+            "symbol": "W_T",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total wealth at the end of period T"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "nonnegative_investment_amounts",
+            "description": "investment amounts are nonnegative for all products and periods",
+            "formula": "x_{p,t} \\ge 0",
+            "parameters": [],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "nonnegative_cash_balances",
+            "description": "liquid cash balances are nonnegative for all decision times",
+            "formula": "b_t \\ge 0",
+            "parameters": [],
+            "variables": [
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "nonnegative_terminal_wealth",
+            "description": "terminal wealth is nonnegative",
+            "formula": "W_T \\ge 0",
+            "parameters": [],
+            "variables": [
+                "terminal_wealth"
+            ]
+        },
+        {
+            "name": "allowed_purchase_periods_only",
+            "description": "investment in a product is only allowed in its permitted periods",
+            "formula": "x_{p,t}=0 \\quad \\forall\\, t\\notin \\mathcal A_p",
+            "parameters": [
+                "availability_sets"
+            ],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "capacity_limit_per_product_period",
+            "description": "investment in any product during a period cannot exceed its capacity when capacity is finite",
+            "formula": "x_{p,t} \\le U_p",
+            "parameters": [
+                "capacities"
+            ],
+            "variables": [
+                "investment_amounts"
+            ]
+        },
+        {
+            "name": "cash_availability_limit",
+            "description": "cash used for investments in a period cannot exceed cash available at the beginning of that period including matured proceeds",
+            "formula": "\\sum_{p=1}^{P} x_{p,t} \\le b_t + \\sum_{p=1}^{P} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau+d_p=t\\}}\\,\\alpha_p x_{p,\\tau} \\quad \\forall\\, t=1,\\ldots,T",
+            "parameters": [
+                "maturity_delays",
+                "gross_multipliers"
+            ],
+            "variables": [
+                "investment_amounts",
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "no_borrowing_or_negative_cash",
+            "description": "borrowing, leverage, and negative cash positions are not allowed",
+            "formula": "b_t \\ge 0",
+            "parameters": [
+                "initial_capital"
+            ],
+            "variables": [
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "matured_proceeds_arrive_later",
+            "description": "proceeds from an investment become liquid cash after the product-specific maturity delay",
+            "formula": "\\text{proceeds from } x_{p,t} \\text{ arrive after } d_p \\text{ periods}",
+            "parameters": [
+                "maturity_delays",
+                "gross_multipliers"
+            ],
+            "variables": [
+                "investment_amounts",
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "cash_carry_forward",
+            "description": "cash not invested in a period remains liquid and carries forward to the next period",
+            "formula": "b_{t+1}= b_t + \\sum_{p=1}^{P} \\sum_{\\tau=1}^{t} \\mathbf{1}_{\\{\\tau+d_p=t+1\\}}\\,\\alpha_p x_{p,\\tau} - \\sum_{p=1}^{P} x_{p,t} \\quad \\forall\\, t=1,\\ldots,T",
+            "parameters": [
+                "maturity_delays",
+                "gross_multipliers"
+            ],
+            "variables": [
+                "investment_amounts",
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "initial_cash_balance",
+            "description": "the initial liquid cash available at the beginning of the horizon equals the given initial capital",
+            "formula": "b_1 = C_0",
+            "parameters": [
+                "initial_capital"
+            ],
+            "variables": [
+                "liquid_cash_balances"
+            ]
+        },
+        {
+            "name": "terminal_wealth_definition",
+            "description": "terminal wealth equals the cash balance at the end of the final period plus any proceeds that mature after period T if such proceeds are included in the horizon valuation; here terminal wealth is identified with the ending liquid cash position after period T",
+            "formula": "W_T = b_{T+1}",
+            "parameters": [],
+            "variables": [
+                "liquid_cash_balances",
+                "terminal_wealth"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "terminal_wealth_maximization",
+            "description": "maximize the total wealth at the end of period T",
+            "sense": "maximize"
+        }
+    ],
+    "final_objective": {
+        "description": "Maximize terminal wealth at the end of period T.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "\\max\\; W_T",
+        "parameters": [],
+        "variables": [
+            "terminal_wealth"
+        ]
+    }
+}

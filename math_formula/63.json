@@ -1,0 +1,232 @@
+{
+    "problem": "Problem description\n- The company must choose a subset of candidates from a candidate pool $$\\mathcal{C}$$ to form an R&D team.\n- Each candidate $$i \\in \\mathcal{C}$$ has three attributes: salary requirement $$s_i$$, skill level $$u_i$$, and project management experience $$e_i$$.\n- The hiring decision is a single-stage planning decision over the horizon $$\\mathcal{T}$$, with no multi-period carryover.\n- The planning goal is to select candidates so that the total salary paid is as small as possible while satisfying all hiring requirements.\n- The total salary of all hired candidates must not exceed the available budget $$B$$.\n- The number of hired candidates must not exceed the hiring limit $$H^{\\max}$$.\n- The total skill level of the hired candidates must be at least the required minimum $$U^{\\min}$$.\n- The total project management experience of the hired candidates must be at least the required minimum $$E^{\\min}$$.\n- For every incompatible pair in the set $$\\mathcal{K}$$, at most one candidate from that pair may be hired.\n- A solution is represented by:\n  - A binary decision variable $$x_i$$ for each candidate $$i \\in \\mathcal{C}$$, where $$x_i=1$$ means candidate $$i$$ is hired and $$x_i=0$$ means candidate $$i$$ is not hired.\n  - The selected team as the subset of candidates with $$x_i=1$$.\n  - The resulting total salary, total skill, and total experience of the selected team as derived quantities.\n\nInput Format\n{\n  \"candidates\": [\n    {\n      \"id\": \"$$i$$\",\n      \"salary_requirement\": \"$$s_i$$\",\n      \"skill_level\": \"$$u_i$$\",\n      \"project_management_experience\": \"$$e_i$$\"\n    }\n  ],\n  \"budget\": \"$$B$$\",\n  \"max_hires\": \"$$H^{\\\\max}$$\",\n  \"minimum_total_skill\": \"$$U^{\\\\min}$$\",\n  \"minimum_total_experience\": \"$$E^{\\\\min}$$\",\n  \"incompatible_pairs\": [\n    {\n      \"candidate_a\": \"$$i$$\",\n      \"candidate_b\": \"$$j$$\"\n    }\n  ]\n}\nThe candidate attribute arrays have length $$N=|\\mathcal{C}|$$, and the incompatible pair list is the set $$\\mathcal{K}$$ of forbidden candidate pairings.\n\nOutput Format\n{\n  \"hire_decisions\": [\n    {\n      \"candidate_id\": \"$$i$$\",\n      \"selected\": \"$$x_i$$\"\n    }\n  ],\n  \"selected_candidates\": [\n    \"$$i \\\\in \\\\mathcal{C}: x_i=1$$\"\n  ],\n  \"total_salary\": \"$$Z_s$$\",\n  \"total_skill\": \"$$Z_u$$\",\n  \"total_experience\": \"$$Z_e$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"candidates\": [\n    {\n      \"id\": \"F\",\n      \"salary_requirement\": 12000,\n      \"skill_level\": 2,\n      \"project_management_experience\": 1\n    },\n    {\n      \"id\": \"G\",\n      \"salary_requirement\": 15000,\n      \"skill_level\": 3,\n      \"project_management_experience\": 2\n    },\n    {\n      \"id\": \"H\",\n      \"salary_requirement\": 18000,\n      \"skill_level\": 4,\n      \"project_management_experience\": 2\n    },\n    {\n      \"id\": \"I\",\n      \"salary_requirement\": 5000,\n      \"skill_level\": 1,\n      \"project_management_experience\": 5\n    },\n    {\n      \"id\": \"J\",\n      \"salary_requirement\": 10000,\n      \"skill_level\": 2,\n      \"project_management_experience\": 4\n    }\n  ],\n  \"budget\": 40000,\n  \"max_hires\": 4,\n  \"minimum_total_skill\": 8,\n  \"minimum_total_experience\": 8,\n  \"incompatible_pairs\": [\n    {\n      \"candidate_a\": \"G\",\n      \"candidate_b\": \"J\"\n    }\n  ]\n}",
+    "parameters": [
+        {
+            "name": "num_candidates",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of candidates in the pool"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of periods in the planning horizon"
+        },
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Available budget"
+        },
+        {
+            "name": "max_hires",
+            "symbol": "H^{\\max}",
+            "shape": [],
+            "description": "Maximum number of hires"
+        },
+        {
+            "name": "minimum_total_skill",
+            "symbol": "U^{\\min}",
+            "shape": [],
+            "description": "Minimum total skill required"
+        },
+        {
+            "name": "minimum_total_experience",
+            "symbol": "E^{\\min}",
+            "shape": [],
+            "description": "Minimum total project management experience required"
+        },
+        {
+            "name": "salary_requirement",
+            "symbol": "s",
+            "shape": [
+                "N"
+            ],
+            "description": "Salary requirement of each candidate"
+        },
+        {
+            "name": "skill_level",
+            "symbol": "u",
+            "shape": [
+                "N"
+            ],
+            "description": "Skill level of each candidate"
+        },
+        {
+            "name": "project_management_experience",
+            "symbol": "e",
+            "shape": [
+                "N"
+            ],
+            "description": "Project management experience of each candidate"
+        },
+        {
+            "name": "num_incompatible_pairs",
+            "symbol": "K",
+            "shape": [],
+            "description": "Number of incompatible candidate pairs"
+        },
+        {
+            "name": "incompatible_pair_a",
+            "symbol": "a",
+            "shape": [
+                "K"
+            ],
+            "description": "First candidate index in each incompatible pair"
+        },
+        {
+            "name": "incompatible_pair_b",
+            "symbol": "b",
+            "shape": [
+                "K"
+            ],
+            "description": "Second candidate index in each incompatible pair"
+        }
+    ],
+    "variables": [
+        {
+            "name": "selected_candidate",
+            "symbol": "x",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary selection decision for each candidate"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "binary_selection_domain",
+            "description": "Each candidate selection decision must be binary",
+            "formula": "x[i] \\in \\{0,1\\}",
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "budget_limit",
+            "description": "Selected candidates must have total salary within the available budget",
+            "formula": "Z_s \\le B",
+            "parameters": [
+                "budget",
+                "salary_requirement"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "hire_count_limit",
+            "description": "The number of selected candidates must not exceed the maximum hires",
+            "formula": "\\sum_i x[i] \\le H^{\\max}",
+            "parameters": [
+                "max_hires"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "skill_requirement",
+            "description": "Selected candidates must meet the minimum total skill requirement",
+            "formula": "Z_u \\ge U^{\\min}",
+            "parameters": [
+                "minimum_total_skill",
+                "skill_level"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "experience_requirement",
+            "description": "Selected candidates must meet the minimum total project management experience requirement",
+            "formula": "Z_e \\ge E^{\\min}",
+            "parameters": [
+                "minimum_total_experience",
+                "project_management_experience"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "incompatibility_pairwise_limit",
+            "description": "For each incompatible pair, at most one candidate may be selected",
+            "formula": "x[a[k]] + x[b[k]] \\le 1",
+            "parameters": [
+                "incompatible_pair_a",
+                "incompatible_pair_b",
+                "num_incompatible_pairs"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "single_stage_no_carryover",
+            "description": "The planning horizon is informational only; the model is a single-stage selection problem with no period-indexed decisions or carryover state.",
+            "formula": "\\text{No period-indexed variables or carryover state are introduced; decisions are modeled only by } x_i,\\ i=0,\\dots,N-1",
+            "parameters": [
+                "num_periods"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "total_salary_definition",
+            "description": "Define total salary as the sum of salaries of selected candidates",
+            "formula": "Z_s = \\sum_{i=0}^{N-1} s_i x_i",
+            "parameters": [
+                "salary_requirement"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "total_skill_definition",
+            "description": "Define total skill as the sum of skill levels of selected candidates",
+            "formula": "Z_u = \\sum_{i=0}^{N-1} u_i x_i",
+            "parameters": [
+                "skill_level"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        },
+        {
+            "name": "total_experience_definition",
+            "description": "Define total project management experience as the sum of experiences of selected candidates",
+            "formula": "Z_e = \\sum_{i=0}^{N-1} e_i x_i",
+            "parameters": [
+                "project_management_experience"
+            ],
+            "variables": [
+                "selected_candidate"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "salary_minimization",
+            "description": "Minimize the total salary of the selected candidates while satisfying all hiring requirements",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total salary of selected candidates while satisfying all hiring requirements; this is a single-objective MILP.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i=0}^{N-1} s_i x_i",
+        "parameters": [
+            "salary_requirement"
+        ],
+        "variables": [
+            "selected_candidate"
+        ]
+    }
+}

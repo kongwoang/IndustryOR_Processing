@@ -1,0 +1,194 @@
+{
+    "problem": "Problem description\n- There are $$n$$ locations indexed by $$i \\in \\mathcal{N}=\\{1,2,\\dots,n\\}$$, and one designated depot location $$r \\in \\mathcal{N}$$ where the tour must both start and end.\n- The travel cost between any two locations is given by a symmetric distance matrix $$D \\in \\mathbb{R}_{\\ge 0}^{n \\times n}$$, where $$D_{ij}$$ is the distance from location $$i$$ to location $$j$$.\n- The planning goal is to determine a single minimum-distance closed tour that visits all locations exactly once and returns to the depot.\n- The route must begin at the depot $$r$$, visit every other location exactly one time, and end at the same depot $$r$$.\n- The tour must not split into disconnected partial cycles; all visited locations must belong to one continuous visiting order.\n- Distances are additive over consecutive travel legs, and the objective is to minimize the total travel distance of the full tour.\n- A solution is represented by:\n  - a tour sequence $$\\pi$$ listing the visited locations in order, with $$\\pi_1=r$$ and $$\\pi_{n+1}=r$$;\n  - or equivalently a set of directed travel decisions $$x_{ij}$$ indicating whether the route goes directly from location $$i$$ to location $$j$$;\n  - optionally, auxiliary ordering variables $$u_i$$ for enforcing a valid single tour without subtours.\n\nInput Format\n{\n  \"n\": \"number of locations, represented symbolically as $$n$$\",\n  \"r\": \"depot index, represented symbolically as $$r$$\",\n  \"D\": {\n    \"type\": \"symmetric distance matrix\",\n    \"shape\": \"$$n \\\\times n$$\",\n    \"meaning\": \"$$D_{ij}$$ is the travel distance between locations $$i$$ and $$j$$, with $$D_{ij}=D_{ji}$$\"\n  }\n}\n\nOutput Format\n{\n  \"tour\": {\n    \"type\": \"ordered list of location indices\",\n    \"shape\": \"$$n+1$$\",\n    \"meaning\": \"a minimum-distance visiting order that starts at $$r$$, visits each location exactly once, and ends at $$r$$\"\n  },\n  \"total_distance\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"the total travel distance of the returned tour\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"n\":  \"7\",\n  \"r\":  \"1\",\n  \"D\": [\n    [\"0\", \"86\", \"49\", \"57\", \"31\", \"69\", \"50\"],\n    [\"86\", \"0\", \"68\", \"79\", \"93\", \"24\", \"5\"],\n    [\"49\", \"68\", \"0\", \"16\", \"7\", \"72\", \"67\"],\n    [\"57\", \"79\", \"16\", \"0\", \"90\", \"69\", \"1\"],\n    [\"31\", \"93\", \"7\", \"90\", \"0\", \"86\", \"59\"],\n    [\"69\", \"24\", \"72\", \"69\", \"86\", \"0\", \"81\"],\n    [\"50\", \"5\", \"67\", \"1\", \"59\", \"81\", \"0\"]\n  ]\n}",
+    "parameters": [
+        {
+            "name": "total_locations",
+            "symbol": "n",
+            "shape": [],
+            "description": "Total number of locations in the set of tour nodes."
+        },
+        {
+            "name": "depot_index",
+            "symbol": "r",
+            "shape": [],
+            "description": "Index of the designated depot location."
+        },
+        {
+            "name": "distance_matrix",
+            "symbol": "D",
+            "shape": [
+                "n",
+                "n"
+            ],
+            "description": "Symmetric nonnegative travel distance matrix between locations."
+        }
+    ],
+    "variables": [
+        {
+            "name": "travel_decision",
+            "symbol": "x",
+            "shape": [
+                "n",
+                "n"
+            ],
+            "domain": "binary",
+            "description": "Binary directed travel decision indicating whether the tour goes directly from location i to location j."
+        },
+        {
+            "name": "ordering_variable",
+            "symbol": "u",
+            "shape": [
+                "n"
+            ],
+            "domain": "continuous",
+            "description": "Auxiliary ordering variable for each location to support subtour elimination."
+        },
+        {
+            "name": "tour_sequence",
+            "symbol": "\\pi",
+            "shape": [
+                "n+1"
+            ],
+            "domain": "integer",
+            "description": "Ordered tour sequence of visited locations, with the depot appearing at both start and end."
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "travel_decision_binary",
+            "description": "Directed travel decision variables must be binary",
+            "formula": "x_{ij}\\in\\{0,1\\} \\quad \\forall i,j\\in\\mathcal{N}",
+            "parameters": [
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision"
+            ]
+        },
+        {
+            "name": "depot_start_end_outgoing",
+            "description": "The depot must have exactly one outgoing travel decision",
+            "formula": "\\sum_{j=0}^{n-1} x_{rj}=1",
+            "parameters": [
+                "depot_index",
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision"
+            ]
+        },
+        {
+            "name": "depot_start_end_incoming",
+            "description": "The depot must have exactly one incoming travel decision",
+            "formula": "\\sum_{i=0}^{n-1} x_{ir}=1",
+            "parameters": [
+                "depot_index",
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision"
+            ]
+        },
+        {
+            "name": "mtz_depot_order",
+            "description": "Fix the depot ordering variable to the first position to anchor subtour elimination",
+            "formula": "u_r=0",
+            "parameters": [
+                "depot_index"
+            ],
+            "variables": [
+                "ordering_variable"
+            ]
+        },
+        {
+            "name": "mtz_bounds_non_depot",
+            "description": "Ordering variables for non-depot locations must lie within the MTZ index range",
+            "formula": "1\\le u_i\\le n-1 \\quad \\forall i\\in\\mathcal{N}\\setminus\\{r\\}",
+            "parameters": [
+                "depot_index",
+                "total_locations"
+            ],
+            "variables": [
+                "ordering_variable"
+            ]
+        },
+        {
+            "name": "mtz_subtour_elimination",
+            "description": "Miller-Tucker-Zemlin subtour elimination constraints for all distinct non-depot pairs",
+            "formula": "u_i - u_j + n x_{ij} \\le n-1 \\quad \\forall i,j \\in \\mathcal{N}\\setminus\\{r\\},\\ i\\ne j",
+            "parameters": [
+                "depot_index",
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision",
+                "ordering_variable"
+            ]
+        },
+        {
+            "name": "depot_start_end_fixed_ends",
+            "description": "The tour must start and end at the designated depot location",
+            "formula": "\\pi_0=r,\\ \\pi_n=r",
+            "parameters": [
+                "depot_index"
+            ],
+            "variables": [
+                "tour_sequence"
+            ]
+        },
+        {
+            "name": "tour_sequence_covers_each_location_once",
+            "description": "Every non-depot location must appear exactly once in the tour sequence, excluding the repeated depot at the end",
+            "formula": "\\sum_{k=1}^{n-1} \\mathbf{1}(\\pi_k=i)=1 \\quad \\forall i\\in\\mathcal{N}\\setminus\\{r\\}",
+            "parameters": [
+                "total_locations",
+                "depot_index"
+            ],
+            "variables": [
+                "tour_sequence"
+            ]
+        },
+        {
+            "name": "degree_balance_for_all_locations",
+            "description": "Each location must have exactly one outgoing and one incoming travel decision; this combines depot and non-depot degree conditions",
+            "formula": "\\sum_{j=0}^{n-1} x_{ij} = 1,\\ \\sum_{i=0}^{n-1} x_{ij} = 1 \\quad \\forall i,j \\in \\mathcal{N}",
+            "parameters": [
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision"
+            ]
+        },
+        {
+            "name": "no_self_loops",
+            "description": "The tour cannot travel directly from a location to itself",
+            "formula": "x_{ii}=0 \\quad \\forall i\\in\\mathcal{N}",
+            "parameters": [
+                "total_locations"
+            ],
+            "variables": [
+                "travel_decision"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "total_travel_distance_minimization",
+            "description": "Minimize the total travel distance of the single closed tour visiting every location exactly once and returning to the depot",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Minimize the total travel distance of the single closed tour. This is a single-objective TSP formulation using directed edge decisions, so the objective is the sum of selected arc distances.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i=0}^{n-1}\\sum_{j=0}^{n-1} D_{ij} x_{ij}",
+        "parameters": [
+            "distance_matrix"
+        ],
+        "variables": [
+            "travel_decision"
+        ]
+    }
+}
