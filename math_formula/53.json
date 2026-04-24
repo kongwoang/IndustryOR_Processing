@@ -1,220 +1,157 @@
 {
-    "problem": "Problem description\n- A factory produces a set $$\\mathcal{P}$$ of products over a monthly planning horizon $$\\mathcal{T}$$ using a set $$\\mathcal{M}$$ of equipment types.\n- Each product $$p\\in\\mathcal{P}$$ has a unit profit $$c_p$$.\n- Each unit of product $$p$$ requires processing time $$a_{m,p}$$ on equipment $$m\\in\\mathcal{M}$$.\n- Each equipment type $$m\\in\\mathcal{M}$$ has an available effective capacity $$u_m$$ during the planning horizon.\n- The planning goal is to choose production quantities $$x_p$$ so that total profit is maximized while respecting all equipment capacities and making practical use of the available machine time.\n- Business constraints:\n  - Only products in $$\\mathcal{P}$$ may be produced.\n  - The total processing time required on each equipment $$m$$ by all produced products must not exceed the available capacity $$u_m$$.\n  - Production quantities $$x_p$$ must be feasible output levels and cannot be negative.\n  - The production plan should prioritize the mix of products that yields the highest total profit under the capacity limits.\n- A solution is represented by:\n  - $$x_p$$: the planned production quantity of product $$p\\in\\mathcal{P}$$.\n  - $$z$$: the resulting total profit of the production plan.\n  - $$h_m$$: the total equipment time used on equipment $$m\\in\\mathcal{M}$$, if equipment utilization is reported.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"monthly planning horizon\",\n    \"structure\": \"single planning period\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"meaning\": \"set of products\",\n    \"structure\": \"indexed set with size $$P$$\"\n  },\n  \"equipment\": {\n    \"symbol\": \"$$\\\\mathcal{M}$$\",\n    \"meaning\": \"set of equipment types\",\n    \"structure\": \"indexed set with size $$M$$\"\n  },\n  \"processing_time\": {\n    \"symbol\": \"$$a_{m,p}$$\",\n    \"meaning\": \"processing time required on equipment $$m$$ for one unit of product $$p$$\",\n    \"shape\": \"$$M\\\\times P$$\"\n  },\n  \"available_capacity\": {\n    \"symbol\": \"$$u_m$$\",\n    \"meaning\": \"available effective hours for equipment $$m$$ in the planning horizon\",\n    \"shape\": \"$$M$$\"\n  },\n  \"unit_profit\": {\n    \"symbol\": \"$$c_p$$\",\n    \"meaning\": \"profit per unit of product $$p$$\",\n    \"shape\": \"$$P$$\"\n  },\n  \"decision_variables\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"meaning\": \"quantity of product $$p$$ to produce\",\n      \"shape\": \"$$P$$\"\n    }\n  },\n  \"objective\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximize total profit from all produced products\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_p$$\",\n    \"meaning\": \"optimal production quantity for each product $$p$$\",\n    \"shape\": \"$$P$$\"\n  },\n  \"equipment_usage\": {\n    \"symbol\": \"$$h_m$$\",\n    \"meaning\": \"total utilized hours on each equipment $$m$$\",\n    \"shape\": \"$$M$$\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$z$$\",\n    \"meaning\": \"maximum achievable total profit\",\n    \"shape\": \"scalar\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"1 monthly period\",\n  \"products\": [\"I\", \"II\", \"III\"],\n  \"equipment\": [\"A\", \"B\", \"C\"],\n  \"processing_time\": [\n    [8, 2, 10],\n    [10, 5, 8],\n    [2, 13, 10]\n  ],\n  \"available_capacity\": [300, 400, 420],\n  \"unit_profit\": [3, 2, 2.9]\n}",
+    "problem": "Problem description\n- There is a finite set of children indexed by $$i \\in \\mathcal{I}$$.\n- Each child $$i$$ has a selection cost $$c_i$$.\n- The planning horizon is a single decision period, so the decision is whether each child is included in the trip or not.\n- The planning goal is to choose a subset of children that minimizes total selection cost while satisfying all family rules and trip-size limits.\n- A child-selection decision is represented by:\n  - $$x_i$$: a binary variable that equals $$1$$ if child $$i$$ is taken on the trip and $$0$$ otherwise.\n  - The selected set is the collection of all children with $$x_i = 1$$.\n  - The total trip cost is the sum of the costs of all selected children.\n- Mandatory participation rules:\n  - Some children may be required to be included in every feasible plan.\n- Capacity rules:\n  - The total number of selected children may not exceed an upper limit $$U$$.\n  - The total number of selected children must be at least a lower limit $$L$$.\n- Compatibility rules:\n  - If one child is selected, certain other children must not be selected together with that child.\n- Precedence or dependency rules:\n  - If one child is selected, one or more other children must also be selected.\n- The objective is to minimize the total cost of the selected children subject to the mandatory, capacity, compatibility, and dependency rules.\n- A solution is represented by:\n  - $$x_i$$ for each $$i \\in \\mathcal{I}$$, indicating whether each child is selected.\n  - The resulting selected subset of children.\n  - The total minimized trip cost.\n\nInput Format\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Set of children indexed by $$i$$.\",\n      \"size\": \"$$n$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"description\": \"Selection cost of child $$i$$.\",\n      \"shape\": [\"$$n$$\"]\n    },\n    \"$$U$$\": {\n      \"description\": \"Maximum number of children that may be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$L$$\": {\n      \"description\": \"Minimum number of children that must be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$\\\\mathcal{M}$$\": {\n      \"description\": \"Set of mandatory children that must be selected.\",\n      \"type\": \"set of indices\"\n    },\n    \"$$\\\\mathcal{P}$$\": {\n      \"description\": \"Set of ordered dependency rules where selecting one child requires selecting another child or group of children.\",\n      \"type\": \"list of rules\"\n    },\n    \"$$\\\\mathcal{Q}$$\": {\n      \"description\": \"Set of incompatibility rules where selecting one child forbids selecting another child or group of children together.\",\n      \"type\": \"list of rules\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"decision_variables\": {\n    \"$$x_i$$\": {\n      \"description\": \"Binary selection variable for child $$i$$.\",\n      \"shape\": [\"$$n$$\"],\n      \"values\": [\"$$0$$\", \"$$1$$\"]\n    }\n  },\n  \"selected_children\": {\n    \"description\": \"The set of children with $$x_i = 1$$.\",\n    \"type\": \"list of indices\"\n  },\n  \"total_cost\": {\n    \"description\": \"The minimized total selection cost of the chosen children.\",\n    \"type\": \"number\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Children\",\n      \"elements\": [\"$$\\\\text{Harry}$$\", \"$$\\\\text{Hermione}$$\", \"$$\\\\text{Ron}$$\", \"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\", \"$$\\\\text{Ginny}$$\"],\n      \"size\": \"$$6$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"$$\\\\text{Harry}$$\": \"$$1200$$\",\n      \"$$\\\\text{Hermione}$$\": \"$$1650$$\",\n      \"$$\\\\text{Ron}$$\": \"$$750$$\",\n      \"$$\\\\text{Fred}$$\": \"$$800$$\",\n      \"$$\\\\text{George}$$\": \"$$800$$\",\n      \"$$\\\\text{Ginny}$$\": \"$$1500$$\"\n    },\n    \"$$U$$\": \"$$4$$\",\n    \"$$L$$\": \"$$3$$\",\n    \"$$\\\\mathcal{M}$$\": [\"$$\\\\text{Ginny}$$\"],\n    \"$$\\\\mathcal{P}$$\": [\n      {\n        \"if\": \"$$\\\\text{George}$$\",\n        \"then\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{Hermione}$$\"]\n      }\n    ],\n    \"$$\\\\mathcal{Q}$$\": [\n      {\n        \"if\": \"$$\\\\text{Harry}$$\",\n        \"forbid\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\"]\n      }\n    ]\n  }\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
-            "symbol": "T",
-            "shape": [],
-            "description": "Single monthly planning horizon length"
-        },
-        {
-            "name": "product_set_size",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of products in the finite product set"
-        },
-        {
-            "name": "equipment_set_size",
-            "symbol": "M",
-            "shape": [],
-            "description": "Number of equipment types in the finite equipment set"
-        },
-        {
-            "name": "unit_profit",
+            "name": "selection_cost",
             "symbol": "c",
             "shape": [
-                "P"
+                "n"
             ],
-            "description": "Unit profit for each product"
+            "description": "Selection cost of each child $i \\in \\mathcal{I}$"
         },
         {
-            "name": "processing_time",
-            "symbol": "a",
-            "shape": [
-                "M",
-                "P"
-            ],
-            "description": "Processing time consumed on each equipment type by each product"
+            "name": "max_selected_children",
+            "symbol": "U",
+            "shape": [],
+            "description": "Maximum number of selected children"
         },
         {
-            "name": "available_capacity",
-            "symbol": "u",
+            "name": "min_selected_children",
+            "symbol": "L",
+            "shape": [],
+            "description": "Minimum number of selected children"
+        },
+        {
+            "name": "mandatory_children",
+            "symbol": "\\mathcal{M}",
             "shape": [
-                "M"
+                "-"
             ],
-            "description": "Available effective capacity for each equipment type over the planning horizon"
+            "description": "Set of mandatory children"
+        },
+        {
+            "name": "precedence_rules",
+            "symbol": "\\mathcal{P}",
+            "shape": [
+                "-"
+            ],
+            "description": "List of precedence or dependency rules"
+        },
+        {
+            "name": "incompatibility_rules",
+            "symbol": "\\mathcal{Q}",
+            "shape": [
+                "-"
+            ],
+            "description": "List of incompatibility rules"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "child_selected",
             "symbol": "x",
             "shape": [
-                "P"
+                "n"
             ],
-            "domain": "continuous",
-            "description": "Production quantity of each product"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "z",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total profit from the chosen production quantities"
-        },
-        {
-            "name": "equipment_usage",
-            "symbol": "h",
-            "shape": [
-                "M"
-            ],
-            "domain": "continuous",
-            "description": "Total equipment usage on each equipment type"
+            "domain": "binary",
+            "description": "Binary selection variable for child $i$, where 1 indicates the child is selected"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "production_nonnegativity",
-            "description": "Production quantities must be nonnegative for all products.",
-            "formula": "x[p] \\ge 0 \\quad \\forall p \\in \\{0,\\dots,P-1\\}",
+            "name": "selection_cardinality_bounds",
+            "description": "The number of selected children must be between the minimum and maximum trip sizes.",
+            "formula": "L \\le \\sum_{i \\in \\mathcal{I}} x_i \\le U",
             "parameters": [
-                "product_set_size"
+                "min_selected_children",
+                "max_selected_children"
             ],
             "variables": [
-                "production_quantity"
+                "child_selected"
             ]
         },
         {
-            "name": "equipment_usage_nonnegativity",
-            "description": "Equipment usage values must be nonnegative for all equipment types.",
-            "formula": "h[m] \\ge 0 \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "name": "mandatory_child_inclusion",
+            "description": "Every mandatory child must be selected.",
+            "formula": "x_i = 1 \\quad \\forall i \\in \\mathcal{M}",
             "parameters": [
-                "equipment_set_size"
+                "mandatory_children"
             ],
             "variables": [
-                "equipment_usage"
+                "child_selected"
             ]
         },
         {
-            "name": "capacity_nonnegativity",
-            "description": "Available capacity must be nonnegative for all equipment types.",
-            "formula": "u[m] \\ge 0 \\quad \\forall m \\,\\in \\{0,\\dots,M-1\\}",
+            "name": "precedence_dependency_rules",
+            "description": "If a child triggers a precedence rule, all listed dependent children must also be selected.",
+            "formula": "x_a \\le x_b \\quad \\forall (a,b) \\in \\mathcal{P}",
             "parameters": [
-                "equipment_set_size",
-                "available_capacity"
-            ],
-            "variables": []
-        },
-        {
-            "name": "processing_time_nonnegativity",
-            "description": "Processing time coefficients must be nonnegative for all equipment types and products.",
-            "formula": "a[m][p] \\ge 0 \\quad \\forall m \\in \\{0,\\dots,M-1\\},\\ \\forall p \\in \\{0,\\dots,P-1\\}",
-            "parameters": [
-                "equipment_set_size",
-                "product_set_size",
-                "processing_time"
-            ],
-            "variables": []
-        },
-        {
-            "name": "total_profit_definition",
-            "description": "Total profit is the sum of unit profits across all produced quantities.",
-            "formula": "z = \\sum_{p=0}^{P-1} c[p] x[p]",
-            "parameters": [
-                "product_set_size",
-                "unit_profit"
+                "precedence_rules"
             ],
             "variables": [
-                "production_quantity",
-                "total_profit"
+                "child_selected"
             ]
         },
         {
-            "name": "equipment_capacity_limit_linearized",
-            "description": "Total processing time used on each equipment type must not exceed its available capacity.",
-            "formula": "\\sum_{p=0}^{P-1} a[m][p]x[p] \\le u[m] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "name": "incompatibility_rules",
+            "description": "If a child triggers an incompatibility rule, none of the listed forbidden children may be selected together with it.",
+            "formula": "x_a + x_b \\le 1 \\quad \\forall (a,b) \\in \\mathcal{Q}",
             "parameters": [
-                "equipment_set_size",
-                "product_set_size",
-                "processing_time",
-                "available_capacity"
+                "incompatibility_rules"
             ],
             "variables": [
-                "production_quantity"
+                "child_selected"
             ]
         },
         {
-            "name": "equipment_usage_definition_linearized",
-            "description": "Reported equipment usage equals the total processing time consumed on each equipment type.",
-            "formula": "h[m] = \\sum_{p=0}^{P-1} a[m][p]x[p] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
-            "parameters": [
-                "equipment_set_size",
-                "product_set_size",
-                "processing_time"
-            ],
+            "name": "binary_selection_variables",
+            "description": "Each child selection decision is binary.",
+            "formula": "x_i \\in \\{0,1\\} \\quad \\forall i \\in \\mathcal{I}",
             "variables": [
-                "production_quantity",
-                "equipment_usage"
+                "child_selected"
             ]
         },
         {
-            "name": "total_profit_definition_linearized",
-            "description": "Total profit equals the sum of unit profits across all produced quantities.",
-            "formula": "z = \\sum_{p=0}^{P-1} c[p]x[p]",
+            "name": "selection_cardinality_bounds_lower",
+            "description": "The number of selected children must be at least the minimum trip size.",
+            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\ge L",
             "parameters": [
-                "product_set_size",
-                "unit_profit"
+                "min_selected_children"
             ],
             "variables": [
-                "production_quantity",
-                "total_profit"
+                "child_selected"
             ]
         },
         {
-            "name": "equipment_capacity_limit_fixed",
-            "description": "Total processing time used on each equipment type must not exceed its available capacity.",
-            "formula": "\\sum_{p=0}^{P-1} a[m][p]x[p] \\le u[m] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
+            "name": "selection_cardinality_bounds_upper",
+            "description": "The number of selected children must not exceed the maximum trip size.",
+            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\le U",
             "parameters": [
-                "equipment_set_size",
-                "product_set_size",
-                "processing_time",
-                "available_capacity"
+                "max_selected_children"
             ],
             "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "equipment_usage_definition_fixed",
-            "description": "Reported equipment usage equals the total processing time consumed on each equipment type.",
-            "formula": "h[m] = \\sum_{p=0}^{P-1} a[m][p]x[p] \\quad \\forall m \\in \\{0,\\dots,M-1\\}",
-            "parameters": [
-                "equipment_set_size",
-                "product_set_size",
-                "processing_time"
-            ],
-            "variables": [
-                "production_quantity",
-                "equipment_usage"
+                "child_selected"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit from the chosen production quantities",
-            "sense": "maximize"
+            "name": "minimize_total_selection_cost",
+            "description": "Minimize the total selection cost of the chosen children.",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit from production quantities, using the scalar total profit variable as the objective value.",
+        "description": "Minimize the total selection cost of the chosen children in the single-period child selection problem.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "z",
-        "parameters": [],
+        "sense": "minimize",
+        "formula": "\\sum_{i \\in \\mathcal{I}} c_i x_i",
+        "parameters": [
+            "selection_cost"
+        ],
         "variables": [
-            "total_profit"
+            "child_selected"
         ]
     }
 }

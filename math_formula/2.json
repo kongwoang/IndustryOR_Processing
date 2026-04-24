@@ -1,449 +1,214 @@
 {
-    "problem": "Problem description\n- There is a single-product production and workforce planning problem over a finite planning horizon of $$T$$ monthly periods, indexed by $$t \\in \\{1,2,\\dots,T\\}$$.\n- The product is a finished good sold to satisfy monthly demand. Demand in each period is exogenous and given by a demand profile $$d_t$$.\n- The company chooses, in each period $$t$$, how much to produce in-house, how much to outsource as finished units, how many workers to employ, how many workers to hire, how many workers to fire, and how many overtime hours to use.\n- The planning goal is to maximize total net profit over the horizon.\n- Revenue is earned from units sold at a unit sales price $$r$$.\n- In-house production consumes raw materials at a unit cost $$c^{\\mathrm{mat}}$$ and requires labor time.\n- Outsourced units are purchased at a unit outsourcing cost $$c^{\\mathrm{out}}$$ and are available as finished goods.\n- Inventory remaining at the end of each period incurs an inventory holding cost $$h$$ per unit.\n- Unfulfilled demand is carried forward as backorders and incurs a backorder penalty cost $$b$$ per unit per period.\n- Each worker provides regular labor capacity of $$H^{\\mathrm{reg}}$$ hours per period, and regular wages are paid at rate $$w^{\\mathrm{reg}}$$ per hour regardless of whether all regular hours are fully utilized.\n- Overtime is allowed, paid at rate $$w^{\\mathrm{ot}}$$ per hour, and the total overtime hours in any period are limited by the workforce size and the per-worker overtime allowance $$H^{\\mathrm{ot}}$$.\n- Each unit produced in-house requires $$\\ell$$ labor hours.\n- Workforce can change from one period to the next through hiring and firing, with hiring cost $$c^{\\mathrm{hire}}$$ per worker and firing cost $$c^{\\mathrm{fire}}$$ per worker.\n- The plan starts from an initial workforce level $$W_0$$ and an initial inventory level $$I_0$$. An initial backorder level $$B_0$$ may also be specified.\n- Demand fulfillment in each period uses available starting inventory, current in-house production, and outsourced units. Any unmet demand becomes backorder and is carried into the next period.\n- The ending inventory at the end of the horizon must be at least $$I_T^{\\min}$$.\n- All backorders must be cleared by the end of the horizon, so the final backorder level must be zero.\n- A solution is represented by:\n  - $$x_t$$: in-house production quantity in period $$t$$\n  - $$u_t$$: outsourced quantity in period $$t$$\n  - $$W_t$$: workforce level in period $$t$$\n  - $$H_t$$: number of workers hired in period $$t$$\n  - $$F_t$$: number of workers fired in period $$t$$\n  - $$o_t$$: overtime hours used in period $$t$$\n  - $$I_t$$: ending inventory in period $$t$$\n  - $$B_t$$: ending backorders in period $$t$$\n\nInput Format\n{\n  \"sets\": {\n    \"periods\": {\n      \"symbol\": \"$$\\\\mathcal{T}=\\\\{1,2,\\\\dots,T\\\\}$$\",\n      \"description\": \"Set of planning periods indexed by $$t$$.\"\n    }\n  },\n  \"time_series\": {\n    \"demand\": {\n      \"symbol\": \"$$d_t$$\",\n      \"shape\": \"$$T$$\",\n      \"description\": \"Forecast demand in period $$t$$.\"\n    }\n  },\n  \"initial_states\": {\n    \"initial_workforce\": {\n      \"symbol\": \"$$W_0$$\",\n      \"description\": \"Workforce available at the start of period $$1$$.\"\n    },\n    \"initial_inventory\": {\n      \"symbol\": \"$$I_0$$\",\n      \"description\": \"Inventory available at the start of period $$1$$.\"\n    },\n    \"initial_backorders\": {\n      \"symbol\": \"$$B_0$$\",\n      \"description\": \"Backorders carried into period $$1$$.\"\n    }\n  },\n  \"economic_parameters\": {\n    \"sales_price\": {\n      \"symbol\": \"$$r$$\",\n      \"description\": \"Unit revenue earned per unit sold.\"\n    },\n    \"inhouse_material_cost\": {\n      \"symbol\": \"$$c^{\\\\mathrm{mat}}$$\",\n      \"description\": \"Unit raw material cost for each in-house unit.\"\n    },\n    \"outsourcing_cost\": {\n      \"symbol\": \"$$c^{\\\\mathrm{out}}$$\",\n      \"description\": \"Unit cost of each outsourced finished unit.\"\n    },\n    \"inventory_holding_cost\": {\n      \"symbol\": \"$$h$$\",\n      \"description\": \"Holding cost per unit of ending inventory in each period.\"\n    },\n    \"backorder_cost\": {\n      \"symbol\": \"$$b$$\",\n      \"description\": \"Penalty cost per unit of ending backorders in each period.\"\n    },\n    \"regular_wage_per_hour\": {\n      \"symbol\": \"$$w^{\\\\mathrm{reg}}$$\",\n      \"description\": \"Regular wage rate per hour.\"\n    },\n    \"overtime_wage_per_hour\": {\n      \"symbol\": \"$$w^{\\\\mathrm{ot}}$$\",\n      \"description\": \"Overtime wage rate per hour.\"\n    },\n    \"hiring_cost_per_worker\": {\n      \"symbol\": \"$$c^{\\\\mathrm{hire}}$$\",\n      \"description\": \"Cost to hire one worker.\"\n    },\n    \"firing_cost_per_worker\": {\n      \"symbol\": \"$$c^{\\\\mathrm{fire}}$$\",\n      \"description\": \"Cost to fire one worker.\"\n    }\n  },\n  \"operating_parameters\": {\n    \"labor_hours_per_inhouse_unit\": {\n      \"symbol\": \"$$\\\\ell$$\",\n      \"description\": \"Labor hours required to produce one in-house unit.\"\n    },\n    \"regular_hours_per_worker\": {\n      \"symbol\": \"$$H^{\\\\mathrm{reg}}$$\",\n      \"description\": \"Regular working hours supplied by one worker in each period.\"\n    },\n    \"max_overtime_hours_per_worker\": {\n      \"symbol\": \"$$H^{\\\\mathrm{ot}}$$\",\n      \"description\": \"Maximum overtime hours allowed per worker in each period.\"\n    }\n  },\n  \"terminal_requirements\": {\n    \"minimum_ending_inventory\": {\n      \"symbol\": \"$$I_T^{\\\\min}$$\",\n      \"description\": \"Minimum required inventory at the end of period $$T$$.\"\n    },\n    \"ending_backorders\": {\n      \"symbol\": \"$$0$$\",\n      \"description\": \"Required backorders at the end of period $$T$$.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_in_house\": {\n    \"symbol\": \"$$x_t$$\",\n    \"shape\": \"$$T$$\",\n    \"description\": \"In-house production quantity in each period $$t$$.\"\n  },\n  \"outsourcing\": {\n    \"symbol\": \"$$u_t$$\",\n    \"shape\": \"$$T$$\",\n    \"description\": \"Outsourced finished quantity in each period $$t$$.\"\n  },\n  \"workforce\": {\n    \"symbol\": \"$$W_t$$\",\n    \"shape\": \"$$T+1$$\",\n    \"description\": \"Workforce level at the start or end state of each period, including the initial state $$W_0$$.\"\n  },\n  \"hires\": {\n    \"symbol\": \"$$H_t$$\",\n    \"shape\": \"$$T$$\",\n    \"description\": \"Number of workers hired in each period $$t$$.\"\n  },\n  \"fires\": {\n    \"symbol\": \"$$F_t$$\",\n    \"shape\": \"$$T$$\",\n    \"description\": \"Number of workers fired in each period $$t$$.\"\n  },\n  \"overtime_hours\": {\n    \"symbol\": \"$$o_t$$\",\n    \"shape\": \"$$T$$\",\n    \"description\": \"Overtime hours used in each period $$t$$.\"\n  },\n  \"ending_inventory\": {\n    \"symbol\": \"$$I_t$$\",\n    \"shape\": \"$$T+1$$\",\n    \"description\": \"Inventory level at the end of each period, including the initial inventory $$I_0$$.\"\n  },\n  \"ending_backorders\": {\n    \"symbol\": \"$$B_t$$\",\n    \"shape\": \"$$T+1$$\",\n    \"description\": \"Backorder level at the end of each period, including the initial backorders $$B_0$$.\"\n  },\n  \"total_net_profit\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"shape\": \"$$1$$\",\n    \"description\": \"Maximum net profit achieved over the full planning horizon.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 6,\n  \"periods\": [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\"],\n  \"initial_workforce\": 1000,\n  \"initial_inventory\": 15000,\n  \"initial_backorders\": 0,\n  \"sales_price\": 300,\n  \"inhouse_material_cost\": 90,\n  \"outsourcing_cost\": 200,\n  \"inventory_holding_cost\": 15,\n  \"backorder_cost\": 35,\n  \"labor_hours_per_inhouse_unit\": 5,\n  \"regular_hours_per_worker\": 160,\n  \"regular_wage_per_hour\": 30,\n  \"max_overtime_hours_per_worker\": 20,\n  \"overtime_wage_per_hour\": 40,\n  \"hiring_cost_per_worker\": 5000,\n  \"firing_cost_per_worker\": 8000,\n  \"minimum_ending_inventory\": 10000,\n  \"ending_backorders\": 0,\n  \"demand\": [20000, 40000, 42000, 35000, 19000, 18500]\n}",
+    "problem": "Problem description\n- There is a planning horizon of $$T$$ periods, indexed by $$t \\in \\mathcal{T} = \\{1,\\dots,T\\}$$.\n- In each period $$t$$, a quantity of fighter jets is produced and becomes available for allocation.\n- A decision is made in each period about how many of the available fighter jets are dedicated exclusively to pilot training.\n- Each training jet can train up to $$\\kappa$$ pilots per period.\n- A trained pilot can operate one combat jet in later periods after training is completed.\n- Training begins in period $$s$$ and is tracked over the planning horizon.\n- If training cost information is included, let $$c_t$$ denote the cost of assigning one jet to training in period $$t$$.\n- The planning goal is to determine a feasible training allocation that maximizes the number of trained pilots available by the end of the horizon for air defense.\n- Business constraints:\n  - Jets assigned to training in a period are reserved only for training in that period and are not simultaneously available for combat use in that same period.\n  - The number of jets allocated to training in any period cannot exceed the jets produced and available in that period.\n  - The number of pilots trained in any period cannot exceed the training capacity created by the number of training jets used in that period.\n  - Pilots become available for combat only after completing training.\n  - The total number of trained pilots available by the end of the horizon is the main quantity of interest.\n- A solution is represented by:\n  - $$x_t$$: the number of fighter jets allocated exclusively to training in period $$t$$.\n  - $$z_t$$: the number of pilots trained in period $$t$$.\n  - $$y_t$$: the cumulative number of trained pilots available by the end of period $$t$$.\n  - If needed, a period-by-period record of how many jets remain available for combat after training allocation.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"meaning\": \"number of planning periods\"\n  },\n  \"period_index_set\": {\n    \"symbol\": \"$$\\mathcal{T}$$\",\n    \"meaning\": \"set of periods indexed by $$t$$\"\n  },\n  \"production_by_period\": {\n    \"symbol\": \"$$a_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of fighter jets produced and available in period $$t$$\"\n  },\n  \"training_capacity_per_jet\": {\n    \"symbol\": \"$$\\kappa$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"number of pilots that one training jet can train per period\"\n  },\n  \"training_start_period\": {\n    \"symbol\": \"$$s$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"first period in which training is allowed\"\n  },\n  \"availability_lag\": {\n    \"symbol\": \"$$\\delta$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"number of periods after training before a pilot is available for combat\"\n  },\n  \"optional_training_cost_by_period\": {\n    \"symbol\": \"$$c_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"optional cost of dedicating one jet to training in period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"training_allocation_by_period\": {\n    \"symbol\": \"$$x_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of fighter jets allocated exclusively to training in period $$t$$\"\n  },\n  \"pilots_trained_by_period\": {\n    \"symbol\": \"$$z_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"number of pilots trained in period $$t$$\"\n  },\n  \"trained_pilots_available_by_period\": {\n    \"symbol\": \"$$y_t$$\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"cumulative number of trained pilots available by the end of period $$t$$\"\n  },\n  \"total_trained_pilots\": {\n    \"symbol\": \"$$y_T$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"total number of trained pilots available by the end of the horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"$$2$$\",\n  \"production_by_period\": [\n    \"$$10$$\",\n    \"$$15$$\"\n  ],\n  \"training_capacity_per_jet\": \"$$5$$\",\n  \"training_start_period\": \"$$1$$\",\n  \"availability_lag\": \"$$1$$\"\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
+            "name": "time_horizon",
             "symbol": "T",
             "shape": [],
-            "description": "Total number of monthly planning periods"
+            "description": "number of planning periods"
         },
         {
-            "name": "demand",
-            "symbol": "d",
+            "name": "production_by_period",
+            "symbol": "a",
             "shape": [
                 "T"
             ],
-            "description": "Demand in each period"
+            "description": "number of fighter jets produced and available in each period"
         },
         {
-            "name": "initial_workforce",
-            "symbol": "W_0",
+            "name": "training_capacity_per_jet",
+            "symbol": "\\kappa",
             "shape": [],
-            "description": "Initial workforce at the start of period 1"
+            "description": "number of pilots one training jet can train per period"
         },
         {
-            "name": "initial_inventory",
-            "symbol": "I_0",
+            "name": "training_start_period",
+            "symbol": "s",
             "shape": [],
-            "description": "Initial inventory at the start of period 1"
+            "description": "first period in which training is allowed"
         },
         {
-            "name": "initial_backorders",
-            "symbol": "B_0",
+            "name": "availability_lag",
+            "symbol": "\\delta",
             "shape": [],
-            "description": "Initial backorders at the start of period 1"
+            "description": "number of periods after training before a pilot is available for combat"
         },
         {
-            "name": "unit_sales_price",
-            "symbol": "r",
-            "shape": [],
-            "description": "Unit sales price"
-        },
-        {
-            "name": "inhouse_material_cost",
-            "symbol": "c^{\\mathrm{mat}}",
-            "shape": [],
-            "description": "Unit raw material cost for in-house production"
-        },
-        {
-            "name": "outsourcing_cost",
-            "symbol": "c^{\\mathrm{out}}",
-            "shape": [],
-            "description": "Unit outsourcing cost for finished outsourced units"
-        },
-        {
-            "name": "inventory_holding_cost",
-            "symbol": "h",
-            "shape": [],
-            "description": "Inventory holding cost per unit of ending inventory per period"
-        },
-        {
-            "name": "backorder_penalty_cost",
-            "symbol": "b",
-            "shape": [],
-            "description": "Backorder penalty cost per unit of ending backorders per period"
-        },
-        {
-            "name": "regular_wage_per_hour",
-            "symbol": "w^{\\mathrm{reg}}",
-            "shape": [],
-            "description": "Regular wage per hour"
-        },
-        {
-            "name": "overtime_wage_per_hour",
-            "symbol": "w^{\\mathrm{ot}}",
-            "shape": [],
-            "description": "Overtime wage per hour"
-        },
-        {
-            "name": "hiring_cost_per_worker",
-            "symbol": "c^{\\mathrm{hire}}",
-            "shape": [],
-            "description": "Hiring cost per worker"
-        },
-        {
-            "name": "firing_cost_per_worker",
-            "symbol": "c^{\\mathrm{fire}}",
-            "shape": [],
-            "description": "Firing cost per worker"
-        },
-        {
-            "name": "labor_hours_per_inhouse_unit",
-            "symbol": "\\ell",
-            "shape": [],
-            "description": "Labor hours required per unit of in-house production"
-        },
-        {
-            "name": "regular_hours_per_worker",
-            "symbol": "H^{\\mathrm{reg}}",
-            "shape": [],
-            "description": "Regular hours supplied by one worker per period"
-        },
-        {
-            "name": "max_overtime_hours_per_worker",
-            "symbol": "H^{\\mathrm{ot}}",
-            "shape": [],
-            "description": "Maximum overtime hours allowed per worker per period"
-        },
-        {
-            "name": "minimum_ending_inventory",
-            "symbol": "I_T^{\\min}",
-            "shape": [],
-            "description": "Minimum required ending inventory at period T"
+            "name": "training_cost_by_period",
+            "symbol": "c",
+            "shape": [
+                "T"
+            ],
+            "description": "optional cost of assigning one jet to training in each period"
         }
     ],
     "variables": [
         {
-            "name": "inhouse_production",
+            "name": "training_jets_allocated",
             "symbol": "x",
             "shape": [
                 "T"
             ],
-            "domain": "continuous",
-            "description": "In-house production quantity in each period"
-        },
-        {
-            "name": "outsourced_quantity",
-            "symbol": "u",
-            "shape": [
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Outsourced finished quantity in each period"
-        },
-        {
-            "name": "workforce_level",
-            "symbol": "W",
-            "shape": [
-                "T+1"
-            ],
             "domain": "integer",
-            "description": "Workforce level from period 0 through period T"
+            "description": "number of fighter jets allocated exclusively to training in each period"
         },
         {
-            "name": "hired_workers",
-            "symbol": "H",
+            "name": "pilots_trained",
+            "symbol": "z",
             "shape": [
                 "T"
             ],
             "domain": "integer",
-            "description": "Number of workers hired in each period"
+            "description": "number of pilots trained in each period"
         },
         {
-            "name": "fired_workers",
-            "symbol": "F",
+            "name": "trained_pilot_availability",
+            "symbol": "y",
             "shape": [
                 "T"
             ],
             "domain": "integer",
-            "description": "Number of workers fired in each period"
-        },
-        {
-            "name": "overtime_hours",
-            "symbol": "o",
-            "shape": [
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Overtime hours used in each period"
-        },
-        {
-            "name": "inventory_level",
-            "symbol": "I",
-            "shape": [
-                "T+1"
-            ],
-            "domain": "continuous",
-            "description": "Ending inventory from period 0 through period T"
-        },
-        {
-            "name": "backorders_level",
-            "symbol": "B",
-            "shape": [
-                "T+1"
-            ],
-            "domain": "continuous",
-            "description": "Ending backorders from period 0 through period T"
+            "description": "cumulative number of trained pilots available by the end of each period"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_demand",
-            "description": "Demand in each period must be nonnegative.",
-            "formula": "d_t \\ge 0",
+            "name": "training_nonnegativity",
+            "description": "Training jets allocated each period must be nonnegative",
+            "formula": "x_t \\ge 0",
             "parameters": [
-                "demand"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_initial_conditions",
-            "description": "Initial workforce, initial inventory, and initial backorders must be nonnegative.",
-            "formula": "W_0 \\ge 0,\\ I_0 \\ge 0,\\ B_0 \\ge 0",
-            "parameters": [
-                "initial_workforce",
-                "initial_inventory",
-                "initial_backorders"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_production_and_flow_variables",
-            "description": "In-house production, outsourced quantity, overtime hours, inventory, and backorders must be nonnegative.",
-            "formula": "x_t \\ge 0,\\ u_t \\ge 0,\\ o_t \\ge 0,\\ I_t \\ge 0,\\ B_t \\ge 0",
-            "parameters": [],
-            "variables": [
-                "inhouse_production",
-                "outsourced_quantity",
-                "overtime_hours",
-                "inventory_level",
-                "backorders_level"
-            ]
-        },
-        {
-            "name": "integer_workforce_variables",
-            "description": "Workforce level, hired workers, and fired workers are integer-valued nonnegative counts.",
-            "formula": "W_t,\\ H_t,\\ F_t \\in \\mathbb{Z}_{\\ge 0}",
-            "parameters": [],
-            "variables": [
-                "workforce_level",
-                "hired_workers",
-                "fired_workers"
-            ]
-        },
-        {
-            "name": "overtime_capacity_limit",
-            "description": "Overtime hours are limited by the current workforce and the per-worker overtime allowance.",
-            "formula": "o_t \\le H^{\\mathrm{ot}} W_t",
-            "parameters": [
-                "max_overtime_hours_per_worker"
+                "time_horizon"
             ],
             "variables": [
-                "overtime_hours",
-                "workforce_level"
+                "training_jets_allocated"
             ]
         },
         {
-            "name": "ending_inventory_requirement",
-            "description": "Ending inventory at the horizon must meet the minimum required level.",
-            "formula": "I_T \\ge I_T^{\\min}",
+            "name": "trained_pilots_nonnegativity",
+            "description": "Pilots trained each period must be nonnegative",
+            "formula": "z_t \\ge 0",
             "parameters": [
-                "minimum_ending_inventory"
+                "time_horizon"
             ],
             "variables": [
-                "inventory_level"
+                "pilots_trained"
             ]
         },
         {
-            "name": "ending_backorders_requirement",
-            "description": "Ending backorders at the horizon must be zero.",
-            "formula": "B_T = 0",
-            "parameters": [],
-            "variables": [
-                "backorders_level"
-            ]
-        },
-        {
-            "name": "workforce_evolution",
-            "description": "Workforce evolves across periods through hiring and firing from the previous period.",
-            "formula": "W_t = W_{t-1} + H_t - F_t",
-            "parameters": [],
-            "variables": [
-                "workforce_level",
-                "hired_workers",
-                "fired_workers"
-            ]
-        },
-        {
-            "name": "inventory_backorder_flow",
-            "description": "Inventory and backorders evolve period to period based on fulfillment of demand using starting inventory, in-house production, and outsourced units.",
-            "formula": "I_t - B_t = I_{t-1} - B_{t-1} + x_t + u_t - d_t",
+            "name": "availability_nonnegativity",
+            "description": "Cumulative trained pilot availability must be nonnegative",
+            "formula": "y_t \\ge 0",
             "parameters": [
-                "demand",
-                "initial_inventory",
-                "initial_backorders"
+                "time_horizon"
             ],
             "variables": [
-                "inventory_level",
-                "backorders_level",
-                "inhouse_production",
-                "outsourced_quantity"
+                "trained_pilot_availability"
             ]
         },
         {
-            "name": "labor_capacity_and_production_link",
-            "description": "Regular labor capacity is determined by workforce and regular hours per worker, and in-house production requires labor hours.",
-            "formula": "\\ell x_t \\le H^{\\mathrm{reg}} W_t + o_t",
+            "name": "training_integer_domain",
+            "description": "Training jet allocations are integer-valued counts",
+            "formula": "x_t \\in \\mathbb{Z}",
             "parameters": [
-                "labor_hours_per_inhouse_unit",
-                "regular_hours_per_worker"
+                "time_horizon"
             ],
             "variables": [
-                "inhouse_production",
-                "workforce_level",
-                "overtime_hours"
+                "training_jets_allocated"
             ]
         },
         {
-            "name": "inventory_backorder_balance",
-            "description": "Inventory and backorders are updated each period by the net supply available after satisfying prior backorders and current demand. The fulfilled demand in period t is represented implicitly by the change in backorders.",
-            "formula": "I_t - B_t = I_{t-1} - B_{t-1} + x_t + u_t - d_t",
+            "name": "trained_pilots_integer_domain",
+            "description": "Trained pilot counts are integer-valued",
+            "formula": "z_t \\in \\mathbb{Z}",
             "parameters": [
-                "demand"
+                "time_horizon"
             ],
             "variables": [
-                "inventory_level",
-                "backorders_level",
-                "inhouse_production",
-                "outsourced_quantity"
+                "pilots_trained"
             ]
         },
         {
-            "name": "workforce_balance",
-            "description": "Workforce evolves from the previous period through hiring and firing.",
-            "formula": "W_t = W_{t-1} + H_t - F_t",
-            "parameters": [],
-            "variables": [
-                "workforce_level",
-                "hired_workers",
-                "fired_workers"
-            ]
-        },
-        {
-            "name": "regular_capacity",
-            "description": "Regular production labor hours available in each period are limited by workforce and regular hours per worker, and in-house production must fit within regular hours plus overtime hours.",
-            "formula": "\\ell x_t \\le H^{\\mathrm{reg}} W_t + o_t",
+            "name": "availability_integer_domain",
+            "description": "Cumulative trained pilot availability is integer-valued",
+            "formula": "y_t \\in \\mathbb{Z}",
             "parameters": [
-                "labor_hours_per_inhouse_unit",
-                "regular_hours_per_worker"
+                "time_horizon"
             ],
             "variables": [
-                "inhouse_production",
-                "workforce_level",
-                "overtime_hours"
+                "trained_pilot_availability"
             ]
         },
         {
-            "name": "overtime_worker_cap",
-            "description": "Total overtime hours in a period cannot exceed the per-worker overtime cap times the workforce employed in that period.",
-            "formula": "o_t \\le H^{\\mathrm{ot}} W_t",
+            "name": "training_capacity_limit",
+            "description": "Training allocation in any period cannot exceed the fighter jets available in that period",
+            "formula": "x_t \\le a_t",
             "parameters": [
-                "max_overtime_hours_per_worker"
+                "production_by_period",
+                "time_horizon"
             ],
             "variables": [
-                "overtime_hours",
-                "workforce_level"
+                "training_jets_allocated"
             ]
         },
         {
-            "name": "ending_inventory_minimum",
-            "description": "The ending inventory at period T must meet or exceed the minimum required inventory.",
-            "formula": "I_T \\ge I_T^{\\min}",
+            "name": "pilot_training_capacity",
+            "description": "The number of pilots trained in a period is limited by the capacity generated by training jets used in that period",
+            "formula": "z_t \\le \\kappa x_t",
             "parameters": [
-                "minimum_ending_inventory"
+                "training_capacity_per_jet",
+                "time_horizon"
             ],
             "variables": [
-                "inventory_level"
+                "training_jets_allocated",
+                "pilots_trained"
             ]
         },
         {
-            "name": "ending_backorders_zero",
-            "description": "The ending backorders at period T must be zero.",
-            "formula": "B_T = 0",
-            "parameters": [],
-            "variables": [
-                "backorders_level"
-            ]
-        },
-        {
-            "name": "workforce_initial_condition",
-            "description": "The workforce state at period 0 is fixed to the given initial workforce.",
-            "formula": "W_0 = W_0",
+            "name": "training_start_restriction",
+            "description": "Training is allowed only from the first allowable training period onward",
+            "formula": "x_t = z_t = y_t = 0 \\quad \\forall t = 0,\\dots,s-1",
             "parameters": [
-                "initial_workforce"
+                "training_start_period",
+                "time_horizon"
             ],
             "variables": [
-                "workforce_level"
+                "training_jets_allocated",
+                "pilots_trained",
+                "trained_pilot_availability"
             ]
         },
         {
-            "name": "inventory_initial_condition",
-            "description": "The inventory state at period 0 is fixed to the given initial inventory.",
-            "formula": "I_0 = I_0",
+            "name": "combat_availability_lag",
+            "description": "Pilots trained in period t become available only after the specified lag has passed; for each period, availability is the cumulative sum of training completions up to t-\\delta, with the convention that empty sums are zero.",
+            "formula": "\\begin{cases}y_t = 0, & t < \\delta \\\\ y_t = \\sum_{\\tau = 0}^{t-\\delta} z_\\tau, & t \\ge \\delta\\end{cases} \\quad \\forall t = 0,\\dots,T-1",
             "parameters": [
-                "initial_inventory"
+                "availability_lag",
+                "time_horizon"
             ],
             "variables": [
-                "inventory_level"
-            ]
-        },
-        {
-            "name": "backorders_initial_condition",
-            "description": "The backorders state at period 0 is fixed to the given initial backorders.",
-            "formula": "B_0 = B_0",
-            "parameters": [
-                "initial_backorders"
-            ],
-            "variables": [
-                "backorders_level"
+                "pilots_trained",
+                "trained_pilot_availability"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "net_profit_maximization",
-            "description": "Maximize total net profit over the planning horizon, including sales revenue minus material, outsourcing, inventory holding, backorder, regular wage, overtime wage, hiring, and firing costs.",
+            "name": "maximize_trained_pilots_available",
+            "description": "Maximize the total number of trained pilots available by the end of the planning horizon, represented by the final cumulative availability value",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total net profit over the planning horizon as a single linear objective, with revenue from fulfilled demand and costs for materials, outsourcing, inventory holding, backorders, regular labor, overtime, hiring, and firing.",
+        "description": "Maximize the cumulative number of trained pilots available by the end of the planning horizon; since the problem has a single explicit objective, use it directly as the final objective.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "\\Pi = \\sum_{t=1}^{T} \\left(r\\,(d_t + B_{t-1} - B_t) - c^{\\mathrm{mat}} x_t - c^{\\mathrm{out}} u_t - h I_t - b B_t - w^{\\mathrm{reg}} H^{\\mathrm{reg}} W_t - w^{\\mathrm{ot}} o_t - c^{\\mathrm{hire}} H_t - c^{\\mathrm{fire}} F_t\\right)",
+        "formula": "y_{T-1}",
         "parameters": [
-            "demand",
-            "unit_sales_price",
-            "inhouse_material_cost",
-            "outsourcing_cost",
-            "inventory_holding_cost",
-            "backorder_penalty_cost",
-            "regular_wage_per_hour",
-            "overtime_wage_per_hour",
-            "hiring_cost_per_worker",
-            "firing_cost_per_worker",
-            "regular_hours_per_worker"
+            "time_horizon"
         ],
         "variables": [
-            "backorders_level",
-            "inhouse_production",
-            "outsourced_quantity",
-            "inventory_level",
-            "workforce_level",
-            "overtime_hours",
-            "hired_workers",
-            "fired_workers"
+            "trained_pilot_availability"
         ]
     }
 }

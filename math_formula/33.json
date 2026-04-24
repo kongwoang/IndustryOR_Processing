@@ -1,312 +1,209 @@
 {
-    "problem": "Problem description\n- There is a single batch packing and transportation planning problem over a one-period planning horizon $$\\mathcal{T}$$, with goods indexed by $$i \\in \\mathcal{I}$$ and candidate containers indexed by $$k \\in \\mathcal{K}$$.\n- The product set is generalized as $$\\mathcal{I}$$, with one available quantity parameter $$q_i$$ and one unit-weight parameter $$w_i$$ for each product $$i \\in \\mathcal{I}$$.\n- The container fleet is modeled by a sufficiently large candidate set $$\\mathcal{K}$$. Each used container has a maximum payload capacity $$U$$ and must also satisfy a minimum utilized load requirement $$L$$.\n- Some products may have intra-container packaging rules. These rules are represented by a set of compatibility requirements $$\\mathcal{R}$$. In this problem class, one product may trigger a minimum accompanying quantity of another product within the same container, while the supporting product may still appear without the trigger product.\n- Some products may also have per-used-container minimum load requirements. In this problem class, a designated product may be required to appear in at least a fixed minimum quantity in every container that is used.\n- The planning goal is to transport the entire required batch using the fewest possible number of containers while respecting container capacity, minimum-load, inventory, and packaging compatibility requirements.\n- The available goods for the concrete instance are the five products $$A$$, $$B$$, $$C$$, $$D$$, and $$E$$.\n- The business rules for the concrete instance are:\n  - Each used container may carry at most $$60$$ tons in total.\n  - Each used container must carry at least $$18$$ tons in total.\n  - The available quantities are $$120$$ units of $$A$$, $$90$$ units of $$B$$, $$300$$ units of $$C$$, $$90$$ units of $$D$$, and $$120$$ units of $$E$$.\n  - The unit weights are $$0.5$$ tons for $$A$$, $$1$$ ton for $$B$$, $$0.4$$ tons for $$C$$, $$0.6$$ tons for $$D$$, and $$0.65$$ tons for $$E$$.\n  - If a container contains any units of $$A$$, then that same container must also contain at least $$1$$ unit of $$C$$.\n  - Product $$C$$ may be loaded without product $$A$$.\n  - Every used container must contain at least $$12$$ units of $$D$$.\n  - All required goods must be assigned to containers without exceeding the available inventory.\n- A solution is represented by:\n  - $$y_k$$, a binary container-usage indicator for each $$k \\in \\mathcal{K}$$, where $$y_k = 1$$ means container $$k$$ is used.\n  - $$x_{ik}$$, the integer number of units of product $$i \\in \\mathcal{I}$$ loaded into container $$k \\in \\mathcal{K}$$.\n  - The total number of used containers, which is the objective value to be minimized.\n  - The packing allocation by container, including the quantity of each product placed in each container.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"periods\": 1,\n    \"meaning\": \"single-period batch packing horizon $$\\\\mathcal{T}$$\"\n  },\n  \"products\": {\n    \"index_set\": \"$$\\\\mathcal{I}$$\",\n    \"items\": [\n      {\n        \"id\": \"A\",\n        \"available_quantity\": \"$$q_A$$\",\n        \"unit_weight_tons\": \"$$w_A$$\"\n      },\n      {\n        \"id\": \"B\",\n        \"available_quantity\": \"$$q_B$$\",\n        \"unit_weight_tons\": \"$$w_B$$\"\n      },\n      {\n        \"id\": \"C\",\n        \"available_quantity\": \"$$q_C$$\",\n        \"unit_weight_tons\": \"$$w_C$$\"\n      },\n      {\n        \"id\": \"D\",\n        \"available_quantity\": \"$$q_D$$\",\n        \"unit_weight_tons\": \"$$w_D$$\"\n      },\n      {\n        \"id\": \"E\",\n        \"available_quantity\": \"$$q_E$$\",\n        \"unit_weight_tons\": \"$$w_E$$\"\n      }\n    ]\n  },\n  \"containers\": {\n    \"index_set_size\": \"$$K$$\",\n    \"meaning\": \"candidate containers indexed by $$k \\\\in \\\\mathcal{K} = \\\\{1,2,\\\\dots,K\\\\}$$\",\n    \"maximum_load_tons\": \"$$U$$\",\n    \"minimum_load_tons_if_used\": \"$$L$$\"\n  },\n  \"compatibility_rules\": {\n    \"meaning\": \"intra-container packaging rules indexed by $$r \\\\in \\\\mathcal{R}$$\",\n    \"rules\": [\n      {\n        \"trigger_product\": \"A\",\n        \"required_product\": \"C\",\n        \"minimum_required_quantity\": \"$$\\\\alpha_{A,C}$$\"\n      }\n    ]\n  },\n  \"product_specific_minimums_if_container_is_used\": {\n    \"meaning\": \"per-used-container minimum quantities for designated products\",\n    \"minimum_units\": {\n      \"D\": \"$$m_D$$\"\n    }\n  },\n  \"objective\": {\n    \"meaning\": \"minimize the number of used containers\"\n  }\n}\n\nOutput Format\n{\n  \"objective_value\": {\n    \"meaning\": \"minimum number of used containers\",\n    \"symbol\": \"$$z^*$$\"\n  },\n  \"container_plan\": {\n    \"index_set\": \"$$\\\\mathcal{K}$$\",\n    \"items\": [\n      {\n        \"container_id\": \"$$k$$\",\n        \"used\": \"$$y_k$$\",\n        \"loads_by_product\": {\n          \"A\": \"$$x_{A k}$$\",\n          \"B\": \"$$x_{B k}$$\",\n          \"C\": \"$$x_{C k}$$\",\n          \"D\": \"$$x_{D k}$$\",\n          \"E\": \"$$x_{E k}$$\"\n        },\n        \"total_weight_tons\": \"$$W_k$$\"\n      }\n    ]\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": {\n    \"periods\": 1\n  },\n  \"products\": {\n    \"items\": [\n      {\n        \"id\": \"A\",\n        \"available_quantity\": 120,\n        \"unit_weight_tons\": 0.5\n      },\n      {\n        \"id\": \"B\",\n        \"available_quantity\": 90,\n        \"unit_weight_tons\": 1\n      },\n      {\n        \"id\": \"C\",\n        \"available_quantity\": 300,\n        \"unit_weight_tons\": 0.4\n      },\n      {\n        \"id\": \"D\",\n        \"available_quantity\": 90,\n        \"unit_weight_tons\": 0.6\n      },\n      {\n        \"id\": \"E\",\n        \"available_quantity\": 120,\n        \"unit_weight_tons\": 0.65\n      }\n    ]\n  },\n  \"containers\": {\n    \"index_set_size\": 23,\n    \"maximum_load_tons\": 60,\n    \"minimum_load_tons_if_used\": 18\n  },\n  \"compatibility_rules\": {\n    \"rules\": [\n      {\n        \"trigger_product\": \"A\",\n        \"required_product\": \"C\",\n        \"minimum_required_quantity\": 1\n      }\n    ]\n  },\n  \"product_specific_minimums_if_container_is_used\": {\n    \"minimum_units\": {\n      \"D\": 12\n    }\n  }\n}",
+    "problem": "Problem description\n- There is a finite set of inherited assets indexed by $$i \\in \\mathcal{I}$$, and each asset has a monetary value parameter $$v_i$$.\n- There is a finite set of recipients indexed by $$r \\in \\mathcal{R}$$ who must share the estate.\n- Some assets may belong to inseparable bundles indexed by $$b \\in \\mathcal{B}$$; all items in the same bundle must be assigned to the same recipient.\n- Each asset must be allocated to exactly one recipient, and no asset may be split across recipients.\n- Bundle integrity must be preserved, meaning that if an asset is part of a bundle, its assignment must match the assignment of the entire bundle.\n- This is a single-period allocation problem, so no time horizon $$t$$ is needed.\n- The planning goal is to divide the inheritance so that the total value received by the recipients is as balanced as possible.\n- The optimization objective is to minimize the value imbalance between the recipient parts.\n- A solution is represented by:\n  - $$x_{i,r}$$, a binary assignment indicator showing whether asset $$i$$ is allocated to recipient $$r$$.\n  - $$x_{b,r}$$, a binary bundle assignment indicator showing whether bundle $$b$$ is allocated to recipient $$r$$, with all bundle members moving together.\n  - $$V_r$$, the total value assigned to recipient $$r$$.\n  - $$\\Delta$$, the final imbalance measure between recipient totals that is minimized.\n\nInput Format\n{\n  \"recipients\": {\n    \"count\": \"$$R$$\",\n    \"index_set\": \"$$\\\\mathcal{R} = \\\\{r\\\\}$$\"\n  },\n  \"items\": {\n    \"count\": \"$$N$$\",\n    \"index_set\": \"$$\\\\mathcal{I} = \\\\{i\\\\}$$\",\n    \"values\": [\n      {\n        \"item_id\": \"$$i$$\",\n        \"value\": \"$$v_i$$\"\n      }\n    ]\n  },\n  \"bundles\": {\n    \"count\": \"$$B$$\",\n    \"index_set\": \"$$\\\\mathcal{B} = \\\\{b\\\\}$$\",\n    \"members\": [\n      {\n        \"bundle_id\": \"$$b$$\",\n        \"item_ids\": [\n          \"$$i$$\"\n        ]\n      }\n    ]\n  },\n  \"allocation_rules\": {\n    \"each_item_assigned_once\": \"$$\\\\text{yes}$$\",\n    \"bundle_members_must_stay_together\": \"$$\\\\text{yes}$$\"\n  },\n  \"objective\": {\n    \"goal\": \"$$\\\\text{minimize value imbalance among recipients}$$\",\n    \"imbalance_measure\": \"$$\\\\Delta$$\"\n  }\n}\n- The field $$N$$ is the number of assets.\n- The field $$R$$ is the number of recipients.\n- The field $$B$$ is the number of inseparable bundles.\n- The list $$\\\\{v_i\\\\}$$ contains the asset values.\n- The bundle membership lists specify which assets must remain together.\n- If no bundles exist, the bundle section may be empty.\n\nOutput Format\n{\n  \"assignment\": [\n    {\n      \"item_id\": \"$$i$$\",\n      \"recipient_id\": \"$$r$$\"\n    }\n  ],\n  \"bundle_assignment\": [\n    {\n      \"bundle_id\": \"$$b$$\",\n      \"recipient_id\": \"$$r$$\"\n    }\n  ],\n  \"total_value_by_recipient\": [\n    {\n      \"recipient_id\": \"$$r$$\",\n      \"total_value\": \"$$V_r$$\"\n    }\n  ],\n  \"imbalance\": \"$$\\\\Delta$$\",\n  \"objective_status\": \"$$\\\\text{minimized}$$\"\n}\n- The assignment list gives the recipient chosen for each asset.\n- The bundle assignment list gives the recipient chosen for each inseparable bundle, if bundles are used.\n- The total value by recipient reports the value accumulated by each recipient after allocation.\n- The imbalance reports the final difference measure used by the optimizer.\n- If the solution is represented only at bundle level, the item-level assignment must be consistent with the bundle assignment.\n\nExample(s)\n\nInput 1\n{\n  \"recipients\": {\n    \"count\": \"$$2$$\",\n    \"labels\": [\"$$\\\\text{son}_1$$\", \"$$\\\\text{son}_2$$\"]\n  },\n  \"items\": [\n    {\n      \"item_id\": \"$$\\\\text{painting\\\\_caillebotte}$$\",\n      \"value\": \"$$25000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{bust\\\\_diocletian}$$\",\n      \"value\": \"$$5000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{yuan\\\\_vase}$$\",\n      \"value\": \"$$20000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{porsche\\\\_911}$$\",\n      \"value\": \"$$40000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_1$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_2$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{diamond}_3$$\",\n      \"value\": \"$$12000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{louis\\\\_xv\\\\_sofa}$$\",\n      \"value\": \"$$3000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{jack\\\\_russell}_1$$\",\n      \"value\": \"$$3000$$\",\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{jack\\\\_russell}_2$$\",\n      \"value\": \"$$3000$$\",\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{sculpture\\\\_200ad}$$\",\n      \"value\": \"$$10000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{sailing\\\\_boat}$$\",\n      \"value\": \"$$15000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{harley\\\\_davidson}$$\",\n      \"value\": \"$$10000$$\"\n    },\n    {\n      \"item_id\": \"$$\\\\text{cavour\\\\_furniture}$$\",\n      \"value\": \"$$13000$$\"\n    }\n  ],\n  \"bundles\": [\n    {\n      \"bundle_id\": \"$$\\\\text{dog\\\\_pair}$$\",\n      \"members\": [\"$$\\\\text{jack\\\\_russell}_1$$\", \"$$\\\\text{jack\\\\_russell}_2$$\"]\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
-            "symbol": "\\mathcal{T}",
+            "name": "num_assets",
+            "symbol": "N",
             "shape": [],
-            "description": "One-period planning horizon"
+            "description": "Number of assets"
         },
         {
-            "name": "product_set",
-            "symbol": "\\mathcal{I}",
+            "name": "num_recipients",
+            "symbol": "R",
             "shape": [],
-            "description": "Set of products indexed over the five listed items A, B, C, D, E"
+            "description": "Number of recipients"
         },
         {
-            "name": "candidate_container_set",
-            "symbol": "\\mathcal{K}",
+            "name": "num_bundles",
+            "symbol": "B",
             "shape": [],
-            "description": "Set of candidate containers, with size K"
+            "description": "Number of inseparable bundles"
         },
         {
-            "name": "available_quantity",
-            "symbol": "q",
+            "name": "asset_values",
+            "symbol": "v",
             "shape": [
-                "\\mathcal{I}"
+                "N"
             ],
-            "description": "Available quantity of each product"
+            "description": "Monetary value of each asset"
         },
         {
-            "name": "unit_weight",
-            "symbol": "w",
+            "name": "bundle_members",
+            "symbol": "\\mathcal{M}",
             "shape": [
-                "\\mathcal{I}"
+                "B",
+                "-"
             ],
-            "description": "Unit weight of each product in tons"
-        },
-        {
-            "name": "maximum_payload",
-            "symbol": "U",
-            "shape": [],
-            "description": "Maximum payload per used container in tons"
-        },
-        {
-            "name": "minimum_utilized_load",
-            "symbol": "L",
-            "shape": [],
-            "description": "Minimum utilized load per used container in tons"
-        },
-        {
-            "name": "compatibility_requirements",
-            "symbol": "\\mathcal{R}",
-            "shape": [],
-            "description": "Set of intra-container compatibility requirements"
-        },
-        {
-            "name": "minimum_required_quantity",
-            "symbol": "\\alpha",
-            "shape": [
-                "\\mathcal{R}",
-                "2"
-            ],
-            "description": "Minimum required quantity of supporting product for each compatibility rule"
-        },
-        {
-            "name": "per_used_container_minimum",
-            "symbol": "m",
-            "shape": [
-                "\\mathcal{I}"
-            ],
-            "description": "Per-used-container minimum quantity requirement for designated products"
-        },
-        {
-            "name": "number_of_candidate_containers",
-            "symbol": "K",
-            "shape": [],
-            "description": "Number of candidate containers"
+            "description": "Asset indices contained in each inseparable bundle"
         }
     ],
     "variables": [
         {
-            "name": "container_usage",
-            "symbol": "y",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "domain": "binary",
-            "description": "Binary indicator equal to 1 if container k is used"
-        },
-        {
-            "name": "loaded_quantity",
+            "name": "asset_assignment",
             "symbol": "x",
             "shape": [
-                "\\mathcal{I}",
-                "\\mathcal{K}"
+                "N",
+                "R"
             ],
-            "domain": "integer",
-            "description": "Integer quantity of product i loaded into container k"
+            "domain": "binary",
+            "description": "Whether asset i is allocated to recipient r"
         },
         {
-            "name": "minimum_number_of_used_containers",
-            "symbol": "z^*",
+            "name": "bundle_assignment",
+            "symbol": "y",
+            "shape": [
+                "B",
+                "R"
+            ],
+            "domain": "binary",
+            "description": "Whether bundle b is allocated to recipient r"
+        },
+        {
+            "name": "recipient_total_value",
+            "symbol": "V",
+            "shape": [
+                "R"
+            ],
+            "domain": "continuous",
+            "description": "Total value assigned to each recipient"
+        },
+        {
+            "name": "value_imbalance",
+            "symbol": "\\Delta",
             "shape": [],
-            "domain": "integer",
-            "description": "Minimum number of used containers"
+            "domain": "continuous",
+            "description": "Final value-imbalance measure"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_inventory_and_weights",
-            "description": "Available quantities must be nonnegative and unit weights must be positive",
-            "formula": "q_i \\geq 0,\\; w_i > 0",
+            "name": "exactly_one_recipient_per_asset",
+            "description": "No asset may be split across recipients",
+            "formula": "asset assignment is binary and exclusive across recipients",
             "parameters": [
-                "available_quantity",
-                "unit_weight"
+                "num_assets",
+                "num_recipients"
             ],
+            "variables": [
+                "asset_assignment"
+            ]
+        },
+        {
+            "name": "bundle_integrity",
+            "description": "All members of the same bundle must be allocated together to the same recipient",
+            "formula": "all assets in a bundle share one recipient assignment",
+            "parameters": [
+                "bundle_members",
+                "num_bundles",
+                "num_assets",
+                "num_recipients"
+            ],
+            "variables": [
+                "asset_assignment",
+                "bundle_assignment"
+            ]
+        },
+        {
+            "name": "recipient_total_value_definition",
+            "description": "The allocation is single-period and has no time horizon index",
+            "formula": "no time index is used in the model",
+            "parameters": [],
             "variables": []
         },
         {
-            "name": "container_bounds_validity",
-            "description": "Container load bounds must be positive and minimum load should not exceed maximum payload",
-            "formula": "U > 0,\\; L \\geq 0,\\; L \\leq U",
+            "name": "value_imbalance_definition",
+            "description": "The imbalance measure equals the maximum difference between any recipient total values.",
+            "formula": "\\Delta \\geq V_r - V_{r'} \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R",
             "parameters": [
-                "maximum_payload",
-                "minimum_utilized_load"
-            ],
-            "variables": []
-        },
-        {
-            "name": "compatibility_thresholds_nonnegative",
-            "description": "Compatibility minimum required quantities must be nonnegative",
-            "formula": "\\alpha_{r} \\geq 0 \\quad \\forall r \\in \\mathcal{R}",
-            "parameters": [
-                "minimum_required_quantity",
-                "compatibility_requirements"
-            ],
-            "variables": []
-        },
-        {
-            "name": "designated_minimums_nonnegative",
-            "description": "Per-used-container minimum quantities must be nonnegative for designated products",
-            "formula": "m_i \\geq 0 \\quad \\forall i \\in \\mathcal{I}",
-            "parameters": [
-                "per_used_container_minimum"
-            ],
-            "variables": []
-        },
-        {
-            "name": "loaded_quantity_integrality",
-            "description": "Loaded quantities must be integer and nonnegative for every product and container",
-            "formula": "x_{ik} \\in \\mathbb{Z}_{\\geq 0} \\quad \\forall i \\in \\mathcal{I},\\; \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "product_set",
-                "candidate_container_set"
+                "num_recipients"
             ],
             "variables": [
-                "loaded_quantity"
+                "recipient_total_value",
+                "value_imbalance"
             ]
         },
         {
-            "name": "container_usage_binary",
-            "description": "Container usage indicators must be binary for every candidate container",
-            "formula": "y_k \\in \\{0,1\\} \\quad \\forall k \\in \\mathcal{K}",
+            "name": "bundle_assignment_consistency",
+            "description": "Each bundle is assigned to exactly one recipient, and this assignment matches the common recipient of all assets in the bundle.",
+            "formula": "\\sum_{r=1}^{R} y_{br} = 1 \\quad \\forall b=1,\\dots,B",
             "parameters": [
-                "candidate_container_set"
+                "num_bundles",
+                "num_recipients"
             ],
             "variables": [
-                "container_usage"
+                "bundle_assignment"
             ]
         },
         {
-            "name": "nonnegative_container_load",
-            "description": "The total load in any container must be nonnegative",
-            "formula": "W[k]",
+            "name": "exactly_one_recipient_per_asset",
+            "description": "Each asset must be assigned to exactly one recipient",
+            "formula": "\\sum_{r=1}^{R} x_{ir} = 1 \\quad \\forall i=1,\\dots,N",
             "parameters": [
-                "unit_weight",
-                "loaded_quantity"
+                "num_assets",
+                "num_recipients"
             ],
             "variables": [
-                "loaded_quantity"
+                "asset_assignment"
             ]
         },
         {
-            "name": "inventory_not_exceeded",
-            "description": "The total assigned quantity of each product cannot exceed available inventory",
-            "formula": "\\sum_{k \\in \\mathcal{K}} x_{ik} \\leq q_i \\quad \\forall i \\in \\mathcal{I}",
+            "name": "bundle_integrity",
+            "description": "If an asset belongs to bundle b, it must be assigned to the same recipient as that bundle",
+            "formula": "x_{ir} = y_{br} \\quad \\forall b=1,\\dots,B,\\ \\forall i \\in \\mathcal{M}_b,\\ \\forall r=1,\\dots,R",
             "parameters": [
-                "available_quantity",
-                "candidate_container_set",
-                "product_set"
+                "bundle_members",
+                "num_bundles",
+                "num_assets",
+                "num_recipients"
             ],
             "variables": [
-                "loaded_quantity"
+                "asset_assignment",
+                "bundle_assignment"
             ]
         },
         {
-            "name": "unused_container_has_no_load",
-            "description": "If a container is not used, then all assigned product quantities in that container must be zero",
-            "formula": "x_{ik} \\leq q_i y_k \\quad \\forall i \\in \\mathcal{I},\\; \\forall k \\in \\mathcal{K}",
+            "name": "recipient_total_value_definition",
+            "description": "The total value for each recipient equals the sum of the values of all assets assigned to that recipient",
+            "formula": "V_r = \\sum_{i=1}^{N} v_i x_{ir} \\quad \\forall r=1,\\dots,R",
             "parameters": [
-                "available_quantity",
-                "candidate_container_set",
-                "product_set"
+                "asset_values",
+                "num_assets",
+                "num_recipients"
             ],
             "variables": [
-                "container_usage",
-                "loaded_quantity"
+                "asset_assignment",
+                "recipient_total_value"
             ]
         },
         {
-            "name": "container_capacity_bounds",
-            "description": "For each used container, the total payload must lie within the minimum utilized load and maximum payload bounds",
-            "formula": "L y_k \\leq \\sum_{i \\in \\mathcal{I}} w_i x_{ik} \\leq U y_k \\quad \\forall k \\in \\mathcal{K}",
+            "name": "imbalance_absolute_gap_definition",
+            "description": "The imbalance measure is at least the absolute difference between every pair of recipient total values",
+            "formula": "\\Delta \\geq V_r - V_{r'} \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R\\qquad\\text{and}\\qquad \\Delta \\geq V_{r'} - V_r \\quad \\forall r=1,\\dots,R,\\ \\forall r'=1,\\dots,R",
             "parameters": [
-                "minimum_utilized_load",
-                "maximum_payload",
-                "unit_weight",
-                "loaded_quantity"
+                "num_recipients"
             ],
             "variables": [
-                "container_usage",
-                "loaded_quantity"
+                "recipient_total_value",
+                "value_imbalance"
             ]
-        },
-        {
-            "name": "compatibility_rule_a_requires_c",
-            "description": "If any units of product A are loaded into a container, that same container must also contain at least the required minimum quantity of product C",
-            "formula": "x_{Ck} \\geq \\alpha_{r_{AC}} y_k \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "minimum_required_quantity",
-                "candidate_container_set"
-            ],
-            "variables": [
-                "container_usage",
-                "loaded_quantity"
-            ]
-        },
-        {
-            "name": "supporting_product_optional_without_trigger",
-            "description": "The supporting product in a compatibility rule may appear even when the trigger product is absent",
-            "formula": "x_{Ck} \\geq 0 \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "compatibility_requirements",
-                "candidate_container_set"
-            ],
-            "variables": [
-                "loaded_quantity"
-            ]
-        },
-        {
-            "name": "minimum_d_when_container_used",
-            "description": "Every used container must contain at least the designated minimum quantity of product D",
-            "formula": "x_{Dk} \\geq m_D y_k \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "per_used_container_minimum",
-                "candidate_container_set"
-            ],
-            "variables": [
-                "container_usage",
-                "loaded_quantity"
-            ]
-        },
-        {
-            "name": "all_required_goods_assigned",
-            "description": "All available goods are assigned across containers without omission",
-            "formula": "\\sum_{k \\in \\mathcal{K}} x_{ik} = q_i \\quad \\forall i \\in \\mathcal{I}",
-            "parameters": [
-                "available_quantity",
-                "candidate_container_set",
-                "product_set"
-            ],
-            "variables": [
-                "loaded_quantity"
-            ]
-        },
-        {
-            "name": "single_period_horizon",
-            "description": "The planning horizon is single-period",
-            "formula": "|\\mathcal{T}|=1",
-            "parameters": [
-                "planning_horizon"
-            ],
-            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "minimize_used_containers",
-            "description": "Minimize the total number of used containers in the packing plan",
+            "name": "minimize_value_imbalance",
+            "description": "Minimize the value imbalance measure Delta among recipient total values while satisfying assignment and bundle integrity requirements",
             "sense": "minimize"
-        },
-        {
-            "name": "find_feasible_packing",
-            "description": "Find any packing allocation that satisfies all capacity, compatibility, inventory, and product-specific minimum requirements if multiple optimal solutions exist",
-            "sense": "find_all"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total number of used containers; the auxiliary scalar variable z^* represents this minimum number and is linked to the binary container-usage variables.",
+        "description": "Minimize the value imbalance measure Delta, defined as the maximum absolute difference between any pair of recipient total values.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "z^* = \\sum_{k \\in \\mathcal{K}} y_k",
-        "parameters": [
-            "candidate_container_set"
-        ],
+        "formula": "\\min \\ \\Delta",
+        "parameters": [],
         "variables": [
-            "minimum_number_of_used_containers",
-            "container_usage"
+            "value_imbalance"
         ]
     }
 }

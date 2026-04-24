@@ -1,300 +1,205 @@
 {
-    "problem": "Problem description\n- There is a production planning setting with a raw material set $$\\mathcal{R}$$, a product set $$\\mathcal{P}$$, an equipment set $$\\mathcal{E}$$, and a planning horizon $$\\mathcal{T}$$.\n- Each product $$p \\in \\mathcal{P}$$ has a product-specific yield from raw material, a product-specific labor requirement, and a unit profit coefficient.\n- Each product is compatible with a required equipment type, and production must be carried out on that compatible equipment.\n- Each equipment type $$e \\in \\mathcal{E}$$ may have a finite processing capacity in each period $$t \\in \\mathcal{T}$$, or it may be effectively unlimited.\n- The available raw material supply and available regular labor hours are limited in each period.\n- The market can absorb all feasible output, so sales are not intended to be the limiting factor unless an explicit demand upper bound is provided in the input data.\n- The planning goal is to choose production and sales decisions over the horizon so that total profit is maximized.\n- Required business constraints:\n  - Do not consume more raw material than is available in any period.\n  - Do not use more regular labor hours than are available in any period.\n  - Produce each product only on its compatible equipment type.\n  - Do not exceed the processing capacity of any equipment type in any period.\n  - If demand upper bounds are provided, do not sell more than those limits.\n  - Keep all production, resource usage, and sales quantities nonnegative.\n  - Ensure that raw material usage, labor usage, and output quantities are consistent with the product-specific conversion and processing requirements.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced in period $$t$$.\n  - $$m_{p,t}$$: amount of raw material assigned to product $$p$$ in period $$t$$.\n  - $$\\ell_{p,t}$$: labor hours used for product $$p$$ in period $$t$$.\n  - $$s_{p,t}$$: quantity of product $$p$$ sold in period $$t$$, if sales are modeled separately from production.\n  - $$Z$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": \"List of products indexed by $$p \\in \\mathcal{P}$$.\",\n    \"equipment_types\": \"List of equipment types indexed by $$e \\in \\mathcal{E}$$.\",\n    \"periods\": \"List of planning periods indexed by $$t \\in \\mathcal{T}$$.\",\n    \"raw_materials\": \"List of raw materials indexed by $$r \\in \\mathcal{R}$$; for this problem, usually $$|\\mathcal{R}| = 1$$.\"\n  },\n  \"parameters\": {\n    \"yield_per_unit_raw\": \"Array $$\\alpha_p$$ giving output quantity of product $$p$$ per unit of raw material.\",\n    \"labor_hours_per_unit_raw\": \"Array $$\\beta_p$$ giving labor hours required per unit of raw material for product $$p$$.\",\n    \"unit_profit\": \"Array $$\\pi_p$$ giving profit per unit of product $$p$$ sold.\",\n    \"raw_material_supply\": \"Vector $$S_t$$ giving available raw material in period $$t$$.\",\n    \"labor_capacity\": \"Vector $$L_t$$ giving available regular labor hours in period $$t$$.\",\n    \"equipment_capacity\": \"Matrix $$K_{e,t}$$ giving the maximum processing or output capacity of equipment $$e$$ in period $$t$$; use $$+\\infty$$ if uncapped.\",\n    \"compatible_equipment\": \"Mapping $$\\eta_p$$ giving the required equipment type for product $$p$$.\",\n    \"demand_upper_bound\": \"Optional matrix $$D_{p,t}$$ giving the maximum sales quantity of product $$p$$ in period $$t$$; use $$+\\infty$$ when sales are unrestricted.\"\n  },\n  \"decision_variables\": {\n    \"production_quantity\": \"Matrix $$x_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"raw_material_allocation\": \"Matrix $$m_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"labor_usage\": \"Matrix $$\\\\ell_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"sales_quantity\": \"Optional matrix $$s_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$ if sales are tracked separately.\"\n  }\n}\n\nOutput Format\n{\n  \"objective_value\": \"Scalar $$Z$$ giving the maximum total profit.\",\n  \"production_plan\": {\n    \"shape\": \"Matrix $$x_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"meaning\": \"Planned production quantity for each product $$p$$ in each period $$t$$.\"\n  },\n  \"resource_usage\": {\n    \"raw_material\": {\n      \"shape\": \"Matrix $$m_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n      \"meaning\": \"Raw material assigned to each product $$p$$ in each period $$t$$.\"\n    },\n    \"labor\": {\n      \"shape\": \"Matrix $$\\\\ell_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n      \"meaning\": \"Labor hours consumed by each product $$p$$ in each period $$t$$.\"\n    }\n  },\n  \"sales_plan\": {\n    \"shape\": \"Optional matrix $$s_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"meaning\": \"Quantity sold of each product $$p$$ in each period $$t$$, if reported separately from production.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"products\": [\"$$A_1$$\", \"$$A_2$$\"],\n    \"equipment_types\": [\"$$E_1$$\", \"$$E_2$$\"],\n    \"periods\": [\"$$t_1$$\"],\n    \"raw_materials\": [\"$$r_1$$\"]\n  },\n  \"parameters\": {\n    \"yield_per_unit_raw\": {\n      \"$$A_1$$\": \"$$3$$\",\n      \"$$A_2$$\": \"$$4$$\"\n    },\n    \"labor_hours_per_unit_raw\": {\n      \"$$A_1$$\": \"$$12$$\",\n      \"$$A_2$$\": \"$$8$$\"\n    },\n    \"unit_profit\": {\n      \"$$A_1$$\": \"$$24$$\",\n      \"$$A_2$$\": \"$$16$$\"\n    },\n    \"raw_material_supply\": {\n      \"$$t_1$$\": \"$$50$$\"\n    },\n    \"labor_capacity\": {\n      \"$$t_1$$\": \"$$480$$\"\n    },\n    \"equipment_capacity\": {\n      \"$$E_1$$\": {\n        \"$$t_1$$\": \"$$100$$\"\n      },\n      \"$$E_2$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      }\n    },\n    \"compatible_equipment\": {\n      \"$$A_1$$\": \"$$E_1$$\",\n      \"$$A_2$$\": \"$$E_2$$\"\n    },\n    \"demand_upper_bound\": {\n      \"$$A_1$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      },\n      \"$$A_2$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      }\n    }\n  }\n}",
+    "problem": "Problem description\n- There is a finite set $$\\mathcal{V}$$ of vehicle types, indexed by $$i \\in \\mathcal{V}$$.\n- A group of $$N$$ travelers must be transported in a single planning decision.\n- Each vehicle type $$i$$ has a seating capacity $$c_i$$, a rental cost $$k_i$$, and an available fleet limit $$u_i$$.\n- A total of $$D$$ drivers are available.\n- Each rented vehicle requires one driver.\n- The goal is to choose how many vehicles of each type to rent so that all travelers are accommodated at minimum total rental cost.\n- The chosen fleet must respect the available number of vehicles of each type.\n- The total number of rented vehicles must not exceed the number of available drivers.\n- The total seating capacity of the chosen vehicles must be sufficient for all travelers.\n- All decision quantities must be nonnegative integers.\n- A solution is represented by:\n  - $$x_i$$: the number of vehicles rented of type $$i \\in \\mathcal{V}$$.\n  - $$z$$: the total rental cost of the selected fleet.\n\nInput Format\n{\n  \"demand\": {\n    \"travelers\": \"$$N$$\"\n  },\n  \"resources\": {\n    \"drivers_available\": \"$$D$$\"\n  },\n  \"vehicle_types\": [\n    {\n      \"type_id\": \"$$i$$\",\n      \"available_units\": \"$$u_i$$\",\n      \"capacity\": \"$$c_i$$\",\n      \"rental_cost\": \"$$k_i$$\"\n    }\n  ]\n}\n\nThe array $$vehicle\\_types$$ contains one record for each vehicle type $$i \\in \\mathcal{V}$$.\n\nOutput Format\n{\n  \"selected_units\": [\n    {\n      \"type_id\": \"$$i$$\",\n      \"quantity\": \"$$x_i$$\"\n    }\n  ],\n  \"total_rental_cost\": \"$$z$$\"\n}\n\nThe array $$selected\\_units$$ contains one record for each vehicle type $$i \\in \\mathcal{V}$$, giving the chosen integer quantity of that type.\n\nExample(s)\n\nInput 1\n{\n  \"demand\": {\n    \"travelers\": 400\n  },\n  \"resources\": {\n    \"drivers_available\": 9\n  },\n  \"vehicle_types\": [\n    {\n      \"type_id\": \"bus\",\n      \"available_units\": 10,\n      \"capacity\": 50,\n      \"rental_cost\": 800\n    },\n    {\n      \"type_id\": \"minibus\",\n      \"available_units\": 8,\n      \"capacity\": 40,\n      \"rental_cost\": 600\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "yield_per_unit_raw",
-            "symbol": "\\alpha",
+            "name": "vehicle_types",
+            "symbol": "\\mathcal{V}",
             "shape": [
-                "P"
+                "-"
             ],
-            "description": "Raw-material-to-output yield for each product"
+            "description": "Finite set of vehicle types, indexed by i in the set"
         },
         {
-            "name": "labor_hours_per_unit_raw",
-            "symbol": "\\beta",
-            "shape": [
-                "P"
-            ],
-            "description": "Labor hours required per unit of raw material for each product"
+            "name": "total_travelers",
+            "symbol": "N",
+            "shape": [],
+            "description": "Total number of travelers to transport"
         },
         {
-            "name": "unit_profit",
-            "symbol": "\\pi",
-            "shape": [
-                "P"
-            ],
-            "description": "Unit profit for each product"
-        },
-        {
-            "name": "raw_material_supply",
-            "symbol": "S",
-            "shape": [
-                "T"
-            ],
-            "description": "Raw material supply available in each period"
-        },
-        {
-            "name": "labor_capacity",
-            "symbol": "L",
-            "shape": [
-                "T"
-            ],
-            "description": "Regular labor hours available in each period"
-        },
-        {
-            "name": "equipment_capacity",
-            "symbol": "K",
-            "shape": [
-                "E",
-                "T"
-            ],
-            "description": "Processing capacity of each equipment type in each period"
-        },
-        {
-            "name": "compatible_equipment",
-            "symbol": "\\eta",
-            "shape": [
-                "P"
-            ],
-            "description": "Compatible equipment type required for each product"
-        },
-        {
-            "name": "demand_upper_bound",
+            "name": "available_drivers",
             "symbol": "D",
+            "shape": [],
+            "description": "Total number of available drivers"
+        },
+        {
+            "name": "seating_capacity",
+            "symbol": "c",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{V}"
             ],
-            "description": "Optional sales upper bound for each product in each period"
+            "description": "Seating capacity of each vehicle type i"
+        },
+        {
+            "name": "rental_cost",
+            "symbol": "k",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "description": "Rental cost of one vehicle of each type i"
+        },
+        {
+            "name": "fleet_limit",
+            "symbol": "u",
+            "shape": [
+                "\\mathcal{V}"
+            ],
+            "description": "Available fleet limit for each vehicle type i"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "vehicles_rented",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{V}"
             ],
-            "domain": "continuous",
-            "description": "Quantity of product produced in each period"
+            "domain": "integer",
+            "description": "Number of vehicles rented of each type i"
         },
         {
-            "name": "raw_material_allocation",
-            "symbol": "m",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Amount of raw material assigned to each product in each period"
-        },
-        {
-            "name": "labor_usage",
-            "symbol": "\\ell",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Labor hours used for each product in each period"
-        },
-        {
-            "name": "sales_quantity",
-            "symbol": "s",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product sold in each period"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "Z",
+            "name": "total_rental_cost",
+            "symbol": "z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit over the planning horizon"
+            "description": "Total rental cost of the selected fleet"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "raw_material_capacity",
-            "description": "Total raw material consumption across all products in each period must not exceed available supply",
-            "formula": "\\sum_{p\\in\\mathcal{P}} m_{p,t} \\leq S_t \\quad \\forall t\\in\\mathcal{T}",
+            "name": "nonnegative_travelers",
+            "description": "Total travelers is nonnegative",
+            "formula": "N",
             "parameters": [
-                "raw_material_supply"
-            ],
-            "variables": [
-                "raw_material_allocation"
-            ]
-        },
-        {
-            "name": "labor_capacity",
-            "description": "Total regular labor usage across all products in each period must not exceed available labor hours",
-            "formula": "\\sum_{p\\in\\mathcal{P}} \\ell_{p,t} \\leq L_t \\quad \\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "labor_capacity"
-            ],
-            "variables": [
-                "labor_usage"
-            ]
-        },
-        {
-            "name": "equipment_compatibility",
-            "description": "Each product may only be produced on its compatible equipment type",
-            "formula": "x_{p,t} \\leq \\sum_{e\\in\\mathcal{E}:\\, e=\\eta_p} K_{e,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "compatible_equipment",
-                "equipment_capacity"
-            ],
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "equipment_capacity",
-            "description": "Processing burden assigned to each equipment type in each period must not exceed its capacity; infinite capacity means no cap",
-            "formula": "\\sum_{p\\in\\mathcal{P}:\\, \\eta_p=e} x_{p,t} \\leq K_{e,t} \\quad \\forall e\\in\\mathcal{E},\\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "compatible_equipment",
-                "equipment_capacity"
-            ],
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "sales_upper_bound",
-            "description": "If demand upper bounds are provided, sales for each product in each period cannot exceed them; otherwise sales are unrestricted",
-            "formula": "s_{p,t} \\leq D_{p,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "demand_upper_bound"
-            ],
-            "variables": [
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "production_resource_consistency",
-            "description": "Raw material usage, labor usage, and output quantities must be consistent with product-specific yield and labor requirements",
-            "formula": "x_{p,t} = \\alpha_p m_{p,t},\\; \\ell_{p,t} = \\beta_p m_{p,t},\\; s_{p,t} = x_{p,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "yield_per_unit_raw",
-                "labor_hours_per_unit_raw"
-            ],
-            "variables": [
-                "production_quantity",
-                "raw_material_allocation",
-                "labor_usage",
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "nonnegative_production_quantity",
-            "description": "Production quantities must be nonnegative",
-            "formula": "x_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "nonnegative_raw_material_allocation",
-            "description": "Raw material allocations must be nonnegative",
-            "formula": "m_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "variables": [
-                "raw_material_allocation"
-            ]
-        },
-        {
-            "name": "nonnegative_labor_usage",
-            "description": "Labor usage must be nonnegative",
-            "formula": "\\ell_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "variables": [
-                "labor_usage"
-            ]
-        },
-        {
-            "name": "nonnegative_sales_quantity",
-            "description": "Sales quantities must be nonnegative",
-            "formula": "s_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
-            "variables": [
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "profit_variable_definition",
-            "description": "Total profit equals the sum of unit profits times sales quantities over the planning horizon",
-            "formula": "Z = \\sum_{p\\in\\mathcal{P}}\\sum_{t\\in\\mathcal{T}} \\pi_p s_{p,t}",
-            "parameters": [
-                "unit_profit"
-            ],
-            "variables": [
-                "total_profit",
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "data_nonnegativity",
-            "description": "All supplied data quantities are nonnegative where applicable; supplies, labor availability, capacities, and finite demand bounds are nonnegative, and infinite values indicate uncapped limits",
-            "formula": "input data values are nonnegative when finite",
-            "parameters": [
-                "yield_per_unit_raw",
-                "labor_hours_per_unit_raw",
-                "unit_profit",
-                "raw_material_supply",
-                "labor_capacity",
-                "equipment_capacity",
-                "compatible_equipment",
-                "demand_upper_bound"
+                "total_travelers"
             ],
             "variables": []
         },
         {
-            "name": "continuous_variables",
-            "description": "Decision variables are continuous unless integrality is imposed externally",
-            "formula": "decision variables are continuous",
+            "name": "nonnegative_drivers",
+            "description": "Available drivers is nonnegative",
+            "formula": "D",
+            "parameters": [
+                "available_drivers"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_vehicle_capacity",
+            "description": "Vehicle seating capacity is nonnegative for each vehicle type",
+            "formula": "c[i]",
+            "parameters": [
+                "seating_capacity",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_rental_cost",
+            "description": "Rental cost is nonnegative for each vehicle type",
+            "formula": "k[i]",
+            "parameters": [
+                "rental_cost",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_fleet_limit",
+            "description": "Fleet limit is nonnegative for each vehicle type",
+            "formula": "u[i]",
+            "parameters": [
+                "fleet_limit",
+                "vehicle_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "integer_vehicle_decisions",
+            "description": "Number of vehicles rented of each type is a nonnegative integer",
+            "formula": "x[i]",
+            "parameters": [
+                "vehicle_types"
+            ],
             "variables": [
-                "production_quantity",
-                "raw_material_allocation",
-                "labor_usage",
-                "sales_quantity",
-                "total_profit"
+                "vehicles_rented"
             ]
         },
         {
-            "name": "finite_or_unrestricted_capacity",
-            "description": "Finite capacities and demand bounds constrain the model, while plus infinity denotes no restriction",
-            "formula": "+infty indicates no cap on capacity or demand",
+            "name": "nonnegative_total_rental_cost",
+            "description": "Total rental cost is nonnegative",
+            "formula": "z",
+            "parameters": [],
+            "variables": [
+                "total_rental_cost"
+            ]
+        },
+        {
+            "name": "driver_limit",
+            "description": "Total number of rented vehicles cannot exceed the number of available drivers; each rented vehicle requires one driver",
+            "formula": "\\sum_{i\\in\\mathcal{V}} x_i \\leq D",
             "parameters": [
-                "equipment_capacity",
-                "demand_upper_bound"
+                "available_drivers",
+                "vehicle_types"
             ],
             "variables": [
-                "production_quantity",
-                "sales_quantity"
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "fleet_availability_limit",
+            "description": "Rented vehicles of each type cannot exceed the available fleet limit for that type",
+            "formula": "x_i \\leq u_i \\quad \\forall i\\in\\mathcal{V}",
+            "parameters": [
+                "fleet_limit",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "capacity_requirement",
+            "description": "Total seating capacity must be sufficient to transport all travelers",
+            "formula": "\\sum_{i\\in\\mathcal{V}} c_i x_i \\geq N",
+            "parameters": [
+                "seating_capacity",
+                "total_travelers",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented"
+            ]
+        },
+        {
+            "name": "cost_definition",
+            "description": "Total rental cost is determined by the selected vehicle quantities and their rental costs",
+            "formula": "z = \\sum_{i\\in\\mathcal{V}} k_i x_i",
+            "parameters": [
+                "rental_cost",
+                "vehicle_types"
+            ],
+            "variables": [
+                "vehicles_rented",
+                "total_rental_cost"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit over the planning horizon",
-            "sense": "maximize"
+            "name": "minimize_total_rental_cost",
+            "description": "Minimize the total rental cost of the selected fleet while meeting traveler demand and resource limits",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit over the planning horizon, where profit equals the sum of unit profits times sales quantities.",
+        "description": "Minimize the total rental cost of the selected fleet while meeting traveler demand and resource limits.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\sum_{t\\in\\mathcal{T}} \\pi_p \\, s_{p,t}",
-        "parameters": [
-            "unit_profit"
-        ],
+        "sense": "minimize",
+        "formula": "z",
+        "parameters": [],
         "variables": [
-            "sales_quantity",
-            "total_profit"
+            "total_rental_cost"
         ]
     }
 }

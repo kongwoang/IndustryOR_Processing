@@ -1,174 +1,290 @@
 {
-    "problem": "Problem description\n- There is a daily staffing planning problem for a periodic service over a horizon of $$T$$ consecutive time periods, indexed by $$t \\in \\{1,\\dots,T\\}$$.\n- The service requires a minimum number of active personnel in each period, given by the demand vector $$d_t$$ for each period $$t$$.\n- Each worker starts at the beginning of one allowed start period and works continuously for a fixed shift length of $$L$$ periods.\n- A worker assigned to a start period contributes coverage to every period within that shift window, including periods that wrap around the end of the daily horizon if the schedule is cyclic.\n- The planning objective is to choose the smallest feasible staffing plan, meaning the minimum total number of scheduled workers, while meeting all period-by-period demand requirements.\n- The model may use a uniform staffing cost $$c$$ per scheduled worker, or period-dependent start costs $$c_t$$ if differentiated costs are needed.\n- Each active worker contributes coverage capacity $$q$$ per covered period, with the standard case being a single unit of coverage per worker per period.\n- Required business constraints:\n  - Every time period must have enough active workers to meet or exceed the required demand in that period.\n  - Workers can only start at permitted start periods.\n  - Each worker follows the fixed shift length $$L$$ once scheduled.\n  - Shift coverage must be counted consistently across the daily cycle, including any wrap-around periods.\n  - Staffing quantities must be nonnegative integers.\n- A solution is represented by:\n  - $$x_t$$: the number of workers whose shifts start at the beginning of period $$t$$.\n  - $$z$$: the total number of workers scheduled over the day, used as the objective value.\n  - Optionally, a coverage summary by period may be reported as a derived result from $$x_t$$.\n\nInput Format\n{\n  \"T\": \"Integer parameter denoting the number of planning periods in the daily horizon, written as $$T$$.\",\n  \"L\": \"Integer parameter denoting the fixed shift length in periods, written as $$L$$.\",\n  \"demand\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of integers\",\n    \"meaning\": \"The required staffing level in each period, where element $$d_t$$ is the demand for period $$t$$.\"\n  },\n  \"start_cost\": {\n    \"shape\": \"scalar or [$$T$$]\",\n    \"type\": \"numeric\",\n    \"meaning\": \"Optional staffing cost parameter, written as $$c$$ or $$c_t$$, for starting one worker in a period.\"\n  },\n  \"coverage_capacity\": {\n    \"shape\": \"scalar\",\n    \"type\": \"numeric\",\n    \"meaning\": \"Coverage contributed by one active worker in a covered period, written as $$q$$.\"\n  },\n  \"cyclic_horizon\": {\n    \"shape\": \"scalar\",\n    \"type\": \"boolean\",\n    \"meaning\": \"Indicates whether shifts that extend past the last period wrap around to the beginning of the next daily cycle.\"\n  },\n  \"periods\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of objects\",\n    \"meaning\": \"Optional descriptive labels for each period, including the period index $$t$$ and its time window.\"\n  }\n}\n\nOutput Format\n{\n  \"start_counts\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of nonnegative integers\",\n    \"meaning\": \"The number of workers starting at each period, denoted by $$x_t$$.\"\n  },\n  \"total_workers\": {\n    \"shape\": \"scalar\",\n    \"type\": \"integer\",\n    \"meaning\": \"The total number of scheduled workers over the planning horizon, denoted by $$z$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 6,\n  \"L\": 2,\n  \"demand\": [60, 70, 60, 50, 20, 30],\n  \"coverage_capacity\": 1,\n  \"cyclic_horizon\": true,\n  \"periods\": [\n    { \"index\": 1, \"time\": \"06:00-10:00\", \"required_staff\": 60 },\n    { \"index\": 2, \"time\": \"10:00-14:00\", \"required_staff\": 70 },\n    { \"index\": 3, \"time\": \"14:00-18:00\", \"required_staff\": 60 },\n    { \"index\": 4, \"time\": \"18:00-22:00\", \"required_staff\": 50 },\n    { \"index\": 5, \"time\": \"22:00-02:00\", \"required_staff\": 20 },\n    { \"index\": 6, \"time\": \"02:00-06:00\", \"required_staff\": 30 }\n  ]\n}",
+    "problem": "Problem description\n- The planning horizon is divided into $$K$$ consecutive time periods over a total horizon of $$H$$ hours, with periods indexed by $$t \\in \\mathcal{T}$$.\n- The hospital must staff nurses to meet a required demand level $$d_t$$ in every period $$t$$.\n- There are two nurse categories indexed by $$i \\in \\mathcal{I}$$, where $$\\mathcal{I} = \\{\\mathrm{reg}, \\mathrm{con}\\}$$, representing regular nurses and contract nurses.\n- Allowed shift start batches are indexed by $$s \\in \\mathcal{S}$$. A nurse assigned to batch $$s$$ starts at time $$\\tau_s$$ and works continuously for a shift length of $$L$$ hours.\n- Regular nurses and contract nurses have the same shift length and the same coverage behavior; they differ only in hourly labor cost.\n- The hourly labor cost for regular nurses is $$c^{\\mathrm{reg}}$$, and the hourly labor cost for contract nurses is $$c^{\\mathrm{con}}$$.\n- The planning goal is to choose how many nurses of each type to start in each allowed batch so that every period\u2019s demand is covered at minimum total labor cost.\n- Staffing decisions must be nonnegative integers.\n- Every hired nurse must work a full shift once assigned, and a shift may cover one or more adjacent periods depending on the overlap between the shift interval and the planning periods.\n- The model should determine whether any contract nurses are used and, if so, how many are hired in total and by start batch.\n- A solution is represented by:\n  - $$x_{s}^{\\mathrm{reg}}$$, the number of regular nurses starting in batch $$s \\in \\mathcal{S}$$.\n  - $$x_{s}^{\\mathrm{con}}$$, the number of contract nurses starting in batch $$s \\in \\mathcal{S}$$.\n  - $$y^{\\mathrm{con}}$$, a binary indicator showing whether contract nurses are used at all.\n  - $$X^{\\mathrm{reg}}$$, the total number of regular nurses hired across all batches.\n  - $$X^{\\mathrm{con}}$$, the total number of contract nurses hired across all batches.\n  - $$Z$$, the total labor cost of the staffing plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Total planning horizon $$H$$ in hours.\"\n  },\n  \"periods\": {\n    \"type\": \"array\",\n    \"length\": \"$$K$$\",\n    \"meaning\": \"Ordered planning periods indexed by $$t \\in \\mathcal{T}$$.\",\n    \"items\": {\n      \"start_time\": \"string\",\n      \"end_time\": \"string\",\n      \"demand\": \"integer; required nurse count $$d_t$$ for period $$t$$.\"\n    }\n  },\n  \"shift_starts\": {\n    \"type\": \"array\",\n    \"length\": \"$$S$$\",\n    \"meaning\": \"Allowed shift start times $$\\\\tau_s$$ indexed by $$s \\\\in \\\\mathcal{S}$$.\"\n  },\n  \"shift_duration\": {\n    \"type\": \"number\",\n    \"meaning\": \"Shift length $$L$$ in hours.\"\n  },\n  \"nurse_types\": {\n    \"type\": \"object\",\n    \"meaning\": \"Nurse categories $$\\\\mathcal{I} = \\\\{\\\\mathrm{reg}, \\\\mathrm{con}\\\\}$$.\",\n    \"fields\": {\n      \"regular\": {\n        \"hourly_cost\": \"number; regular nurse hourly cost $$c^{\\\\mathrm{reg}}$$.\"\n      },\n      \"contract\": {\n        \"hourly_cost\": \"number; contract nurse hourly cost $$c^{\\\\mathrm{con}}$$.\"\n      }\n    }\n  },\n  \"coverage_rule\": {\n    \"type\": \"string\",\n    \"meaning\": \"Describes how a shift starting at $$\\\\tau_s$$ and lasting $$L$$ hours covers the planning periods; the derived coverage indicator may be represented by $$a_{t,s}$$.\"\n  }\n}\n\nOutput Format\n{\n  \"hire_plan\": {\n    \"regular_by_start\": {\n      \"type\": \"array\",\n      \"length\": \"$$S$$\",\n      \"meaning\": \"Values $$x_s^{\\\\mathrm{reg}}$$ for each shift-start batch $$s \\\\in \\\\mathcal{S}$$.\"\n    },\n    \"contract_by_start\": {\n      \"type\": \"array\",\n      \"length\": \"$$S$$\",\n      \"meaning\": \"Values $$x_s^{\\\\mathrm{con}}$$ for each shift-start batch $$s \\\\in \\\\mathcal{S}$$.\"\n    },\n    \"use_contract_nurses\": {\n      \"type\": \"boolean\",\n      \"meaning\": \"Indicator $$y^{\\\\mathrm{con}}$$ showing whether any contract nurses are hired.\"\n    }\n  },\n  \"summary\": {\n    \"total_regular_hires\": {\n      \"type\": \"integer\",\n      \"meaning\": \"Total regular nurses hired, $$X^{\\\\mathrm{reg}}$$.\"\n    },\n    \"total_contract_hires\": {\n      \"type\": \"integer\",\n      \"meaning\": \"Total contract nurses hired, $$X^{\\\\mathrm{con}}$$.\"\n    },\n    \"total_labor_cost\": {\n      \"type\": \"number\",\n      \"meaning\": \"Objective value $$Z$$.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 24,\n  \"periods\": [\n    {\n      \"start_time\": \"02:00\",\n      \"end_time\": \"06:00\",\n      \"demand\": 10\n    },\n    {\n      \"start_time\": \"06:00\",\n      \"end_time\": \"10:00\",\n      \"demand\": 15\n    },\n    {\n      \"start_time\": \"10:00\",\n      \"end_time\": \"14:00\",\n      \"demand\": 25\n    },\n    {\n      \"start_time\": \"14:00\",\n      \"end_time\": \"18:00\",\n      \"demand\": 20\n    },\n    {\n      \"start_time\": \"18:00\",\n      \"end_time\": \"22:00\",\n      \"demand\": 18\n    },\n    {\n      \"start_time\": \"22:00\",\n      \"end_time\": \"02:00\",\n      \"demand\": 12\n    }\n  ],\n  \"shift_starts\": [\n    \"02:00\",\n    \"06:00\",\n    \"10:00\",\n    \"14:00\",\n    \"18:00\",\n    \"22:00\"\n  ],\n  \"shift_duration\": 8,\n  \"nurse_types\": {\n    \"regular\": {\n      \"hourly_cost\": 10\n    },\n    \"contract\": {\n      \"hourly_cost\": 15\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "periods",
-            "symbol": "\u0002",
-            "shape": [
-                "T"
-            ],
-            "description": "Optional descriptive objects for period t, including index and time window"
-        },
-        {
-            "name": "planning_periods",
-            "symbol": "T",
+            "name": "total_planning_horizon",
+            "symbol": "H",
             "shape": [],
-            "description": "Integer number of planning periods in the cyclic horizon"
+            "description": "Total planning horizon in hours"
         },
         {
-            "name": "shift_length",
-            "symbol": "L",
+            "name": "num_periods",
+            "symbol": "K",
             "shape": [],
-            "description": "Fixed shift length in periods"
+            "description": "Number of planning periods in the horizon"
         },
         {
-            "name": "demand",
+            "name": "period_demand",
             "symbol": "d",
             "shape": [
-                "T"
+                "K"
             ],
-            "description": "Required staffing level in each period"
+            "description": "Required nurse demand in each planning period"
         },
         {
-            "name": "coverage_capacity",
-            "symbol": "q",
-            "shape": [],
-            "description": "Coverage capacity contributed by one active worker in a covered period"
-        },
-        {
-            "name": "uniform_start_cost",
-            "symbol": "c",
-            "shape": [],
-            "description": "Optional uniform cost per scheduled worker"
-        },
-        {
-            "name": "start_cost",
-            "symbol": "c_t",
+            "name": "allowed_shift_starts",
+            "symbol": "\\mathcal{S}",
             "shape": [
-                "T"
+                "S"
             ],
-            "description": "Optional period-dependent start cost for starting one worker in period t"
+            "description": "Set of allowed shift-start batches"
         },
         {
-            "name": "cyclic_horizon",
-            "symbol": "\u0001",
+            "name": "shift_start_time",
+            "symbol": "\\tau",
+            "shape": [
+                "S"
+            ],
+            "description": "Shift start time for each allowed batch"
+        },
+        {
+            "name": "shift_length_hours",
+            "symbol": "L",
             "shape": [],
-            "description": "Boolean indicating whether shift coverage wraps around the end of the horizon"
+            "description": "Length of each shift in hours"
+        },
+        {
+            "name": "nurse_categories",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "2"
+            ],
+            "description": "Set of nurse categories: regular and contract"
+        },
+        {
+            "name": "regular_hourly_cost",
+            "symbol": "c^{reg}",
+            "shape": [],
+            "description": "Hourly labor cost for a regular nurse"
+        },
+        {
+            "name": "contract_hourly_cost",
+            "symbol": "c^{con}",
+            "shape": [],
+            "description": "Hourly labor cost for a contract nurse"
+        },
+        {
+            "name": "coverage_indicator",
+            "symbol": "a",
+            "shape": [
+                "K",
+                "S"
+            ],
+            "description": "Binary coverage indicator equal to 1 if shift batch s covers period t, and 0 otherwise"
         }
     ],
     "variables": [
         {
-            "name": "start_counts",
-            "symbol": "x",
+            "name": "regular_nurses_by_start",
+            "symbol": "x^{reg}",
             "shape": [
-                "T"
+                "S"
             ],
             "domain": "integer",
-            "description": "Nonnegative integer number of workers whose shifts start at each period"
+            "description": "Number of regular nurses starting in each allowed shift batch"
         },
         {
-            "name": "total_workers",
-            "symbol": "z",
+            "name": "contract_nurses_by_start",
+            "symbol": "x^{con}",
+            "shape": [
+                "S"
+            ],
+            "domain": "integer",
+            "description": "Number of contract nurses starting in each allowed shift batch"
+        },
+        {
+            "name": "use_contract_nurses",
+            "symbol": "y^{con}",
+            "shape": [],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if any contract nurses are used, 0 otherwise"
+        },
+        {
+            "name": "total_regular_hires",
+            "symbol": "X^{reg}",
             "shape": [],
             "domain": "integer",
-            "description": "Total number of workers scheduled over the planning horizon"
+            "description": "Total number of regular nurses hired across all batches"
+        },
+        {
+            "name": "total_contract_hires",
+            "symbol": "X^{con}",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of contract nurses hired across all batches"
+        },
+        {
+            "name": "total_labor_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total labor cost of the staffing plan"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_integer_start_counts",
-            "description": "Start counts must be nonnegative integers for each planning period",
-            "formula": "x[t]",
+            "name": "demand_coverage",
+            "description": "For each planning period, total nurse coverage from all allowed shift starts and both nurse categories must meet required demand",
+            "formula": "\\sum_{s=1}^{S} a_{t,s}\\left(x^{reg}_s + x^{con}_s\\right) \\ge d_t \\qquad \\forall t=1,\\dots,K",
             "parameters": [
-                "planning_periods"
+                "period_demand",
+                "coverage_indicator"
             ],
             "variables": [
-                "start_counts"
+                "regular_nurses_by_start",
+                "contract_nurses_by_start"
             ]
         },
         {
-            "name": "nonnegative_integer_total_workers",
-            "description": "Total workers must be a nonnegative integer",
-            "formula": "z",
-            "parameters": [],
+            "name": "nonnegative_integer_regular_starts",
+            "description": "Regular nurses started in each allowed batch must be nonnegative integers",
+            "formula": "x^{reg} are nonnegative integers",
+            "parameters": [
+                "allowed_shift_starts"
+            ],
             "variables": [
-                "total_workers"
+                "regular_nurses_by_start"
             ]
         },
         {
-            "name": "period_demand_coverage",
-            "description": "Each period t must have total active coverage at least the required demand, with explicit linear cyclic indexing",
-            "formula": "\\sum_{k=0}^{L-1} q\\,x_{(t-k)\\bmod T} \\ge d_t \\quad \\forall t \\in \\{0,\\dots,T-1\\}",
+            "name": "nonnegative_integer_contract_starts",
+            "description": "Contract nurses started in each allowed batch must be nonnegative integers",
+            "formula": "x^{con} are nonnegative integers",
             "parameters": [
-                "planning_periods",
-                "shift_length",
-                "demand",
-                "coverage_capacity",
-                "cyclic_horizon"
+                "allowed_shift_starts"
             ],
             "variables": [
-                "start_counts"
+                "contract_nurses_by_start"
             ]
         },
         {
-            "name": "fixed_length_shift_assignment",
-            "description": "Redundant semantic statement that each scheduled worker starts in exactly one period and works a fixed contiguous shift of length L; retained as a modeling note only",
-            "formula": "x_t \\ge 0,\\ x_t \\in \\mathbb{Z} \\quad \\forall t \\in \\{0,\\dots,T-1\\}",
-            "parameters": [
-                "planning_periods",
-                "shift_length"
-            ],
+            "name": "contract_usage_binary",
+            "description": "Contract usage indicator must be binary",
+            "formula": "y^{con} \\in \\{0,1\\}",
             "variables": [
-                "start_counts"
+                "use_contract_nurses"
             ]
         },
         {
-            "name": "cyclic_wraparound_coverage",
-            "description": "Coverage indices wrap around the horizon when the horizon is cyclic; this is already embedded in the explicit coverage family",
-            "formula": "x_{(t-k)\\bmod T} \\text{ for } k=0,\\dots,L-1",
-            "parameters": [
-                "planning_periods",
-                "shift_length",
-                "cyclic_horizon"
-            ],
+            "name": "nonnegative_integer_total_regular_hires",
+            "description": "Total regular hires must be a nonnegative integer",
+            "formula": "X^{reg} \\in \\mathbb{Z}_{\\ge 0}",
             "variables": [
-                "start_counts"
+                "total_regular_hires"
             ]
         },
         {
-            "name": "total_workers_derived_from_starts",
-            "description": "The total number of scheduled workers equals the sum of all start counts",
-            "formula": "z = \\sum_{t=0}^{T-1} x_t",
+            "name": "nonnegative_integer_total_contract_hires",
+            "description": "Total contract hires must be a nonnegative integer",
+            "formula": "X^{con} \\in \\mathbb{Z}_{\\ge 0}",
+            "variables": [
+                "total_contract_hires"
+            ]
+        },
+        {
+            "name": "nonnegative_total_labor_cost",
+            "description": "Total labor cost must be nonnegative",
+            "formula": "Z \\ge 0",
+            "variables": [
+                "total_labor_cost"
+            ]
+        },
+        {
+            "name": "allowed_shift_starts_only",
+            "description": "Nurses may start only at allowed shift-start batches",
+            "formula": "x^{reg}_s, x^{con}_s \\in \\mathbb{Z}_{\\ge 0} \\qquad \\forall s=1,\\dots,S",
             "parameters": [
-                "planning_periods"
+                "allowed_shift_starts"
             ],
             "variables": [
-                "start_counts",
-                "total_workers"
+                "regular_nurses_by_start",
+                "contract_nurses_by_start"
+            ]
+        },
+        {
+            "name": "full_shift_once_started",
+            "description": "Every assigned nurse works a full shift once started",
+            "formula": "a_{t,s}=1 \\text{ if shift } s \\text{ covers period } t \\text{ under shift length } L",
+            "parameters": [
+                "shift_length_hours"
+            ],
+            "variables": [
+                "regular_nurses_by_start",
+                "contract_nurses_by_start"
+            ]
+        },
+        {
+            "name": "regular_and_contract_same_coverage",
+            "description": "Regular and contract nurses share the same coverage pattern determined by the overlap indicator and the same shift duration",
+            "formula": "a_{t,s}^{reg}=a_{t,s}^{con}=a_{t,s} \\qquad \\forall t=1,\\dots,K,\\; s=1,\\dots,S",
+            "parameters": [
+                "coverage_indicator",
+                "shift_length_hours"
+            ],
+            "variables": [
+                "regular_nurses_by_start",
+                "contract_nurses_by_start"
+            ]
+        },
+        {
+            "name": "contract_indicator_status",
+            "description": "Contract usage indicator records whether any contract nurses are used",
+            "formula": "\\sum_{s=1}^{S} x^{con}_s \\le M y^{con}",
+            "variables": [
+                "use_contract_nurses",
+                "contract_nurses_by_start"
+            ]
+        },
+        {
+            "name": "aggregate_hires_regular",
+            "description": "Total regular hires represent the aggregate hires across all batches for regular nurses",
+            "formula": "X^{reg} = \\sum_{s=1}^{S} x^{reg}_s",
+            "variables": [
+                "total_regular_hires",
+                "regular_nurses_by_start"
+            ]
+        },
+        {
+            "name": "aggregate_hires_contract",
+            "description": "Total contract hires represent the aggregate hires across all batches for contract nurses",
+            "formula": "X^{con} = \\sum_{s=1}^{S} x^{con}_s",
+            "variables": [
+                "total_contract_hires",
+                "contract_nurses_by_start"
+            ]
+        },
+        {
+            "name": "total_labor_cost_definition",
+            "description": "Total labor cost equals the sum of regular and contract labor costs across all starts",
+            "formula": "Z = L\\left(c^{reg} \\sum_{s=1}^{S} x^{reg}_s + c^{con} \\sum_{s=1}^{S} x^{con}_s\\right)",
+            "parameters": [
+                "shift_length_hours",
+                "regular_hourly_cost",
+                "contract_hourly_cost"
+            ],
+            "variables": [
+                "regular_nurses_by_start",
+                "contract_nurses_by_start",
+                "total_labor_cost"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "minimize_total_scheduled_workers",
-            "description": "Minimize the total number of scheduled workers over the planning horizon",
-            "sense": "minimize"
-        },
-        {
-            "name": "minimize_total_staffing_cost",
-            "description": "If differentiated start costs are used, minimize the total staffing cost based on uniform or period-dependent start costs while satisfying all demand requirements",
+            "name": "total_labor_cost_minimization",
+            "description": "Minimize the total labor cost of the staffing plan while meeting demand in every planning period",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total number of scheduled workers over the planning horizon, using the derived aggregate total_workers.",
+        "description": "Minimize total labor cost of the staffing plan while meeting demand in every planning period.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "z",
+        "formula": "Z",
         "parameters": [],
         "variables": [
-            "total_workers"
+            "total_labor_cost"
         ]
     }
 }

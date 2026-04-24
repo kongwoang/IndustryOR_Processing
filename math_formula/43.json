@@ -1,196 +1,139 @@
 {
-    "problem": "Problem description\n- There are $$m$$ production points indexed by $$i \\in \\mathcal{I}$$, $$n$$ demand points indexed by $$j \\in \\mathcal{J}$$, and $$p$$ intermediate marshaling stations indexed by $$k \\in \\mathcal{K}$$.\n- Each production point $$i$$ has available supply $$a_i$$.\n- Each demand point $$j$$ has required demand $$b_j$$.\n- Each marshaling station $$k$$ has a fixed usage cost $$f_k$$ and a maximum transshipment capacity $$q_k$$.\n- The unit transportation cost from production point $$i$$ to marshaling station $$k$$ is $$c_{ik}$$, and the unit transportation cost from marshaling station $$k$$ to demand point $$j$$ is $$c'_{kj}$$.\n- The instance is assumed to have total available supply at least as large as total demand.\n- The planning goal is to choose shipment quantities and station-usage decisions so that all demand is satisfied at minimum total cost.\n- All material must be routed from production points to demand points through intermediate marshaling stations; direct shipment from a production point to a demand point is not allowed.\n- Every demand point must receive its full required quantity.\n- Shipments leaving any production point cannot exceed that point\u2019s available supply.\n- If a marshaling station is used, the total amount transshipped through it cannot exceed its capacity.\n- If a marshaling station is not used, no material may pass through it and no fixed usage cost is incurred.\n- Flow entering a marshaling station must be matched by flow leaving that station so that material is conserved at the station.\n- A solution is represented by:\n  - $$x_{ik}$$, the quantity shipped from production point $$i$$ to marshaling station $$k$$.\n  - $$y_{kj}$$, the quantity shipped from marshaling station $$k$$ to demand point $$j$$.\n  - $$z_k$$, a binary indicator showing whether marshaling station $$k$$ is used.\n  - $$Z$$, the total transportation-and-usage cost of the plan.\n\nInput Format\n{\n  \"m\": \"integer $$m$$, number of production points\",\n  \"n\": \"integer $$n$$, number of demand points\",\n  \"p\": \"integer $$p$$, number of marshaling stations\",\n  \"supply\": \"array of length $$m$$, where $$supply[i] = a_i$$ is the available supply at production point $$i$$\",\n  \"demand\": \"array of length $$n$$, where $$demand[j] = b_j$$ is the required demand at demand point $$j$$\",\n  \"fixed_cost\": \"array of length $$p$$, where $$fixed\\_cost[k] = f_k$$ is the fixed usage cost of marshaling station $$k$$\",\n  \"capacity\": \"array of length $$p$$, where $$capacity[k] = q_k$$ is the maximum transshipment capacity of marshaling station $$k$$\",\n  \"cost_production_to_station\": \"matrix of shape $$m \\times p$$, where entry $$c_{ik}$$ is the unit cost from production point $$i$$ to marshaling station $$k$$\",\n  \"cost_station_to_demand\": \"matrix of shape $$p \\times n$$, where entry $$c'_{kj}$$ is the unit cost from marshaling station $$k$$ to demand point $$j$$\"\n}\n\nOutput Format\n{\n  \"station_used\": \"binary array of length $$p$$, where $$station\\_used[k] = z_k$$ indicates whether marshaling station $$k$$ is used\",\n  \"shipments_to_station\": \"nonnegative matrix of shape $$m \\times p$$, where entry $$x_{ik}$$ is the shipment from production point $$i$$ to marshaling station $$k$$\",\n  \"shipments_to_demand\": \"nonnegative matrix of shape $$p \\times n$$, where entry $$y_{kj}$$ is the shipment from marshaling station $$k$$ to demand point $$j$$\",\n  \"total_cost\": \"scalar value $$Z$$ giving the minimum total cost of the transportation plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"m\": 2,\n  \"n\": 2,\n  \"p\": 2,\n  \"supply\": [100, 150],\n  \"demand\": [80, 120],\n  \"fixed_cost\": [10, 15],\n  \"capacity\": [100, 100],\n  \"cost_production_to_station\": [[2, 3], [4, 1]],\n  \"cost_station_to_demand\": [[3, 2], [1, 4]]\n}",
+    "problem": "Problem description\n- There is a single daily logistics planning problem for a production base that must receive raw materials from two warehouses, indexed by $$w \\in W$$, where $$W=\\{1,2\\}$$ corresponds to warehouses $$A$$ and $$B$$.\n- There are raw material types indexed by $$r \\in R$$, where each warehouse dispatch delivers a fixed amount of each raw material type per truck.\n- The planning horizon is one day, indexed by $$t \\in T$$, where $$T=\\{1\\}$$.\n- The minimum daily required quantities of raw materials are represented by demand parameters $$d_r$$ for each $$r \\in R$$.\n- The amount of raw material $$r$$ transported by one truck from warehouse $$w$$ is represented by the coefficient $$q_{w,r}$$.\n- The freight cost per truck dispatched from warehouse $$w$$ is represented by the parameter $$c_w$$.\n- The decision is to choose the number of trucks dispatched daily from each warehouse.\n- The planning goal is to minimize the total freight cost while meeting all minimum raw material requirements.\n\n- Required business constraints:\n  - The number of trucks dispatched from each warehouse must be a nonnegative integer.\n  - The total amount of each raw material delivered to the production base from all dispatched trucks must meet or exceed the required daily demand for that material.\n  - Each warehouse contributes raw materials according to its fixed per-truck transport mix.\n  - The total freight cost is the sum of the per-truck freight costs across all dispatched trucks.\n  - The model is a daily planning model and does not include inventory carryover, backlogging, or alternative transportation modes.\n\n- A solution is represented by:\n  - $$x_w$$: the integer number of trucks dispatched daily from warehouse $$w \\in W$$.\n  - $$z$$: the total daily freight cost incurred by the dispatch plan.\n\nInput Format\n{\n  \"warehouses\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Set of warehouses indexed by $$w \\\\in W$$\"\n  },\n  \"materials\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Set of raw material types indexed by $$r \\\\in R$$\"\n  },\n  \"demand\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Minimum required daily quantity of each raw material, where entry $$d_r$$ is the demand for material $$r$$\"\n  },\n  \"transport_yield_per_truck\": {\n    \"type\": \"matrix\",\n    \"dimension\": \"$$|W| \\\\times |R|$$\",\n    \"meaning\": \"Amount of each raw material delivered by one truck from each warehouse, where entry $$q_{w,r}$$ is the quantity of material $$r$$ carried by one truck from warehouse $$w$$\"\n  },\n  \"truck_cost\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Freight cost per truck dispatched from each warehouse, where entry $$c_w$$ is the cost for warehouse $$w$$\"\n  }\n}\n\nOutput Format\n{\n  \"trucks_dispatched\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Integer number of trucks dispatched daily from each warehouse, where entry $$x_w$$ is the truck count for warehouse $$w$$\"\n  },\n  \"total_freight_cost\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Minimum total daily freight cost, denoted by $$z$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"warehouses\": [\"A\", \"B\"],\n  \"materials\": [\"A\", \"B\", \"C\"],\n  \"demand\": [240, 80, 120],\n  \"transport_yield_per_truck\": [\n    [4, 2, 6],\n    [7, 2, 2]\n  ],\n  \"truck_cost\": [200, 160]\n}",
     "parameters": [
         {
-            "name": "m",
-            "symbol": "m",
+            "name": "warehouses",
+            "symbol": "W",
             "shape": [],
-            "description": "Integer count of production points; the set of production points is \\mathcal{I} = {0,\\dots,m-1}"
+            "description": "Set of warehouses indexed by $w$, with $W=\\{0,1\\}$ corresponding to warehouses $A$ and $B$"
         },
         {
-            "name": "n",
-            "symbol": "n",
+            "name": "raw_material_types",
+            "symbol": "R",
             "shape": [],
-            "description": "Integer count of demand points; the set of demand points is \\mathcal{J} = {0,\\dots,n-1}"
-        },
-        {
-            "name": "p",
-            "symbol": "p",
-            "shape": [],
-            "description": "Integer count of marshaling stations; the set of stations is \\mathcal{K} = {0,\\dots,p-1}"
-        },
-        {
-            "name": "supply",
-            "symbol": "a",
-            "shape": [
-                "m"
-            ],
-            "description": "Available supply at each production point i \\in \\mathcal{I}"
+            "description": "Set of raw material types indexed by $r$"
         },
         {
             "name": "demand",
-            "symbol": "b",
+            "symbol": "d",
             "shape": [
-                "n"
+                "R"
             ],
-            "description": "Required demand at each demand point j \\in \\mathcal{J}"
+            "description": "Minimum required daily quantity of each raw material type $r$"
         },
         {
-            "name": "fixed_cost",
-            "symbol": "f",
-            "shape": [
-                "p"
-            ],
-            "description": "Fixed usage cost of each marshaling station k \\in \\mathcal{K}"
-        },
-        {
-            "name": "capacity",
+            "name": "transport_yield_per_truck",
             "symbol": "q",
             "shape": [
-                "p"
+                "W",
+                "R"
             ],
-            "description": "Maximum transshipment capacity of each marshaling station k \\in \\mathcal{K}"
+            "description": "Quantity of material $r$ delivered by one truck from warehouse $w$"
         },
         {
-            "name": "cost_production_to_station",
+            "name": "truck_cost",
             "symbol": "c",
             "shape": [
-                "m",
-                "p"
+                "W"
             ],
-            "description": "Unit shipping cost from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
+            "description": "Freight cost per truck dispatched from each warehouse $w$"
         },
         {
-            "name": "cost_station_to_demand",
-            "symbol": "c'",
-            "shape": [
-                "p",
-                "n"
-            ],
-            "description": "Unit shipping cost from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
+            "name": "planning_horizon",
+            "symbol": "T",
+            "shape": [],
+            "description": "Single-day planning horizon index set with $T=\\{0\\}$"
         }
     ],
     "variables": [
         {
-            "name": "shipments_to_station",
+            "name": "trucks_dispatched",
             "symbol": "x",
             "shape": [
-                "m",
-                "p"
+                "W"
             ],
-            "domain": "continuous",
-            "description": "Quantity shipped from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
+            "domain": "integer",
+            "description": "Number of trucks dispatched daily from each warehouse $w$"
         },
         {
-            "name": "shipments_to_demand",
-            "symbol": "y",
-            "shape": [
-                "p",
-                "n"
-            ],
-            "domain": "continuous",
-            "description": "Quantity shipped from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
-        },
-        {
-            "name": "station_used",
+            "name": "total_freight_cost",
             "symbol": "z",
-            "shape": [
-                "p"
-            ],
-            "domain": "binary",
-            "description": "Binary indicator equal to 1 if marshaling station k \\in \\mathcal{K} is used, and 0 otherwise"
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total daily freight cost incurred by the dispatch plan"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "demand_satisfaction",
-            "description": "Each demand point must receive exactly its required demand through marshaling stations",
-            "formula": "\\sum_{k=0}^{p-1} y_{kj} = b_j \\quad \\forall j\\in\\{0,\\dots,n-1\\}",
-            "parameters": [
-                "demand"
-            ],
+            "name": "nonnegative_integer_truck_dispatch",
+            "description": "The number of trucks dispatched from each warehouse must be a nonnegative integer.",
+            "formula": "x_w \\in \\mathbb{Z}_{\\ge 0}",
             "variables": [
-                "shipments_to_demand"
+                "trucks_dispatched"
             ]
         },
         {
-            "name": "supply_limit",
-            "description": "Total shipment leaving each production point cannot exceed its available supply",
-            "formula": "\\sum_{k=0}^{p-1} x_{ik} \\le a_i \\quad \\forall i\\in\\{0,\\dots,m-1\\}",
+            "name": "material_demand_satisfaction",
+            "description": "For each raw material type r, the total quantity delivered by trucks from all warehouses must meet or exceed the minimum daily demand.",
+            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\ge d_r \\quad \\forall r\\in R",
             "parameters": [
-                "supply"
+                "raw_material_types",
+                "demand",
+                "transport_yield_per_truck"
             ],
             "variables": [
-                "shipments_to_station"
+                "trucks_dispatched"
             ]
         },
         {
-            "name": "station_capacity_usage",
-            "description": "If a station is used, total flow through it is limited by its capacity; if it is not used, no flow may pass through it",
-            "formula": "\\sum_{i=0}^{m-1} x_{ik} = \\sum_{j=0}^{n-1} y_{kj} \\le q_k z_k \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
+            "name": "fixed_mix_per_truck",
+            "description": "Each dispatched truck from warehouse w delivers a fixed mix of raw materials q_{w,r}; this is captured directly in the demand satisfaction constraints and requires no separate restriction beyond the delivery coefficients.",
+            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\text{ is the delivered amount of material } r",
             "parameters": [
-                "capacity"
+                "transport_yield_per_truck"
             ],
             "variables": [
-                "shipments_to_station",
-                "shipments_to_demand",
-                "station_used"
+                "trucks_dispatched"
             ]
         },
         {
-            "name": "station_flow_conservation",
-            "description": "Removed because station balance is now embedded in the station capacity/usage constraint",
-            "formula": "inflow equals outflow at each station",
-            "parameters": [],
+            "name": "total_freight_cost_definition",
+            "description": "Define total freight cost as the sum of per-truck freight costs over all dispatched trucks.",
+            "formula": "z = \\sum_{w\\in W} c_w x_w",
+            "parameters": [
+                "truck_cost"
+            ],
+            "variables": [
+                "trucks_dispatched",
+                "total_freight_cost"
+            ]
+        },
+        {
+            "name": "single_day_no_carryover_or_backlog",
+            "description": "Single-day planning is modeled implicitly by using only daily dispatch variables, so no intertemporal flow variables are needed; there is no carryover or backlog state in the model.",
+            "formula": "\\text{Single-day planning model with no inventory carryover or backlog}",
+            "parameters": [
+                "planning_horizon"
+            ],
             "variables": []
-        },
-        {
-            "name": "no_direct_shipping",
-            "description": "Removed because direct production-to-demand shipping is structurally excluded by the variable set; no separate algebraic constraint is needed",
-            "formula": "no direct production to demand shipment",
-            "parameters": [],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_shipments",
-            "description": "Shipment quantities must be nonnegative",
-            "formula": "x_{ik} \\ge 0 \\; \\forall i\\in\\{0,\\dots,m-1\\},\\forall k\\in\\{0,\\dots,p-1\\},\\qquad y_{kj} \\ge 0 \\; \\forall k\\in\\{0,\\dots,p-1\\},\\forall j\\in\\{0,\\dots,n-1\\}",
-            "variables": [
-                "shipments_to_station",
-                "shipments_to_demand"
-            ]
-        },
-        {
-            "name": "binary_station_usage",
-            "description": "Station usage indicator must be binary",
-            "formula": "z_k \\in \\{0,1\\} \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
-            "variables": [
-                "station_used"
-            ]
         }
     ],
     "objectives": [
         {
-            "name": "total_cost_minimization",
-            "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations",
+            "name": "minimize_total_freight_cost",
+            "description": "Minimize the total daily freight cost of dispatching trucks from the warehouses while satisfying all raw material demand requirements.",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations.",
+        "description": "Minimize the total daily freight cost of dispatching trucks from the two warehouses while meeting or exceeding all raw material demands.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "\\sum_{i=0}^{m-1}\\sum_{k=0}^{p-1} c_{ik}x_{ik}+\\sum_{k=0}^{p-1}\\sum_{j=0}^{n-1} c'_{kj}y_{kj}+\\sum_{k=0}^{p-1} f_k z_k",
-        "parameters": [
-            "cost_production_to_station",
-            "cost_station_to_demand",
-            "fixed_cost"
-        ],
+        "formula": "\\min \\; z",
+        "parameters": [],
         "variables": [
-            "shipments_to_station",
-            "shipments_to_demand",
-            "station_used"
+            "total_freight_cost"
         ]
     }
 }

@@ -1,265 +1,311 @@
 {
-    "problem": "Problem description\n- There are $$I$$ customer orders indexed by $$i \\in \\mathcal{I}$$.\n- Each order $$i$$ is characterized by a required width $$w_i$$ and a required length $$\\ell_i$$.\n- There are $$S$$ available standard stock width types indexed by $$s \\in \\mathcal{S}$$, with standard width parameter $$W_s$$ for each type.\n- The stock length is effectively unlimited, and length pieces may be spliced together, so the main planning decision is how to cut widths and allocate material area.\n- The planning goal is to choose a cutting plan that satisfies all orders while minimizing total waste area.\n- Business rules:\n  - Only stock widths in $$\\mathcal{S}$$ may be used.\n  - Every order must be fully satisfied in both width and length.\n  - Length fulfillment may come from multiple spliced pieces when needed.\n  - Any unused material area created by cutting is counted as waste.\n  - The solution should minimize the total waste area across all used stock material.\n- A solution is represented by:\n  - A set of cutting patterns $$\\mathcal{P}$$.\n  - A pattern usage variable $$x_p$$ for each $$p \\in \\mathcal{P}$$, indicating how many times pattern $$p$$ is applied.\n  - A pattern composition description for each $$p$$, identifying the stock width type used and the orders included in that pattern.\n  - A total waste area value $$Z$$.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"static single planning horizon; no time indexing is required\"\n  },\n  \"orders\": {\n    \"type\": \"array\",\n    \"shape\": \"$$I$$\",\n    \"items\": {\n      \"order_id\": \"identifier in $$\\\\mathcal{I}$$\",\n      \"required_width\": \"real demand parameter $$w_i \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\",\n      \"required_length\": \"real demand parameter $$\\\\ell_i \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"stock_widths\": {\n    \"type\": \"array\",\n    \"shape\": \"$$S$$\",\n    \"items\": {\n      \"stock_width_id\": \"identifier in $$\\\\mathcal{S}$$\",\n      \"standard_width\": \"real parameter $$W_s \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"splicing_allowed\": \"boolean parameter indicating whether length pieces may be joined\",\n  \"objective\": \"minimize total waste area\"\n}\n\nOutput Format\n{\n  \"selected_patterns\": {\n    \"type\": \"array\",\n    \"shape\": \"$$P$$\",\n    \"items\": {\n      \"pattern_id\": \"identifier in $$\\\\mathcal{P}$$\",\n      \"stock_width_id\": \"identifier in $$\\\\mathcal{S}$$\",\n      \"usage_count\": \"nonnegative integer $$x_p \\\\in \\\\mathbb{Z}_{\\\\ge 0}$$\",\n      \"orders_in_pattern\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"order_id\": \"identifier in $$\\\\mathcal{I}$$\",\n          \"allocated_width\": \"width assigned to the order in this pattern, consistent with $$w_i$$\",\n          \"allocated_length\": \"length assigned to the order in this pattern, consistent with $$\\\\ell_i$$\"\n        }\n      },\n      \"pattern_waste_area\": \"nonnegative real value $$Z_p \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"total_waste_area\": \"nonnegative real value $$Z \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"single static period\",\n  \"orders\": [\n    {\n      \"order_id\": 1,\n      \"required_width\": 0.5,\n      \"required_length\": 1000\n    },\n    {\n      \"order_id\": 2,\n      \"required_width\": 0.7,\n      \"required_length\": 3000\n    },\n    {\n      \"order_id\": 3,\n      \"required_width\": 0.9,\n      \"required_length\": 2000\n    }\n  ],\n  \"stock_widths\": [\n    {\n      \"stock_width_id\": 1,\n      \"standard_width\": 1\n    },\n    {\n      \"stock_width_id\": 2,\n      \"standard_width\": 2\n    }\n  ],\n  \"splicing_allowed\": true\n}",
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- The firm trades one or more grain categories indexed by $$g \\in \\mathcal{G}=\\{1,2,\\ldots,G\\}$$.\n- The planning input includes initial inventory $$I_{g,0}$$ for each grain category and initial cash balance $$B_0$$.\n- Each period has an exogenous purchase price $$c_{g,t}$$ and selling price $$s_{g,t}$$ for each grain category.\n- The warehouse has a finite storage capacity $$K$$ for total on-hand inventory across all grain categories.\n- Purchases made in period $$t$$ are delivered in period $$t$$ and are paid for immediately upon delivery.\n- Goods purchased in period $$t$$ cannot be sold until period $$t+1$$ or later.\n- Sales in any period may only use inventory that is already eligible for sale at the start of that period.\n- The cash balance must remain feasible throughout the horizon, with no negative cash unless an explicit financing source is provided.\n- The inventory held in the warehouse at any time must never exceed the storage capacity $$K$$.\n- The ending inventory at the end of period $$T$$ must satisfy the required terminal inventory level $$I^{\\mathrm{req}}_g$$ for each grain category.\n- The optimization goal is to maximize total trading profit over the horizon, using the period-by-period purchase and sales decisions.\n\n- A solution is represented by:\n  - $$x_{g,t}$$, the quantity of grain category $$g$$ purchased in period $$t$$.\n  - $$y_{g,t}$$, the quantity of grain category $$g$$ sold in period $$t$$.\n  - $$I_{g,t}$$, the ending inventory of grain category $$g$$ after period $$t$$.\n  - $$B_t$$, the cash balance after period $$t$$.\n  - $$\\Pi$$, the total profit over the full planning horizon.\n\nInput Format\n{\n  \"T\": \"number of planning periods, indexed by $$t \\\\in \\\\mathcal{T}=\\\\{1,2,\\\\ldots,T\\\\}$$\",\n  \"G\": \"number of grain categories, indexed by $$g \\\\in \\\\mathcal{G}=\\\\{1,2,\\\\ldots,G\\\\}$$\",\n  \"K\": \"warehouse capacity for total inventory\",\n  \"B_0\": \"initial cash balance\",\n  \"I_0\": \"initial inventory vector with shape $$G$$, where $$I_{g,0}$$ is the initial stock of grain category $$g$$\",\n  \"I^{\\\\mathrm{req}}\": \"required ending inventory vector with shape $$G$$, where $$I^{\\\\mathrm{req}}_g$$ is the terminal stock requirement for grain category $$g$$\",\n  \"c\": \"purchase price matrix with shape $$G \\\\times T$$, where $$c_{g,t}$$ is the unit purchase cost of grain category $$g$$ in period $$t$$\",\n  \"s\": \"selling price matrix with shape $$G \\\\times T$$, where $$s_{g,t}$$ is the unit selling price of grain category $$g$$ in period $$t$$\",\n  \"receipt_lag\": \"sellability delay in periods; here the rule is that purchased goods become sellable only after one period\",\n  \"payment_rule\": \"purchase payment is due upon delivery in the purchase period\",\n  \"demand\": \"not exogenous in this problem; sales are decision variables limited by sellable inventory and timing rules\"\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$x_{g,t}$$, purchased quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"sales_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$y_{g,t}$$, sold quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$G$$\",\n    \"meaning\": \"$$I_{g,T}$$, ending inventory of each grain category after period $$T$$\"\n  },\n  \"ending_cash\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$B_T$$, cash balance at the end of period $$T$$\"\n  },\n  \"total_profit\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$\\\\Pi$$, total profit over the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"G\": 1,\n  \"K\": 5000,\n  \"B_0\": 20000,\n  \"I_0\": [1000],\n  \"I^{\\\\mathrm{req}}\": [2000],\n  \"c\": [[2.85, 3.05, 2.90]],\n  \"s\": [[3.10, 3.25, 2.95]],\n  \"receipt_lag\": 1,\n  \"payment_rule\": \"purchase payment is due upon delivery in the same month\"\n}",
     "parameters": [
         {
-            "name": "num_orders",
-            "symbol": "I",
+            "name": "num_periods",
+            "symbol": "T",
             "shape": [],
-            "description": "Number of customer orders"
+            "description": "Number of trading periods in the planning horizon"
         },
         {
-            "name": "num_stock_width_types",
-            "symbol": "S",
+            "name": "num_grain_categories",
+            "symbol": "G",
             "shape": [],
-            "description": "Number of available standard stock width types"
+            "description": "Number of grain categories"
         },
         {
-            "name": "required_width",
-            "symbol": "w",
+            "name": "warehouse_capacity",
+            "symbol": "K",
+            "shape": [],
+            "description": "Maximum total on-hand inventory that can be stored in the warehouse"
+        },
+        {
+            "name": "initial_cash_balance",
+            "symbol": "B_0",
+            "shape": [],
+            "description": "Initial cash balance"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
             "shape": [
-                "I"
+                "G"
             ],
-            "description": "Required width of each order i"
+            "description": "Initial inventory vector by grain category"
         },
         {
-            "name": "required_length",
-            "symbol": "\\ell",
+            "name": "required_terminal_inventory",
+            "symbol": "I^{\\mathrm{req}}",
             "shape": [
-                "I"
+                "G"
             ],
-            "description": "Required length of each order i"
+            "description": "Required ending inventory vector by grain category"
         },
         {
-            "name": "standard_width",
-            "symbol": "W",
+            "name": "purchase_price",
+            "symbol": "c",
             "shape": [
-                "S"
+                "G",
+                "T"
             ],
-            "description": "Standard width of each stock type s"
+            "description": "Purchase price matrix by grain category and period"
         },
         {
-            "name": "time_horizon",
-            "symbol": "\\mathcal T",
-            "shape": [],
-            "description": "Single static planning horizon"
+            "name": "selling_price",
+            "symbol": "s",
+            "shape": [
+                "G",
+                "T"
+            ],
+            "description": "Selling price matrix by grain category and period"
         },
         {
-            "name": "splicing_allowed",
-            "symbol": "\\sigma",
+            "name": "receipt_lag",
+            "symbol": "\u007fl",
             "shape": [],
-            "description": "Boolean flag indicating whether length pieces may be joined"
+            "description": "Number of periods before purchased inventory becomes eligible for sale"
+        },
+        {
+            "name": "payment_rule",
+            "symbol": "\u007fp",
+            "shape": [],
+            "description": "Timing rule indicating that purchases are paid upon delivery in the purchase period"
         }
     ],
     "variables": [
         {
-            "name": "pattern_usage_count",
+            "name": "purchase_quantity",
             "symbol": "x",
             "shape": [
-                "\\mathcal P"
-            ],
-            "domain": "integer",
-            "description": "Usage count of each cutting pattern p"
-        },
-        {
-            "name": "stock_type_of_pattern",
-            "symbol": "u",
-            "shape": [
-                "\\mathcal P"
-            ],
-            "domain": "integer",
-            "description": "Stock width type used by each pattern p"
-        },
-        {
-            "name": "orders_in_pattern",
-            "symbol": "a",
-            "shape": [
-                "\\mathcal P",
-                "-"
-            ],
-            "domain": "binary",
-            "description": "Indicator of whether an order is included in a pattern p"
-        },
-        {
-            "name": "allocated_width",
-            "symbol": "q",
-            "shape": [
-                "\\mathcal P",
-                "-"
+                "G",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Width allocated to each included order within a pattern p"
+            "description": "Quantity of grain category purchased in each period"
         },
         {
-            "name": "allocated_length",
-            "symbol": "r",
+            "name": "sales_quantity",
+            "symbol": "y",
             "shape": [
-                "\\mathcal P",
-                "-"
+                "G",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Length allocated to each included order within a pattern p"
+            "description": "Quantity of grain category sold in each period"
         },
         {
-            "name": "pattern_waste_area",
-            "symbol": "z",
+            "name": "ending_inventory",
+            "symbol": "I",
             "shape": [
-                "\\mathcal P"
+                "G",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Waste area generated by each pattern p"
+            "description": "Ending inventory of each grain category after each period"
         },
         {
-            "name": "total_waste_area",
-            "symbol": "Z",
+            "name": "cash_balance",
+            "symbol": "B",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Cash balance after each period"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
             "shape": [],
             "domain": "continuous",
-            "description": "Total waste area across all used stock material"
+            "description": "Total profit over the full planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_problem_sizes",
-            "description": "Number of orders and number of stock width types must be positive integers",
-            "formula": "I \\in \\mathbb{Z}_{>0},\\; S \\in \\mathbb{Z}_{>0}",
+            "name": "purchase_quantity_nonnegative",
+            "description": "Purchase quantities must be nonnegative",
+            "formula": "x[g][t]",
             "parameters": [
-                "num_orders",
-                "num_stock_width_types"
+                "num_grain_categories",
+                "num_periods"
             ],
-            "variables": []
-        },
-        {
-            "name": "indexing_domain",
-            "description": "Orders and stock width types use 0-based indexing over their respective sets",
-            "formula": "\\mathcal I = \\{0,1,\\dots,I-1\\},\\; \\mathcal S = \\{0,1,\\dots,S-1\\}",
-            "parameters": [
-                "num_orders",
-                "num_stock_width_types"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_requirements",
-            "description": "Required widths and required lengths must be nonnegative for all orders",
-            "formula": "w_i \\ge 0,\\; \\ell_i \\ge 0\\quad \\forall i \\in \\mathcal I",
-            "parameters": [
-                "required_width",
-                "required_length"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_stock_widths",
-            "description": "Standard stock widths must be nonnegative for all stock types",
-            "formula": "W_s \\ge 0\\quad \\forall s \\in \\mathcal S",
-            "parameters": [
-                "standard_width"
-            ],
-            "variables": []
-        },
-        {
-            "name": "pattern_usage_integer_nonnegative",
-            "description": "Pattern usage counts must be nonnegative integers",
-            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall p \\in \\mathcal P",
-            "parameters": [],
             "variables": [
-                "pattern_usage_count"
+                "purchase_quantity"
             ]
         },
         {
-            "name": "pattern_waste_nonnegative",
-            "description": "Pattern waste area and total waste area must be nonnegative",
-            "formula": "z_p \\ge 0\\quad \\forall p \\in \\mathcal P,\\qquad Z \\ge 0",
-            "parameters": [],
+            "name": "sales_quantity_nonnegative",
+            "description": "Sales quantities must be nonnegative",
+            "formula": "y[g][t]",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
             "variables": [
-                "pattern_waste_area",
-                "total_waste_area"
+                "sales_quantity"
             ]
         },
         {
-            "name": "single_stock_type_per_pattern",
-            "description": "Each pattern must reference exactly one stock width type from the available stock types",
-            "formula": "u_p \\in \\mathcal S\\quad \\forall p \\in \\mathcal P",
+            "name": "ending_inventory_nonnegative",
+            "description": "Ending inventory must be nonnegative for each grain category and period",
+            "formula": "I[g][t]",
             "parameters": [
-                "num_stock_width_types"
+                "num_grain_categories",
+                "num_periods"
             ],
             "variables": [
-                "stock_type_of_pattern"
+                "ending_inventory"
             ]
         },
         {
-            "name": "full_order_satisfaction",
-            "description": "Every order must be fully satisfied in both width and length",
-            "formula": "\\sum_{p \\in \\mathcal P} x_p a_{p i} q_{p i} = w_i,\\qquad \\sum_{p \\in \\mathcal P} x_p a_{p i} r_{p i} = \\ell_i\\quad \\forall i \\in \\mathcal I",
+            "name": "cash_balance_nonnegative",
+            "description": "Cash balance must remain nonnegative throughout the horizon",
+            "formula": "B[t]",
             "parameters": [
-                "required_width",
-                "required_length"
+                "num_periods",
+                "initial_cash_balance"
             ],
             "variables": [
-                "pattern_usage_count",
-                "orders_in_pattern",
-                "allocated_width",
-                "allocated_length"
+                "cash_balance"
             ]
         },
         {
-            "name": "splicing_rule",
-            "description": "If splicing is disabled, length pieces cannot be joined; if enabled, length may be fulfilled by multiple spliced pieces",
-            "formula": "\\sigma = 0 \\Rightarrow \\sum_{p \\in \\mathcal P} x_p a_{p i} \\le 1\\quad \\forall i \\in \\mathcal I",
+            "name": "warehouse_capacity_limit",
+            "description": "Total on-hand inventory across all grain categories cannot exceed warehouse capacity",
+            "formula": "I[g][t]",
             "parameters": [
-                "splicing_allowed"
+                "num_grain_categories",
+                "num_periods",
+                "warehouse_capacity"
             ],
             "variables": [
-                "pattern_usage_count",
-                "orders_in_pattern"
+                "ending_inventory"
             ]
         },
         {
-            "name": "pattern_waste_definition",
-            "description": "Unused material area created by cutting a pattern contributes to that pattern's waste",
-            "formula": "z_p = x_p \\left(u_p \\sum_{i \\in \\mathcal I} a_{p i} q_{p i} r_{p i} - \\sum_{i \\in \\mathcal I} a_{p i} q_{p i} r_{p i}\\right)\\quad \\forall p \\in \\mathcal P",
+            "name": "sale_eligibility_lag",
+            "description": "Inventory purchased in a period cannot be sold until the following period or later",
+            "formula": "x[g][t] and y[g][t] with receipt lag",
             "parameters": [
-                "standard_width",
-                "required_width",
-                "required_length"
+                "num_grain_categories",
+                "num_periods",
+                "receipt_lag"
             ],
             "variables": [
-                "pattern_waste_area",
-                "allocated_width",
-                "allocated_length"
+                "purchase_quantity",
+                "sales_quantity"
             ]
         },
         {
-            "name": "aggregate_demand_coverage",
-            "description": "Across all selected patterns and their usage counts, cumulative allocations must cover every order fully",
-            "formula": "\\sum_{p \\in \\mathcal P} x_p a_{p i} q_{p i} \\ge w_i,\\qquad \\sum_{p \\in \\mathcal P} x_p a_{p i} r_{p i} \\ge \\ell_i\\quad \\forall i \\in \\mathcal I",
+            "name": "terminal_inventory_requirement",
+            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category",
+            "formula": "I[g][T]",
             "parameters": [
-                "required_width",
-                "required_length"
+                "num_grain_categories",
+                "required_terminal_inventory"
             ],
             "variables": [
-                "pattern_usage_count",
-                "orders_in_pattern",
-                "allocated_width",
-                "allocated_length"
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory balance for each grain category and period, with purchases added and sales removed; for the first period, initial inventory is used as the starting level, and for later periods previous ending inventory is carried forward.",
+            "formula": "I_{g,t}=I_{g,t-1}+x_{g,t}-y_{g,t}\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "initial_inventory"
+            ],
+            "variables": [
+                "ending_inventory",
+                "purchase_quantity",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "cash_balance_update",
+            "description": "Cash balance evolution by period, assuming purchases are paid upon delivery in the same period and sales revenue is received in the same period.",
+            "formula": "B_t=B_{t-1}+\\sum_{g\\in\\mathcal{G}} s_{g,t}y_{g,t}-\\sum_{g\\in\\mathcal{G}} c_{g,t}x_{g,t}\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "purchase_price",
+                "selling_price",
+                "initial_cash_balance"
+            ],
+            "variables": [
+                "cash_balance",
+                "purchase_quantity",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "warehouse_capacity_total",
+            "description": "Total inventory across all grain categories at the end of each period cannot exceed warehouse capacity.",
+            "formula": "\\sum_{g\\in\\mathcal{G}} I_{g,t}\\le K\\quad \\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods",
+                "warehouse_capacity"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "terminal_inventory_satisfaction",
+            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category.",
+            "formula": "I_{g,T}\\ge I^{\\mathrm{req}}_g\\quad \\forall g\\in\\mathcal{G}",
+            "parameters": [
+                "num_grain_categories",
+                "required_terminal_inventory"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "purchase_sales_nonnegativity",
+            "description": "Decision variables for purchases and sales are nonnegative, and inventory and cash remain nonnegative over the horizon.",
+            "formula": "x_{g,t}\\ge 0,\\ y_{g,t}\\ge 0,\\ I_{g,t}\\ge 0,\\ B_t\\ge 0\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
+            "parameters": [
+                "num_grain_categories",
+                "num_periods"
+            ],
+            "variables": [
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "cash_balance"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_waste_area_minimization",
-            "description": "Minimize total waste area across all used stock material",
-            "sense": "minimize"
+            "name": "total_trading_profit",
+            "description": "Maximize total trading profit over the planning horizon",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total waste area generated by all used stock material.",
+        "description": "Maximize total trading profit over the planning horizon as final cash minus initial cash, equivalently cumulative sales revenue minus cumulative purchase cost.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "\\min Z",
-        "parameters": [],
+        "sense": "maximize",
+        "formula": "\\Pi = B_T - B_0 = \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} s_{g,t}y_{g,t} - \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} c_{g,t}x_{g,t}",
+        "parameters": [
+            "initial_cash_balance",
+            "purchase_price",
+            "selling_price",
+            "num_grain_categories",
+            "num_periods"
+        ],
         "variables": [
-            "total_waste_area"
+            "total_profit",
+            "cash_balance",
+            "purchase_quantity",
+            "sales_quantity"
         ]
     }
 }

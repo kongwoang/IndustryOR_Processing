@@ -1,222 +1,195 @@
 {
-    "problem": "Problem description\n- There is a single planning horizon $$\\mathcal{H}$$ with a set of main products indexed by $$p \\in \\mathcal{P}$$, a set of reaction stages indexed by $$r \\in \\mathcal{R}$$, and a set of byproducts indexed by $$k \\in \\mathcal{K}$$.\n- Each unit of main product $$p$$ requires a fixed amount of processing time $$t_{rp}$$ at each reaction stage $$r$$.\n- Each reaction stage $$r$$ has an available time capacity $$T_r$$ within $$\\mathcal{H}$$.\n- Producing main product $$p$$ may generate byproduct $$k$$ according to a fixed yield coefficient $$a_{kp}$$, and byproduct generation does not add any extra production cost.\n- Each main product $$p$$ yields a unit profit $$\\pi_p$$ when sold.\n- Each byproduct $$k$$ yields a unit profit $$\\rho_k$$ when sold, may be sold only up to a limited amount $$L_k$$, and any remaining byproduct must be disposed of at unit cost $$c_k$$.\n- The planning goal is to choose production and byproduct disposition quantities so that total profit over $$\\mathcal{H}$$ is maximized.\n- Required business constraints:\n  - Every produced unit must respect the available time capacity of each reaction stage.\n  - Byproduct generation must be consistent with the chosen production quantities of the main products.\n  - Byproduct sales must not exceed the sale limit for each byproduct.\n  - Any byproduct that is not sold must be disposed of and incur disposal cost.\n  - All decision variables must be nonnegative.\n- A solution is represented by:\n  - $$x_p$$: quantity of main product $$p$$ produced and sold during $$\\mathcal{H}$$.\n  - $$y_k$$: quantity of byproduct $$k$$ sold during $$\\mathcal{H}$$.\n  - $$z_k$$: quantity of byproduct $$k$$ disposed of during $$\\mathcal{H}$$.\n  - $$Z$$: total profit achieved over $$\\mathcal{H}$$.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{H}$$\",\n    \"meaning\": \"single aggregate planning horizon\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"list of main products\"\n  },\n  \"byproducts\": {\n    \"symbol\": \"$$\\\\mathcal{K}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"list of byproducts\"\n  },\n  \"processes\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"type\": \"array of strings\",\n    \"shape\": \"$$|\\\\mathcal{R}|$$\",\n    \"meaning\": \"list of reaction stages\"\n  },\n  \"processing_time\": {\n    \"symbol\": \"$$t_{rp}$$\",\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n    \"meaning\": \"hours required at reaction stage $$r$$ for one unit of product $$p$$\"\n  },\n  \"process_capacity\": {\n    \"symbol\": \"$$T_r$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{R}|$$\",\n    \"meaning\": \"available hours for each reaction stage $$r$$\"\n  },\n  \"byproduct_yield\": {\n    \"symbol\": \"$$a_{kp}$$\",\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{K}| \\\\times |\\\\mathcal{P}|$$\",\n    \"meaning\": \"units of byproduct $$k$$ generated per unit of product $$p$$\"\n  },\n  \"main_product_profit\": {\n    \"symbol\": \"$$\\\\pi_p$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"profit per sold unit of main product $$p$$\"\n  },\n  \"byproduct_sale_profit\": {\n    \"symbol\": \"$$\\\\rho_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"profit per sold unit of byproduct $$k$$\"\n  },\n  \"byproduct_sale_limit\": {\n    \"symbol\": \"$$L_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"maximum sellable quantity of byproduct $$k$$\"\n  },\n  \"byproduct_disposal_cost\": {\n    \"symbol\": \"$$c_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"disposal cost per unit of byproduct $$k$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_p$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"meaning\": \"produced and sold quantity of each main product $$p$$\"\n  },\n  \"byproduct_sales\": {\n    \"symbol\": \"$$y_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"sold quantity of each byproduct $$k$$\"\n  },\n  \"byproduct_disposal\": {\n    \"symbol\": \"$$z_k$$\",\n    \"type\": \"vector\",\n    \"shape\": \"$$|\\\\mathcal{K}|$$\",\n    \"meaning\": \"disposed quantity of each byproduct $$k$$\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$Z$$\",\n    \"type\": \"scalar\",\n    \"meaning\": \"maximum total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"single_period\",\n  \"products\": [\"A\", \"B\"],\n  \"byproducts\": [\"C\"],\n  \"processes\": [\"reaction_1\", \"reaction_2\"],\n  \"processing_time\": {\n    \"A\": [2, 3],\n    \"B\": [3, 4]\n  },\n  \"process_capacity\": {\n    \"reaction_1\": 16,\n    \"reaction_2\": 24\n  },\n  \"byproduct_yield\": {\n    \"C\": {\n      \"A\": 0,\n      \"B\": 2\n    }\n  },\n  \"main_product_profit\": {\n    \"A\": 4,\n    \"B\": 10\n  },\n  \"byproduct_sale_profit\": {\n    \"C\": 3\n  },\n  \"byproduct_sale_limit\": {\n    \"C\": 5\n  },\n  \"byproduct_disposal_cost\": {\n    \"C\": 2\n  }\n}",
+    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of non-preemptive activities, indexed by $$i \\in \\mathcal{I}$$, each with a fixed duration $$d_i$$ measured in days.\n- The activities form a precedence network described by a set of immediate precedence pairs $$\\mathcal{P} \\subseteq \\mathcal{I} \\times \\mathcal{I}$$, where each pair means that the predecessor must finish before the successor can begin.\n- The schedule is planned over a time horizon $$T$$ measured in days.\n- A uniform work cost is incurred at rate $$c_{\\mathrm{work}}$$ per day for the project timeline.\n- A special machine must be rented continuously over a designated interval determined by two anchor activities, one that marks the rental start and one that marks the rental end.\n- The machine rental cost is incurred at rate $$c_{\\mathrm{mach}}$$ per day over that rental interval.\n- The planning goal is to choose feasible activity start times so that all precedence requirements are respected and the total cost from work time and machine rental time is minimized.\n- A solution is represented by:\n  - $$s_i$$, the start time of activity $$i \\in \\mathcal{I}$$,\n  - $$f_i$$, the finish time of activity $$i \\in \\mathcal{I}$$,\n  - $$C_{\\max}$$, the project completion time,\n  - $$r_{\\mathrm{mach}}$$, the total rental duration of the special machine,\n  - $$Z$$, the total project cost.\n\nInput Format\n{\n  \"activities\": {\n    \"type\": \"array\",\n    \"description\": \"List of activities in $$\\\\mathcal{I}$$, indexed by $$i$$.\",\n    \"items\": {\n      \"id\": \"activity identifier\",\n      \"duration\": \"processing time $$d_i$$ in days\"\n    }\n  },\n  \"precedence_arcs\": {\n    \"type\": \"array\",\n    \"description\": \"List of ordered pairs in $$\\\\mathcal{P}$$, where each pair indicates that the first activity must finish before the second activity starts.\",\n    \"items\": {\n      \"predecessor\": \"activity index $$i$$\",\n      \"successor\": \"activity index $$j$$\"\n    }\n  },\n  \"work_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily work cost $$c_{\\\\mathrm{work}}$$.\"\n  },\n  \"machine_rental_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily rental cost $$c_{\\\\mathrm{mach}}$$ for the special machine.\"\n  },\n  \"machine_start_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{s}}$$ whose start time defines the beginning of the machine rental interval.\"\n  },\n  \"machine_end_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{e}}$$ whose finish time defines the end of the machine rental interval.\"\n  },\n  \"time_horizon\": {\n    \"type\": \"number\",\n    \"description\": \"Planning horizon $$T$$ in days, if an upper bound on completion time is needed.\"\n  },\n  \"time_unit\": {\n    \"type\": \"string\",\n    \"description\": \"Time is measured in days.\"\n  }\n}\n\nOutput Format\n{\n  \"start_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned start time $$s_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"finish_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned finish time $$f_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"project_completion_time\": {\n    \"type\": \"number\",\n    \"description\": \"Project completion time $$C_{\\\\max}$$.\"\n  },\n  \"machine_rental_duration\": {\n    \"type\": \"number\",\n    \"description\": \"Total machine rental duration $$r_{\\\\mathrm{mach}}$$.\"\n  },\n  \"total_cost\": {\n    \"type\": \"number\",\n    \"description\": \"Minimum total cost $$Z$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"activities\": [\n    {\n      \"id\": \"A\",\n      \"duration\": 4\n    },\n    {\n      \"id\": \"B\",\n      \"duration\": 3\n    },\n    {\n      \"id\": \"C\",\n      \"duration\": 5\n    },\n    {\n      \"id\": \"D\",\n      \"duration\": 2\n    },\n    {\n      \"id\": \"E\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"F\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"G\",\n      \"duration\": 1\n    }\n  ],\n  \"precedence_arcs\": [\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"G\"\n    },\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"D\"\n    },\n    {\n      \"predecessor\": \"E\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"G\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"D\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"B\"\n    }\n  ],\n  \"work_cost_per_day\": 1000,\n  \"machine_rental_cost_per_day\": 5000,\n  \"machine_start_activity\": \"A\",\n  \"machine_end_activity\": \"B\",\n  \"time_unit\": \"day\"\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
-            "symbol": "\\mathcal{H}",
+            "name": "num_activities",
+            "symbol": "N",
             "shape": [],
-            "description": "Single planning horizon"
+            "description": "The number of activities in the project network"
         },
         {
-            "name": "main_products",
-            "symbol": "\\mathcal{P}",
+            "name": "num_precedence_arcs",
+            "symbol": "P",
             "shape": [],
-            "description": "Set of main products, indexed by p=0,...,|\\mathcal{P}|-1"
+            "description": "The number of immediate precedence arcs"
         },
         {
-            "name": "reaction_stages",
-            "symbol": "\\mathcal{R}",
+            "name": "activity_durations",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Duration of activity $i$ in days"
+        },
+        {
+            "name": "precedence_arcs",
+            "symbol": "p",
+            "shape": [
+                "P",
+                "2"
+            ],
+            "description": "The precedence arc list where each arc stores predecessor and successor activity indices"
+        },
+        {
+            "name": "time_horizon",
+            "symbol": "T",
             "shape": [],
-            "description": "Set of reaction stages, indexed by r=0,...,|\\mathcal{R}|-1"
+            "description": "Planning horizon in days"
         },
         {
-            "name": "byproducts",
-            "symbol": "\\mathcal{K}",
+            "name": "work_cost_per_day",
+            "symbol": "c_{\\mathrm{work}}",
             "shape": [],
-            "description": "Set of byproducts, indexed by k=0,...,|\\mathcal{K}|-1"
+            "description": "Uniform work cost rate per day over the project timeline"
         },
         {
-            "name": "processing_time",
-            "symbol": "t_{rp}",
-            "shape": [
-                "\\mathcal{R}",
-                "\\mathcal{P}"
-            ],
-            "description": "Processing time required at stage r for one unit of product p"
+            "name": "machine_rental_cost_per_day",
+            "symbol": "c_{\\mathrm{mach}}",
+            "shape": [],
+            "description": "Machine rental cost rate per day over the rental interval"
         },
         {
-            "name": "stage_capacity",
-            "symbol": "T_r",
-            "shape": [
-                "\\mathcal{R}"
-            ],
-            "description": "Available time capacity of reaction stage r"
+            "name": "machine_start_activity",
+            "symbol": "i^{\\mathrm{s}}",
+            "shape": [],
+            "description": "Index of the anchor activity whose start time defines the beginning of the machine rental interval"
         },
         {
-            "name": "byproduct_yield",
-            "symbol": "a_{kp}",
-            "shape": [
-                "\\mathcal{K}",
-                "\\mathcal{P}"
-            ],
-            "description": "Byproduct yield coefficient of byproduct k generated per unit of product p"
-        },
-        {
-            "name": "main_product_profit",
-            "symbol": "\\pi_p",
-            "shape": [
-                "\\mathcal{P}"
-            ],
-            "description": "Unit profit from selling one unit of main product p"
-        },
-        {
-            "name": "byproduct_profit",
-            "symbol": "\\rho_k",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "description": "Unit profit from selling one unit of byproduct k"
-        },
-        {
-            "name": "byproduct_sale_limit",
-            "symbol": "L_k",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "description": "Maximum sellable quantity of byproduct k"
-        },
-        {
-            "name": "byproduct_disposal_cost",
-            "symbol": "c_k",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "description": "Unit disposal cost for byproduct k"
+            "name": "machine_end_activity",
+            "symbol": "i^{\\mathrm{e}}",
+            "shape": [],
+            "description": "Index of the anchor activity whose finish time defines the end of the machine rental interval"
         }
     ],
     "variables": [
         {
-            "name": "main_product_quantity",
-            "symbol": "x_p",
+            "name": "start_times",
+            "symbol": "s",
             "shape": [
-                "\\mathcal{P}"
+                "N"
             ],
             "domain": "continuous",
-            "description": "Quantity of main product p produced and sold during the planning horizon"
+            "description": "Start time of each activity"
         },
         {
-            "name": "byproduct_sold_quantity",
-            "symbol": "y_k",
+            "name": "finish_times",
+            "symbol": "f",
             "shape": [
-                "\\mathcal{K}"
+                "N"
             ],
             "domain": "continuous",
-            "description": "Quantity of byproduct k sold during the planning horizon"
+            "description": "Finish time of each activity"
         },
         {
-            "name": "byproduct_disposed_quantity",
-            "symbol": "z_k",
-            "shape": [
-                "\\mathcal{K}"
-            ],
+            "name": "project_completion_time",
+            "symbol": "C_{\\max}",
+            "shape": [],
             "domain": "continuous",
-            "description": "Quantity of byproduct k disposed of during the planning horizon"
+            "description": "Project completion time"
         },
         {
-            "name": "total_profit",
+            "name": "machine_rental_duration",
+            "symbol": "r_{\\mathrm{mach}}",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total machine rental duration"
+        },
+        {
+            "name": "total_cost",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit achieved over the planning horizon"
+            "description": "Total project cost"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "stage_capacity_limit",
-            "description": "Total processing time used at each reaction stage must not exceed the available stage capacity over the planning horizon",
-            "formula": "\\sum_{p\\in\\mathcal{P}} t_{rp} x_p \\leq T_r \\quad \\forall r\\in\\mathcal{R}",
+            "name": "precedence_feasibility",
+            "description": "Each immediate precedence relation must be respected so a predecessor finishes before its successor starts.",
+            "formula": "s_j \\ge f_i \\qquad \\forall (i,j) \\in \\mathcal{P}",
             "parameters": [
-                "processing_time",
-                "stage_capacity",
-                "main_products",
-                "reaction_stages"
+                "precedence_arcs"
             ],
             "variables": [
-                "main_product_quantity"
+                "start_times",
+                "finish_times"
             ]
         },
         {
-            "name": "byproduct_yield_balance",
-            "description": "Byproduct quantities must be consistent with main-product production through the fixed byproduct yield coefficients",
-            "formula": "\\sum_{p\\in\\mathcal{P}} a_{kp} x_p = y_k + z_k \\quad \\forall k\\in\\mathcal{K}",
+            "name": "activity_timing_definitions",
+            "description": "Start and finish times are linked by fixed durations, with nonnegative start times and an upper bound by the planning horizon.",
+            "formula": "f_i = s_i + d_i,\\quad 0 \\le s_i \\le T,\\quad 0 \\le f_i \\le T\\qquad \\forall i \\in \\mathcal{I}",
             "parameters": [
-                "byproduct_yield",
-                "main_products",
-                "byproducts"
+                "activity_durations",
+                "time_horizon"
             ],
             "variables": [
-                "main_product_quantity",
-                "byproduct_sold_quantity",
-                "byproduct_disposed_quantity"
+                "start_times",
+                "finish_times"
             ]
         },
         {
-            "name": "byproduct_sale_limit",
-            "description": "Sold quantity of each byproduct cannot exceed its sale limit",
-            "formula": "y_k \\leq L_k \\quad \\forall k\\in\\mathcal{K}",
+            "name": "project_completion_time_definition",
+            "description": "The project completion time equals the latest activity finish time and is bounded by the planning horizon.",
+            "formula": "C_{\\max} \\ge f_i \\qquad \\forall i \\in \\mathcal{I},\\qquad C_{\\max} \\le T",
             "parameters": [
-                "byproduct_sale_limit",
-                "byproducts"
+                "time_horizon"
             ],
             "variables": [
-                "byproduct_sold_quantity"
+                "finish_times",
+                "project_completion_time"
             ]
         },
         {
-            "name": "nonnegativity_of_decision_variables",
-            "description": "All decision variables must be nonnegative",
-            "formula": "x_p \\geq 0,\\; y_k \\geq 0,\\; z_k \\geq 0,\\; Z \\in \\mathbb{R}_{\\geq 0}",
+            "name": "machine_rental_duration_definition",
+            "description": "The machine rental duration is the nonnegative difference between the designated end-anchor finish time and start-anchor start time.",
+            "formula": "r_{\\mathrm{mach}} = f_{i^{\\mathrm{e}}} - s_{i^{\\mathrm{s}}},\\qquad r_{\\mathrm{mach}} \\ge 0",
+            "parameters": [
+                "machine_start_activity",
+                "machine_end_activity"
+            ],
             "variables": [
-                "main_product_quantity",
-                "byproduct_sold_quantity",
-                "byproduct_disposed_quantity",
-                "total_profit"
+                "start_times",
+                "finish_times",
+                "machine_rental_duration"
             ]
         },
         {
-            "name": "total_profit_definition",
-            "description": "Define total profit as main-product sales profit plus byproduct sales profit minus disposal cost for disposed byproducts",
-            "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{k\\in\\mathcal{K}} \\rho_k y_k - \\sum_{k\\in\\mathcal{K}} c_k z_k",
+            "name": "total_cost_definition",
+            "description": "The total cost equals work-time cost over the project completion time plus machine rental cost over the rental duration.",
+            "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
             "parameters": [
-                "main_product_profit",
-                "byproduct_profit",
-                "byproduct_disposal_cost",
-                "main_products",
-                "byproducts"
+                "work_cost_per_day",
+                "machine_rental_cost_per_day"
             ],
             "variables": [
-                "main_product_quantity",
-                "byproduct_sold_quantity",
-                "byproduct_disposed_quantity",
-                "total_profit"
+                "project_completion_time",
+                "machine_rental_duration",
+                "total_cost"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit over the planning horizon, including main-product sales profit, byproduct sales profit, and disposal cost effects",
-            "sense": "maximize"
+            "name": "total_project_cost_minimization",
+            "description": "Minimize the total project cost composed of work-time cost and machine rental cost",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit over the planning horizon, equal to main-product sales profit plus byproduct sales profit minus disposal cost for unsold byproducts.",
+        "description": "Minimize the total project cost, defined as the sum of uniform work-time cost over the project completion time and machine rental cost over the rental duration.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\pi_p x_p + \\sum_{k\\in\\mathcal{K}} \\rho_k y_k - \\sum_{k\\in\\mathcal{K}} c_k z_k",
+        "sense": "minimize",
+        "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
         "parameters": [
-            "main_product_profit",
-            "byproduct_profit",
-            "byproduct_disposal_cost",
-            "main_products",
-            "byproducts"
+            "work_cost_per_day",
+            "machine_rental_cost_per_day"
         ],
         "variables": [
-            "main_product_quantity",
-            "byproduct_sold_quantity",
-            "byproduct_disposed_quantity",
-            "total_profit"
+            "project_completion_time",
+            "machine_rental_duration",
+            "total_cost"
         ]
     }
 }

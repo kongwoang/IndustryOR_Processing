@@ -1,248 +1,246 @@
 {
-    "problem": "Problem description\n- A single service location requires staffing over a planning horizon $$H$$ divided into $$T$$ equal time periods indexed by $$t \\in \\mathcal{T}$$.\n- There is a set of allowed shift start times indexed by $$s \\in \\mathcal{S}$$. Each shift has a fixed duration $$L$$ and may continue across the end of the planning horizon if needed.\n- Demand data $$d_t$$ gives the required number of salespeople in each period $$t \\in \\mathcal{T}$$.\n- Coverage data $$a_{t,s}$$ indicates whether a salesperson starting shift $$s$$ is available in period $$t$$.\n- Decision variables $$x_s$$ represent the number of salespeople assigned to each allowed shift start time $$s \\in \\mathcal{S}$$.\n- The planning goal is to minimize the total number of salespeople scheduled while meeting all staffing requirements in every period.\n- Business constraints:\n  - Every time period must be staffed with at least the required number of salespeople.\n  - Salespeople may only start work at the allowed shift start times.\n  - Each salesperson works continuously for the full shift duration $$L$$ once assigned.\n  - All staffing quantities must be nonnegative integers.\n- A solution is represented by:\n  - The integer assignment vector $$x = (x_s)_{s \\in \\mathcal{S}}$$.\n  - The minimum total workforce size $$Z$$.\n\nInput Format\n{\n  \"H\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"planning horizon length\"\n  },\n  \"T\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of equal planning periods\"\n  },\n  \"period_length\": {\n    \"type\": \"scalar $$\\\\Delta$$\",\n    \"meaning\": \"length of each planning period\"\n  },\n  \"S\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of allowed shift start times\"\n  },\n  \"shift_duration\": {\n    \"type\": \"scalar $$L$$\",\n    \"meaning\": \"duration of each shift\"\n  },\n  \"shift_starts\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"allowed shift start times for each $$s \\\\in \\\\mathcal{S}$$\"\n  },\n  \"demand\": {\n    \"type\": \"array of length $$T$$\",\n    \"meaning\": \"required staffing level $$d_t$$ for each period $$t \\\\in \\\\mathcal{T}$$\"\n  },\n  \"coverage\": {\n    \"type\": \"optional binary matrix of shape $$T \\\\times S$$\",\n    \"meaning\": \"coverage indicator $$a_{t,s}$$, where $$1$$ means shift $$s$$ covers period $$t$$ and $$0$$ otherwise\"\n  }\n}\n\nOutput Format\n{\n  \"total_salespeople\": {\n    \"type\": \"integer\",\n    \"meaning\": \"minimum total number of scheduled salespeople, denoted by $$Z$$\"\n  },\n  \"shift_assignments\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"integer values $$x_s$$ for each allowed shift start time $$s \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"H\": 24,\n  \"T\": 6,\n  \"period_length\": 4,\n  \"S\": 6,\n  \"shift_duration\": 8,\n  \"shift_starts\": [\"02:00\", \"06:00\", \"10:00\", \"14:00\", \"18:00\", \"22:00\"],\n  \"periods\": [\n    {\"start\": \"02:00\", \"end\": \"06:00\"},\n    {\"start\": \"06:00\", \"end\": \"10:00\"},\n    {\"start\": \"10:00\", \"end\": \"14:00\"},\n    {\"start\": \"14:00\", \"end\": \"18:00\"},\n    {\"start\": \"18:00\", \"end\": \"22:00\"},\n    {\"start\": \"22:00\", \"end\": \"02:00\"}\n  ],\n  \"demand\": [10, 15, 25, 20, 18, 12]\n}",
+    "problem": "Problem description\n- There is an investor with initial capital $$B$$ and a finite planning horizon of $$H$$ periods.\n- There are $$N$$ investment alternatives indexed by $$i \\in \\mathcal{I}$$, where each alternative has a guaranteed payoff structure.\n- Investment alternative $$i$$ requires a holding period of $$\\tau_i$$ periods and produces a guaranteed terminal cash amount of $$\\gamma_i$$ per unit of capital invested.\n- The decision is to allocate the available capital across the feasible investment alternatives and feasible start periods so that the terminal wealth at the end of period $$H$$ is maximized.\n- The investment amount committed to a choice remains unavailable until that investment matures.\n- An investment may only be started if it can still mature within the planning horizon.\n- Capital is allocated linearly and proportionally across the available alternatives.\n- The investment plan must respect the available budget and any timing restrictions implied by the holding periods.\n- If idle cash is allowed, uninvested capital may remain as cash; otherwise, the full budget must be committed according to the plan.\n- The planning goal is to maximize the total wealth available at the end of the horizon.\n- A solution is represented by:\n  - $$x_{t,i}$$: the amount of capital invested in alternative $$i$$ when started at period $$t$$\n  - $$c_t$$: the cash balance carried into period $$t$$, if a cash state is included\n  - $$W_H$$: the terminal wealth at the end of period $$H$$\n  - The complete solution specifies all feasible investment amounts and the resulting maximum terminal wealth\n\nInput Format\n{\n  \"budget\": \"Initial available capital $$B$$\",\n  \"horizon_periods\": \"Planning horizon length $$H$$\",\n  \"investment_options\": [\n    {\n      \"option_id\": \"Investment alternative index $$i$$\",\n      \"holding_period\": \"Holding duration $$\\tau_i$$\",\n      \"guaranteed_payoff_per_unit\": \"Guaranteed terminal payoff $$\\gamma_i$$ per unit invested\"\n    }\n  ],\n  \"feasible_start_periods\": \"Optional set of valid start periods $$\\mathcal{T}_i$$ for each option, meaning the periods in which the option can be initiated and still mature by $$H$$\",\n  \"cash_allowed\": \"Boolean indicator of whether unused capital may remain as cash\"\n}\n\nOutput Format\n{\n  \"investment_plan\": [\n    {\n      \"start_period\": \"Start period index $$t$$\",\n      \"option_id\": \"Investment option index $$i$$\",\n      \"amount_invested\": \"Optimal investment amount $$x_{t,i}$$\"\n    }\n  ],\n  \"terminal_wealth\": \"Maximum wealth at the end of period $$H$$, denoted $$W_H$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"budget\": 100000,\n  \"horizon_periods\": 3,\n  \"investment_options\": [\n    {\n      \"option_id\": 1,\n      \"holding_period\": 1,\n      \"guaranteed_payoff_per_unit\": 0.7\n    },\n    {\n      \"option_id\": 2,\n      \"holding_period\": 2,\n      \"guaranteed_payoff_per_unit\": 2\n    }\n  ],\n  \"cash_allowed\": false\n}",
     "parameters": [
         {
-            "name": "demand",
-            "symbol": "d",
-            "shape": [
-                "T"
-            ],
-            "description": "Period-by-period staffing demand"
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Initial available capital budget"
         },
         {
-            "name": "coverage_indicator",
-            "symbol": "a",
-            "shape": [
-                "T",
-                "S"
-            ],
-            "description": "Binary indicator of whether shift start s covers period t"
-        },
-        {
-            "name": "planning_horizon_length",
+            "name": "horizon_periods",
             "symbol": "H",
             "shape": [],
-            "description": "Planning horizon length"
+            "description": "Number of planning periods in the horizon"
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "num_investment_options",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of equal planning periods"
+            "description": "Number of investment alternatives"
         },
         {
-            "name": "period_length",
-            "symbol": "\\Delta",
-            "shape": [],
-            "description": "Length of each planning period"
-        },
-        {
-            "name": "num_shift_starts",
-            "symbol": "S",
-            "shape": [],
-            "description": "Number of allowed shift start times"
-        },
-        {
-            "name": "shift_duration",
-            "symbol": "L",
-            "shape": [],
-            "description": "Duration of each shift"
-        },
-        {
-            "name": "shift_starts",
-            "symbol": "\\sigma",
+            "name": "holding_periods",
+            "symbol": "\\tau",
             "shape": [
-                "S"
+                "N"
             ],
-            "description": "Allowed shift start times indexed by shift start"
+            "description": "Holding period of each investment option"
+        },
+        {
+            "name": "guaranteed_payoffs",
+            "symbol": "\\gamma",
+            "shape": [
+                "N"
+            ],
+            "description": "Guaranteed terminal payoff per unit invested for each option"
+        },
+        {
+            "name": "investment_options_set",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "N"
+            ],
+            "description": "Set of investment option indices"
+        },
+        {
+            "name": "feasible_start_periods",
+            "symbol": "T",
+            "shape": [
+                "N",
+                "-"
+            ],
+            "description": "Feasible start periods for each investment option, if provided"
         }
     ],
     "variables": [
         {
-            "name": "staff_assigned_by_shift",
+            "name": "investment_amounts",
             "symbol": "x",
             "shape": [
-                "S"
+                "H",
+                "N"
             ],
-            "domain": "integer",
-            "description": "Integer number of salespeople assigned to start each shift"
+            "domain": "continuous",
+            "description": "Amount of capital invested in option i when started at period t"
         },
         {
-            "name": "total_scheduled_salespeople",
-            "symbol": "Z",
+            "name": "cash_balance",
+            "symbol": "c",
+            "shape": [
+                "H"
+            ],
+            "domain": "continuous",
+            "description": "Cash balance carried into each period, if cash state is included"
+        },
+        {
+            "name": "terminal_wealth",
+            "symbol": "W_H",
             "shape": [],
-            "domain": "integer",
-            "description": "Total number of scheduled salespeople"
+            "domain": "continuous",
+            "description": "Terminal wealth at the end of the planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_integer_staff_assignments",
-            "description": "The number of salespeople assigned to each shift start is a nonnegative integer.",
-            "formula": "x_s \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall s \\in \\{0,\\dots,S-1\\}",
+            "name": "budget_nonnegativity",
+            "description": "Initial capital budget must be nonnegative",
+            "formula": "B \\geq 0",
             "parameters": [
-                "num_shift_starts"
+                "budget"
+            ],
+            "variables": []
+        },
+        {
+            "name": "horizon_positivity",
+            "description": "Planning horizon must be a positive integer",
+            "formula": "H \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "horizon_periods"
+            ],
+            "variables": []
+        },
+        {
+            "name": "option_count_positivity",
+            "description": "Number of investment options must be a positive integer",
+            "formula": "N \\in \\mathbb{Z}_{>0}",
+            "parameters": [
+                "num_investment_options"
+            ],
+            "variables": []
+        },
+        {
+            "name": "holding_period_positivity",
+            "description": "Each investment option must have a positive holding period",
+            "formula": "\\tau_i \\in \\mathbb{Z}_{>0} \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "holding_periods",
+                "investment_options_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "payoff_nonnegativity",
+            "description": "Guaranteed terminal payoff per unit must be nonnegative for each option",
+            "formula": "\\gamma_i \\geq 0 \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "guaranteed_payoffs",
+                "investment_options_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "investment_nonnegativity",
+            "description": "Investment amounts must be nonnegative",
+            "formula": "x_{t,i} \\geq 0 \\quad \\forall t \\in \\{0,\\dots,H-1\\},\\ \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "horizon_periods",
+                "investment_options_set"
             ],
             "variables": [
-                "staff_assigned_by_shift"
+                "investment_amounts"
             ]
         },
         {
-            "name": "nonnegative_integer_total_scheduled_salespeople",
-            "description": "The total number of scheduled salespeople is a nonnegative integer.",
-            "formula": "Z \\in \\mathbb{Z}_{\\ge 0}",
+            "name": "cash_nonnegativity",
+            "description": "Cash balances must be nonnegative when cash is modeled",
+            "formula": "c_t \\geq 0 \\quad \\forall t \\in \\{0,\\dots,H\\}",
+            "parameters": [
+                "horizon_periods"
+            ],
+            "variables": [
+                "cash_balance"
+            ]
+        },
+        {
+            "name": "terminal_wealth_nonnegativity",
+            "description": "Terminal wealth must be nonnegative",
+            "formula": "W_H \\geq 0",
             "parameters": [],
             "variables": [
-                "total_scheduled_salespeople"
+                "terminal_wealth"
             ]
         },
         {
-            "name": "binary_coverage_indicator",
-            "description": "Coverage indicators are binary values indicating whether a shift starting at s covers period t.",
-            "formula": "a_{t,s} \\in \\{0,1\\}\\quad \\forall t \\in \\{0,\\dots,T-1\\},\\ \\forall s \\in \\{0,\\dots,S-1\\}",
+            "name": "maturity_feasible_start_periods",
+            "description": "An investment may start only in periods that allow maturity within the horizon",
+            "formula": "x_{t,i} = 0 \\quad \\forall i \\in \\mathcal{I},\\ \\forall t \\notin \\{0,\\dots,H-\\tau_i\\}",
             "parameters": [
-                "num_periods",
-                "num_shift_starts"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_integer_demand",
-            "description": "Period demand is nonnegative and integer-valued for each period.",
-            "formula": "d_t \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
-            "parameters": [
-                "num_periods",
-                "demand"
-            ],
-            "variables": []
-        },
-        {
-            "name": "positive_problem_dimensions",
-            "description": "Core sizing parameters are positive.",
-            "formula": "H > 0,\\ T \\in \\mathbb{Z}_{>0},\\ \\Delta > 0,\\ S \\in \\mathbb{Z}_{>0},\\ L > 0",
-            "parameters": [
-                "planning_horizon_length",
-                "num_periods",
-                "period_length",
-                "num_shift_starts",
-                "shift_duration"
-            ],
-            "variables": []
-        },
-        {
-            "name": "period_partition_structure",
-            "description": "The planning horizon is partitioned into T equal periods of length Delta.",
-            "formula": "[0,H) = \\bigcup_{t=0}^{T-1} [t\\Delta,(t+1)\\Delta)\\quad \\text{and}\\quad \\Delta = \\frac{H}{T}",
-            "parameters": [
-                "planning_horizon_length",
-                "num_periods",
-                "period_length"
-            ],
-            "variables": []
-        },
-        {
-            "name": "shift_start_restriction",
-            "description": "Salespeople may only start at allowed shift start times.",
-            "formula": "x_s \\text{ is defined only for } s \\in \\{0,\\dots,S-1\\}",
-            "parameters": [
-                "shift_starts",
-                "num_shift_starts"
+                "horizon_periods",
+                "holding_periods",
+                "investment_options_set"
             ],
             "variables": [
-                "staff_assigned_by_shift"
+                "investment_amounts"
             ]
         },
         {
-            "name": "fixed_shift_duration",
-            "description": "Each salesperson assigned to a shift works continuously for the full shift duration.",
-            "formula": "\\text{Each shift assigned to } x_s \\text{ lasts for } L \\text{ time units}",
+            "name": "option_specific_start_set_restriction",
+            "description": "If feasible start periods are provided for an option, investment is allowed only in those periods",
+            "formula": "x_{t,i} = 0 \\quad \\forall i \\in \\mathcal{I},\\ \\forall t \\notin T_i",
             "parameters": [
-                "shift_duration"
+                "feasible_start_periods",
+                "investment_options_set"
             ],
             "variables": [
-                "staff_assigned_by_shift"
+                "investment_amounts"
             ]
         },
         {
-            "name": "coverage_requirement",
-            "description": "Every period must receive staffing coverage sufficient to meet or exceed demand.",
-            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\n\\dots,T-1\\}",
+            "name": "initial_budget_allocation",
+            "description": "The initial budget can be split between cash and investments started in period 0",
+            "formula": "c_0 + \\sum_{i \\in \\mathcal{I}} x_{0,i} = B",
             "parameters": [
-                "demand",
-                "coverage_indicator",
-                "num_periods",
-                "num_shift_starts"
+                "budget",
+                "investment_options_set"
             ],
             "variables": [
-                "staff_assigned_by_shift"
+                "cash_balance",
+                "investment_amounts"
             ]
         },
         {
-            "name": "coverage_indicator_semantics",
-            "description": "A shift assignment covers a period whenever the corresponding coverage indicator equals 1.",
-            "formula": "a_{t,s}=1 \\Rightarrow \\text{shift } s \\text{ covers period } t",
+            "name": "cash_flow_recursion",
+            "description": "Cash carried to the next period equals current cash minus new investments plus matured proceeds from investments started earlier",
+            "formula": "c_{t+1} = c_t - \\sum_{i \\in \\mathcal{I}} x_{t,i} + \\sum_{i \\in \\mathcal{I}:\\ t-\\tau_i \\geq 0} \\gamma_i x_{t-\\tau_i,i} \\quad \\forall t \\in \\{0,\\dots,H-1\\}",
             "parameters": [
-                "coverage_indicator"
+                "horizon_periods",
+                "holding_periods",
+                "guaranteed_payoffs",
+                "investment_options_set"
             ],
             "variables": [
-                "staff_assigned_by_shift"
+                "cash_balance",
+                "investment_amounts"
             ]
         },
         {
-            "name": "shift_wraparound_possible",
-            "description": "Shifts may extend beyond the end of the planning horizon if needed.",
-            "formula": "\\text{Coverage is allowed for periods beyond } H \\text{ when a shift extends past the horizon end}",
-            "parameters": [
-                "planning_horizon_length",
-                "shift_duration"
-            ],
+            "name": "terminal_wealth_definition",
+            "description": "Terminal wealth is equal to the final cash balance at the end of the horizon",
+            "formula": "W_H = c_H",
+            "parameters": [],
             "variables": [
-                "staff_assigned_by_shift"
-            ]
-        },
-        {
-            "name": "staffing_coverage_constraint",
-            "description": "Each period must be staffed to at least its required demand using the assigned shift coverage indicators.",
-            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
-            "parameters": [
-                "demand",
-                "coverage_indicator",
-                "num_periods",
-                "num_shift_starts"
-            ],
-            "variables": [
-                "staff_assigned_by_shift"
-            ]
-        },
-        {
-            "name": "total_salespeople_definition",
-            "description": "The total scheduled workforce equals the sum of the assigned staff across all allowed shift starts.",
-            "formula": "Z = \\sum_{s=0}^{S-1} x_s",
-            "parameters": [
-                "num_shift_starts"
-            ],
-            "variables": [
-                "staff_assigned_by_shift",
-                "total_scheduled_salespeople"
+                "terminal_wealth",
+                "cash_balance"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "minimize_total_scheduled_salespeople",
-            "description": "Minimize the total number of scheduled salespeople while satisfying all period staffing requirements",
+            "name": "terminal_wealth_maximization",
+            "description": "Maximize terminal wealth at the end of the planning horizon",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total number of scheduled salespeople by minimizing the scalar total workforce variable Z; this is a single-objective MILP, so no combination strategy is needed.",
+        "description": "Maximize terminal wealth at the end of the planning horizon using the single given objective.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "Z",
+        "sense": "maximize",
+        "formula": "W_H",
         "parameters": [],
         "variables": [
-            "total_scheduled_salespeople"
+            "terminal_wealth"
         ]
     }
 }

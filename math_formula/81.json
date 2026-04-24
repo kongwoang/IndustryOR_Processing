@@ -1,255 +1,169 @@
 {
-    "problem": "Problem description\n- There is a single leasing-planning period over a planning horizon $$\\mathcal{T}$$, and the mall must decide how many stores of each type to lease.\n- There are $$P$$ store types indexed by $$p \\in \\mathcal{P}$$.\n- Each store type $$p$$ has:\n  - an area requirement per shop $$a_p$$,\n  - a minimum allowable number of shops $$\\underline{q}_p$$,\n  - a maximum allowable number of shops $$\\overline{q}_p$$,\n  - an expected annual profit per shop that depends on how many shops of the same type are leased, denoted by $$\\pi_{p,q}$$ for feasible count levels $$q \\in \\mathcal{Q}_p$$.\n- The mall has a total leasable area $$A^{\\text{tot}}$$.\n- Each shop pays a fixed rent share $$\\rho$$ of its expected annual profit to the mall.\n- The optimization goal is to choose the number of shops of each type so that the mall\u2019s total rental income is maximized.\n- The chosen number of shops for each type must be an integer.\n- The total occupied area of all leased shops must not exceed the available mall space.\n- For each store type, the chosen number of shops must stay within its allowed minimum and maximum bounds.\n- For each store type, the rental income contribution must be based on the expected annual profit level associated with the selected number of shops for that type.\n- A solution is represented by:\n  - The integer decision variables $$x_p$$, where $$x_p$$ is the number of shops of type $$p$$ to lease.\n  - The resulting total rental income $$Z$$.\n  - Optionally, the implied income contribution from each store type, if needed for reporting.\n\nInput Format\n{\n  \"A_tot\": {\n    \"description\": \"Total leasable area available in the mall\",\n    \"type\": \"scalar\",\n    \"unit\": \"area\"\n  },\n  \"rho\": {\n    \"description\": \"Fraction of each shop\u2019s expected annual profit paid as rent\",\n    \"type\": \"scalar\"\n  },\n  \"P\": {\n    \"description\": \"Number of store types\",\n    \"type\": \"integer\"\n  },\n  \"store_types\": {\n    \"description\": \"Array of store-type records indexed by $$p \\\\in \\\\mathcal{P}$$\",\n    \"shape\": \"[$$P$$]\",\n    \"items\": {\n      \"p\": {\n        \"description\": \"Store type index\",\n        \"type\": \"integer\"\n      },\n      \"name\": {\n        \"description\": \"Optional store-type label\",\n        \"type\": \"string\"\n      },\n      \"a_p\": {\n        \"description\": \"Area occupied by one shop of type $$p$$\",\n        \"type\": \"scalar\",\n        \"unit\": \"area\"\n      },\n      \"underline_q_p\": {\n        \"description\": \"Minimum allowable number of shops of type $$p$$\",\n        \"type\": \"integer\"\n      },\n      \"overline_q_p\": {\n        \"description\": \"Maximum allowable number of shops of type $$p$$\",\n        \"type\": \"integer\"\n      },\n      \"Q_p\": {\n        \"description\": \"Feasible count levels for which profit data are provided for type $$p$$\",\n        \"type\": \"array of integers\"\n      },\n      \"pi_p_q\": {\n        \"description\": \"Expected annual profit per shop for type $$p$$ when the selected count is $$q \\\\in \\\\mathcal{Q}_p$$\",\n        \"shape\": \"[$$|\\\\mathcal{Q}_p|$$]\",\n        \"indexed_by\": \"$$q \\\\in \\\\mathcal{Q}_p$$\",\n        \"type\": \"array of scalars\"\n      }\n    }\n  }\n}\n\nOutput Format\n{\n  \"store_counts\": {\n    \"description\": \"Chosen number of shops for each store type\",\n    \"shape\": \"[$$P$$]\",\n    \"values\": \"$$x_p$$ for each $$p \\\\in \\\\mathcal{P}$$\",\n    \"type\": \"integer array\"\n  },\n  \"total_rental_income\": {\n    \"description\": \"Maximum total rental income achieved by the chosen store mix\",\n    \"shape\": \"scalar\",\n    \"values\": \"$$Z$$\",\n    \"type\": \"scalar\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"A_tot\": \"$$5000$$\",\n  \"rho\": \"$$0.2$$\",\n  \"P\": \"$$5$$\",\n  \"store_types\": [\n    {\n      \"p\": \"$$1$$\",\n      \"name\": \"Jewelry\",\n      \"a_p\": \"$$250$$\",\n      \"underline_q_p\": \"$$1$$\",\n      \"overline_q_p\": \"$$3$$\",\n      \"Q_p\": [\"$$1$$\", \"$$2$$\", \"$$3$$\"],\n      \"pi_p_q\": {\n        \"$$1$$\": \"$$9$$\",\n        \"$$2$$\": \"$$8$$\",\n        \"$$3$$\": \"$$7$$\"\n      }\n    },\n    {\n      \"p\": \"$$2$$\",\n      \"name\": \"Shoes & Hats\",\n      \"a_p\": \"$$350$$\",\n      \"underline_q_p\": \"$$1$$\",\n      \"overline_q_p\": \"$$2$$\",\n      \"Q_p\": [\"$$1$$\", \"$$2$$\"],\n      \"pi_p_q\": {\n        \"$$1$$\": \"$$10$$\",\n        \"$$2$$\": \"$$9$$\"\n      }\n    },\n    {\n      \"p\": \"$$3$$\",\n      \"name\": \"General Merchandise\",\n      \"a_p\": \"$$800$$\",\n      \"underline_q_p\": \"$$1$$\",\n      \"overline_q_p\": \"$$3$$\",\n      \"Q_p\": [\"$$1$$\", \"$$2$$\", \"$$3$$\"],\n      \"pi_p_q\": {\n        \"$$1$$\": \"$$27$$\",\n        \"$$2$$\": \"$$21$$\",\n        \"$$3$$\": \"$$20$$\"\n      }\n    },\n    {\n      \"p\": \"$$4$$\",\n      \"name\": \"Bookstore\",\n      \"a_p\": \"$$400$$\",\n      \"underline_q_p\": \"$$0$$\",\n      \"overline_q_p\": \"$$2$$\",\n      \"Q_p\": [\"$$1$$\", \"$$2$$\"],\n      \"pi_p_q\": {\n        \"$$1$$\": \"$$16$$\",\n        \"$$2$$\": \"$$10$$\"\n      }\n    },\n    {\n      \"p\": \"$$5$$\",\n      \"name\": \"Catering\",\n      \"a_p\": \"$$500$$\",\n      \"underline_q_p\": \"$$1$$\",\n      \"overline_q_p\": \"$$3$$\",\n      \"Q_p\": [\"$$1$$\", \"$$2$$\", \"$$3$$\"],\n      \"pi_p_q\": {\n        \"$$1$$\": \"$$17$$\",\n        \"$$2$$\": \"$$15$$\",\n        \"$$3$$\": \"$$12$$\"\n      }\n    }\n  ]\n}",
+    "problem": "Problem description\n- There is a finite set of vehicles indexed by $$i \\in \\mathcal{I}$$, with $$|\\mathcal{I}|=N$$.\n- Each vehicle $$i$$ has a known occupied length $$\\ell_i$$.\n- Parking is available on two street sides indexed by $$s \\in \\mathcal{S}$$, with $$\\mathcal{S}=\\{1,2\\}$$.\n- The planning problem is a single-period assignment problem, so the planning horizon is $$\\mathcal{T}=\\{1\\}$$.\n- The goal is to assign every vehicle to exactly one street side so that the occupied street length is as small as possible.\n- The occupied length of a side is determined by the total length of all vehicles assigned to that side.\n- The street length occupied by the fleet is determined by the longer of the two side occupancies, and this overall occupied length is what must be minimized.\n- Optionally, one or both street sides may have a maximum allowed occupied length $$u_s$$; if such a limit is active, the total occupied length on that side must not exceed its limit.\n- The business rules require that no vehicle be split across sides and that every vehicle be parked on one side only.\n- The model may include a side-specific capacity parameter to represent the case where cars on one side cannot occupy more than a specified length.\n- A solution is represented by:\n  - $$x_{is}$$: a binary assignment variable equal to $$1$$ if vehicle $$i$$ is parked on side $$s$$, and $$0$$ otherwise.\n  - $$L_s$$: the total occupied length on side $$s$$.\n  - $$Z$$: the total occupied street length to be minimized.\n\nInput Format\n{\n  \"N\": \"integer, number of vehicles, with vehicles indexed by $$i \\\\in \\\\mathcal{I}$$\",\n  \"S\": \"integer, number of parking sides, typically $$S=2$$, with sides indexed by $$s \\\\in \\\\mathcal{S}$$\",\n  \"lengths\": \"array of length $$N$$; entry $$\\\\ell_i$$ is the length of vehicle $$i$$\",\n  \"side_capacity\": \"optional scalar or array of length $$S$$; entry $$u_s$$ is the maximum occupied length allowed on side $$s$$, or $$+\\\\infty$$ if no limit applies\",\n  \"planning_horizon\": \"single-period planning set $$\\\\mathcal{T}=\\\\{1\\\\}$$\"\n}\n\nOutput Format\n{\n  \"assignment\": \"binary matrix $$x$$ of shape $$N \\\\times S$$; $$x_{is}=1$$ means vehicle $$i$$ is assigned to side $$s$$\",\n  \"side_occupancy\": \"array $$L$$ of length $$S$$; $$L_s$$ is the total occupied length on side $$s$$\",\n  \"total_occupied_length\": \"scalar $$Z$$; the minimized occupied street length\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 15,\n  \"S\": 2,\n  \"lengths\": [4, 4.5, 5, 4.1, 2.4, 5.2, 3.7, 3.5, 3.2, 4.5, 2.3, 3.3, 3.8, 4.6, 3.0],\n  \"side_capacity\": 30\n}",
     "parameters": [
         {
-            "name": "num_store_types",
-            "symbol": "P",
+            "name": "num_vehicles",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of store types"
+            "description": "Number of vehicles in the fleet"
         },
         {
-            "name": "total_leasable_area",
-            "symbol": "A^{tot}",
+            "name": "num_sides",
+            "symbol": "S",
             "shape": [],
-            "description": "Total leasable area of the mall"
+            "description": "Number of street sides"
         },
         {
-            "name": "rent_share",
-            "symbol": "\\rho",
-            "shape": [],
-            "description": "Fixed fraction of each shop's expected annual profit paid as rent"
+            "name": "vehicle_lengths",
+            "symbol": "\\ell",
+            "shape": [
+                "N"
+            ],
+            "description": "Known occupied length of each vehicle"
+        },
+        {
+            "name": "side_capacity",
+            "symbol": "u",
+            "shape": [
+                "S"
+            ],
+            "description": "Maximum allowed occupied length on each street side when a capacity limit is active"
         },
         {
             "name": "planning_horizon",
-            "symbol": "\\mathcal{T}",
+            "symbol": "T",
             "shape": [],
-            "description": "Single planning period over the planning horizon"
-        },
-        {
-            "name": "area_per_shop",
-            "symbol": "a",
-            "shape": [
-                "P"
-            ],
-            "description": "Area occupied by one shop of each store type"
-        },
-        {
-            "name": "min_shops",
-            "symbol": "\\underline{q}",
-            "shape": [
-                "P"
-            ],
-            "description": "Minimum allowable number of shops for each store type"
-        },
-        {
-            "name": "max_shops",
-            "symbol": "\\overline{q}",
-            "shape": [
-                "P"
-            ],
-            "description": "Maximum allowable number of shops for each store type"
-        },
-        {
-            "name": "feasible_count_levels",
-            "symbol": "\\mathcal{Q}",
-            "shape": [
-                "P"
-            ],
-            "description": "Feasible count levels provided for each store type"
-        },
-        {
-            "name": "expected_profit_per_shop",
-            "symbol": "\\pi",
-            "shape": [
-                "P",
-                "\\mathcal{Q}_p"
-            ],
-            "description": "Expected annual profit per shop for each store type and feasible count level"
+            "description": "Single-period planning horizon indicator"
         }
     ],
     "variables": [
         {
-            "name": "store_counts",
+            "name": "assignment",
             "symbol": "x",
             "shape": [
-                "P"
+                "N",
+                "S"
             ],
-            "domain": "integer",
-            "description": "Integer number of shops of each store type to lease"
+            "domain": "binary",
+            "description": "Binary assignment of each vehicle to a street side"
         },
         {
-            "name": "total_rental_income",
+            "name": "side_occupancy",
+            "symbol": "L",
+            "shape": [
+                "S"
+            ],
+            "domain": "continuous",
+            "description": "Total occupied length on each street side"
+        },
+        {
+            "name": "total_occupied_length",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total rental income for the mall"
+            "description": "Overall occupied street length to be minimized"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "income_contribution",
-            "symbol": "y",
-            "shape": [
-                "P"
-            ],
-            "domain": "continuous",
-            "description": "Rental income contribution from each store type"
-        },
-        {
-            "name": "count_selection",
-            "symbol": "\\delta",
-            "shape": [
-                "P",
-                "\\mathcal{Q}_p"
-            ],
-            "domain": "binary",
-            "description": "Binary indicator for selecting a feasible count level for each store type"
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "store_count_integrality",
-            "description": "Each store type count must be an integer number of shops",
-            "formula": "x_p \\in \\mathbb{Z} \\quad \\forall p \\in \\mathcal{P}",
-            "variables": [
-                "store_counts"
-            ]
-        },
-        {
-            "name": "store_count_nonnegativity",
-            "description": "Each store type count must be nonnegative",
-            "formula": "x_p \\ge 0 \\quad \\forall p \\in \\mathcal{P}",
-            "variables": [
-                "store_counts"
-            ]
-        },
-        {
-            "name": "store_count_lower_bound",
-            "description": "Each store type count must be at least the minimum allowable count for that type",
-            "formula": "x_p \\ge \\underline{q}_p \\quad \\forall p \\in \\mathcal{P}",
+            "name": "assignment_exactly_one_side",
+            "description": "Each vehicle must be assigned to exactly one street side; no vehicle may be split across sides",
+            "formula": "\\sum_{s=0}^{S-1} x_{is} = 1 \\quad \\forall i=0,\\dots,N-1",
             "parameters": [
-                "min_shops"
+                "num_vehicles",
+                "num_sides"
             ],
             "variables": [
-                "store_counts"
+                "assignment"
             ]
         },
         {
-            "name": "store_count_upper_bound",
-            "description": "Each store type count must be at most the maximum allowable count for that type",
-            "formula": "x_p \\le \\overline{q}_p \\quad \\forall p \\in \\mathcal{P}",
+            "name": "side_occupancy_definition",
+            "description": "The occupied length on each side is determined by the sum of vehicle lengths assigned to that side",
+            "formula": "L_s = \\sum_{i=0}^{N-1} \\ell_i x_{is} \\quad \\forall s=0,\\dots,S-1",
             "parameters": [
-                "max_shops"
+                "num_vehicles",
+                "num_sides",
+                "vehicle_lengths"
             ],
             "variables": [
-                "store_counts"
+                "assignment",
+                "side_occupancy"
             ]
         },
         {
-            "name": "area_capacity_limit",
-            "description": "Total occupied area across all store types must not exceed the mall's total leasable area",
-            "formula": "\\sum_{p \\in \\mathcal{P}} a_p x_p \\le A^{tot}",
+            "name": "overall_occupied_length_definition",
+            "description": "The total occupied street length represents the larger of the side occupancies",
+            "formula": "Z \\ge L_s \\quad \\forall s=0,\\dots,S-1",
             "parameters": [
-                "area_per_shop",
-                "total_leasable_area"
+                "num_sides"
             ],
             "variables": [
-                "store_counts"
+                "side_occupancy",
+                "total_occupied_length"
             ]
         },
         {
-            "name": "profit_data_domain",
-            "description": "Each store type count must be selected only from the feasible count levels for which profit data are provided",
-            "formula": "x_p \\in \\mathcal{Q}_p \\quad \\forall p \\in \\mathcal{P}",
+            "name": "side_capacity_limit",
+            "description": "If a side-specific capacity is active, the occupied length on that side must not exceed its allowed limit",
+            "formula": "L_s \\le u_s \\quad \\forall s=0,\\dots,S-1",
             "parameters": [
-                "feasible_count_levels"
+                "num_sides",
+                "side_capacity"
             ],
             "variables": [
-                "store_counts"
+                "side_occupancy"
             ]
         },
         {
-            "name": "rental_income_definition",
-            "description": "Total rental income is computed from the selected counts using the fixed rent share and the count-dependent per-shop profit values",
-            "formula": "Z = \\sum_{p \\in \\mathcal{P}} y_p",
+            "name": "binary_assignment_domain",
+            "description": "Assignment variables are binary decisions indicating whether a vehicle is parked on a given side",
+            "formula": "x_{is} \\in \\{0,1\\}",
             "parameters": [
-                "income_contribution"
+                "num_vehicles",
+                "num_sides"
             ],
             "variables": [
-                "total_rental_income",
-                "income_contribution"
+                "assignment"
             ]
         },
         {
-            "name": "income_linking",
-            "description": "Link total rental income to per-type income contributions",
-            "formula": "Z = \\sum_{p \\in \\mathcal{P}} y_p",
+            "name": "nonnegative_side_occupancy",
+            "description": "Side occupancy variables are nonnegative",
+            "formula": "L_s \\ge 0",
             "parameters": [
-                "income_contribution"
+                "num_sides"
             ],
             "variables": [
-                "total_rental_income",
-                "income_contribution"
+                "side_occupancy"
             ]
         },
         {
-            "name": "count_selection",
-            "description": "Select exactly one feasible count level for each store type using binary indicators over the feasible count set",
-            "formula": "\\sum_{q \\in \\mathcal{Q}_p} \\delta_{p,q} = 1 \\quad \\forall p \\in \\mathcal{P}",
-            "parameters": [
-                "feasible_count_levels"
-            ],
+            "name": "nonnegative_total_occupied_length",
+            "description": "Overall occupied street length is nonnegative",
+            "formula": "Z \\ge 0",
+            "parameters": [],
             "variables": [
-                "count_selection"
-            ]
-        },
-        {
-            "name": "count_definition",
-            "description": "Define the chosen store count as the selected feasible count level for each store type",
-            "formula": "x_p = \\sum_{q \\in \\mathcal{Q}_p} q\\,\\delta_{p,q} \\quad \\forall p \\in \\mathcal{P}",
-            "parameters": [
-                "feasible_count_levels"
-            ],
-            "variables": [
-                "store_counts",
-                "count_selection"
-            ]
-        },
-        {
-            "name": "income_definition",
-            "description": "Define each store type's rental income as the rent share times the chosen per-shop profit times the selected count",
-            "formula": "y_p = \\rho \\sum_{q \\in \\mathcal{Q}_p} q\\,\\pi_{p,q}\\,\\delta_{p,q} \\quad \\forall p \\in \\mathcal{P}",
-            "parameters": [
-                "rent_share",
-                "expected_profit_per_shop",
-                "feasible_count_levels"
-            ],
-            "variables": [
-                "income_contribution",
-                "count_selection"
+                "total_occupied_length"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_rental_income_maximization",
-            "description": "Maximize the mall's total rental income",
-            "sense": "maximize"
-        },
-        {
-            "name": "feasible_store_mix",
-            "description": "Find a feasible store mix satisfying all stated leasing and capacity constraints if no feasible solution exists for the maximizing objective",
-            "sense": "feasibility"
+            "name": "minimize_total_occupied_length",
+            "description": "Minimize the overall occupied street length, defined as the maximum of the two side occupancies",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total rental income from all store types. The income is represented directly by the scalar variable Z, which is linked linearly to per-type income contributions.",
+        "description": "Minimize the overall occupied street length, represented by the epigraph variable that upper-bounds all side occupancies.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
+        "sense": "minimize",
         "formula": "Z",
         "parameters": [],
         "variables": [
-            "total_rental_income"
+            "total_occupied_length"
         ]
     }
 }

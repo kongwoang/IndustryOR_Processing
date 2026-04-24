@@ -1,357 +1,269 @@
 {
-    "problem": "Problem description\n- There are $$T$$ planning stages indexed by $$t \\in \\{1,\\ldots,T\\}$$.\n- At each stage $$t$$, the factory requires $$R_t$$ usable special tools.\n- The tool requirement profile over the horizon is given by the demand sequence $$\\{R_t\\}_{t=1}^T$$.\n- After a tool is used in a stage, it must leave service and be routed to one of two repair modes before it can be used again.\n- The two repair modes are:\n  - a slow repair mode with unit repair cost $$b$$ and return delay $$p$$ stages,\n  - a fast repair mode with unit repair cost $$c$$ and return delay $$q$$ stages,\n  - where the slow repair mode is cheaper but slower, and the fast repair mode is faster but more expensive.\n- New tools may be purchased at unit cost $$a$$, and new purchases are the most expensive source of tools.\n- The planning horizon ends after stage $$T$$, so any tool returning after stage $$T$$ has no value for feasibility inside the horizon.\n- Optional capacity limits, if provided, are represented by stage-dependent limits such as $$K_t^{\\mathrm{buy}}$$, $$K_t^{\\mathrm{slow}}$$, and $$K_t^{\\mathrm{fast}}$$; otherwise, no explicit capacity limit is imposed.\n- The objective is to minimize the total tool-related spending over the horizon, including new purchases and repair actions.\n- The business rules are:\n  - every stage demand must be fully satisfied,\n  - every tool used in a stage must be assigned to exactly one repair mode afterward,\n  - repaired tools become available again only after their corresponding delay,\n  - tools available at a stage come from earlier purchases and from repairs that have already returned,\n  - all decision quantities are nonnegative integers.\n- A solution is represented by:\n  - the purchase plan $$\\{x_t\\}_{t=1}^T$$, where $$x_t$$ is the number of new tools bought at stage $$t$$,\n  - the slow-repair assignment plan $$\\{y_t^{\\mathrm{slow}}\\}_{t=1}^T$$, where $$y_t^{\\mathrm{slow}}$$ is the number of tools sent to slow repair after stage $$t$$,\n  - the fast-repair assignment plan $$\\{y_t^{\\mathrm{fast}}\\}_{t=1}^T$$, where $$y_t^{\\mathrm{fast}}$$ is the number of tools sent to fast repair after stage $$t$$,\n  - the implied availability profile $$\\{I_t\\}_{t=1}^T$$, where $$I_t$$ is the number of tools available at the start of stage $$t$$,\n  - the total cost $$Z$$ over the planning horizon.\n\nInput Format\n{\n  \"planning_horizon\": \"$$T$$\",\n  \"demand\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$R_t$$ is the number of tools required at stage $$t$$\"\n  },\n  \"purchase_cost\": \"$$a$$\",\n  \"slow_repair\": {\n    \"unit_cost\": \"$$b$$\",\n    \"return_delay\": \"$$p$$\"\n  },\n  \"fast_repair\": {\n    \"unit_cost\": \"$$c$$\",\n    \"return_delay\": \"$$q$$\"\n  },\n  \"initial_available_tools\": {\n    \"symbol\": \"$$I_1$$\",\n    \"type\": \"integer\",\n    \"default\": \"$$0$$\",\n    \"meaning\": \"the number of usable tools available at the start of stage $$1$$\"\n  },\n  \"optional_capacities\": {\n    \"purchase_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{buy}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be purchased at stage $$t$$\"\n    },\n    \"slow_repair_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{slow}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be sent to slow repair at stage $$t$$\"\n    },\n    \"fast_repair_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{fast}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be sent to fast repair at stage $$t$$\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"total_cost\": \"$$Z$$\",\n  \"purchase_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$x_t$$ is the number of new tools purchased at stage $$t$$\"\n  },\n  \"slow_repair_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$y_t^{\\\\mathrm{slow}}$$ is the number of tools sent to slow repair after stage $$t$$\"\n  },\n  \"fast_repair_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$y_t^{\\\\mathrm{fast}}$$ is the number of tools sent to fast repair after stage $$t$$\"\n  },\n  \"availability_profile\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$I_t$$ is the number of tools available at the start of stage $$t$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 10,\n  \"demand\": [3, 5, 2, 4, 6, 5, 4, 3, 2, 1],\n  \"purchase_cost\": 10,\n  \"slow_repair\": {\n    \"unit_cost\": 1,\n    \"return_delay\": 3\n  },\n  \"fast_repair\": {\n    \"unit_cost\": 3,\n    \"return_delay\": 1\n  },\n  \"initial_available_tools\": 0\n}",
+    "problem": "Problem description\n- There is a single meal-planning horizon $$\\mathcal{T}=\\{1\\}$$.\n- The available food items are partitioned into protein items indexed by $$p \\in \\mathcal{P}$$ and vegetable items indexed by $$v \\in \\mathcal{V}$$.\n- Each protein item $$p \\in \\mathcal{P}$$ has a protein yield $$\\pi_p$$ per unit, a unit cost $$c_p$$, and a unit weight $$w_p$$. Protein items may be purchased in any nonnegative quantity measured in units of $$100\\text{g}$$.\n- Each vegetable item $$v \\in \\mathcal{V}$$ has a protein yield $$\\pi_v$$ per pack, a pack cost $$c_v$$, and a pack weight $$w_v$$. Vegetable purchases are made in packs.\n- The planning goal is to choose a combination of protein and vegetable purchases that maximizes total protein intake for the meal.\n- The total spending must stay within the budget $$B$$.\n- The total purchased food weight must not exceed the weight limit $$W^{\\max}$$.\n- At least $$K$$ distinct vegetable types must be selected.\n- A vegetable type may only be purchased if it is selected.\n- A solution is represented by:\n  - $$x_p$$: purchased quantity of protein item $$p \\in \\mathcal{P}$$, measured in units of $$100\\text{g}$$.\n  - $$z_v$$: purchased number of packs of vegetable item $$v \\in \\mathcal{V}$$.\n  - $$y_v$$: binary selection indicator for vegetable item $$v \\in \\mathcal{V}$$, where $$1$$ means selected and $$0$$ means not selected.\n  - $$Z$$: total protein achieved by the chosen meal plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"periods\": \"$$\\\\mathcal{T}=\\\\{1\\\\}$$\"\n  },\n  \"protein_items\": {\n    \"count\": \"$$|\\\\mathcal{P}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{P}|$$\",\n    \"protein_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$\\\\pi_p$$ is the protein yield per unit for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"cost_per_unit\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$c_p$$ is the unit cost for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"weight_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$w_p$$ is the unit weight for protein item $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"vegetable_items\": {\n    \"count\": \"$$|\\\\mathcal{V}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{V}|$$\",\n    \"protein_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$\\\\pi_v$$ is the protein yield per pack for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"cost_per_pack\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$c_v$$ is the pack cost for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"weight_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$w_v$$ is the pack weight for vegetable item $$v \\\\in \\\\mathcal{V}$$\"\n  },\n  \"budget\": \"$$B$$, the maximum total spending allowed\",\n  \"max_total_weight_g\": \"$$W^{\\\\max}$$, the maximum total food weight allowed in grams\",\n  \"min_distinct_vegetables\": \"$$K$$, the minimum number of different vegetable types that must be selected\",\n  \"variable_domains\": {\n    \"protein_purchase\": \"$$x_p \\\\ge 0$$ for all $$p \\\\in \\\\mathcal{P}$$\",\n    \"vegetable_purchase\": \"$$z_v \\\\in \\\\mathbb{Z}_{\\\\ge 0}$$ for all $$v \\\\in \\\\mathcal{V}$$\",\n    \"vegetable_selected\": \"$$y_v \\\\in \\\\{0,1\\\\}$$ for all $$v \\\\in \\\\mathcal{V}$$\"\n  }\n}\n\nOutput Format\n{\n  \"protein_purchase\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$x_p$$ is the chosen purchase quantity of protein item $$p \\\\in \\\\mathcal{P}$$ in units of $$100\\\\text{g}$$\",\n  \"vegetable_purchase\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$z_v$$ is the chosen number of packs of vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n  \"vegetable_selected\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$y_v$$ indicates whether vegetable item $$v \\\\in \\\\mathcal{V}$$ is selected\",\n  \"total_protein\": \"$$Z$$, the total protein obtained by the selected meal plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"periods\": 1\n  },\n  \"protein_items\": {\n    \"count\": 3,\n    \"names\": [\"chicken\", \"salmon\", \"tofu\"],\n    \"protein_per_unit_g\": [23, 20, 8],\n    \"cost_per_unit\": [3.0, 5.0, 1.5],\n    \"weight_per_unit_g\": [100, 100, 100]\n  },\n  \"vegetable_items\": {\n    \"count\": 5,\n    \"names\": [\"broccoli\", \"carrots\", \"spinach\", \"bell_pepper\", \"mushrooms\"],\n    \"protein_per_pack_g\": [2.8, 0.9, 2.9, 1.0, 3.1],\n    \"cost_per_pack\": [1.2, 0.8, 1.5, 1.0, 2.0],\n    \"weight_per_pack_g\": [100, 100, 100, 100, 100]\n  },\n  \"budget\": 20,\n  \"max_total_weight_g\": 800,\n  \"min_distinct_vegetables\": 3\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
+            "name": "num_protein_items",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of protein items"
+        },
+        {
+            "name": "num_vegetable_items",
+            "symbol": "V",
+            "shape": [],
+            "description": "Number of vegetable items"
+        },
+        {
+            "name": "time_horizon_periods",
             "symbol": "T",
             "shape": [],
-            "description": "Number of planning stages in the horizon, indexed by t = 0, ..., T-1"
+            "description": "Number of planning periods in the meal-planning horizon"
         },
         {
-            "name": "demand_profile",
-            "symbol": "R",
+            "name": "protein_yield_per_unit",
+            "symbol": "\\pi_p",
             "shape": [
-                "T"
+                "P"
             ],
-            "description": "Number of usable tools required at each stage t"
+            "description": "Protein yield per unit for each protein item"
         },
         {
-            "name": "purchase_cost",
-            "symbol": "a",
-            "shape": [],
-            "description": "Unit cost to purchase a new tool"
-        },
-        {
-            "name": "slow_repair_unit_cost",
-            "symbol": "b",
-            "shape": [],
-            "description": "Unit cost of sending a used tool to slow repair"
-        },
-        {
-            "name": "slow_repair_return_delay",
-            "symbol": "p",
-            "shape": [],
-            "description": "Return delay in stages for slow repair"
-        },
-        {
-            "name": "fast_repair_unit_cost",
-            "symbol": "c",
-            "shape": [],
-            "description": "Unit cost of sending a used tool to fast repair"
-        },
-        {
-            "name": "fast_repair_return_delay",
-            "symbol": "q",
-            "shape": [],
-            "description": "Return delay in stages for fast repair"
-        },
-        {
-            "name": "initial_available_tools",
-            "symbol": "I_1",
-            "shape": [],
-            "description": "Initial number of usable tools available before stage t = 0"
-        },
-        {
-            "name": "purchase_capacity",
-            "symbol": "K_{buy}",
+            "name": "protein_cost_per_unit",
+            "symbol": "c_p",
             "shape": [
-                "T"
+                "P"
             ],
-            "description": "Optional maximum number of tools that can be purchased at each stage t"
+            "description": "Cost per unit for each protein item"
         },
         {
-            "name": "slow_repair_capacity",
-            "symbol": "K_{slow}",
+            "name": "protein_weight_per_unit",
+            "symbol": "w_p",
             "shape": [
-                "T"
+                "P"
             ],
-            "description": "Optional maximum number of tools that can be sent to slow repair after each stage t"
+            "description": "Weight per unit for each protein item"
         },
         {
-            "name": "fast_repair_capacity",
-            "symbol": "K_{fast}",
+            "name": "vegetable_protein_yield_per_pack",
+            "symbol": "\\pi_v",
             "shape": [
-                "T"
+                "V"
             ],
-            "description": "Optional maximum number of tools that can be sent to fast repair after each stage t"
+            "description": "Protein yield per pack for each vegetable item"
+        },
+        {
+            "name": "vegetable_cost_per_pack",
+            "symbol": "c_v",
+            "shape": [
+                "V"
+            ],
+            "description": "Cost per pack for each vegetable item"
+        },
+        {
+            "name": "vegetable_weight_per_pack",
+            "symbol": "w_v",
+            "shape": [
+                "V"
+            ],
+            "description": "Weight per pack for each vegetable item"
+        },
+        {
+            "name": "budget",
+            "symbol": "B",
+            "shape": [],
+            "description": "Total spending limit for the meal plan"
+        },
+        {
+            "name": "max_total_weight",
+            "symbol": "W^{\\max}",
+            "shape": [],
+            "description": "Maximum total purchased food weight"
+        },
+        {
+            "name": "min_distinct_vegetables",
+            "symbol": "K",
+            "shape": [],
+            "description": "Minimum number of distinct vegetable types to select"
         }
     ],
     "variables": [
         {
-            "name": "purchase_plan",
-            "symbol": "x",
+            "name": "protein_purchase_quantity",
+            "symbol": "x_p",
             "shape": [
-                "T"
+                "P"
             ],
-            "domain": "integer",
-            "description": "Number of new tools purchased at each stage t"
+            "domain": "continuous",
+            "description": "Purchased quantity of each protein item in units of 100g"
         },
         {
-            "name": "slow_repair_plan",
-            "symbol": "y^{slow}",
+            "name": "vegetable_purchase_packs",
+            "symbol": "z_v",
             "shape": [
-                "T"
+                "V"
             ],
             "domain": "integer",
-            "description": "Number of tools sent to slow repair after each stage t"
+            "description": "Purchased number of packs of each vegetable item"
         },
         {
-            "name": "fast_repair_plan",
-            "symbol": "y^{fast}",
+            "name": "vegetable_selected",
+            "symbol": "y_v",
             "shape": [
-                "T"
+                "V"
             ],
-            "domain": "integer",
-            "description": "Number of tools sent to fast repair after each stage t"
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if the vegetable item is selected, 0 otherwise"
         },
         {
-            "name": "availability_profile",
-            "symbol": "I",
-            "shape": [
-                "T"
-            ],
-            "domain": "integer",
-            "description": "Number of tools available at the start of each stage t"
+            "name": "total_protein",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total protein achieved by the meal plan"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "vegetable_big_m",
+            "symbol": "M_v",
+            "shape": [
+                "V"
+            ],
+            "domain": "continuous",
+            "description": "Item-specific upper bound for vegetable purchases used to linearize purchase-implies-selection"
+        }
+    ],
     "constraints": [
         {
-            "name": "nonnegative_integer_decision_variables",
-            "description": "All decision variables are nonnegative integers.",
-            "formula": "nonnegative integer domains",
+            "name": "nonnegative_protein_purchase",
+            "description": "Protein purchase quantities must be nonnegative",
+            "formula": "x_p \\ge 0",
             "parameters": [
-                "planning_horizon",
-                "demand_profile",
-                "purchase_cost",
-                "slow_repair_unit_cost",
-                "slow_repair_return_delay",
-                "fast_repair_unit_cost",
-                "fast_repair_return_delay",
-                "initial_available_tools",
-                "purchase_capacity",
-                "slow_repair_capacity",
-                "fast_repair_capacity"
+                "num_protein_items"
             ],
             "variables": [
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan",
-                "availability_profile"
+                "protein_purchase_quantity"
             ]
         },
         {
-            "name": "nonnegative_data_parameters",
-            "description": "Demand, costs, delays, and capacities are nonnegative; capacities are integer-valued when provided.",
-            "formula": "nonnegative parameter domains",
+            "name": "nonnegative_vegetable_purchase",
+            "description": "Vegetable purchase quantities must be nonnegative integers",
+            "formula": "z_v \\in \\mathbb{Z}_{\\ge 0}",
             "parameters": [
-                "planning_horizon",
-                "demand_profile",
-                "purchase_cost",
-                "slow_repair_unit_cost",
-                "slow_repair_return_delay",
-                "fast_repair_unit_cost",
-                "fast_repair_return_delay",
-                "initial_available_tools",
-                "purchase_capacity",
-                "slow_repair_capacity",
-                "fast_repair_capacity"
-            ],
-            "variables": []
-        },
-        {
-            "name": "stage_demand_satisfaction",
-            "description": "At each stage, available tools plus purchases and returned repairs must be sufficient to satisfy that stage's demand exactly.",
-            "formula": "stage availability must cover demand",
-            "parameters": [
-                "planning_horizon",
-                "demand_profile",
-                "initial_available_tools",
-                "slow_repair_return_delay",
-                "fast_repair_return_delay"
+                "num_vegetable_items"
             ],
             "variables": [
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan",
-                "availability_profile"
+                "vegetable_purchase_packs"
             ]
         },
         {
-            "name": "exclusive_repair_routing",
-            "description": "Tools used in a stage are assigned to exactly one repair mode afterward.",
-            "formula": "exactly one repair mode per used tool",
+            "name": "binary_vegetable_selection",
+            "description": "Vegetable selection indicators must be binary",
+            "formula": "y_v \\in \\{0,1\\}",
             "parameters": [
-                "planning_horizon"
+                "num_vegetable_items"
             ],
             "variables": [
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "vegetable_selected"
             ]
         },
         {
-            "name": "repair_capacity_limits",
-            "description": "Stage-t purchases and repair assignments may not exceed optional stage-dependent capacities when provided.",
-            "formula": "respect optional stage capacities",
-            "parameters": [
-                "planning_horizon",
-                "purchase_capacity",
-                "slow_repair_capacity",
-                "fast_repair_capacity"
-            ],
+            "name": "nonnegative_total_protein",
+            "description": "Total protein must be nonnegative",
+            "formula": "Z \\ge 0",
             "variables": [
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "total_protein"
             ]
         },
         {
-            "name": "availability_from_elapsed_returns_only",
-            "description": "Tools become available only from earlier purchases and from repairs whose delays have already elapsed.",
-            "formula": "I_t = I_{t-1} + x_{t-1} + \\sum_{\\tau=0}^{t-p-1} y^{slow}_\\tau + \\sum_{\\tau=0}^{t-q-1} y^{fast}_\\tau - R_{t-1}",
+            "name": "budget_limit",
+            "description": "Total spending must not exceed the available budget",
+            "formula": "\\sum_{p=1}^{P} c_p x_p + \\sum_{v=1}^{V} c_v z_v \\le B",
             "parameters": [
-                "planning_horizon",
-                "initial_available_tools",
-                "slow_repair_return_delay",
-                "fast_repair_return_delay",
-                "demand_profile"
+                "budget",
+                "protein_cost_per_unit",
+                "vegetable_cost_per_pack"
             ],
             "variables": [
-                "availability_profile",
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs"
             ]
         },
         {
-            "name": "horizon_truncation_of_late_returns",
-            "description": "Tools returning after the end of the planning horizon do not contribute to feasibility inside the horizon.",
-            "formula": "\\sum_{\\tau=T-p}^{T-1} y^{slow}_\\tau \\text{ and } \\sum_{\\tau=T-q}^{T-1} y^{fast}_\\tau \\text{ are excluded from any } I_t \\text{ with } t \\leq T-1",
+            "name": "weight_limit",
+            "description": "Total purchased food weight must not exceed the maximum total weight",
+            "formula": "\\sum_{p=1}^{P} w_p x_p + \\sum_{v=1}^{V} w_v z_v \\le W^{\\max}",
             "parameters": [
-                "planning_horizon",
-                "slow_repair_return_delay",
-                "fast_repair_return_delay"
+                "max_total_weight",
+                "protein_weight_per_unit",
+                "vegetable_weight_per_pack"
             ],
             "variables": [
-                "availability_profile",
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs"
             ]
         },
         {
-            "name": "inventory_balance_and_demand_satisfaction",
-            "description": "For each stage, the available tools at the start of the stage must exactly satisfy demand when combined with same-stage purchases and returns from repairs completed by that stage. This enforces exact satisfaction and defines the availability profile recursively.",
-            "formula": "I_t + x_t + \\sum_{\\tau=0}^{t-p} y^{slow}_\\tau \\mathbf{1}_{t-p\\ge 0} + \\sum_{\\tau=0}^{t-q} y^{fast}_\\tau \\mathbf{1}_{t-q\\ge 0} = R_t + \\sum_{\\tau=0}^{t-1} y^{slow}_\\tau + \\sum_{\\tau=0}^{t-1} y^{fast}_\\tau",
+            "name": "minimum_vegetable_diversity",
+            "description": "At least the required number of distinct vegetable types must be selected",
+            "formula": "\\sum_v y_v \\ge K",
             "parameters": [
-                "planning_horizon",
-                "demand_profile",
-                "slow_repair_return_delay",
-                "fast_repair_return_delay"
+                "min_distinct_vegetables"
             ],
             "variables": [
-                "availability_profile",
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "vegetable_selected"
             ]
         },
         {
-            "name": "initial_availability_definition",
-            "description": "The availability at the first stage equals the initially available tools.",
-            "formula": "I_0 = I_1",
+            "name": "purchase_requires_selection",
+            "description": "A vegetable item may be purchased only if it is selected",
+            "formula": "z_v \\le M_v y_v \\quad \\forall v \\in \\{1,\\dots,V\\}",
             "parameters": [
-                "initial_available_tools"
+                "num_vegetable_items"
             ],
             "variables": [
-                "availability_profile"
+                "vegetable_purchase_packs",
+                "vegetable_selected"
             ]
         },
         {
-            "name": "repair_routing_equals_used_tools",
-            "description": "Every tool used in a stage is routed to exactly one repair mode after that stage, so the total number sent to repair equals stage demand.",
-            "formula": "y^{slow}_t + y^{fast}_t = R_t",
+            "name": "single_period_horizon",
+            "description": "The planning horizon consists of a single period, so there is no intertemporal coupling",
+            "formula": "\\mathcal{T} = \\{1\\}",
             "parameters": [
-                "planning_horizon",
-                "demand_profile"
-            ],
-            "variables": [
-                "slow_repair_plan",
-                "fast_repair_plan"
+                "time_horizon_periods"
             ]
         },
         {
-            "name": "purchase_capacity_limits",
-            "description": "If purchase capacities are provided, purchases at each stage cannot exceed the corresponding capacity.",
-            "formula": "x_t \\le K_{buy,t}",
+            "name": "total_protein_definition",
+            "description": "Defines total protein as the sum of protein contributions from purchased protein items and vegetables.",
+            "formula": "Z = \\sum_{p=1}^{P} \\pi_p x_p + \\sum_{v=1}^{V} \\pi_v z_v",
             "parameters": [
-                "planning_horizon",
-                "purchase_capacity"
+                "protein_yield_per_unit",
+                "vegetable_protein_yield_per_pack"
             ],
             "variables": [
-                "purchase_plan"
-            ]
-        },
-        {
-            "name": "slow_repair_capacity_limits",
-            "description": "If slow repair capacities are provided, the number of tools sent to slow repair at each stage cannot exceed the corresponding capacity.",
-            "formula": "y^{slow}_t \\le K_{slow,t}",
-            "parameters": [
-                "planning_horizon",
-                "slow_repair_capacity"
-            ],
-            "variables": [
-                "slow_repair_plan"
-            ]
-        },
-        {
-            "name": "fast_repair_capacity_limits",
-            "description": "If fast repair capacities are provided, the number of tools sent to fast repair at each stage cannot exceed the corresponding capacity.",
-            "formula": "y^{fast}_t \\le K_{fast,t}",
-            "parameters": [
-                "planning_horizon",
-                "fast_repair_capacity"
-            ],
-            "variables": [
-                "fast_repair_plan"
-            ]
-        },
-        {
-            "name": "nonnegativity_and_integrality_of_decision_variables",
-            "description": "Decision variables are nonnegative integers to represent counts of tools and to preserve exact discrete tool flows.",
-            "formula": "x_t,\\; y^{slow}_t,\\; y^{fast}_t,\\; I_t \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t=0,\\ldots,T-1",
-            "parameters": [
-                "planning_horizon"
-            ],
-            "variables": [
-                "purchase_plan",
-                "slow_repair_plan",
-                "fast_repair_plan",
-                "availability_profile"
+                "protein_purchase_quantity",
+                "vegetable_purchase_packs",
+                "total_protein"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_tool_related_spending_minimization",
-            "description": "Minimize total tool-related spending over the horizon, including purchase costs and repair costs.",
-            "sense": "minimize"
+            "name": "total_protein_maximization",
+            "description": "maximize total protein intake achieved by the meal plan",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total tool-related spending over the horizon, consisting of purchase costs and both repair mode costs.",
+        "description": "Maximize total protein intake of the meal plan. This is a single-objective MILP, so the original objective is used directly without combination.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "Z = a \\sum_{t=0}^{T-1} x_t + b \\sum_{t=0}^{T-1} y^{slow}_t + c \\sum_{t=0}^{T-1} y^{fast}_t",
-        "parameters": [
-            "purchase_cost",
-            "slow_repair_unit_cost",
-            "fast_repair_unit_cost",
-            "planning_horizon"
-        ],
+        "sense": "maximize",
+        "formula": "Z",
+        "parameters": [],
         "variables": [
-            "purchase_plan",
-            "slow_repair_plan",
-            "fast_repair_plan"
+            "total_protein"
         ]
     }
 }

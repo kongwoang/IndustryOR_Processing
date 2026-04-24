@@ -1,223 +1,293 @@
 {
-    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ yearly decision periods, indexed by $$t\\in\\mathcal T=\\{1,\\ldots,T\\}$$.\n- There are $$P$$ investment products, indexed by $$p\\in\\mathcal P=\\{1,\\ldots,P\\}$$.\n- The planner starts with initial liquid capital $$C_0$$ at the beginning of period $$1$$.\n- Each product $$p$$ has a set of periods when it can be purchased, a fixed gross payout multiplier at maturity, a maturity delay measured in periods, and a maximum investable amount.\n- At the beginning of each period, only the cash currently on hand may be allocated. Cash on hand includes the initial capital and any proceeds from investments that have already matured.\n- No borrowing, leverage, or negative cash positions are allowed.\n- A product may only receive investment in periods when it is available.\n- Investments in each product must respect its capacity; a product with unlimited capacity may accept any nonnegative amount of available cash.\n- Cash that is not invested in a period remains liquid and may be used in later periods.\n- Proceeds are received at the specified maturity time and become part of the cash available at the appropriate later decision time.\n- The planning goal is to choose the investment amounts so that the total wealth at the end of period $$T$$ is maximized.\n- A solution is represented by:\n  - $$x_{p,t}$$: the amount invested in product $$p$$ at the beginning of period $$t$$.\n  - $$b_t$$: the liquid cash available at the beginning of period $$t$$.\n  - $$W_T$$: the total wealth at the end of period $$T$$.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"type\": \"$$\\\\mathbb{Z}_{>0}$$\",\n    \"meaning\": \"number of yearly decision periods\"\n  },\n  \"initial_capital\": {\n    \"symbol\": \"$$C_0$$\",\n    \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}$$\",\n    \"meaning\": \"cash available at the beginning of period $$1$$\"\n  },\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal P$$\",\n    \"type\": \"array of length $$P$$\",\n    \"meaning\": \"investment products\"\n  },\n  \"product_fields\": {\n    \"available_periods\": {\n      \"symbol\": \"$$\\\\mathcal A_p\\\\subseteq\\\\mathcal T$$\",\n      \"type\": \"list of integers\",\n      \"meaning\": \"periods when product $$p$$ can be purchased\"\n    },\n    \"maturity_delay\": {\n      \"symbol\": \"$$d_p$$\",\n      \"type\": \"$$\\\\mathbb{Z}_{\\\\ge 0}$$\",\n      \"meaning\": \"number of periods from purchase to payout\"\n    },\n    \"gross_multiplier\": {\n      \"symbol\": \"$$\\\\alpha_p$$\",\n      \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}$$\",\n      \"meaning\": \"cash received per unit invested at maturity\"\n    },\n    \"capacity\": {\n      \"symbol\": \"$$U_p$$\",\n      \"type\": \"$$\\\\mathbb{R}_{\\\\ge 0}\\\\cup\\\\{+\\\\infty\\\\}$$\",\n      \"meaning\": \"maximum amount that may be invested in product $$p$$ in one purchase period\"\n    }\n  },\n  \"planning_goal\": {\n    \"symbol\": \"$$\\\\max W_T$$\",\n    \"meaning\": \"maximize total wealth at the end of period $$T$$\"\n  }\n}\n\nOutput Format\n{\n  \"investment_plan\": {\n    \"symbol\": \"$$X=[x_{p,t}]$$\",\n    \"shape\": \"$$P\\\\times T$$\",\n    \"meaning\": \"investment amount in each product $$p$$ at each period $$t$$\"\n  },\n  \"cash_balance\": {\n    \"symbol\": \"$$b_t$$\",\n    \"shape\": \"$$T+1$$\",\n    \"meaning\": \"liquid cash available at each decision time, including the initial time and the final time\"\n  },\n  \"terminal_wealth\": {\n    \"symbol\": \"$$W_T$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"total wealth at the end of period $$T$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 3,\n  \"initial_capital\": 500000,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"available_periods\": [1, 2, 3],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.20,\n      \"capacity\": \"unlimited\"\n    },\n    {\n      \"id\": 2,\n      \"available_periods\": [1],\n      \"maturity_delay\": 1,\n      \"gross_multiplier\": 1.50,\n      \"capacity\": 120000\n    },\n    {\n      \"id\": 3,\n      \"available_periods\": [2],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.60,\n      \"capacity\": 150000\n    },\n    {\n      \"id\": 4,\n      \"available_periods\": [3],\n      \"maturity_delay\": 0,\n      \"gross_multiplier\": 1.40,\n      \"capacity\": 100000\n    }\n  ]\n}",
+    "problem": "Problem description\n- A single-period production and export planning problem is considered for a set $$\\mathcal{I}$$ of commodities, where each commodity may be both a final export item and an intermediate input to other commodities.\n- The planner is given a world-market export price $$\\pi_i$$ for each commodity $$i \\in \\mathcal{I}$$, an imported-input expenditure coefficient $$\\mu_i$$ per unit of commodity $$i$$, a technical input matrix $$A = [a_{ij}]$$, a labor requirement coefficient $$\\lambda_i$$ per unit of commodity $$i$$, and optional commodity-specific production caps $$\\bar{x}_i$$.\n- The planning horizon is a single period $$\\mathcal{T}$$, and the total available labor over $$\\mathcal{T}$$ is $$L$$.\n- The planning goal is to choose nonnegative production levels so that the total export value is maximized while imported-input expenditure is minimized, subject to all feasibility limits.\n- The plan must respect the production recipe of each commodity, meaning that all required intermediate commodity inputs, imported inputs, and labor must be available for the chosen production level.\n- Production may not exceed any commodity-specific capacity limit that is provided.\n- Total labor used across all commodities must not exceed the available labor budget.\n- All produced quantities are assumed to be sold or exported within the same planning period, with no inventory carryover, backlog, or explicit domestic demand cap unless a demand limit $$d_i$$ is provided as input.\n- A solution is represented by:\n  - $$x_i$$: the production and export quantity of commodity $$i \\in \\mathcal{I}$$.\n  - $$z$$: the optimal value of the planning objective, representing the best net domestic value created by the plan.\n  - $$m$$: the total imported-input expenditure implied by the chosen production plan.\n\nInput Format\n{\n  \"commodities\": {\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"type\": \"array of identifiers\",\n    \"description\": \"Set of commodities indexed by $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"type\": \"array or singleton set\",\n    \"description\": \"Planning period set; in this problem, a single-period horizon.\"\n  },\n  \"export_prices\": {\n    \"symbol\": \"$$\\\\pi_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"World-market export price per unit of commodity $$i$$.\"\n  },\n  \"imported_input_expenditure\": {\n    \"symbol\": \"$$\\\\mu_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Imported-input expenditure required per unit of commodity $$i$$.\"\n  },\n  \"technical_input_coefficients\": {\n    \"symbol\": \"$$A = [a_{ij}]$$\",\n    \"type\": \"matrix of size $$|\\\\mathcal{I}| \\\\times |\\\\mathcal{I}|$$\",\n    \"description\": \"For each produced commodity $$i$$, the amount of commodity $$j$$ needed per unit of $$i$$.\"\n  },\n  \"labor_requirements\": {\n    \"symbol\": \"$$\\\\lambda_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Labor required per unit of commodity $$i$$, expressed in a common labor unit.\"\n  },\n  \"capacity_upper_bounds\": {\n    \"symbol\": \"$$\\\\bar{x}_i$$\",\n    \"type\": \"optional array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Maximum allowable production for commodity $$i$$ when a cap exists; omitted or set to no upper bound otherwise.\"\n  },\n  \"external_demand_cap\": {\n    \"symbol\": \"$$d_i$$\",\n    \"type\": \"optional array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Optional external demand limit for commodity $$i$$; if absent, assume unlimited market absorption at price $$\\\\pi_i$$.\"\n  },\n  \"total_labor_available\": {\n    \"symbol\": \"$$L$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Total labor available over $$\\\\mathcal{T}$$.\"\n  },\n  \"objective_priority\": {\n    \"symbol\": \"$$\\\\text{maximize net export value}$$\",\n    \"type\": \"string\",\n    \"description\": \"Planning objective stating that export value should be maximized while import expenditure is reduced subject to feasibility.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"symbol\": \"$$x_i$$\",\n    \"type\": \"array of length $$|\\\\mathcal{I}|$$\",\n    \"description\": \"Optimal production and export quantity for each commodity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$z^*$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Optimal value of the planning objective.\"\n  },\n  \"imported_input_expenditure_total\": {\n    \"symbol\": \"$$m^*$$\",\n    \"type\": \"scalar\",\n    \"description\": \"Total imported-input expenditure implied by the optimal production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"commodities\": [\"steel\", \"engines\", \"electronic_components\", \"plastic\"],\n  \"planning_horizon\": [\"single_period\"],\n  \"export_prices\": {\n    \"steel\": 500,\n    \"engines\": 1500,\n    \"electronic_components\": 300,\n    \"plastic\": 1200\n  },\n  \"technical_input_coefficients\": {\n    \"steel\": {\n      \"engines\": 0.02,\n      \"plastic\": 0.01\n    },\n    \"engines\": {\n      \"steel\": 0.8,\n      \"electronic_components\": 0.15,\n      \"plastic\": 0.11\n    },\n    \"electronic_components\": {\n      \"steel\": 0.01,\n      \"engines\": 0.01,\n      \"plastic\": 0.05\n    },\n    \"plastic\": {\n      \"engines\": 0.03,\n      \"steel\": 0.2,\n      \"electronic_components\": 0.05\n    }\n  },\n  \"imported_input_expenditure\": {\n    \"steel\": 250,\n    \"engines\": 300,\n    \"electronic_components\": 50,\n    \"plastic\": 300\n  },\n  \"labor_requirements\": {\n    \"steel\": {\n      \"value\": 6,\n      \"unit\": \"person-months\"\n    },\n    \"engines\": {\n      \"value\": 1,\n      \"unit\": \"person-year\"\n    },\n    \"electronic_components\": {\n      \"value\": 6,\n      \"unit\": \"person-months\"\n    },\n    \"plastic\": {\n      \"value\": 2,\n      \"unit\": \"person-years\"\n    }\n  },\n  \"capacity_upper_bounds\": {\n    \"engines\": 650000,\n    \"plastic\": 60000\n  },\n  \"total_labor_available\": {\n    \"value\": 830000,\n    \"unit\": \"person-months per year\"\n  }\n}",
     "parameters": [
         {
-            "name": "time_horizon",
-            "symbol": "T",
+            "name": "commodity_set_size",
+            "symbol": "I",
             "shape": [],
-            "description": "Number of decision periods in the planning horizon"
+            "description": "Number of commodities in the commodity set \\(\\mathcal{I}\\)"
         },
         {
-            "name": "initial_capital",
-            "symbol": "C_0",
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Initial liquid capital available at time 0"
+            "description": "Single-period planning horizon"
         },
         {
-            "name": "product_count",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of investment products"
-        },
-        {
-            "name": "availability_sets",
-            "symbol": "\\mathcal A",
+            "name": "export_prices",
+            "symbol": "\\pi",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Allowed investment periods for each product"
+            "description": "Export price for each commodity"
         },
         {
-            "name": "maturity_delays",
+            "name": "imported_input_expenditure_coefficients",
+            "symbol": "\\mu",
+            "shape": [
+                "I"
+            ],
+            "description": "Imported-input expenditure coefficient for each commodity"
+        },
+        {
+            "name": "technical_input_matrix",
+            "symbol": "A",
+            "shape": [
+                "I",
+                "I"
+            ],
+            "description": "Technical input matrix where \\(a_{ij}\\) is the amount of commodity \\(j\\) required per unit of commodity \\(i\\)"
+        },
+        {
+            "name": "labor_requirements",
+            "symbol": "\\lambda",
+            "shape": [
+                "I"
+            ],
+            "description": "Labor requirement for each commodity"
+        },
+        {
+            "name": "production_upper_bounds",
+            "symbol": "\\bar{x}",
+            "shape": [
+                "I"
+            ],
+            "description": "Optional production capacity upper bound for each commodity"
+        },
+        {
+            "name": "demand_caps",
             "symbol": "d",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Maturity delay for each product in periods"
+            "description": "Optional external demand cap for each commodity"
         },
         {
-            "name": "gross_multipliers",
-            "symbol": "\\alpha",
-            "shape": [
-                "P"
-            ],
-            "description": "Gross payout multiplier at maturity for each product"
-        },
-        {
-            "name": "capacities",
-            "symbol": "U",
-            "shape": [
-                "P"
-            ],
-            "description": "Investment capacity for each product; may be finite or unlimited"
+            "name": "total_available_labor",
+            "symbol": "L",
+            "shape": [],
+            "description": "Total labor available over the planning horizon"
         }
     ],
     "variables": [
         {
-            "name": "investment_amounts",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "I"
             ],
             "domain": "continuous",
-            "description": "Amount invested in product p at the beginning of period t"
+            "description": "Production and export quantity for each commodity"
         },
         {
-            "name": "liquid_cash_balances",
-            "symbol": "b",
-            "shape": [
-                "T+1"
-            ],
-            "domain": "continuous",
-            "description": "Liquid cash available at the beginning of each decision time t"
-        },
-        {
-            "name": "terminal_wealth",
-            "symbol": "W_T",
+            "name": "optimal_objective_value",
+            "symbol": "z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total wealth at the end of period T"
+            "description": "Optimal objective value of the planning problem"
+        },
+        {
+            "name": "total_imported_input_expenditure",
+            "symbol": "m",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total imported-input expenditure"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_investment_amounts",
-            "description": "investment amounts are nonnegative for all products and periods",
-            "formula": "x_{p,t} \\ge 0",
+            "name": "production_nonnegativity",
+            "description": "production and export quantities must be nonnegative for all commodities",
+            "formula": "x[i]",
+            "parameters": [
+                "commodity_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "scalar_output_nonnegativity",
+            "description": "the reported objective value and imported-input expenditure are real-valued scalars, with imported-input expenditure nonnegative",
+            "formula": "z, m",
             "parameters": [],
             "variables": [
-                "investment_amounts"
+                "optimal_objective_value",
+                "total_imported_input_expenditure"
             ]
         },
         {
-            "name": "nonnegative_cash_balances",
-            "description": "liquid cash balances are nonnegative for all decision times",
-            "formula": "b_t \\ge 0",
+            "name": "labor_capacity_limit",
+            "description": "total labor used across all commodities may not exceed the available labor",
+            "formula": "\\sum_{i=1}^{I} \\lambda_i x_i \\le L",
+            "parameters": [
+                "labor_requirements",
+                "total_available_labor"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_capacity_limit",
+            "description": "if a production upper bound is provided, production of a commodity cannot exceed that bound",
+            "formula": "x_i \\le \\bar{x}_i \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "production_upper_bounds"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "demand_cap_limit",
+            "description": "if a demand cap is provided, exported quantity of a commodity cannot exceed that cap",
+            "formula": "x_i \\le d_i \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "demand_caps"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "same_period_sale_or_export",
+            "description": "all produced quantities are sold or exported within the same period",
+            "formula": "x_i \\text{ is sold/exported in } \\mathcal{T} \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_nonnegativity",
+            "description": "production and export quantities must be nonnegative for all commodities",
+            "formula": "x_i \\ge 0 \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "commodity_set_size"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "scalar_output_nonnegativity",
+            "description": "the reported objective value is unrestricted and imported-input expenditure is nonnegative",
+            "formula": "m \\ge 0",
             "parameters": [],
             "variables": [
-                "liquid_cash_balances"
+                "total_imported_input_expenditure"
             ]
         },
         {
-            "name": "nonnegative_terminal_wealth",
-            "description": "terminal wealth is nonnegative",
-            "formula": "W_T \\ge 0",
-            "parameters": [],
-            "variables": [
-                "terminal_wealth"
-            ]
-        },
-        {
-            "name": "allowed_purchase_periods_only",
-            "description": "investment in a product is only allowed in its permitted periods",
-            "formula": "x_{p,t}=0 \\quad \\forall\\, t\\notin \\mathcal A_p",
+            "name": "optimal_objective_definition",
+            "description": "the reported objective value equals the total export revenue from the production plan",
+            "formula": "z = \\sum_{i=1}^{I} \\pi_i x_i",
             "parameters": [
-                "availability_sets"
+                "export_prices"
             ],
             "variables": [
-                "investment_amounts"
+                "production_quantity",
+                "optimal_objective_value"
             ]
         },
         {
-            "name": "capacity_limit_per_product_period",
-            "description": "investment in any product during a period cannot exceed its capacity when capacity is finite",
-            "formula": "x_{p,t} \\le U_p",
+            "name": "parameter_nonnegativity",
+            "description": "export prices, imported-input expenditure coefficients, labor requirements, total labor, and any optional capacity or demand caps are nonnegative",
+            "formula": "\\pi_i \\ge 0,\\; \\mu_i \\ge 0,\\; \\lambda_i \\ge 0,\\; L \\ge 0,\\; \\bar{x}_i \\ge 0,\\; d_i \\ge 0",
             "parameters": [
-                "capacities"
+                "export_prices",
+                "imported_input_expenditure_coefficients",
+                "labor_requirements",
+                "total_available_labor",
+                "production_upper_bounds",
+                "demand_caps"
+            ],
+            "variables": []
+        },
+        {
+            "name": "technical_coefficient_nonnegativity",
+            "description": "technical input coefficients must be nonnegative for all commodity pairs",
+            "formula": "a_{ij} \\ge 0 \\quad \\forall i=1,\\ldots,I,\\; \\forall j=1,\\ldots,I",
+            "parameters": [
+                "technical_input_matrix"
+            ],
+            "variables": []
+        },
+        {
+            "name": "production_continuous_domain",
+            "description": "production quantities are continuous and nonnegative",
+            "formula": "x_i \\in \\mathbb{R}_{+} \\quad \\forall i=1,\\ldots,I",
+            "parameters": [
+                "commodity_set_size"
             ],
             "variables": [
-                "investment_amounts"
+                "production_quantity"
             ]
         },
         {
-            "name": "cash_availability_limit",
-            "description": "cash used for investments in a period cannot exceed cash available at the beginning of that period including matured proceeds",
-            "formula": "\\sum_{p=1}^{P} x_{p,t} \\le b_t + \\sum_{p=1}^{P} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau+d_p=t\\}}\\,\\alpha_p x_{p,\\tau} \\quad \\forall\\, t=1,\\ldots,T",
+            "name": "single_period_indexing",
+            "description": "the model is indexed to a single planning period and has no inter-period carryover state",
+            "formula": "t \\in \\mathcal{T},\\; |\\mathcal{T}|=1",
             "parameters": [
-                "maturity_delays",
-                "gross_multipliers"
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "imported_input_expenditure_definition",
+            "description": "the imported-input expenditure equals the coefficient-weighted expenditure implied by the production plan",
+            "formula": "m = \\sum_{i=1}^{I} \\mu_i x_i",
+            "parameters": [
+                "imported_input_expenditure_coefficients"
             ],
             "variables": [
-                "investment_amounts",
-                "liquid_cash_balances"
+                "production_quantity",
+                "total_imported_input_expenditure"
             ]
         },
         {
-            "name": "no_borrowing_or_negative_cash",
-            "description": "borrowing, leverage, and negative cash positions are not allowed",
-            "formula": "b_t \\ge 0",
+            "name": "reporting_variable_definition",
+            "description": "the scalar report variable z records total export value and m records total imported-input expenditure",
+            "formula": "z = \\sum_{i=1}^{I} \\pi_i x_i,\\; m = \\sum_{i=1}^{I} \\mu_i x_i",
             "parameters": [
-                "initial_capital"
+                "export_prices",
+                "imported_input_expenditure_coefficients"
             ],
             "variables": [
-                "liquid_cash_balances"
-            ]
-        },
-        {
-            "name": "matured_proceeds_arrive_later",
-            "description": "proceeds from an investment become liquid cash after the product-specific maturity delay",
-            "formula": "\\text{proceeds from } x_{p,t} \\text{ arrive after } d_p \\text{ periods}",
-            "parameters": [
-                "maturity_delays",
-                "gross_multipliers"
-            ],
-            "variables": [
-                "investment_amounts",
-                "liquid_cash_balances"
-            ]
-        },
-        {
-            "name": "cash_carry_forward",
-            "description": "cash not invested in a period remains liquid and carries forward to the next period",
-            "formula": "b_{t+1}= b_t + \\sum_{p=1}^{P} \\sum_{\\tau=1}^{t} \\mathbf{1}_{\\{\\tau+d_p=t+1\\}}\\,\\alpha_p x_{p,\\tau} - \\sum_{p=1}^{P} x_{p,t} \\quad \\forall\\, t=1,\\ldots,T",
-            "parameters": [
-                "maturity_delays",
-                "gross_multipliers"
-            ],
-            "variables": [
-                "investment_amounts",
-                "liquid_cash_balances"
-            ]
-        },
-        {
-            "name": "initial_cash_balance",
-            "description": "the initial liquid cash available at the beginning of the horizon equals the given initial capital",
-            "formula": "b_1 = C_0",
-            "parameters": [
-                "initial_capital"
-            ],
-            "variables": [
-                "liquid_cash_balances"
-            ]
-        },
-        {
-            "name": "terminal_wealth_definition",
-            "description": "terminal wealth equals the cash balance at the end of the final period plus any proceeds that mature after period T if such proceeds are included in the horizon valuation; here terminal wealth is identified with the ending liquid cash position after period T",
-            "formula": "W_T = b_{T+1}",
-            "parameters": [],
-            "variables": [
-                "liquid_cash_balances",
-                "terminal_wealth"
+                "production_quantity",
+                "optimal_objective_value",
+                "total_imported_input_expenditure"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "terminal_wealth_maximization",
-            "description": "maximize the total wealth at the end of period T",
+            "name": "maximize_export_value",
+            "description": "maximize total export value across all commodities",
             "sense": "maximize"
+        },
+        {
+            "name": "minimize_imported_input_expenditure",
+            "description": "minimize total imported-input expenditure",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize terminal wealth at the end of period T.",
-        "objective_combination_method": "one_objective",
+        "description": "Lexicographically maximize total export revenue and, among all export-optimal plans, minimize total imported-input expenditure.",
+        "objective_combination_method": "preemption_optimization",
         "sense": "maximize",
-        "formula": "\\max\\; W_T",
-        "parameters": [],
+        "formula": "\\text{preemptively maximize } \\sum_{i=1}^{I} \\pi_i x_i \\text{, then minimize } m",
+        "parameters": [
+            "export_prices",
+            "imported_input_expenditure_coefficients"
+        ],
         "variables": [
-            "terminal_wealth"
+            "production_quantity",
+            "total_imported_input_expenditure"
         ]
     }
 }

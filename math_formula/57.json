@@ -1,211 +1,265 @@
 {
-    "problem": "Problem description\n- This is a single-period land-allocation optimization problem on a farm with total available land $$L$$.\n- There is a set of candidate crops $$\\mathcal{P}$$, indexed by $$p \\in \\mathcal{P}$$, and each crop has a per-acre profit parameter $$\\pi_p$$.\n- The planning goal is to choose how many acres to assign to each crop so that total profit is maximized.\n- There is no demand-driven sales requirement in this instance; the limiting factor is land availability together with crop-mix rules.\n- The total planted acreage across all crops cannot exceed the available land $$L$$.\n- No more than $$K$$ distinct crop types may be grown.\n- Crop selection and acreage must be consistent, meaning that any crop not selected must receive zero acreage.\n- There is a set of pairwise land-ratio rules $$\\mathcal{R}$$. For each rule, one specified crop must use at least a stated multiple of the acreage of another specified crop.\n- A solution is represented by:\n    - $$x_p$$: the acreage assigned to crop $$p$$ for each $$p \\in \\mathcal{P}$$.\n    - $$y_p$$: a binary indicator equal to $$1$$ if crop $$p$$ is grown and $$0$$ otherwise.\n    - $$Z$$: the total profit obtained from the chosen land allocation.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"description\": \"Single planning period with $$|\\\\mathcal{T}|=1$$.\"\n  },\n  \"crops\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"description\": \"Array of crop identifiers; the number of crops is $$|\\\\mathcal{P}|$$.\"\n  },\n  \"profit_per_acre\": {\n    \"symbol\": \"$$\\\\pi \\\\in \\\\mathbb{R}_+^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Per-acre profit vector, where $$\\\\pi_p$$ is the profit earned per acre of crop $$p$$.\"\n  },\n  \"land_capacity\": {\n    \"symbol\": \"$$L$$\",\n    \"description\": \"Total available land in acres.\"\n  },\n  \"max_distinct_crops\": {\n    \"symbol\": \"$$K$$\",\n    \"description\": \"Maximum number of crop types that may be grown.\"\n  },\n  \"ratio_rules\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"description\": \"Array of pairwise acreage rules. Each rule contains $$i$$, $$j$$, and $$\\\\alpha_{ij}$$, meaning crop $$i$$ must be grown on at least $$\\\\alpha_{ij}$$ times the acreage of crop $$j$$.\"\n  }\n}\n\nOutput Format\n{\n  \"acreage_by_crop\": {\n    \"symbol\": \"$$x \\\\in \\\\mathbb{R}_+^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Acreage assigned to each crop, listed in the same order as $$\\\\mathcal{P}$$.\"\n  },\n  \"selected_crop_indicator\": {\n    \"symbol\": \"$$y \\\\in \\\\{0,1\\\\}^{|\\\\mathcal{P}|}$$\",\n    \"description\": \"Binary selection vector, where $$y_p=1$$ indicates that crop $$p$$ is grown.\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$Z$$\",\n    \"description\": \"Maximum achievable profit for the chosen allocation.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"crop_order\": [\"apples\", \"pears\", \"oranges\", \"lemons\"],\n  \"profit_per_acre\": [\"$$2000$$\", \"$$1800$$\", \"$$2200$$\", \"$$3000$$\"],\n  \"land_capacity\": \"$$120$$\",\n  \"max_distinct_crops\": \"$$2$$\",\n  \"ratio_rules\": [\n    {\n      \"lhs_crop\": \"apples\",\n      \"rhs_crop\": \"pears\",\n      \"minimum_multiple\": \"$$2$$\"\n    },\n    {\n      \"lhs_crop\": \"apples\",\n      \"rhs_crop\": \"lemons\",\n      \"minimum_multiple\": \"$$3$$\"\n    },\n    {\n      \"lhs_crop\": \"oranges\",\n      \"rhs_crop\": \"lemons\",\n      \"minimum_multiple\": \"$$2$$\"\n    }\n  ]\n}",
+    "problem": "Problem description\n- There are $$I$$ customer orders indexed by $$i \\in \\mathcal{I}$$.\n- Each order $$i$$ is characterized by a required width $$w_i$$ and a required length $$\\ell_i$$.\n- There are $$S$$ available standard stock width types indexed by $$s \\in \\mathcal{S}$$, with standard width parameter $$W_s$$ for each type.\n- The stock length is effectively unlimited, and length pieces may be spliced together, so the main planning decision is how to cut widths and allocate material area.\n- The planning goal is to choose a cutting plan that satisfies all orders while minimizing total waste area.\n- Business rules:\n  - Only stock widths in $$\\mathcal{S}$$ may be used.\n  - Every order must be fully satisfied in both width and length.\n  - Length fulfillment may come from multiple spliced pieces when needed.\n  - Any unused material area created by cutting is counted as waste.\n  - The solution should minimize the total waste area across all used stock material.\n- A solution is represented by:\n  - A set of cutting patterns $$\\mathcal{P}$$.\n  - A pattern usage variable $$x_p$$ for each $$p \\in \\mathcal{P}$$, indicating how many times pattern $$p$$ is applied.\n  - A pattern composition description for each $$p$$, identifying the stock width type used and the orders included in that pattern.\n  - A total waste area value $$Z$$.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"static single planning horizon; no time indexing is required\"\n  },\n  \"orders\": {\n    \"type\": \"array\",\n    \"shape\": \"$$I$$\",\n    \"items\": {\n      \"order_id\": \"identifier in $$\\\\mathcal{I}$$\",\n      \"required_width\": \"real demand parameter $$w_i \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\",\n      \"required_length\": \"real demand parameter $$\\\\ell_i \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"stock_widths\": {\n    \"type\": \"array\",\n    \"shape\": \"$$S$$\",\n    \"items\": {\n      \"stock_width_id\": \"identifier in $$\\\\mathcal{S}$$\",\n      \"standard_width\": \"real parameter $$W_s \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"splicing_allowed\": \"boolean parameter indicating whether length pieces may be joined\",\n  \"objective\": \"minimize total waste area\"\n}\n\nOutput Format\n{\n  \"selected_patterns\": {\n    \"type\": \"array\",\n    \"shape\": \"$$P$$\",\n    \"items\": {\n      \"pattern_id\": \"identifier in $$\\\\mathcal{P}$$\",\n      \"stock_width_id\": \"identifier in $$\\\\mathcal{S}$$\",\n      \"usage_count\": \"nonnegative integer $$x_p \\\\in \\\\mathbb{Z}_{\\\\ge 0}$$\",\n      \"orders_in_pattern\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"order_id\": \"identifier in $$\\\\mathcal{I}$$\",\n          \"allocated_width\": \"width assigned to the order in this pattern, consistent with $$w_i$$\",\n          \"allocated_length\": \"length assigned to the order in this pattern, consistent with $$\\\\ell_i$$\"\n        }\n      },\n      \"pattern_waste_area\": \"nonnegative real value $$Z_p \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n    }\n  },\n  \"total_waste_area\": \"nonnegative real value $$Z \\\\in \\\\mathbb{R}_{\\\\ge 0}$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": \"single static period\",\n  \"orders\": [\n    {\n      \"order_id\": 1,\n      \"required_width\": 0.5,\n      \"required_length\": 1000\n    },\n    {\n      \"order_id\": 2,\n      \"required_width\": 0.7,\n      \"required_length\": 3000\n    },\n    {\n      \"order_id\": 3,\n      \"required_width\": 0.9,\n      \"required_length\": 2000\n    }\n  ],\n  \"stock_widths\": [\n    {\n      \"stock_width_id\": 1,\n      \"standard_width\": 1\n    },\n    {\n      \"stock_width_id\": 2,\n      \"standard_width\": 2\n    }\n  ],\n  \"splicing_allowed\": true\n}",
     "parameters": [
         {
-            "name": "num_crops",
-            "symbol": "N",
+            "name": "num_orders",
+            "symbol": "I",
             "shape": [],
-            "description": "Number of candidate crops"
+            "description": "Number of customer orders"
         },
         {
-            "name": "num_ratio_rules",
-            "symbol": "R",
+            "name": "num_stock_width_types",
+            "symbol": "S",
             "shape": [],
-            "description": "Number of pairwise land-ratio rules"
+            "description": "Number of available standard stock width types"
         },
         {
-            "name": "profit_per_acre",
-            "symbol": "\\pi",
+            "name": "required_width",
+            "symbol": "w",
             "shape": [
-                "N"
+                "I"
             ],
-            "description": "Per-acre profit for each crop"
+            "description": "Required width of each order i"
         },
         {
-            "name": "total_land",
-            "symbol": "L",
+            "name": "required_length",
+            "symbol": "\\ell",
+            "shape": [
+                "I"
+            ],
+            "description": "Required length of each order i"
+        },
+        {
+            "name": "standard_width",
+            "symbol": "W",
+            "shape": [
+                "S"
+            ],
+            "description": "Standard width of each stock type s"
+        },
+        {
+            "name": "time_horizon",
+            "symbol": "\\mathcal T",
             "shape": [],
-            "description": "Total available land in acres"
+            "description": "Single static planning horizon"
         },
         {
-            "name": "max_distinct_crops",
-            "symbol": "K",
+            "name": "splicing_allowed",
+            "symbol": "\\sigma",
             "shape": [],
-            "description": "Maximum number of distinct crop types allowed"
-        },
-        {
-            "name": "ratio_rule_lhs",
-            "symbol": "lhs",
-            "shape": [
-                "R"
-            ],
-            "description": "Left-hand crop index for each ratio rule"
-        },
-        {
-            "name": "ratio_rule_rhs",
-            "symbol": "rhs",
-            "shape": [
-                "R"
-            ],
-            "description": "Right-hand crop index for each ratio rule"
-        },
-        {
-            "name": "ratio_rule_multiple",
-            "symbol": "\\alpha",
-            "shape": [
-                "R"
-            ],
-            "description": "Required minimum acreage multiple for each ratio rule"
+            "description": "Boolean flag indicating whether length pieces may be joined"
         }
     ],
     "variables": [
         {
-            "name": "crop_acreage",
+            "name": "pattern_usage_count",
             "symbol": "x",
             "shape": [
-                "N"
+                "\\mathcal P"
             ],
-            "domain": "continuous",
-            "description": "Acreage assigned to each crop"
+            "domain": "integer",
+            "description": "Usage count of each cutting pattern p"
         },
         {
-            "name": "crop_selected",
-            "symbol": "y",
+            "name": "stock_type_of_pattern",
+            "symbol": "u",
             "shape": [
-                "N"
+                "\\mathcal P"
+            ],
+            "domain": "integer",
+            "description": "Stock width type used by each pattern p"
+        },
+        {
+            "name": "orders_in_pattern",
+            "symbol": "a",
+            "shape": [
+                "\\mathcal P",
+                "-"
             ],
             "domain": "binary",
-            "description": "Binary indicator equal to 1 if a crop is selected for planting, 0 otherwise"
+            "description": "Indicator of whether an order is included in a pattern p"
         },
         {
-            "name": "total_profit",
+            "name": "allocated_width",
+            "symbol": "q",
+            "shape": [
+                "\\mathcal P",
+                "-"
+            ],
+            "domain": "continuous",
+            "description": "Width allocated to each included order within a pattern p"
+        },
+        {
+            "name": "allocated_length",
+            "symbol": "r",
+            "shape": [
+                "\\mathcal P",
+                "-"
+            ],
+            "domain": "continuous",
+            "description": "Length allocated to each included order within a pattern p"
+        },
+        {
+            "name": "pattern_waste_area",
+            "symbol": "z",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "domain": "continuous",
+            "description": "Waste area generated by each pattern p"
+        },
+        {
+            "name": "total_waste_area",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit from the land allocation"
+            "description": "Total waste area across all used stock material"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_acreage",
-            "description": "Crop acreage must be nonnegative for each crop",
-            "formula": "x[p] \\ge 0",
+            "name": "nonnegative_problem_sizes",
+            "description": "Number of orders and number of stock width types must be positive integers",
+            "formula": "I \\in \\mathbb{Z}_{>0},\\; S \\in \\mathbb{Z}_{>0}",
             "parameters": [
-                "num_crops"
+                "num_orders",
+                "num_stock_width_types"
             ],
+            "variables": []
+        },
+        {
+            "name": "indexing_domain",
+            "description": "Orders and stock width types use 0-based indexing over their respective sets",
+            "formula": "\\mathcal I = \\{0,1,\\dots,I-1\\},\\; \\mathcal S = \\{0,1,\\dots,S-1\\}",
+            "parameters": [
+                "num_orders",
+                "num_stock_width_types"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_requirements",
+            "description": "Required widths and required lengths must be nonnegative for all orders",
+            "formula": "w_i \\ge 0,\\; \\ell_i \\ge 0\\quad \\forall i \\in \\mathcal I",
+            "parameters": [
+                "required_width",
+                "required_length"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_stock_widths",
+            "description": "Standard stock widths must be nonnegative for all stock types",
+            "formula": "W_s \\ge 0\\quad \\forall s \\in \\mathcal S",
+            "parameters": [
+                "standard_width"
+            ],
+            "variables": []
+        },
+        {
+            "name": "pattern_usage_integer_nonnegative",
+            "description": "Pattern usage counts must be nonnegative integers",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall p \\in \\mathcal P",
+            "parameters": [],
             "variables": [
-                "crop_acreage"
+                "pattern_usage_count"
             ]
         },
         {
-            "name": "binary_crop_selection",
-            "description": "Crop selection indicator must be binary for each crop",
-            "formula": "y[p] \\in \\{0,1\\}",
-            "parameters": [
-                "num_crops"
-            ],
+            "name": "pattern_waste_nonnegative",
+            "description": "Pattern waste area and total waste area must be nonnegative",
+            "formula": "z_p \\ge 0\\quad \\forall p \\in \\mathcal P,\\qquad Z \\ge 0",
+            "parameters": [],
             "variables": [
-                "crop_selected"
+                "pattern_waste_area",
+                "total_waste_area"
             ]
         },
         {
-            "name": "total_land_limit",
-            "description": "Total planted acreage across all crops cannot exceed available land",
-            "formula": "\\sum x[p] \\le L",
+            "name": "single_stock_type_per_pattern",
+            "description": "Each pattern must reference exactly one stock width type from the available stock types",
+            "formula": "u_p \\in \\mathcal S\\quad \\forall p \\in \\mathcal P",
             "parameters": [
-                "total_land",
-                "num_crops"
+                "num_stock_width_types"
             ],
             "variables": [
-                "crop_acreage"
+                "stock_type_of_pattern"
             ]
         },
         {
-            "name": "distinct_crop_limit",
-            "description": "No more than K distinct crop types may be selected",
-            "formula": "\\sum y[p] \\le K",
+            "name": "full_order_satisfaction",
+            "description": "Every order must be fully satisfied in both width and length",
+            "formula": "\\sum_{p \\in \\mathcal P} x_p a_{p i} q_{p i} = w_i,\\qquad \\sum_{p \\in \\mathcal P} x_p a_{p i} r_{p i} = \\ell_i\\quad \\forall i \\in \\mathcal I",
             "parameters": [
-                "max_distinct_crops",
-                "num_crops"
+                "required_width",
+                "required_length"
             ],
             "variables": [
-                "crop_selected"
+                "pattern_usage_count",
+                "orders_in_pattern",
+                "allocated_width",
+                "allocated_length"
             ]
         },
         {
-            "name": "selection_acreage_consistency",
-            "description": "If a crop is selected then its acreage may be positive; if it is not selected, acreage must be zero. This is enforced by a linear upper bound using total land.",
-            "formula": "x[p] \\le L\\, y[p]",
+            "name": "splicing_rule",
+            "description": "If splicing is disabled, length pieces cannot be joined; if enabled, length may be fulfilled by multiple spliced pieces",
+            "formula": "\\sigma = 0 \\Rightarrow \\sum_{p \\in \\mathcal P} x_p a_{p i} \\le 1\\quad \\forall i \\in \\mathcal I",
             "parameters": [
-                "total_land",
-                "num_crops"
+                "splicing_allowed"
             ],
             "variables": [
-                "crop_acreage",
-                "crop_selected"
+                "pattern_usage_count",
+                "orders_in_pattern"
             ]
         },
         {
-            "name": "ratio_rule_minimum_multiple",
-            "description": "For each ratio rule, the lhs crop must use at least the specified multiple of the rhs crop acreage",
-            "formula": "x[lhs[r]] \\ge \\alpha[r] x[rhs[r]]",
+            "name": "pattern_waste_definition",
+            "description": "Unused material area created by cutting a pattern contributes to that pattern's waste",
+            "formula": "z_p = x_p \\left(u_p \\sum_{i \\in \\mathcal I} a_{p i} q_{p i} r_{p i} - \\sum_{i \\in \\mathcal I} a_{p i} q_{p i} r_{p i}\\right)\\quad \\forall p \\in \\mathcal P",
             "parameters": [
-                "num_ratio_rules",
-                "ratio_rule_lhs",
-                "ratio_rule_rhs",
-                "ratio_rule_multiple"
+                "standard_width",
+                "required_width",
+                "required_length"
             ],
             "variables": [
-                "crop_acreage"
+                "pattern_waste_area",
+                "allocated_width",
+                "allocated_length"
             ]
         },
         {
-            "name": "selection_acreage_consistency_big_m",
-            "description": "If a crop is not selected, its acreage must be zero, enforced with a big-M upper bound using total available land",
-            "formula": "x[p] \\le L\\, y[p]",
+            "name": "aggregate_demand_coverage",
+            "description": "Across all selected patterns and their usage counts, cumulative allocations must cover every order fully",
+            "formula": "\\sum_{p \\in \\mathcal P} x_p a_{p i} q_{p i} \\ge w_i,\\qquad \\sum_{p \\in \\mathcal P} x_p a_{p i} r_{p i} \\ge \\ell_i\\quad \\forall i \\in \\mathcal I",
             "parameters": [
-                "total_land",
-                "num_crops"
+                "required_width",
+                "required_length"
             ],
             "variables": [
-                "crop_acreage",
-                "crop_selected"
-            ]
-        },
-        {
-            "name": "total_profit_definition",
-            "description": "Define total profit as the sum of per-acre profits times allocated acreage.",
-            "formula": "Z = \\sum_{p=1}^{N} \\pi_p x_p",
-            "parameters": [
-                "num_crops",
-                "profit_per_acre"
-            ],
-            "variables": [
-                "crop_acreage",
-                "total_profit"
+                "pattern_usage_count",
+                "orders_in_pattern",
+                "allocated_width",
+                "allocated_length"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit from the chosen crop allocation",
-            "sense": "maximize"
+            "name": "total_waste_area_minimization",
+            "description": "Minimize total waste area across all used stock material",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit from the chosen crop allocation; keep Z as a decision variable defined by the linear profit balance.",
+        "description": "Minimize the total waste area generated by all used stock material.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z = \\sum_{p=1}^{N} \\pi_p x_p",
-        "parameters": [
-            "num_crops",
-            "profit_per_acre"
-        ],
+        "sense": "minimize",
+        "formula": "\\min Z",
+        "parameters": [],
         "variables": [
-            "crop_acreage",
-            "total_profit"
+            "total_waste_area"
         ]
     }
 }

@@ -1,204 +1,254 @@
 {
-    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and a planning horizon of $$T$$ production days indexed by $$t \\in \\mathcal{T}$$.\n- For each product $$p$$, the input data include a demand ceiling $$D_p$$, a unit selling price $$S_p$$, a unit production cost $$C_p$$, a maximum daily production quota $$Q_p$$, a fixed daily activation cost $$F_p$$, and a minimum production batch size $$B_p$$.\n- All production quantities are measured in a common unit of output, and the production plan is made day by day across the horizon.\n- The planning goal is to choose which products to activate on which days and how much to produce so as to maximize total net profit from sales after accounting for production costs and fixed activation costs.\n- A product may be produced on a day only if its production line is activated for that day.\n- If a product is activated on a day, the produced quantity for that product on that day must be at least its minimum batch size.\n- If a product is activated on a day, its produced quantity on that day must not exceed its daily quota.\n- Over the full planning horizon, the total production assigned to each product must not exceed that product\u2019s demand ceiling.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced on day $$t$$.\n  - $$y_{p,t}$$: a binary activation decision, where $$y_{p,t}=1$$ means product $$p$$ is activated on day $$t$$ and $$y_{p,t}=0$$ otherwise.\n  - $$z$$: the total objective value of the selected production plan.\n\nInput Format\n{\n  \"T\": \"integer; number of planning days in the horizon.\",\n  \"P\": \"integer; number of products.\",\n  \"demand_ceiling\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of demand limits $$D_p$$, one value for each product $$p$$.\"\n  },\n  \"selling_price\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit selling prices $$S_p$$, one value for each product $$p$$.\"\n  },\n  \"production_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit production costs $$C_p$$, one value for each product $$p$$.\"\n  },\n  \"daily_quota\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of maximum daily production quotas $$Q_p$$, one value for each product $$p$$.\"\n  },\n  \"activation_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of fixed activation costs $$F_p$$, one value for each product $$p$$.\"\n  },\n  \"minimum_batch\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of minimum batch sizes $$B_p$$, one value for each product $$p$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Matrix $$x_{p,t}$$ giving the planned production quantity of product $$p$$ on day $$t$$.\"\n  },\n  \"activation_indicator\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Binary matrix $$y_{p,t}$$ indicating whether product $$p$$ is activated on day $$t$$.\"\n  },\n  \"objective_value\": {\n    \"shape\": [\"scalar\"],\n    \"meaning\": \"The total net objective value $$z$$ of the production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 22,\n  \"P\": 3,\n  \"demand_ceiling\": [5300, 4500, 5400],\n  \"selling_price\": [124, 109, 115],\n  \"production_cost\": [73.30, 52.90, 65.40],\n  \"daily_quota\": [500, 450, 550],\n  \"activation_cost\": [170000, 150000, 100000],\n  \"minimum_batch\": [20, 20, 16]\n}",
+    "problem": "Problem description\n- There is a single-period procurement planning problem with a finite supplier set $$\\mathcal{S}$$ containing the designated suppliers $$A$$, $$B$$, and $$C$$.\n- Each supplier $$i \\in \\mathcal{S}$$ has an order cost parameter $$c_i$$ and a fixed lot-size parameter $$q_i$$, meaning one order from supplier $$i$$ provides exactly $$q_i$$ tables.\n- The restaurant chooses a nonnegative integer number of orders from each supplier, and may use supplier-activation indicators to express conditional purchasing rules.\n- The total number of tables obtained from all suppliers must be at least the minimum required demand level $$D^{\\min}$$ and must not exceed the maximum allowed supply level $$D^{\\max}$$.\n- If supplier $$A$$ is used, then supplier $$B$$ must provide at least the required minimum quantity $$L_{A \\rightarrow B}$$ of tables.\n- If supplier $$B$$ is used, then supplier $$C$$ must also be used.\n- The planning goal is to minimize the total procurement cost across all suppliers.\n- A solution is represented by:\n  - $$x_i$$: the nonnegative integer number of orders placed with supplier $$i \\in \\mathcal{S}$$.\n  - $$z_i$$: a binary indicator showing whether supplier $$i$$ is used.\n  - $$t_i$$: the total number of tables procured from supplier $$i$$.\n  - $$T$$: the total number of tables ordered across all suppliers.\n  - $$Z$$: the minimum total procurement cost achieved by the plan.\n\nInput Format\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\mathcal{S}$$\",\n    \"size\": \"$$S$$\",\n    \"elements\": \"A finite set of suppliers indexed by $$i \\\\in \\\\mathcal{S}$$\"\n  },\n  \"supplier_parameters\": [\n    {\n      \"id\": \"$$i$$\",\n      \"cost_per_order\": \"$$c_i$$\",\n      \"tables_per_order\": \"$$q_i$$\"\n    }\n  ],\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\mathcal{H}$$\",\n    \"size\": \"$$H$$\",\n    \"description\": \"The ordering horizon, which may be a single period or multiple periods\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$D^{\\\\min}$$\",\n    \"maximum_total_tables\": \"$$D^{\\\\max}$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$L_{ij}$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for all $$i \\\\in \\\\mathcal{S}$$\",\n    \"supplier_usage\": \"Binary for all $$i \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nOutput Format\n{\n  \"orders_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{x} = (x_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The integer number of orders placed with each supplier\"\n  },\n  \"supplier_usage\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{z} = (z_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The binary supplier-activation vector\"\n  },\n  \"tables_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{t} = (t_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The total number of tables procured from each supplier\"\n  },\n  \"total_tables\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$T$$\",\n    \"description\": \"The total number of tables ordered across all suppliers\"\n  },\n  \"total_cost\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$Z$$\",\n    \"description\": \"The minimum total procurement cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\{A,B,C\\\\}$$\",\n    \"size\": \"$$3$$\",\n    \"elements\": [\n      {\n        \"id\": \"$$A$$\",\n        \"cost_per_order\": \"$$120$$\",\n        \"tables_per_order\": \"$$20$$\"\n      },\n      {\n        \"id\": \"$$B$$\",\n        \"cost_per_order\": \"$$110$$\",\n        \"tables_per_order\": \"$$15$$\"\n      },\n      {\n        \"id\": \"$$C$$\",\n        \"cost_per_order\": \"$$100$$\",\n        \"tables_per_order\": \"$$15$$\"\n      }\n    ]\n  },\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\{1\\\\}$$\",\n    \"size\": \"$$1$$\",\n    \"description\": \"Single ordering period\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$150$$\",\n    \"maximum_total_tables\": \"$$600$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$A$$\",\n      \"required_supplier\": \"$$B$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$30$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$B$$\",\n      \"required_supplier\": \"$$C$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for each supplier\",\n    \"supplier_usage\": \"Binary for each supplier\"\n  }\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "supplier_set",
+            "symbol": "\\mathcal{S}",
             "shape": [],
-            "description": "Integer number of products, with products indexed by $p \\in \\mathcal{P} = \\{0,1,\\dots,P-1\\}$"
+            "description": "Finite supplier set containing the suppliers A, B, and C"
         },
         {
-            "name": "num_days",
-            "symbol": "T",
-            "shape": [],
-            "description": "Integer number of planning days, with days indexed by $t \\in \\mathcal{T} = \\{0,1,\\dots,T-1\\}$"
-        },
-        {
-            "name": "demand_ceiling",
-            "symbol": "D",
-            "shape": [
-                "P"
-            ],
-            "description": "Demand ceiling for product $p$"
-        },
-        {
-            "name": "selling_price",
+            "name": "num_suppliers",
             "symbol": "S",
-            "shape": [
-                "P"
-            ],
-            "description": "Unit selling price for product $p$"
+            "shape": [],
+            "description": "Number of suppliers in the supplier set"
         },
         {
-            "name": "production_cost",
-            "symbol": "C",
+            "name": "order_cost",
+            "symbol": "c",
             "shape": [
-                "P"
+                "\\mathcal{S}"
             ],
-            "description": "Unit production cost for product $p$"
+            "description": "Cost per order for each supplier"
         },
         {
-            "name": "daily_quota",
-            "symbol": "Q",
+            "name": "tables_per_order",
+            "symbol": "q",
             "shape": [
-                "P"
+                "\\mathcal{S}"
             ],
-            "description": "Maximum daily production quota for product $p$"
+            "description": "Number of tables obtained per order from each supplier"
         },
         {
-            "name": "activation_cost",
-            "symbol": "F",
-            "shape": [
-                "P"
-            ],
-            "description": "Fixed daily activation cost for product $p$"
+            "name": "min_total_tables",
+            "symbol": "D^{\\min}",
+            "shape": [],
+            "description": "Minimum allowed total tables procured"
         },
         {
-            "name": "minimum_batch",
-            "symbol": "B",
-            "shape": [
-                "P"
-            ],
-            "description": "Minimum production batch size for product $p$"
+            "name": "max_total_tables",
+            "symbol": "D^{\\max}",
+            "shape": [],
+            "description": "Maximum allowed total tables procured"
+        },
+        {
+            "name": "min_tables_if_a_used_and_b_required",
+            "symbol": "L_{A\\rightarrow B}",
+            "shape": [],
+            "description": "Minimum number of tables supplier B must provide if supplier A is used"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "orders_by_supplier",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{S}"
             ],
-            "domain": "continuous",
-            "description": "Quantity of product $p$ produced on day $t$"
+            "domain": "integer",
+            "description": "Nonnegative integer number of orders placed with each supplier"
         },
         {
-            "name": "activation_indicator",
-            "symbol": "y",
+            "name": "supplier_usage",
+            "symbol": "z",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{S}"
             ],
             "domain": "binary",
-            "description": "Binary activation indicator for product $p$ on day $t$"
+            "description": "Binary indicator equal to 1 if the corresponding supplier is used, otherwise 0"
+        },
+        {
+            "name": "tables_by_supplier",
+            "symbol": "t",
+            "shape": [
+                "\\mathcal{S}"
+            ],
+            "domain": "continuous",
+            "description": "Total number of tables procured from each supplier"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_production_quantity",
-            "description": "Production quantity must be nonnegative for each product-day pair",
-            "formula": "x_{p,t} \\ge 0",
+            "name": "nonnegative_integer_orders",
+            "description": "Order counts are nonnegative integers for each supplier",
+            "formula": "x_i \\in \\mathbb{Z}_{\\ge 0}",
             "parameters": [
-                "num_products",
-                "num_days"
+                "supplier_set"
             ],
             "variables": [
-                "production_quantity"
+                "orders_by_supplier"
             ]
         },
         {
-            "name": "binary_activation_indicator",
-            "description": "Activation indicator must be binary for each product-day pair",
-            "formula": "y_{p,t} \\in \\{0,1\\}",
+            "name": "binary_supplier_usage",
+            "description": "Supplier usage indicators are binary for each supplier",
+            "formula": "z_i \\in \\{0,1\\}",
             "parameters": [
-                "num_products",
-                "num_days"
+                "supplier_set"
             ],
             "variables": [
-                "activation_indicator"
+                "supplier_usage"
             ]
         },
         {
-            "name": "activation_required_for_production",
-            "description": "Production is allowed only when the activation indicator is on for the same product-day pair",
-            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "name": "nonnegative_tables_by_supplier",
+            "description": "Tables procured from each supplier are nonnegative",
+            "formula": "t_i \\ge 0",
             "parameters": [
-                "daily_quota",
-                "num_products",
-                "num_days"
+                "supplier_set"
             ],
             "variables": [
-                "production_quantity",
-                "activation_indicator"
+                "tables_by_supplier"
             ]
         },
         {
-            "name": "minimum_batch_when_activated",
-            "description": "If a product is activated on a day, its production that day must meet the minimum batch size",
-            "formula": "x_{p,t} \\ge B_p y_{p,t}",
-            "parameters": [
-                "minimum_batch",
-                "num_products",
-                "num_days"
-            ],
+            "name": "nonnegative_total_tables",
+            "description": "Total tables procured across all suppliers are nonnegative",
+            "formula": "T \\ge 0",
+            "parameters": [],
             "variables": [
-                "production_quantity",
-                "activation_indicator"
+                "total_tables"
             ]
         },
         {
-            "name": "daily_quota_when_activated",
-            "description": "If a product is activated on a day, its production that day must not exceed the daily quota",
-            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "name": "total_tables_bounds",
+            "description": "Total tables procured must stay within the minimum and maximum demand limits",
+            "formula": "D^{\\min} \\le T \\le D^{\\max}",
             "parameters": [
-                "daily_quota",
-                "num_products",
-                "num_days"
+                "min_total_tables",
+                "max_total_tables"
             ],
             "variables": [
-                "production_quantity",
-                "activation_indicator"
+                "total_tables"
             ]
         },
         {
-            "name": "zero_production_when_inactive",
-            "description": "If a product is not activated on a day, production that day must be zero",
-            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "name": "supplier_tables_from_orders",
+            "description": "Tables obtained from each supplier are determined exactly by the supplier order count and lot size.",
+            "formula": "t_i = q_i x_i \\quad \\forall i \\in \\mathcal{S}",
             "parameters": [
-                "daily_quota",
-                "num_products",
-                "num_days"
+                "tables_per_order",
+                "supplier_set"
             ],
             "variables": [
-                "production_quantity",
-                "activation_indicator"
+                "tables_by_supplier",
+                "orders_by_supplier"
             ]
         },
         {
-            "name": "total_production_demand_cap",
-            "description": "Total production of each product across all days must not exceed the product demand ceiling",
-            "formula": "\\sum_{t=0}^{T-1} x_{p,t} \\le D_p",
+            "name": "supplier_a_triggers_b_minimum_quantity",
+            "description": "If supplier A is used, supplier B must provide at least the specified minimum number of tables.",
+            "formula": "t_B \\ge L_{A\\rightarrow B} z_A",
             "parameters": [
-                "demand_ceiling",
-                "num_days"
+                "min_tables_if_a_used_and_b_required"
             ],
             "variables": [
-                "production_quantity"
+                "tables_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "supplier_b_implies_supplier_c_usage",
+            "description": "If supplier B is used, supplier C must also be used.",
+            "formula": "z_B \\le z_C",
+            "parameters": [
+                "supplier_usage"
+            ],
+            "variables": [
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "tables_link_orders",
+            "description": "Tables procured from each supplier equal the number of orders times tables per order.",
+            "formula": "t_i = q_i x_i",
+            "parameters": [
+                "tables_per_order"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "orders_by_supplier"
+            ]
+        },
+        {
+            "name": "total_tables_definition",
+            "description": "Total tables equal the sum of tables procured from all suppliers.",
+            "formula": "T = \\sum_{i \\in \\mathcal{S}} t_i",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "total_tables",
+                "tables_by_supplier"
+            ]
+        },
+        {
+            "name": "usage_links_orders",
+            "description": "An order count can be positive only if the corresponding supplier is used.",
+            "formula": "x_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "orders_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "usage_links_tables",
+            "description": "Tables procured from a supplier are zero when the supplier is not used.",
+            "formula": "t_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "tables_by_supplier",
+                "supplier_usage"
+            ]
+        },
+        {
+            "name": "supplier_usage_implied_by_orders",
+            "description": "If a supplier receives any positive order, the supplier must be marked as used.",
+            "formula": "x_i \\ge z_i \\quad \\forall i \\in \\mathcal{S}",
+            "parameters": [
+                "supplier_set"
+            ],
+            "variables": [
+                "orders_by_supplier",
+                "supplier_usage"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs",
-            "sense": "maximize"
+            "name": "total_procurement_cost_minimization",
+            "description": "Minimize total procurement cost across all suppliers",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs. Single-objective MILP formulation; no combination strategy is needed.",
+        "description": "Minimize total procurement cost across all suppliers by summing each supplier's per-order cost times the number of orders placed.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\sum_{p=0}^{P-1}\\sum_{t=0}^{T-1}\\left((S_p-C_p)x_{p,t}-F_p y_{p,t}\\right)",
+        "sense": "minimize",
+        "formula": "Z = \\sum_{i \\in \\mathcal{S}} c_i x_i",
         "parameters": [
-            "selling_price",
-            "production_cost",
-            "activation_cost"
+            "supplier_set",
+            "order_cost"
         ],
         "variables": [
-            "production_quantity",
-            "activation_indicator"
+            "orders_by_supplier",
+            "total_cost"
         ]
     }
 }

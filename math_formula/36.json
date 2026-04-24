@@ -1,447 +1,376 @@
 {
-    "problem": "Problem description\n- There is a factory that produces a set of products $$\\mathcal{P}$$ over a planning horizon $$\\mathcal{T}$$ using a set of shared production processes $$\\mathcal{R}$$.\n- Each product $$p \\in \\mathcal{P}$$ requires a known amount of processing time on each process $$r \\in \\mathcal{R}$$, represented by the parameter $$a_{r,p}$$.\n- Each product $$p \\in \\mathcal{P}$$ generates a unit profit $$\\pi_{p,t}$$ in period $$t \\in \\mathcal{T}$$.\n- Each process $$r \\in \\mathcal{R}$$ has a regular available capacity $$c_{r,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- Some processes may also allow overtime, with overtime availability or limit represented by the parameter $$\\Omega_{r,t}$$ when applicable.\n- The planning goal is to maximize total profit over the horizon while respecting production requirements and process utilization goals.\n- The total production of each product must meet or exceed its minimum required level $$\\ell_{p,t}$$ in each period $$t \\in \\mathcal{T}$$.\n- The overall profit in each period must meet or exceed the target profit level $$G_t$$.\n- The operating time assigned to Process $$\\mathrm{I}$$ must match its required target utilization $$H_{\\mathrm{I},t}$$ exactly in each period $$t \\in \\mathcal{T}$$.\n- Process $$\\mathrm{II}$$ must be fully utilized at its regular capacity, and overtime may be used if needed and permitted for that process.\n- Production decisions must be feasible with respect to the available process times, and the processing time consumed by each product must be consistent with the product mix selected.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced in period $$t$$.\n  - $$u_{r,t}$$: regular hours assigned to process $$r$$ in period $$t$$.\n  - $$o_{r,t}$$: overtime hours assigned to process $$r$$ in period $$t$$, if overtime is allowed.\n  - Optional deviation variables for target shortfalls or excesses, if a goal-programming representation is used, such as deviations for profit, production minimums, and exact process utilization.\n\nInput Format\n{\n  \"products\": \"List of product identifiers, size $$P = |\\\\mathcal{P}|$$.\",\n  \"processes\": \"List of process identifiers, size $$R = |\\\\mathcal{R}|$$.\",\n  \"periods\": \"List of planning periods, size $$T = |\\\\mathcal{T}|$$.\",\n  \"processing_time\": \"Matrix $$a_{r,p}$$ of size $$R \\\\times P$$, where $$a_{r,p}$$ is the hours required on process $$r$$ for one unit of product $$p$$.\",\n  \"unit_profit\": \"Matrix or vector $$\\\\pi_{p,t}$$ of size $$P \\\\times T$$, where $$\\\\pi_{p,t}$$ is the profit per unit of product $$p$$ in period $$t$$.\",\n  \"regular_capacity\": \"Matrix $$c_{r,t}$$ of size $$R \\\\times T$$, where $$c_{r,t}$$ is the regular available hours of process $$r$$ in period $$t$$.\",\n  \"minimum_production\": \"Matrix $$\\\\ell_{p,t}$$ of size $$P \\\\times T$$, where $$\\\\ell_{p,t}$$ is the minimum required production of product $$p$$ in period $$t$$.\",\n  \"profit_target\": \"Vector $$G_t$$ of size $$T$$, where $$G_t$$ is the minimum required total profit in period $$t$$.\",\n  \"process_time_target\": \"Matrix $$H_{r,t}$$ of size $$R \\\\times T$$, where $$H_{r,t}$$ is the required utilization target for process $$r$$ in period $$t$$.\",\n  \"overtime_allowed\": \"Matrix of logical flags or limits $$\\\\Omega_{r,t}$$ indicating whether overtime is allowed for process $$r$$ in period $$t$$ and, if relevant, the maximum overtime available.\",\n  \"objective\": \"Maximize total profit over the planning horizon while satisfying the stated production and utilization requirements.\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"Matrix $$x_{p,t}$$ of size $$P \\\\times T$$, where $$x_{p,t}$$ is the production quantity of product $$p$$ in period $$t$$.\",\n  \"regular_process_usage\": \"Matrix $$u_{r,t}$$ of size $$R \\\\times T$$, where $$u_{r,t}$$ is the regular time used on process $$r$$ in period $$t$$.\",\n  \"overtime_plan\": \"Matrix $$o_{r,t}$$ of size $$R \\\\times T$$, where $$o_{r,t}$$ is the overtime time used on process $$r$$ in period $$t$$, if overtime is allowed.\",\n  \"goal_deviations\": \"Optional structured record of deviations from target profit and process utilization goals, if the model uses deviation variables.\",\n  \"total_profit\": \"Scalar value giving the achieved total profit over the planning horizon.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"$$A$$\", \"$$B$$\"],\n  \"processes\": [\"$$\\\\mathrm{I}$$\", \"$$\\\\mathrm{II}$$\"],\n  \"periods\": [\"$$\\\\mathrm{week1}$$\"],\n  \"processing_time\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$A$$\": \"$$4$$\", \"$$B$$\": \"$$6$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$A$$\": \"$$3$$\", \"$$B$$\": \"$$2$$\"}\n  },\n  \"regular_capacity\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$150$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$70$$\"}\n  },\n  \"unit_profit\": {\n    \"$$A$$\": {\"$$\\\\mathrm{week1}$$\": \"$$300$$\"},\n    \"$$B$$\": {\"$$\\\\mathrm{week1}$$\": \"$$450$$\"}\n  },\n  \"minimum_production\": {\n    \"$$A$$\": {\"$$\\\\mathrm{week1}$$\": \"$$10$$\"},\n    \"$$B$$\": {\"$$\\\\mathrm{week1}$$\": \"$$15$$\"}\n  },\n  \"profit_target\": {\n    \"$$\\\\mathrm{week1}$$\": \"$$10000$$\"\n  },\n  \"process_time_target\": {\n    \"$$\\\\mathrm{I}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$150$$\"},\n    \"$$\\\\mathrm{II}$$\": {\"$$\\\\mathrm{week1}$$\": \"$$70$$\"}\n  },\n  \"overtime_allowed\": {\n    \"$$\\\\mathrm{I}$$\": \"$$false$$\",\n    \"$$\\\\mathrm{II}$$\": \"$$true$$\"\n  }\n}",
+    "problem": "Problem description\n- There is a depot indexed by $$0$$ and a set of customers indexed by $$i \\in \\mathcal{C}=\\{1,2,\\ldots,N\\}$$.\n- A fleet of vehicles is available, indexed by $$k \\in \\mathcal{V}=\\{1,2,\\ldots,K\\}$$, where only up to $$K$$ vehicles may be used.\n- Each location $$i \\in \\{0\\} \\cup \\mathcal{C}$$ has a position $$\\mathbf{p}_i=(x_i,y_i)$$ in the service area.\n- Each customer $$i \\in \\mathcal{C}$$ has a delivery demand $$d_i$$, a hard service time window $$[a_i,b_i]$$, and a service duration $$s_i$$.\n- The depot has its own operating time window $$[a_0,b_0]$$.\n- Each vehicle has a capacity limit $$Q$$, and the total demand served on any single route must not exceed that capacity.\n- Travel between any two locations is described by a distance matrix $$C=[c_{ij}]$$ and, if needed, a travel-time matrix $$T=[\\tau_{ij}]$$ for all $$i,j \\in \\{0\\} \\cup \\mathcal{C}$$.\n- The planning horizon is the depot operating horizon $$[a_0,b_0]$$, and all route activity must remain feasible within this horizon.\n- The objective is to minimize the total distance traveled by all used vehicles while satisfying all customer demands.\n\n- The required business constraints are:\n  - Every customer must be served exactly once by exactly one vehicle.\n  - Every used vehicle must start from the depot and return to the depot.\n  - Vehicle routes must be continuous and ordered so that service follows the travel sequence.\n  - The load carried by any vehicle on its route must never exceed $$Q$$.\n  - Service at each customer must begin within that customer\u2019s hard time window $$[a_i,b_i]$$.\n  - Early arrival at a customer is allowed only if the vehicle waits until the window opens.\n  - Late service start at a customer is not allowed.\n  - The service duration at each customer is fixed at $$s_i$$.\n  - The depot departure and return times must be consistent with the depot operating window $$[a_0,b_0]$$.\n  - The routing plan should minimize the total travel distance, and any secondary operational preferences are not part of the core model unless explicitly provided.\n\n- A solution is represented by:\n  - A binary route-selection variable $$u_k$$ indicating whether vehicle $$k$$ is used.\n  - A binary arc variable $$x_{ij}^k$$ indicating whether vehicle $$k$$ directly travels from location $$i$$ to location $$j$$.\n  - A service-start-time variable $$t_i^k$$ indicating the time vehicle $$k$$ begins service at customer $$i$$ when assigned.\n  - A waiting-time variable $$w_i^k$$ indicating any waiting before service begins at customer $$i$$.\n  - A route-load variable $$\\ell_k$$ indicating the total demand carried by vehicle $$k$$.\n  - A route-sequence representation for each used vehicle, listing the ordered customers visited between depot departure and depot return.\n  - A total-distance value summarizing the sum of all traveled route distances.\n\nInput Format\n{\n  \"sets\": {\n    \"depot_index\": \"$$0$$\",\n    \"customer_set\": \"Customers indexed by $$i \\\\in \\\\mathcal{C}=\\\\{1,2,\\\\ldots,N\\\\}$$\",\n    \"vehicle_set\": \"Vehicles indexed by $$k \\\\in \\\\mathcal{V}=\\\\{1,2,\\\\ldots,K\\\\}$$\"\n  },\n  \"parameters\": {\n    \"N\": \"number of customers\",\n    \"K\": \"maximum number of available vehicles\",\n    \"Q\": \"vehicle capacity\",\n    \"a_0\": \"depot opening time\",\n    \"b_0\": \"depot closing time\",\n    \"p_i\": \"location of node $$i$$ as $$\\\\mathbf{p}_i=(x_i,y_i)$$ for all $$i \\\\in \\\\{0\\\\} \\\\cup \\\\mathcal{C}$$\",\n    \"d_i\": \"customer demand for all $$i \\\\in \\\\mathcal{C}$$\",\n    \"a_i\": \"earliest service start time for customer $$i$$\",\n    \"b_i\": \"latest service start time for customer $$i$$\",\n    \"s_i\": \"service duration for customer $$i$$\",\n    \"c_ij\": \"travel distance from node $$i$$ to node $$j$$ for all $$i,j \\\\in \\\\{0\\\\} \\\\cup \\\\mathcal{C}$$\",\n    \"tau_ij\": \"travel time from node $$i$$ to node $$j$$ for all $$i,j \\\\in \\\\{0\\\\} \\\\cup \\\\mathcal{C}$$, if used\"\n  },\n  \"optional\": {\n    \"distance_definition\": \"If a distance matrix is not provided, it may be derived from coordinates $$\\\\mathbf{p}_i$$.\",\n    \"travel_time_definition\": \"If travel times are not separately provided, they may be assumed proportional to distances.\"\n  }\n}\n\nOutput Format\n{\n  \"objective_value\": \"minimum total distance traveled by all used vehicles\",\n  \"vehicles_used\": \"integer count in $$\\\\{0,1,\\\\ldots,K\\\\}$$\",\n  \"routes\": [\n    {\n      \"vehicle_id\": \"$$k \\\\in \\\\mathcal{V}$$\",\n      \"is_used\": \"$$u_k$$\",\n      \"sequence\": \"ordered list of visited nodes beginning at $$0$$ and ending at $$0$$\",\n      \"arrival_times\": \"ordered list of arrival times aligned with the route sequence\",\n      \"service_start_times\": \"ordered list of service start times aligned with customer visits\",\n      \"waiting_times\": \"ordered list of waiting times aligned with customer visits\",\n      \"route_load\": \"total demand served by this vehicle, bounded by $$Q$$\",\n      \"route_distance\": \"total travel distance of this vehicle\"\n    }\n  ],\n  \"feasibility\": {\n    \"all_customers_served_once\": \"true or false\",\n    \"capacity_respected\": \"true or false\",\n    \"hard_time_windows_respected\": \"true or false\",\n    \"depot_start_end_respected\": \"true or false\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"depot_index\": 0,\n    \"customer_set\": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],\n    \"vehicle_set\": [1,2,3,4,5]\n  },\n  \"parameters\": {\n    \"N\": 20,\n    \"K\": 5,\n    \"Q\": 200,\n    \"a_0\": 0,\n    \"b_0\": 1236,\n    \"p_i\": {\n      \"0\": [40,50],\n      \"1\": [45,68],\n      \"2\": [45,70],\n      \"3\": [42,66],\n      \"4\": [42,68],\n      \"5\": [42,65],\n      \"6\": [40,69],\n      \"7\": [40,66],\n      \"8\": [38,68],\n      \"9\": [38,70],\n      \"10\": [35,66],\n      \"11\": [35,69],\n      \"12\": [25,85],\n      \"13\": [22,75],\n      \"14\": [22,85],\n      \"15\": [20,80],\n      \"16\": [20,85],\n      \"17\": [18,75],\n      \"18\": [15,75],\n      \"19\": [15,80],\n      \"20\": [30,50]\n    },\n    \"d_i\": {\n      \"1\": 10,\n      \"2\": 30,\n      \"3\": 10,\n      \"4\": 10,\n      \"5\": 10,\n      \"6\": 20,\n      \"7\": 20,\n      \"8\": 20,\n      \"9\": 10,\n      \"10\": 10,\n      \"11\": 10,\n      \"12\": 20,\n      \"13\": 30,\n      \"14\": 10,\n      \"15\": 40,\n      \"16\": 40,\n      \"17\": 20,\n      \"18\": 20,\n      \"19\": 10,\n      \"20\": 10\n    },\n    \"a_i\": {\n      \"1\": 912,\n      \"2\": 825,\n      \"3\": 65,\n      \"4\": 727,\n      \"5\": 15,\n      \"6\": 621,\n      \"7\": 170,\n      \"8\": 255,\n      \"9\": 534,\n      \"10\": 357,\n      \"11\": 448,\n      \"12\": 652,\n      \"13\": 30,\n      \"14\": 567,\n      \"15\": 384,\n      \"16\": 475,\n      \"17\": 99,\n      \"18\": 179,\n      \"19\": 278,\n      \"20\": 10\n    },\n    \"b_i\": {\n      \"1\": 967,\n      \"2\": 870,\n      \"3\": 146,\n      \"4\": 782,\n      \"5\": 67,\n      \"6\": 702,\n      \"7\": 225,\n      \"8\": 324,\n      \"9\": 605,\n      \"10\": 410,\n      \"11\": 505,\n      \"12\": 721,\n      \"13\": 92,\n      \"14\": 620,\n      \"15\": 429,\n      \"16\": 528,\n      \"17\": 148,\n      \"18\": 254,\n      \"19\": 345,\n      \"20\": 73\n    },\n    \"s_i\": {\n      \"1\": 90,\n      \"2\": 90,\n      \"3\": 90,\n      \"4\": 90,\n      \"5\": 90,\n      \"6\": 90,\n      \"7\": 90,\n      \"8\": 90,\n      \"9\": 90,\n      \"10\": 90,\n      \"11\": 90,\n      \"12\": 90,\n      \"13\": 90,\n      \"14\": 90,\n      \"15\": 90,\n      \"16\": 90,\n      \"17\": 90,\n      \"18\": 90,\n      \"19\": 90,\n      \"20\": 90\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "num_customers",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of products in set $\\mathcal{P}$"
+            "description": "Number of customers"
         },
         {
-            "name": "num_processes",
-            "symbol": "R",
+            "name": "num_vehicles",
+            "symbol": "K",
             "shape": [],
-            "description": "Number of processes in set $\\mathcal{R}$"
+            "description": "Maximum number of available vehicles"
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "vehicle_capacity",
+            "symbol": "Q",
             "shape": [],
-            "description": "Number of planning periods in set $\\mathcal{T}$"
+            "description": "Vehicle capacity limit"
         },
         {
-            "name": "processing_time",
+            "name": "depot_opening_time",
+            "symbol": "a_0",
+            "shape": [],
+            "description": "Depot opening time"
+        },
+        {
+            "name": "depot_closing_time",
+            "symbol": "b_0",
+            "shape": [],
+            "description": "Depot closing time"
+        },
+        {
+            "name": "node_coordinates",
+            "symbol": "p",
+            "shape": [
+                "N + 1",
+                "2"
+            ],
+            "description": "Coordinates of each node including the depot"
+        },
+        {
+            "name": "customer_demand",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Demand of each customer"
+        },
+        {
+            "name": "customer_earliest_service",
             "symbol": "a",
             "shape": [
-                "R",
-                "P"
+                "N"
             ],
-            "description": "Processing hours required on process r for one unit of product p"
+            "description": "Earliest service start time for each customer"
         },
         {
-            "name": "unit_profit",
-            "symbol": "\\pi",
+            "name": "customer_latest_service",
+            "symbol": "b",
             "shape": [
-                "P",
-                "T"
+                "N"
             ],
-            "description": "Unit profit of product p in period t"
+            "description": "Latest service start time for each customer"
         },
         {
-            "name": "regular_capacity",
+            "name": "customer_service_duration",
+            "symbol": "s",
+            "shape": [
+                "N"
+            ],
+            "description": "Service duration for each customer"
+        },
+        {
+            "name": "distance_matrix",
             "symbol": "c",
             "shape": [
-                "R",
-                "T"
+                "N + 1",
+                "N + 1"
             ],
-            "description": "Regular available hours of process r in period t"
+            "description": "Travel distance between every pair of nodes"
         },
         {
-            "name": "minimum_production",
-            "symbol": "\\ell",
+            "name": "travel_time_matrix",
+            "symbol": "\\tau",
             "shape": [
-                "P",
-                "T"
+                "N + 1",
+                "N + 1"
             ],
-            "description": "Minimum required production of product p in period t"
-        },
-        {
-            "name": "profit_target",
-            "symbol": "G",
-            "shape": [
-                "T"
-            ],
-            "description": "Minimum required total profit in period t"
-        },
-        {
-            "name": "process_time_target",
-            "symbol": "H",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "description": "Required utilization target for process r in period t"
-        },
-        {
-            "name": "overtime_availability",
-            "symbol": "\\Omega",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "description": "Overtime availability or maximum overtime hours for process r in period t when applicable"
+            "description": "Travel time between every pair of nodes, if provided"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
-            "symbol": "x",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product p produced in period t"
-        },
-        {
-            "name": "regular_process_usage",
+            "name": "vehicle_used",
             "symbol": "u",
             "shape": [
-                "R",
-                "T"
+                "K"
             ],
-            "domain": "continuous",
-            "description": "Regular hours assigned to process r in period t"
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if vehicle k is used"
         },
         {
-            "name": "overtime_hours",
-            "symbol": "o",
+            "name": "route_arc_selected",
+            "symbol": "x",
             "shape": [
-                "R",
-                "T"
+                "K",
+                "N + 1",
+                "N + 1"
             ],
-            "domain": "continuous",
-            "description": "Overtime hours assigned to process r in period t where overtime is allowed"
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if vehicle k travels from node i to node j"
         },
         {
-            "name": "profit_shortfall",
-            "symbol": "d^-_G",
+            "name": "service_start_time",
+            "symbol": "t",
             "shape": [
-                "T"
+                "K",
+                "N"
             ],
             "domain": "continuous",
-            "description": "Nonnegative deviation variable for shortfall from the profit target in period t"
+            "description": "Service start time for customer i on vehicle k"
         },
         {
-            "name": "profit_excess",
-            "symbol": "d^+_G",
+            "name": "waiting_time",
+            "symbol": "w",
             "shape": [
-                "T"
+                "K",
+                "N"
             ],
             "domain": "continuous",
-            "description": "Nonnegative deviation variable for excess above the profit target in period t"
+            "description": "Waiting time for customer i on vehicle k"
         },
         {
-            "name": "minimum_production_shortfall",
-            "symbol": "d^-_{\\ell}",
+            "name": "route_load",
+            "symbol": "\\ell",
             "shape": [
-                "P",
-                "T"
+                "K"
             ],
             "domain": "continuous",
-            "description": "Nonnegative deviation variable for shortfall from the minimum production target for product p in period t"
+            "description": "Total load carried by vehicle k"
         },
         {
-            "name": "minimum_production_excess",
-            "symbol": "d^+_{\\ell}",
+            "name": "route_sequence",
+            "symbol": "R",
             "shape": [
-                "P",
-                "T"
+                "K",
+                "-"
             ],
-            "domain": "continuous",
-            "description": "Nonnegative deviation variable for excess above the minimum production target for product p in period t"
-        },
-        {
-            "name": "process_time_shortfall",
-            "symbol": "d^-_{H}",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Nonnegative deviation variable for shortfall from the process utilization target for process r in period t"
-        },
-        {
-            "name": "process_time_excess",
-            "symbol": "d^+_{H}",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Nonnegative deviation variable for excess above the process utilization target for process r in period t"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "Z",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Scalar achieved total profit over all periods"
+            "domain": "sos1",
+            "description": "Ordered route sequence of visited nodes for each vehicle beginning and ending at the depot"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "arrival_time",
+            "symbol": "\\alpha",
+            "shape": [
+                "K",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Arrival time at customer i for vehicle k before any waiting time is applied"
+        },
+        {
+            "name": "route_distance",
+            "symbol": "D",
+            "shape": [
+                "K"
+            ],
+            "domain": "continuous",
+            "description": "Total distance traveled by each vehicle route"
+        }
+    ],
     "constraints": [
         {
-            "name": "nonnegative_production_quantities",
-            "description": "Production quantities are nonnegative",
-            "formula": "x[p][t] \\ge 0",
+            "name": "customer_served_exactly_once",
+            "description": "Each customer must be served exactly once by exactly one vehicle.",
+            "formula": "\\sum_{k=1}^{K}\\sum_{j=0,\\,j\\neq i}^{N} x_{kij} = 1 \\quad \\forall i\\in\\{1,\\ldots,N\\}",
             "parameters": [
-                "num_products",
-                "num_periods"
+                "num_customers",
+                "num_vehicles"
             ],
             "variables": [
-                "production_quantity"
+                "route_arc_selected"
             ]
         },
         {
-            "name": "nonnegative_regular_process_usage",
-            "description": "Regular process-hour allocations are nonnegative",
-            "formula": "u[r][t] \\ge 0",
+            "name": "vehicle_depot_start_end",
+            "description": "Every used vehicle must depart from the depot once and return to the depot once.",
+            "formula": "\\sum_{j=1}^{N} x_{k0j} = u_k \\quad \\forall k\\in\\{1,\\ldots,K\\},\\qquad \\sum_{i=1}^{N} x_{ki0} = u_k \\quad \\forall k\\in\\{1,\\ldots,K\\}",
             "parameters": [
-                "num_processes",
-                "num_periods"
+                "num_vehicles"
             ],
             "variables": [
-                "regular_process_usage"
+                "vehicle_used",
+                "route_arc_selected"
             ]
         },
         {
-            "name": "nonnegative_overtime_hours",
-            "description": "Overtime hour allocations are nonnegative when overtime is allowed",
-            "formula": "o[r][t] \\ge 0",
+            "name": "route_continuity",
+            "description": "If vehicle k enters a customer node, it must also leave that customer node, ensuring route continuity.",
+            "formula": "\\sum_{j=0}^{N} x_{kij} - \\sum_{j=0}^{N} x_{kji} = 0 \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\n\\ldots,N\\}",
             "parameters": [
-                "num_processes",
-                "num_periods",
-                "overtime_availability"
+                "num_customers",
+                "num_vehicles"
             ],
             "variables": [
-                "overtime_hours"
+                "route_arc_selected"
             ]
         },
         {
-            "name": "nonnegative_goal_deviations",
-            "description": "Deviation variables in the goal-programming representation are nonnegative",
-            "formula": "d^-_{G,t} \\ge 0,\\; d^+_{G,t} \\ge 0,\\; d^-_{\\ell,p,t} \\ge 0,\\; d^+_{\\ell,p,t} \\ge 0,\\; d^-_{H,r,t} \\ge 0,\\; d^+_{H,r,t} \\ge 0",
+            "name": "route_capacity_limit",
+            "description": "The total demand carried by any vehicle route must not exceed vehicle capacity.",
+            "formula": "\\ell_k = \\sum_{i=1}^{N} d_i\\sum_{j=0}^{N} x_{kij} \\quad \\forall k\\in\\{1,\n\\ldots,K\\},\\qquad \\ell_k \\le Q \\quad \\forall k\\in\\{1,\\ldots,K\\}",
             "parameters": [
-                "num_periods",
-                "num_products",
-                "num_processes"
+                "vehicle_capacity",
+                "customer_demand",
+                "num_vehicles"
             ],
             "variables": [
-                "profit_shortfall",
-                "profit_excess",
-                "minimum_production_shortfall",
-                "minimum_production_excess",
-                "process_time_shortfall",
-                "process_time_excess"
+                "route_load",
+                "route_arc_selected"
             ]
         },
         {
-            "name": "minimum_production_requirement",
-            "description": "Each product must meet its minimum required production in every period",
-            "formula": "x[p][t] \\ge \\ell[p][t]",
+            "name": "hard_customer_time_windows",
+            "description": "Service at each customer must begin within that customer's hard service window; early arrival is handled by waiting and late service start is prohibited.",
+            "formula": "a_i \\le t_{ki} \\le b_i \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\}",
             "parameters": [
-                "minimum_production",
-                "num_products",
-                "num_periods"
+                "customer_earliest_service",
+                "customer_latest_service",
+                "num_customers",
+                "num_vehicles"
             ],
             "variables": [
-                "production_quantity"
+                "service_start_time"
             ]
         },
         {
-            "name": "profit_target_requirement",
-            "description": "Total profit in each period must meet the required target",
-            "formula": "Z_t \\ge G_t",
+            "name": "fixed_service_duration",
+            "description": "Service at each customer lasts for the prescribed fixed duration, linked linearly to arrival and waiting times.",
+            "formula": "t_{ki} = \\alpha_{ki} + w_{ki} \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\}",
             "parameters": [
-                "profit_target",
-                "num_periods"
+                "num_customers",
+                "num_vehicles"
             ],
             "variables": [
-                "total_profit"
+                "service_start_time",
+                "waiting_time",
+                "arrival_time"
             ]
         },
         {
-            "name": "process_i_exact_utilization",
-            "description": "Process I must use exactly its target operating time in each period",
-            "formula": "u_{\\mathrm{I},t} = H_{\\mathrm{I},t}",
+            "name": "depot_operating_window",
+            "description": "Depot departure and return times for each used vehicle must lie within the depot operating window.",
+            "formula": "a_0 \\le \\alpha_{k0}^{\\text{dep}} \\le b_0 \\quad \\forall k\\in\\{1,\\ldots,K\\},\\qquad a_0 \\le \\alpha_{k0}^{\\text{ret}} \\le b_0 \\quad \\forall k\\in\\{1,\\ldots,K\\}",
             "parameters": [
-                "process_time_target",
-                "num_periods"
+                "depot_opening_time",
+                "depot_closing_time",
+                "num_vehicles"
             ],
             "variables": [
-                "regular_process_usage"
+                "vehicle_used",
+                "route_arc_selected"
             ]
         },
         {
-            "name": "process_ii_regular_capacity_utilization",
-            "description": "Process II must be fully utilized at its regular capacity in each period",
-            "formula": "u_{\\mathrm{II},t} = c_{\\mathrm{II},t}",
+            "name": "planning_horizon_feasibility",
+            "description": "Customer service start times must be compatible with route arrival times and travel/service precedence along each vehicle route, enforcing time propagation within the depot horizon.",
+            "formula": "\\alpha_{kj} \\ge \\alpha_{ki} + s_i + \\tau_{ij} - M\\,(1-x_{kij}) \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{0,\\ldots,N\\},\\ \\forall j\\in\\{1,\\ldots,N\\},\\ i\\ne j",
             "parameters": [
-                "regular_capacity",
-                "num_periods"
+                "depot_opening_time",
+                "depot_closing_time",
+                "num_vehicles"
             ],
             "variables": [
-                "regular_process_usage"
+                "route_arc_selected",
+                "service_start_time"
             ]
         },
         {
-            "name": "process_time_feasibility",
-            "description": "Selected production must be feasible with respect to the process-time requirements implied by the product mix and the available regular and overtime hours",
-            "formula": "\\sum_{p=1}^{P} a_{r,p} x_{p,t} = u_{r,t} + o_{r,t}",
+            "name": "variable_binary_domains",
+            "description": "Vehicle-used indicators and route arc selection variables are binary.",
+            "formula": "u_k \\in \\{0,1\\} \\quad \\forall k\\in\\{1,\\ldots,K\\},\\qquad x_{kij} \\in \\{0,1\\} \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i,j\\in\\{0,\\ldots,N\\}",
             "parameters": [
-                "processing_time",
-                "num_products",
-                "num_processes",
-                "num_periods"
+                "num_vehicles",
+                "num_customers"
             ],
             "variables": [
-                "production_quantity",
-                "regular_process_usage",
-                "overtime_hours"
+                "vehicle_used",
+                "route_arc_selected"
             ]
         },
         {
-            "name": "overtime_limit_respected",
-            "description": "Overtime hours cannot exceed the permitted overtime availability for each process and period when overtime is allowed",
-            "formula": "o_{r,t} \\le \\Omega_{r,t}",
+            "name": "variable_nonnegative_domains",
+            "description": "Service start times, waiting times, and route loads are nonnegative.",
+            "formula": "t_{ki} \\ge 0 \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\},\\qquad w_{ki} \\ge 0 \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\},\\qquad \\ell_k \\ge 0 \\quad \\forall k\\in\\{1,\\ldots,K\\}",
             "parameters": [
-                "overtime_availability",
-                "num_processes",
-                "num_periods"
+                "num_vehicles",
+                "num_customers"
             ],
             "variables": [
-                "overtime_hours"
+                "service_start_time",
+                "waiting_time",
+                "route_load"
             ]
         },
         {
-            "name": "overtime_disabled_when_not_allowed",
-            "description": "Overtime variables are zero for processes and periods where overtime is not permitted",
-            "formula": "o_{r,t} = 0 \\quad \\text{if } \\Omega_{r,t}=0",
+            "name": "arrival_time_linking",
+            "description": "Arrival time on a selected arc equals the departure/service completion time at the predecessor plus travel time, using big-M linearization.",
+            "formula": "\\alpha_{kj} \\ge t_{ki} + s_i + \\tau_{ij} - M\\,(1-x_{kij}) \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\},\\ \\forall j\\in\\{1,\\ldots,N\\},\\ i\\ne j",
             "parameters": [
-                "overtime_availability",
-                "num_processes",
-                "num_periods"
+                "customer_service_duration",
+                "travel_time_matrix",
+                "num_vehicles",
+                "num_customers"
             ],
             "variables": [
-                "overtime_hours"
+                "arrival_time",
+                "service_start_time",
+                "route_arc_selected"
             ]
         },
         {
-            "name": "production_process_time_balance",
-            "description": "For each process and period, total processing time required by the production plan equals regular usage plus overtime hours.",
-            "formula": "\\sum_{p=1}^{P} a_{r,p} x_{p,t} = u_{r,t} + o_{r,t}",
+            "name": "customer_service_start_bounds",
+            "description": "Hard service windows constrain each customer's service-start time for every vehicle assignment.",
+            "formula": "a_i \\le t_{ki} \\le b_i \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\}",
             "parameters": [
-                "processing_time",
-                "num_products",
-                "num_processes",
-                "num_periods"
+                "customer_earliest_service",
+                "customer_latest_service",
+                "num_vehicles",
+                "num_customers"
             ],
             "variables": [
-                "production_quantity",
-                "regular_process_usage",
-                "overtime_hours"
+                "service_start_time"
             ]
         },
         {
-            "name": "total_profit_definition",
-            "description": "Define total profit as the sum of unit profit times production across all products and periods.",
-            "formula": "Z = \\sum_{t=1}^{T}\\sum_{p=1}^{P} \\pi_{p,t} x_{p,t}",
+            "name": "waiting_time_definition",
+            "description": "Waiting time equals the nonnegative gap between arrival and service start at each customer.",
+            "formula": "w_{ki} = t_{ki} - \\alpha_{ki} \\quad \\forall k\\in\\{1,\\ldots,K\\},\\ \\forall i\\in\\{1,\\ldots,N\\}",
             "parameters": [
-                "unit_profit",
-                "num_products",
-                "num_periods"
+                "num_vehicles",
+                "num_customers"
             ],
             "variables": [
-                "production_quantity",
-                "total_profit"
-            ]
-        },
-        {
-            "name": "profit_goal_balance",
-            "description": "Link achieved profit to the period profit target using positive and negative deviation variables in the goal-programming representation.",
-            "formula": "Z_t + d^-_{G,t} - d^+_{G,t} = G_t",
-            "parameters": [
-                "profit_target",
-                "num_periods"
-            ],
-            "variables": [
-                "profit_shortfall",
-                "profit_excess"
-            ]
-        },
-        {
-            "name": "minimum_production_goal_balance",
-            "description": "Link production quantity to the minimum production target using positive and negative deviation variables in the goal-programming representation.",
-            "formula": "x_{p,t} + d^-_{\\ell,p,t} - d^+_{\\ell,p,t} = \\ell_{p,t}",
-            "parameters": [
-                "minimum_production",
-                "num_products",
-                "num_periods"
-            ],
-            "variables": [
-                "production_quantity",
-                "minimum_production_shortfall",
-                "minimum_production_excess"
-            ]
-        },
-        {
-            "name": "regular_usage_capacity_limit",
-            "description": "Regular process usage cannot exceed the regular capacity available in each period.",
-            "formula": "u_{r,t} \\le c_{r,t}",
-            "parameters": [
-                "regular_capacity",
-                "num_processes",
-                "num_periods"
-            ],
-            "variables": [
-                "regular_process_usage"
-            ]
-        },
-        {
-            "name": "overtime_nonnegativity_with_permissions",
-            "description": "Overtime hours are nonnegative and therefore implicitly zero when disallowed by the availability flag.",
-            "formula": "o_{r,t} \\ge 0",
-            "parameters": [
-                "overtime_availability",
-                "num_processes",
-                "num_periods"
-            ],
-            "variables": [
-                "overtime_hours"
+                "waiting_time",
+                "service_start_time",
+                "arrival_time"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit over the planning horizon while satisfying production and utilization requirements",
-            "sense": "maximize"
-        },
-        {
-            "name": "goal_programming_deviation_minimization",
-            "description": "Minimize deviation penalties for profit targets, minimum production targets, and process utilization targets in a goal-programming formulation",
+            "name": "total_travel_distance_minimization",
+            "description": "Minimize the total distance traveled by all used vehicles while serving all customers and satisfying routing feasibility requirements.",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total goal-programming deviations first, then maximize total profit as a secondary lexicographic criterion.",
-        "objective_combination_method": "preemption_optimization",
+        "description": "Minimize the total travel distance across all selected vehicle arcs.",
+        "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "\\left( \\sum_{t=1}^{T} \\left(d^-_{G,t} + d^+_{G,t}\\right) + \\sum_{p=1}^{P}\\sum_{t=1}^{T} \\left(d^-_{\\ell,p,t} + d^+_{\\ell,p,t}\\right) + \\sum_{r=1}^{R}\\sum_{t=1}^{T} \\left(d^-_{H,r,t} + d^+_{H,r,t}\\right) \\right) - \\varepsilon Z",
+        "formula": "\\sum_{k=1}^{K}\\sum_{i=0}^{N}\\sum_{j=0}^{N} c_{ij} x_{kij}",
         "parameters": [
-            "num_periods",
-            "num_products",
-            "num_processes"
+            "distance_matrix",
+            "num_vehicles",
+            "num_customers"
         ],
         "variables": [
-            "profit_shortfall",
-            "profit_excess",
-            "minimum_production_shortfall",
-            "minimum_production_excess",
-            "process_time_shortfall",
-            "process_time_excess",
-            "total_profit"
+            "route_arc_selected"
         ]
     }
 }

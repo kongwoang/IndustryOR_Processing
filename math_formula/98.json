@@ -1,0 +1,181 @@
+{
+    "problem": "Problem description\n- There is a finite set of products $$\\mathcal{P}$$ indexed by $$p \\in \\mathcal{P}$$, a finite set of raw materials $$\\mathcal{R}$$ indexed by $$r \\in \\mathcal{R}$$, and a planning horizon $$\\mathcal{T}$$.\n- Each product $$p$$ has a unit raw-material requirement, a unit labor requirement, and a unit profit before overtime pay.\n- Each raw material $$r$$ has a limited available supply for the planning horizon.\n- Regular labor is available up to a fixed capacity, and any labor use beyond that capacity must be covered by overtime.\n- Overtime labor has an hourly payment rate and acts as a penalty cost in the planning decision.\n- The planning goal is to choose production quantities and overtime usage so that total profit is maximized while overtime usage is kept as low as possible, subject to all resource limits.\n- Required business constraints:\n  - Production quantities must be nonnegative for every product.\n  - Total consumption of each raw material must not exceed its available supply.\n  - Total labor needed for production must be covered by regular labor and, if necessary, overtime labor.\n  - Overtime is allowed only when regular labor is insufficient.\n  - Overtime payment must be included when evaluating the plan\u2019s profit.\n  - The plan must remain feasible with respect to all material and labor capacities.\n- A solution is represented by:\n  - $$x_p$$: the quantity of product $$p$$ to produce over the planning horizon.\n  - $$o$$: the total overtime labor hours used over the planning horizon.\n  - Optional summary values such as total pre-overtime profit, overtime cost, and net profit.\n\nInput Format\n{\n  \"P\": \"integer $$|\\mathcal{P}|$$, number of products\",\n  \"R\": \"integer $$|\\mathcal{R}|$$, number of raw materials\",\n  \"T\": \"integer $$|\\mathcal{T}|$$, number of planning periods in the horizon\",\n  \"product_names\": \"optional list of length $$P$$ identifying the products in $$\\mathcal{P}$$\",\n  \"material_names\": \"optional list of length $$R$$ identifying the raw materials in $$\\mathcal{R}$$\",\n  \"available_material\": \"vector $$s \\in \\mathbb{R}_{\\ge 0}^{R}$$, where $$s_r$$ is the available amount of raw material $$r$$\",\n  \"material_usage\": \"matrix $$a \\in \\mathbb{R}_{\\ge 0}^{R \\times P}$$, where $$a_{r,p}$$ is the amount of raw material $$r$$ needed per unit of product $$p$$\",\n  \"labor_usage\": \"vector $$h \\in \\mathbb{R}_{\\ge 0}^{P}$$, where $$h_p$$ is the labor hours needed per unit of product $$p$$\",\n  \"regular_labor_capacity\": \"scalar $$L \\in \\mathbb{R}_{\\ge 0}$$, regular labor hours available over the planning horizon\",\n  \"unit_profit\": \"vector $$\\pi \\in \\mathbb{R}^{P}$$, where $$\\pi_p$$ is the profit per unit of product $$p$$ before overtime pay\",\n  \"overtime_wage\": \"scalar $$c^{\\mathrm{ot}} \\in \\mathbb{R}_{\\ge 0}$$, overtime payment per labor hour\"\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"quantity\": \"vector $$x \\in \\mathbb{R}_{\\ge 0}^{P}$$, where $$x_p$$ is the production quantity of product $$p$$\"\n  },\n  \"overtime_plan\": {\n    \"hours\": \"scalar $$o \\in \\mathbb{R}_{\\ge 0}$$, total overtime labor hours used\"\n  },\n  \"objective_summary\": {\n    \"gross_profit\": \"scalar, total profit before overtime payment\",\n    \"overtime_cost\": \"scalar, total overtime payment\",\n    \"net_profit\": \"scalar, total profit after overtime payment\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"R\": 2,\n  \"T\": 1,\n  \"product_names\": [\"A\", \"B\"],\n  \"material_names\": [\"steel\", \"aluminum\"],\n  \"available_material\": [200, 300],\n  \"material_usage\": [\n    [6, 12],\n    [8, 20]\n  ],\n  \"labor_usage\": [11, 24],\n  \"regular_labor_capacity\": 300,\n  \"unit_profit\": [5000, 11000],\n  \"overtime_wage\": 100\n}",
+    "parameters": [
+        {
+            "name": "num_products",
+            "symbol": "P",
+            "shape": [],
+            "description": "Number of products in the planning problem"
+        },
+        {
+            "name": "num_raw_materials",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of raw materials in the planning problem"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of periods in the planning horizon"
+        },
+        {
+            "name": "product_names",
+            "symbol": "\u001bP",
+            "shape": [
+                "P"
+            ],
+            "description": "Optional identifiers for the products"
+        },
+        {
+            "name": "material_names",
+            "symbol": "\u001bR",
+            "shape": [
+                "R"
+            ],
+            "description": "Optional identifiers for the raw materials"
+        },
+        {
+            "name": "available_material",
+            "symbol": "s",
+            "shape": [
+                "R"
+            ],
+            "description": "Available amount of each raw material over the planning horizon"
+        },
+        {
+            "name": "material_usage",
+            "symbol": "a",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "description": "Unit raw material requirement of each product for each raw material"
+        },
+        {
+            "name": "labor_usage",
+            "symbol": "h",
+            "shape": [
+                "P"
+            ],
+            "description": "Labor hours required per unit of each product"
+        },
+        {
+            "name": "regular_labor_capacity",
+            "symbol": "L",
+            "shape": [],
+            "description": "Regular labor capacity over the planning horizon"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\u001bpi",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit of each product before overtime payment"
+        },
+        {
+            "name": "overtime_wage",
+            "symbol": "c^{\\mathrm{ot}}",
+            "shape": [],
+            "description": "Overtime payment rate per labor hour"
+        }
+    ],
+    "variables": [
+        {
+            "name": "production_quantity",
+            "symbol": "x",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each product"
+        },
+        {
+            "name": "overtime_hours",
+            "symbol": "o",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total overtime labor hours used over the planning horizon"
+        }
+    ],
+    "auxiliary_variables": [],
+    "constraints": [
+        {
+            "name": "raw_material_capacity",
+            "description": "For each raw material r, total consumption across all products cannot exceed available supply.",
+            "formula": "\\sum_{p=1}^{P} a_{r p} x_p \\le s_r \\qquad \\forall r=1,\\dots,R",
+            "parameters": [
+                "available_material",
+                "material_usage"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "labor_capacity_with_overtime",
+            "description": "Total labor required by production must be covered by regular labor capacity and overtime hours.",
+            "formula": "\\sum_{p=1}^{P} h_p x_p \\le L + o",
+            "parameters": [
+                "labor_usage",
+                "regular_labor_capacity"
+            ],
+            "variables": [
+                "production_quantity",
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "overtime_nonnegative",
+            "description": "Overtime hours must be nonnegative.",
+            "formula": "o \\ge 0",
+            "variables": [
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "production_nonnegative",
+            "description": "Production quantities must be nonnegative.",
+            "formula": "x_p \\ge 0 \\qquad \\forall p=1,\\dots,P",
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "variable_domains",
+            "description": "Decision variables are continuous.",
+            "formula": "x_p \\in \\mathbb{R}_{+},\\ o \\in \\mathbb{R}_{+}",
+            "variables": [
+                "production_quantity",
+                "overtime_hours"
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "net_profit_maximization",
+            "description": "Maximize total net profit over the planning horizon, defined as total pre-overtime profit minus overtime payment.",
+            "sense": "maximize"
+        },
+        {
+            "name": "overtime_minimization_tiebreak",
+            "description": "Prefer lower overtime usage among plans with the same net profit.",
+            "sense": "minimize"
+        }
+    ],
+    "final_objective": {
+        "description": "Use preemption optimization to maximize total net profit first, then minimize overtime usage among solutions with the same net profit.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "maximize",
+        "formula": "\\sum_{p=1}^{P} \\pi_p x_p - c^{\\mathrm{ot}} o",
+        "parameters": [
+            "unit_profit",
+            "overtime_wage"
+        ],
+        "variables": [
+            "production_quantity",
+            "overtime_hours"
+        ]
+    }
+}

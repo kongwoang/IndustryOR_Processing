@@ -1,139 +1,192 @@
 {
-    "problem": "Problem description\n- There is a single daily logistics planning problem for a production base that must receive raw materials from two warehouses, indexed by $$w \\in W$$, where $$W=\\{1,2\\}$$ corresponds to warehouses $$A$$ and $$B$$.\n- There are raw material types indexed by $$r \\in R$$, where each warehouse dispatch delivers a fixed amount of each raw material type per truck.\n- The planning horizon is one day, indexed by $$t \\in T$$, where $$T=\\{1\\}$$.\n- The minimum daily required quantities of raw materials are represented by demand parameters $$d_r$$ for each $$r \\in R$$.\n- The amount of raw material $$r$$ transported by one truck from warehouse $$w$$ is represented by the coefficient $$q_{w,r}$$.\n- The freight cost per truck dispatched from warehouse $$w$$ is represented by the parameter $$c_w$$.\n- The decision is to choose the number of trucks dispatched daily from each warehouse.\n- The planning goal is to minimize the total freight cost while meeting all minimum raw material requirements.\n\n- Required business constraints:\n  - The number of trucks dispatched from each warehouse must be a nonnegative integer.\n  - The total amount of each raw material delivered to the production base from all dispatched trucks must meet or exceed the required daily demand for that material.\n  - Each warehouse contributes raw materials according to its fixed per-truck transport mix.\n  - The total freight cost is the sum of the per-truck freight costs across all dispatched trucks.\n  - The model is a daily planning model and does not include inventory carryover, backlogging, or alternative transportation modes.\n\n- A solution is represented by:\n  - $$x_w$$: the integer number of trucks dispatched daily from warehouse $$w \\in W$$.\n  - $$z$$: the total daily freight cost incurred by the dispatch plan.\n\nInput Format\n{\n  \"warehouses\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Set of warehouses indexed by $$w \\\\in W$$\"\n  },\n  \"materials\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Set of raw material types indexed by $$r \\\\in R$$\"\n  },\n  \"demand\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|R|$$\",\n    \"meaning\": \"Minimum required daily quantity of each raw material, where entry $$d_r$$ is the demand for material $$r$$\"\n  },\n  \"transport_yield_per_truck\": {\n    \"type\": \"matrix\",\n    \"dimension\": \"$$|W| \\\\times |R|$$\",\n    \"meaning\": \"Amount of each raw material delivered by one truck from each warehouse, where entry $$q_{w,r}$$ is the quantity of material $$r$$ carried by one truck from warehouse $$w$$\"\n  },\n  \"truck_cost\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Freight cost per truck dispatched from each warehouse, where entry $$c_w$$ is the cost for warehouse $$w$$\"\n  }\n}\n\nOutput Format\n{\n  \"trucks_dispatched\": {\n    \"type\": \"array\",\n    \"dimension\": \"$$|W|$$\",\n    \"meaning\": \"Integer number of trucks dispatched daily from each warehouse, where entry $$x_w$$ is the truck count for warehouse $$w$$\"\n  },\n  \"total_freight_cost\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Minimum total daily freight cost, denoted by $$z$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"warehouses\": [\"A\", \"B\"],\n  \"materials\": [\"A\", \"B\", \"C\"],\n  \"demand\": [240, 80, 120],\n  \"transport_yield_per_truck\": [\n    [4, 2, 6],\n    [7, 2, 2]\n  ],\n  \"truck_cost\": [200, 160]\n}",
+    "problem": "Problem description\n- There is a steel plant with a set of furnaces $$\\mathcal{F}$$ and a set of steelmaking methods $$\\mathcal{M}$$.\n- Each method $$m \\in \\mathcal{M}$$ has a processing time $$t_m$$ per furnace and a fuel expense $$c_m$$ per furnace.\n- Every furnace produces the same steel output $$r$$ tons, independent of the method used.\n- The planning horizon is $$H$$ hours.\n- The minimum required production is $$D$$ tons.\n- The planning goal is to allocate furnace usage across the available methods so that the required steel output is achieved within the available time and the total fuel expense is minimized.\n- Business constraints:\n  - The total furnace allocation across all methods cannot exceed the available furnace capacity $$F$$.\n  - The selected allocation must fit within the planning horizon $$H$$.\n  - The total produced steel must be at least the required demand $$D$$.\n  - Fuel expense is incurred according to the chosen method allocations.\n- A solution is represented by:\n  - $$y_m$$: the amount of furnace capacity assigned to method $$m$$ over the planning horizon.\n  - $$z$$: the total fuel expense of the plan.\n  - If a detailed assignment is needed, $$x_{f,m}$$ may be used to represent the allocation of furnace $$f$$ to method $$m$$.\n\nInput Format\n{\n  \"sets\": {\n    \"furnaces\": {\n      \"symbol\": \"$$\\\\mathcal{F}$$\",\n      \"size\": \"$$F$$\",\n      \"meaning\": \"set of available furnaces\"\n    },\n    \"methods\": {\n      \"symbol\": \"$$\\\\mathcal{M}$$\",\n      \"size\": \"$$M$$\",\n      \"meaning\": \"set of steelmaking methods\"\n    }\n  },\n  \"parameters\": {\n    \"processing_time_per_method\": {\n      \"symbol\": \"$$t$$\",\n      \"shape\": \"$$M$$\",\n      \"meaning\": \"vector where $$t_m$$ is the number of hours required per furnace when method $$m$$ is used\"\n    },\n    \"fuel_cost_per_method\": {\n      \"symbol\": \"$$c$$\",\n      \"shape\": \"$$M$$\",\n      \"meaning\": \"vector where $$c_m$$ is the fuel expense per furnace for method $$m$$\"\n    },\n    \"output_per_furnace\": {\n      \"symbol\": \"$$r$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"tons of steel produced by one furnace\"\n    },\n    \"minimum_required_output\": {\n      \"symbol\": \"$$D$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"minimum tons of steel that must be produced\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$H$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"available planning time in hours\"\n    },\n    \"available_furnace_capacity\": {\n      \"symbol\": \"$$F$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"total number of furnace units available for allocation\"\n    }\n  },\n  \"assumptions\": {\n    \"output_independence\": \"the output per furnace does not depend on the chosen method\",\n    \"cost_additivity\": \"total fuel expense is the sum of method-specific fuel expenses across all allocated furnace usage\"\n  }\n}\n\nOutput Format\n{\n  \"allocation_by_method\": {\n    \"symbol\": \"$$y$$\",\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"vector where $$y_m$$ is the allocated furnace capacity for method $$m$$\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$z$$\",\n    \"shape\": \"scalar\",\n    \"meaning\": \"minimum total fuel expense achieved by the allocation\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"furnaces\": \"$$2$$\",\n  \"methods\": \"$$2$$\",\n  \"processing_time_per_method\": [\"$$2$$\", \"$$3$$\"],\n  \"fuel_cost_per_method\": [\"$$50$$\", \"$$70$$\"],\n  \"output_per_furnace\": \"$$10$$\",\n  \"minimum_required_output\": \"$$30$$\",\n  \"planning_horizon\": \"$$12$$\"\n}",
     "parameters": [
         {
-            "name": "warehouses",
-            "symbol": "W",
+            "name": "num_furnaces",
+            "symbol": "F",
             "shape": [],
-            "description": "Set of warehouses indexed by $w$, with $W=\\{0,1\\}$ corresponding to warehouses $A$ and $B$"
+            "description": "Number of available furnaces / total furnace capacity available for allocation"
         },
         {
-            "name": "raw_material_types",
-            "symbol": "R",
+            "name": "num_methods",
+            "symbol": "M",
             "shape": [],
-            "description": "Set of raw material types indexed by $r$"
+            "description": "Number of steelmaking methods"
         },
         {
-            "name": "demand",
-            "symbol": "d",
+            "name": "processing_time_per_method",
+            "symbol": "t",
             "shape": [
-                "R"
+                "M"
             ],
-            "description": "Minimum required daily quantity of each raw material type $r$"
+            "description": "Processing time in hours per furnace for each steelmaking method"
         },
         {
-            "name": "transport_yield_per_truck",
-            "symbol": "q",
-            "shape": [
-                "W",
-                "R"
-            ],
-            "description": "Quantity of material $r$ delivered by one truck from warehouse $w$"
-        },
-        {
-            "name": "truck_cost",
+            "name": "fuel_cost_per_method",
             "symbol": "c",
             "shape": [
-                "W"
+                "M"
             ],
-            "description": "Freight cost per truck dispatched from each warehouse $w$"
+            "description": "Fuel expense per furnace for each steelmaking method"
+        },
+        {
+            "name": "output_per_furnace",
+            "symbol": "r",
+            "shape": [],
+            "description": "Steel output in tons produced by one furnace, independent of method"
+        },
+        {
+            "name": "minimum_required_output",
+            "symbol": "D",
+            "shape": [],
+            "description": "Minimum required steel output in tons"
         },
         {
             "name": "planning_horizon",
-            "symbol": "T",
+            "symbol": "H",
             "shape": [],
-            "description": "Single-day planning horizon index set with $T=\\{0\\}$"
+            "description": "Available planning horizon in hours"
         }
     ],
     "variables": [
         {
-            "name": "trucks_dispatched",
-            "symbol": "x",
+            "name": "method_allocation",
+            "symbol": "y",
             "shape": [
-                "W"
+                "M"
             ],
-            "domain": "integer",
-            "description": "Number of trucks dispatched daily from each warehouse $w$"
+            "domain": "continuous",
+            "description": "Amount of furnace capacity allocated to each steelmaking method"
         },
         {
-            "name": "total_freight_cost",
+            "name": "total_fuel_expense",
             "symbol": "z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total daily freight cost incurred by the dispatch plan"
+            "description": "Total fuel expense of the plan"
+        },
+        {
+            "name": "furnace_method_assignment",
+            "symbol": "x",
+            "shape": [
+                "F",
+                "M"
+            ],
+            "domain": "continuous",
+            "description": "Detailed allocation of each furnace to each steelmaking method"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_integer_truck_dispatch",
-            "description": "The number of trucks dispatched from each warehouse must be a nonnegative integer.",
-            "formula": "x_w \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "trucks_dispatched"
-            ]
-        },
-        {
-            "name": "material_demand_satisfaction",
-            "description": "For each raw material type r, the total quantity delivered by trucks from all warehouses must meet or exceed the minimum daily demand.",
-            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\ge d_r \\quad \\forall r\\in R",
+            "name": "nonnegative_method_allocation",
+            "description": "Method allocation must be nonnegative",
+            "formula": "y_m \\geq 0",
             "parameters": [
-                "raw_material_types",
-                "demand",
-                "transport_yield_per_truck"
+                "num_methods"
             ],
             "variables": [
-                "trucks_dispatched"
+                "method_allocation"
             ]
         },
         {
-            "name": "fixed_mix_per_truck",
-            "description": "Each dispatched truck from warehouse w delivers a fixed mix of raw materials q_{w,r}; this is captured directly in the demand satisfaction constraints and requires no separate restriction beyond the delivery coefficients.",
-            "formula": "\\sum_{w\\in W} q_{w,r} x_w \\text{ is the delivered amount of material } r",
+            "name": "nonnegative_total_fuel_expense",
+            "description": "Total fuel expense must be nonnegative",
+            "formula": "z \\geq 0",
+            "parameters": [],
+            "variables": [
+                "total_fuel_expense"
+            ]
+        },
+        {
+            "name": "nonnegative_assignment",
+            "description": "Detailed furnace-to-method assignment must be nonnegative when used",
+            "formula": "x_{f,m} \\geq 0",
             "parameters": [
-                "transport_yield_per_truck"
+                "num_furnaces",
+                "num_methods"
             ],
             "variables": [
-                "trucks_dispatched"
+                "furnace_method_assignment"
             ]
         },
         {
-            "name": "total_freight_cost_definition",
-            "description": "Define total freight cost as the sum of per-truck freight costs over all dispatched trucks.",
-            "formula": "z = \\sum_{w\\in W} c_w x_w",
+            "name": "total_capacity_limit",
+            "description": "Total furnace allocation across all methods cannot exceed available furnace capacity",
+            "formula": "\\sum_{m=0}^{M-1} y_m \\leq F",
             "parameters": [
-                "truck_cost"
+                "num_furnaces",
+                "num_methods"
             ],
             "variables": [
-                "trucks_dispatched",
-                "total_freight_cost"
+                "method_allocation"
             ]
         },
         {
-            "name": "single_day_no_carryover_or_backlog",
-            "description": "Single-day planning is modeled implicitly by using only daily dispatch variables, so no intertemporal flow variables are needed; there is no carryover or backlog state in the model.",
-            "formula": "\\text{Single-day planning model with no inventory carryover or backlog}",
+            "name": "planning_horizon_limit",
+            "description": "Chosen allocation must fit within the available planning horizon using method processing times",
+            "formula": "\\sum_{m=0}^{M-1} t_m y_m \\leq H",
             "parameters": [
+                "processing_time_per_method",
                 "planning_horizon"
             ],
-            "variables": []
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "minimum_output_requirement",
+            "description": "Total steel produced must meet or exceed the minimum required output",
+            "formula": "r \\sum_{m=0}^{M-1} y_m \\geq D",
+            "parameters": [
+                "output_per_furnace",
+                "minimum_required_output"
+            ],
+            "variables": [
+                "method_allocation"
+            ]
+        },
+        {
+            "name": "fuel_expense_definition",
+            "description": "Total fuel expense is determined from method allocations and method-specific fuel costs",
+            "formula": "z = \\sum_{m=0}^{M-1} c_m y_m",
+            "parameters": [
+                "fuel_cost_per_method"
+            ],
+            "variables": [
+                "method_allocation",
+                "total_fuel_expense"
+            ]
+        },
+        {
+            "name": "assignment_aggregation",
+            "description": "Detailed furnace-by-method assignment must aggregate consistently to method-level allocation when used",
+            "formula": "y_m = \\sum_{f=0}^{F-1} x_{f,m}",
+            "parameters": [
+                "num_furnaces",
+                "num_methods"
+            ],
+            "variables": [
+                "furnace_method_assignment",
+                "method_allocation"
+            ]
         }
     ],
     "objectives": [
         {
-            "name": "minimize_total_freight_cost",
-            "description": "Minimize the total daily freight cost of dispatching trucks from the warehouses while satisfying all raw material demand requirements.",
+            "name": "fuel_expense_minimization",
+            "description": "Minimize total fuel expense while meeting production demand and respecting furnace capacity and planning horizon limits",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total daily freight cost of dispatching trucks from the two warehouses while meeting or exceeding all raw material demands.",
+        "description": "Minimize total fuel expense for the furnace allocation plan while satisfying production demand, furnace capacity, and planning horizon limits.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "\\min \\; z",
+        "formula": "z",
         "parameters": [],
         "variables": [
-            "total_freight_cost"
+            "total_fuel_expense"
         ]
     }
 }

@@ -1,232 +1,179 @@
 {
-    "problem": "Problem description\n- There is a weekly planning horizon $$\\mathcal{T}$$, indexed by $$t\\in\\mathcal{T}$$, and a set of fabric types $$\\mathcal{P}$$, indexed by $$p\\in\\mathcal{P}$$.\n- The factory operates over $$S$$ shifts per week, but the planning is based on the total weekly available production time.\n- Each product $$p$$ has a production rate $$r_p$$ measured in meters per hour.\n- Each product $$p$$ has a minimum required sellable quantity in each period, denoted by $$d^{\\min}_{p,t}$$.\n- Each product $$p$$ has a unit profit $$\\pi_p$$ per meter, which is part of the business data.\n- The factory has regular production capacity $$H_t^{\\mathrm{reg}}$$ in each period and an overtime allowance limited by $$H_t^{\\mathrm{ot,max}}$$.\n- The planning goal is to determine how much of each fabric type to produce and sell, together with how much overtime to use, so that all minimum sales requirements are satisfied, regular production time is fully utilized, overtime stays within the allowed limit, and overtime is minimized as much as possible.\n- The production plan is assumed to be weekly and product-specific, with no mention of inventory carryover, backlogging, or product substitution beyond the stated minimum sales requirements.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced and sold in period $$t$$, measured in meters.\n  - $$z_t^{\\mathrm{reg}}$$: the amount of regular production time used in period $$t$$, measured in hours.\n  - $$o_t$$: the overtime used in period $$t$$, measured in hours.\n  - $$\\eta$$: the overall objective value representing total overtime or its penalty score.\n\nInput Format\n{\n  \"num_products\": \"Integer $$P$$, the number of fabric types in $$\\\\mathcal{P}$$.\",\n  \"num_periods\": \"Integer $$T$$, the number of planning periods in $$\\\\mathcal{T}$$.\",\n  \"num_shifts\": \"Integer $$S$$, the number of shifts per week.\",\n  \"regular_hours\": \"Length-$$T$$ array with entries $$H_t^{\\\\mathrm{reg}}$$, the regular production hours available in each period.\",\n  \"max_overtime_hours\": \"Length-$$T$$ array with entries $$H_t^{\\\\mathrm{ot,max}}$$, the maximum overtime hours allowed in each period.\",\n  \"production_rate\": \"Length-$$P$$ array with entries $$r_p$$, the production rate of product $$p$$ in meters per hour.\",\n  \"minimum_sales_demand\": \"Matrix of size $$P\\\\times T$$ with entries $$d^{\\\\min}_{p,t}$$, the minimum sellable quantity required for product $$p$$ in period $$t$$, in meters.\",\n  \"unit_profit\": \"Length-$$P$$ array with entries $$\\\\pi_p$$, the profit per meter of product $$p$$.\",\n  \"overtime_penalty\": \"Optional scalar $$c^{\\\\mathrm{ot}}$$, the penalty per overtime hour if overtime is evaluated in cost terms.\",\n  \"planning_priority\": \"Ordered list of planning priorities, namely full utilization of regular time, overtime limit compliance, minimum sales satisfaction, and overtime minimization.\"\n}\n\nOutput Format\n{\n  \"objective_value\": \"Scalar $$\\\\eta$$, the minimized overtime amount or overtime penalty value.\",\n  \"period_plan\": [\n    {\n      \"period\": \"$$t$$\",\n      \"regular_hours_used\": \"$$z_t^{\\\\mathrm{reg}}$$\",\n      \"overtime_hours_used\": \"$$o_t$$\",\n      \"product_plan\": [\n        {\n          \"product\": \"$$p$$\",\n          \"quantity_meters\": \"$$x_{p,t}$$\"\n        }\n      ]\n    }\n  ]\n}\n\nExample(s)\n\nInput 1\n{\n  \"num_products\": 2,\n  \"num_periods\": 1,\n  \"num_shifts\": 2,\n  \"regular_hours\": [110],\n  \"max_overtime_hours\": [10],\n  \"production_rate\": [1000, 1000],\n  \"minimum_sales_demand\": [\n    [70000],\n    [45000]\n  ],\n  \"unit_profit\": [2.5, 1.5]\n}",
+    "problem": "Problem description\n- There is a single mission planning horizon $$\\mathcal{T}$$ for a bombing operation over a set of target parts $$\\mathcal{I}$$, with bomb types indexed by $$\\mathcal{K}$$.\n- For each target part $$i \\in \\mathcal{I}$$, the distance from the airport is given by $$d_i$$.\n- For each target part $$i \\in \\mathcal{I}$$ and bomb type $$k \\in \\mathcal{K}$$, the probability that one bomb of type $$k$$ destroys target part $$i$$ is given by $$p_{ik}$$.\n- The available bomb stock is limited by bomb-type capacities $$B_k$$.\n- The total fuel available for the mission is limited by $$F^{\\max}$$.\n- Fuel usage depends on the selected bomb type and target distance through the loaded-flight efficiency $$r_k^{\\text{load}}$$, the empty-aircraft efficiency $$r^{\\text{empty}}$$, and the fixed sortie overhead fuel $$f^{\\text{oh}}$$ for takeoff and landing.\n- Each sortie carries exactly one bomb and is assigned to at most one target part.\n- The total number of bombs of each type used in the plan cannot exceed the available stock of that type.\n- The total fuel consumed by all planned sorties cannot exceed the mission fuel budget.\n- The mission is considered successful if at least $$m$$ target parts are destroyed.\n- The optimization goal is to choose which target parts to attack and with which bomb type so that the probability of mission success is maximized.\n- A solution is represented by:\n  - $$x_{ik}$$, a binary assignment variable that equals $$1$$ if target part $$i$$ is attacked with bomb type $$k$$, and $$0$$ otherwise.\n  - $$P^{\\star}$$, the maximum achievable probability that at least $$m$$ target parts are destroyed.\n\nInput Format\n{\n  \"$$\\mathcal{I}$$\": {\n    \"description\": \"Set of target parts indexed by $$i$$\",\n    \"shape\": \"$$|\\mathcal{I}|$$\"\n  },\n  \"$$\\mathcal{K}$$\": {\n    \"description\": \"Set of bomb types indexed by $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$d_i$$\": {\n    \"description\": \"Distance from the airport to target part $$i$$ for each $$i \\\\in \\\\mathcal{I}$$\",\n    \"shape\": \"$$|\\mathcal{I}|$$\"\n  },\n  \"$$p_{ik}$$\": {\n    \"description\": \"Probability that one bomb of type $$k$$ destroys target part $$i$$\",\n    \"shape\": \"$$|\\mathcal{I}| \\\\times |\\mathcal{K}|$$\"\n  },\n  \"$$B_k$$\": {\n    \"description\": \"Available stock of bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$F^{\\\\max}$$\": {\n    \"description\": \"Maximum total fuel available for the mission\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$r_k^{\\\\text{load}}$$\": {\n    \"description\": \"Distance covered per liter when carrying bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{K}|$$\"\n  },\n  \"$$r^{\\\\text{empty}}$$\": {\n    \"description\": \"Distance covered per liter when the aircraft is empty\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$f^{\\\\text{oh}}$$\": {\n    \"description\": \"Fixed fuel overhead per sortie for takeoff and landing\",\n    \"shape\": \"$$1$$\"\n  },\n  \"$$m$$\": {\n    \"description\": \"Minimum number of target parts that must be destroyed for mission success\",\n    \"shape\": \"$$1$$\"\n  }\n}\n\nOutput Format\n{\n  \"$$x_{ik}$$\": {\n    \"description\": \"Binary assignment matrix indicating whether target part $$i$$ is attacked with bomb type $$k$$\",\n    \"shape\": \"$$|\\mathcal{I}| \\\\times |\\mathcal{K}|$$\"\n  },\n  \"$$P^{\\\\star}$$\": {\n    \"description\": \"Maximum probability that at least $$m$$ target parts are destroyed\",\n    \"shape\": \"$$1$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"$$\\\\mathcal{I}$$\": [1, 2, 3, 4],\n  \"$$\\\\mathcal{K}$$\": [\"heavy\", \"light\"],\n  \"$$d_i$$\": {\n    \"1\": 450,\n    \"2\": 480,\n    \"3\": 540,\n    \"4\": 600\n  },\n  \"$$p_{ik}$$\": {\n    \"heavy\": {\n      \"1\": 0.03,\n      \"2\": 0.10,\n      \"3\": 0.05,\n      \"4\": 0.05\n    },\n    \"light\": {\n      \"1\": 0.08,\n      \"2\": 0.11,\n      \"3\": 0.12,\n      \"4\": 0.09\n    }\n  },\n  \"$$B_k$$\": {\n    \"heavy\": 28,\n    \"light\": 12\n  },\n  \"$$F^{\\\\max}$$\": 10000,\n  \"$$r_k^{\\\\text{load}}$$\": {\n    \"heavy\": 2,\n    \"light\": 3\n  },\n  \"$$r^{\\\\text{empty}}$$\": 4,\n  \"$$f^{\\\\text{oh}}$$\": 100,\n  \"$$m$$\": 2\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "n_targets",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of fabric types in the planning set \\(\\mathcal{P}\\)"
+            "description": "Number of target parts in the bombing operation"
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "n_bomb_types",
+            "symbol": "K",
             "shape": [],
-            "description": "Number of planning periods in the horizon \\(\\mathcal{T}\\)"
+            "description": "Number of bomb types available"
         },
         {
-            "name": "num_shifts",
-            "symbol": "S",
+            "name": "target_distance",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Airport distance for each target part"
+        },
+        {
+            "name": "destruction_probability",
+            "symbol": "p",
+            "shape": [
+                "N",
+                "K"
+            ],
+            "description": "Destruction probability when using bomb type k against target part i"
+        },
+        {
+            "name": "bomb_stock",
+            "symbol": "B",
+            "shape": [
+                "K"
+            ],
+            "description": "Available stock for each bomb type"
+        },
+        {
+            "name": "fuel_budget",
+            "symbol": "F^{\\max}",
             "shape": [],
-            "description": "Number of shifts per week"
+            "description": "Total mission fuel budget"
         },
         {
-            "name": "regular_hours",
-            "symbol": "H^{\\mathrm{reg}}",
+            "name": "loaded_flight_efficiency",
+            "symbol": "r^{\\text{load}}",
             "shape": [
-                "T"
+                "K"
             ],
-            "description": "Regular production hours available in each period"
+            "description": "Loaded-flight efficiency for each bomb type"
         },
         {
-            "name": "max_overtime_hours",
-            "symbol": "H^{\\mathrm{ot,max}}",
-            "shape": [
-                "T"
-            ],
-            "description": "Maximum overtime hours allowed in each period"
-        },
-        {
-            "name": "production_rate",
-            "symbol": "r",
-            "shape": [
-                "P"
-            ],
-            "description": "Production rate of each fabric type in meters per hour"
-        },
-        {
-            "name": "minimum_sales_demand",
-            "symbol": "d^{\\min}",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Minimum required sellable quantity for each product in each period"
-        },
-        {
-            "name": "unit_profit",
-            "symbol": "\\pi",
-            "shape": [
-                "P"
-            ],
-            "description": "Unit profit per meter for each product"
-        },
-        {
-            "name": "overtime_penalty",
-            "symbol": "c^{\\mathrm{ot}}",
+            "name": "empty_aircraft_efficiency",
+            "symbol": "r^{\\text{empty}}",
             "shape": [],
-            "description": "Optional overtime penalty per overtime hour"
+            "description": "Empty-aircraft efficiency"
+        },
+        {
+            "name": "sortie_overhead_fuel",
+            "symbol": "f^{\\text{oh}}",
+            "shape": [],
+            "description": "Fixed sortie overhead fuel consumption"
+        },
+        {
+            "name": "minimum_destroyed_targets",
+            "symbol": "m",
+            "shape": [],
+            "description": "Minimum number of target parts that must be destroyed for mission success"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "attack_assignment",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "N",
+                "K"
             ],
-            "domain": "continuous",
-            "description": "Quantity of product produced and sold in each period, in meters"
+            "domain": "binary",
+            "description": "Binary decision indicating whether target part i is attacked with bomb type k"
         },
         {
-            "name": "regular_hours_used",
-            "symbol": "z^{\\mathrm{reg}}",
-            "shape": [
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Regular production time used in each period, in hours"
-        },
-        {
-            "name": "overtime_used",
-            "symbol": "o",
-            "shape": [
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Overtime used in each period, in hours"
-        },
-        {
-            "name": "objective_value",
-            "symbol": "\\eta",
+            "name": "optimal_success_probability",
+            "symbol": "P^{\\star}",
             "shape": [],
             "domain": "continuous",
-            "description": "Overall objective value representing total overtime or its penalty score"
+            "description": "Maximum achievable probability that at least m target parts are destroyed"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "production_quantity_nonnegative",
-            "description": "Production quantity must be nonnegative for every product and period.",
-            "formula": "x_{p,t} \\ge 0",
+            "name": "single_bomb_per_sortie",
+            "description": "Each sortie carries exactly one bomb and is assigned to at most one target part, so each selected (i,k) pair represents one bomb use",
+            "formula": "x_{ik} \\in \\{0,1\\}",
             "parameters": [
-                "minimum_sales_demand"
+                "n_targets",
+                "n_bomb_types"
             ],
             "variables": [
-                "production_quantity"
+                "attack_assignment"
             ]
         },
         {
-            "name": "regular_hours_used_nonnegative",
-            "description": "Regular production hours used must be nonnegative in every period.",
-            "formula": "z_t^{\\mathrm{reg}} \\ge 0",
+            "name": "attack_assignment_binary",
+            "description": "Binary decision variables for assigning target part i to bomb type k",
+            "formula": "x_{ik} \\in \\{0,1\\} \\quad \\forall i=1,\\dots,N,\\ \\forall k=1,\\dots,K",
             "parameters": [
-                "regular_hours"
+                "n_targets",
+                "n_bomb_types"
             ],
             "variables": [
-                "regular_hours_used"
+                "attack_assignment"
             ]
         },
         {
-            "name": "overtime_used_nonnegative",
-            "description": "Overtime used must be nonnegative in every period.",
-            "formula": "o_t \\ge 0",
+            "name": "one_bomb_type_per_target",
+            "description": "Each target part can be attacked with at most one bomb type",
+            "formula": "\\sum_{k=1}^{K} x_{ik} \\leq 1 \\quad \\forall i=1,\\dots,N",
             "parameters": [
-                "max_overtime_hours"
+                "n_targets",
+                "n_bomb_types"
             ],
             "variables": [
-                "overtime_used"
+                "attack_assignment"
             ]
         },
         {
-            "name": "minimum_sales_satisfaction",
-            "description": "Each product-period production quantity must satisfy the minimum sellable quantity requirement.",
-            "formula": "x_{p,t} \\ge d^{\\min}_{p,t}",
+            "name": "bomb_stock_limit",
+            "description": "The number of bombs of each type used across all selected target parts cannot exceed available stock",
+            "formula": "\\sum_{i=1}^{N} x_{ik} \\leq B_k \\quad \\forall k=1,\\dots,K",
             "parameters": [
-                "minimum_sales_demand"
+                "bomb_stock",
+                "n_targets",
+                "n_bomb_types"
             ],
             "variables": [
-                "production_quantity"
+                "attack_assignment"
             ]
         },
         {
-            "name": "regular_time_full_utilization",
-            "description": "Regular production time is fully utilized in each period.",
-            "formula": "z_t^{\\mathrm{reg}} = H_t^{\\mathrm{reg}}",
+            "name": "fuel_budget_limit",
+            "description": "The total fuel consumed by all selected sorties, including loaded-flight, empty-aircraft, and sortie overhead components, cannot exceed the total fuel budget",
+            "formula": "\\sum_{i=1}^{N}\\sum_{k=1}^{K} \\left(f^{\\text{oh}} + d_i\\left(r_k^{\\text{load}} + r^{\\text{empty}}\\right)\\right)x_{ik} \\leq F^{\\max}",
             "parameters": [
-                "regular_hours"
+                "target_distance",
+                "loaded_flight_efficiency",
+                "empty_aircraft_efficiency",
+                "sortie_overhead_fuel",
+                "fuel_budget",
+                "n_targets",
+                "n_bomb_types"
             ],
             "variables": [
-                "regular_hours_used"
-            ]
-        },
-        {
-            "name": "overtime_capacity_limit",
-            "description": "Overtime used in each period must not exceed the available overtime allowance.",
-            "formula": "o_t \\le H_t^{\\mathrm{ot,max}}",
-            "parameters": [
-                "max_overtime_hours"
-            ],
-            "variables": [
-                "overtime_used"
-            ]
-        },
-        {
-            "name": "production_time_balance",
-            "description": "Total production time consumed by all products in a period equals the sum of regular time used and overtime used.",
-            "formula": "\\sum_{p=1}^{P} \\frac{x_{p,t}}{r_p} = z_t^{\\mathrm{reg}} + o_t",
-            "parameters": [
-                "production_rate"
-            ],
-            "variables": [
-                "production_quantity",
-                "regular_hours_used",
-                "overtime_used"
-            ]
-        },
-        {
-            "name": "objective_value_link",
-            "description": "Link the objective-value variable to total overtime across all periods.",
-            "formula": "\\eta = \\sum_{t=1}^{T} o_t",
-            "parameters": [
-                "num_periods"
-            ],
-            "variables": [
-                "objective_value",
-                "overtime_used"
-            ]
-        },
-        {
-            "name": "period_sales_equals_production",
-            "description": "Since there is no inventory carryover, backlogging, or substitution, sales in each period are exactly equal to production in that period; this is already captured by the production quantity variable.",
-            "formula": "s_{p,t} = x_{p,t}",
-            "parameters": [
-                "minimum_sales_demand"
-            ],
-            "variables": [
-                "production_quantity"
+                "attack_assignment"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "overtime_minimization",
-            "description": "Minimize the total overtime used across all planning periods, or the equivalent overtime penalty score if an overtime penalty parameter is used.",
-            "sense": "minimize"
+            "name": "mission_success_probability_maximization",
+            "description": "Maximize the probability that at least m target parts are destroyed",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total overtime used across all planning periods; the objective value variable \\(\\eta\\) is linked to this total overtime. The overtime penalty parameter is not used because the stated planning priority is direct overtime minimization.",
+        "description": "Maximize the mission success probability surrogate represented by the scalar variable P^{\\star}. No exact algebraic probability-composition formula is provided in the problem data, so the MILP objective remains a direct maximization of the reported success-probability variable.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "\\eta = \\sum_{t=1}^{T} o_t",
-        "parameters": [
-            "num_periods"
-        ],
+        "sense": "maximize",
+        "formula": "P^{\\star}",
+        "parameters": [],
         "variables": [
-            "objective_value",
-            "overtime_used"
+            "optimal_success_probability"
         ]
     }
 }

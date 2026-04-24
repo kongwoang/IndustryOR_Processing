@@ -1,250 +1,230 @@
 {
-    "problem": "Problem description\n- This is a single-period production planning problem with a finite set of toy product types indexed by $$p \\in P$$, where $$|P|$$ is the number of available toy types.\n- Each product type $$p$$ has a unit profit $$r_p$$, a plastic consumption coefficient $$\\alpha_p$$, and an electronic-component consumption coefficient $$\\beta_p$$.\n- The available resource limits are a plastic capacity $$A$$ and an electronic-component capacity $$B$$.\n- The planning goal is to choose which toy types to manufacture and how many units of each type to produce so that total profit is maximized while respecting all resource limits and logical business rules.\n- The product portfolio contains distinguished product types corresponding to robots, model cars, building blocks, and dolls.\n- Manufacturing quantities are linked to binary activation decisions so that a product type is considered manufactured only when its production quantity is positive.\n- The available resource pools must not be exceeded by the total resource consumption of all manufactured products.\n- If the robot product type is manufactured, then the doll product type must not be manufactured.\n- If the model-car product type is manufactured, then the building-block product type must also be manufactured.\n- The number of dolls produced cannot exceed the number of model cars produced.\n- The objective is to maximize the total profit from all manufactured and sold toy units.\n- A solution is represented by:\n  - A production quantity vector $$x \\in \\mathbb{Z}_{\\ge 0}^{|P|}$$, where $$x_p$$ is the number of units produced for product type $$p$$.\n  - A binary manufacturing vector $$y \\in \\{0,1\\}^{|P|}$$, where $$y_p = 1$$ means product type $$p$$ is manufactured and $$y_p = 0$$ means it is not manufactured.\n  - Optionally, the total achieved profit $$Z$$ as a scalar output.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Number of planning periods $$H$$. For this problem, the instance is single-period, so $$H = 1$$.\"\n  },\n  \"products\": {\n    \"type\": \"array\",\n    \"meaning\": \"List of product identifiers indexed by $$p \\in P$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"unit_profit\": {\n    \"type\": \"array\",\n    \"meaning\": \"Unit profit vector $$r_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"resource_usage\": {\n    \"plastic\": {\n      \"type\": \"array\",\n      \"meaning\": \"Plastic usage coefficients $$\\alpha_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    },\n    \"electronics\": {\n      \"type\": \"array\",\n      \"meaning\": \"Electronic-component usage coefficients $$\\beta_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    }\n  },\n  \"resource_capacity\": {\n    \"plastic\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available plastic capacity $$A$$.\"\n    },\n    \"electronics\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available electronic-component capacity $$B$$.\"\n    }\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the robot product type is manufactured, the doll product type must not be manufactured.\"\n    },\n    \"model_car_requires_blocks\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the model-car product type is manufactured, the building-block product type must also be manufactured.\"\n    },\n    \"doll_quantity_limit_relative_to_model_cars\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"The production quantity of dolls must not exceed the production quantity of model cars.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"type\": \"array\",\n    \"meaning\": \"Optimal production quantity vector $$x_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"manufacture_indicator\": {\n    \"type\": \"array\",\n    \"meaning\": \"Binary manufacturing vector $$y_p$$ indicating whether each product type is manufactured.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"total_profit\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Maximum achievable profit $$Z$$ under all resource and logical constraints.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 1,\n  \"products\": [\"robot\", \"model_car\", \"building_blocks\", \"doll\"],\n  \"unit_profit\": [15, 8, 12, 5],\n  \"resource_usage\": {\n    \"plastic\": [30, 10, 20, 15],\n    \"electronics\": [8, 5, 3, 2]\n  },\n  \"resource_capacity\": {\n    \"plastic\": 1200,\n    \"electronics\": 800\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": [\"robot\", \"doll\"],\n    \"model_car_requires_blocks\": [\"model_car\", \"building_blocks\"],\n    \"doll_quantity_limit_relative_to_model_cars\": [\"doll\", \"model_car\"]\n  }\n}",
+    "problem": "Problem description\n- There is a single-period procurement planning problem for a furniture store that buys identical chairs from a finite set of manufacturers $$\\mathcal{M}$$.\n- For each manufacturer $$m \\in \\mathcal{M}$$, the parameter $$c_m$$ denotes the cost of placing one order, and the parameter $$q_m$$ denotes the number of chairs delivered by one order.\n- The store must choose integer numbers of orders from the available manufacturers, and each chosen manufacturer may also have an activation status indicating whether it is used at all.\n- The total number of chairs ordered must satisfy a lower bound $$D^{\\min}$$ and an upper bound $$D^{\\max}$$.\n- Some manufacturers may have prerequisite relations, represented by a set $$\\mathcal{R}$$ of ordered pairs. If a manufacturer is selected, the required manufacturer in the pair must also be selected and must satisfy the associated linked minimum quantity requirement.\n- The planning goal is to minimize the total procurement cost of all orders while respecting all quantity bounds and prerequisite relations.\n- A solution is represented by:\n  - $$x_m$$: the integer number of orders placed with manufacturer $$m \\in \\mathcal{M}$$\n  - $$y_m$$: a binary activation variable for manufacturer $$m \\in \\mathcal{M}$$, where $$1$$ means the manufacturer is used and $$0$$ means it is not used\n  - $$Q$$: the total number of chairs ordered across all manufacturers\n  - $$Z$$: the total ordering cost to be minimized\n\nInput Format\n{\n  \"manufacturers\": \"Array of manufacturer identifiers representing the set $$\\\\mathcal{M}$$.\",\n  \"order_costs\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its per-order cost $$c_m$$.\",\n  \"units_per_order\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its fixed order quantity $$q_m$$.\",\n  \"minimum_total_quantity\": \"Scalar lower bound $$D^{\\\\min}$$ on the total chairs ordered.\",\n  \"maximum_total_quantity\": \"Scalar upper bound $$D^{\\\\max}$$ on the total chairs ordered.\",\n  \"precedence_rules\": \"Array of rule objects. Each rule specifies a triggering manufacturer $$i$$, a required manufacturer $$j$$, and a linked minimum quantity $$\\\\ell_{ij}$$ that must be satisfied for $$j$$ whenever $$i$$ is selected.\"\n}\n\nOutput Format\n{\n  \"orders\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the integer decision $$x_m$$, giving the number of orders placed with manufacturer $$m$$.\",\n  \"selected\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the binary decision $$y_m$$, indicating whether manufacturer $$m$$ is used.\",\n  \"total_quantity\": \"Scalar $$Q$$ giving the total number of chairs ordered.\",\n  \"total_cost\": \"Scalar $$Z$$ giving the minimized total procurement cost.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"manufacturers\": [\"A\", \"B\", \"C\"],\n  \"order_costs\": {\n    \"A\": 50,\n    \"B\": 45,\n    \"C\": 40\n  },\n  \"units_per_order\": {\n    \"A\": 15,\n    \"B\": 10,\n    \"C\": 10\n  },\n  \"minimum_total_quantity\": 100,\n  \"maximum_total_quantity\": 500,\n  \"precedence_rules\": [\n    {\n      \"trigger\": \"A\",\n      \"requires\": \"B\",\n      \"linked_minimum_quantity\": 10\n    },\n    {\n      \"trigger\": \"B\",\n      \"requires\": \"C\",\n      \"linked_minimum_quantity\": 10\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "product_types",
-            "symbol": "P",
+            "name": "manufacturers_count",
+            "symbol": "M",
             "shape": [],
-            "description": "Finite set of product types indexed by p in P using 0-based indexing"
+            "description": "Number of manufacturers in the ordered set \\(\\mathcal{M}\\)"
         },
         {
-            "name": "unit_profit",
-            "symbol": "r",
+            "name": "order_costs",
+            "symbol": "c",
             "shape": [
-                "P"
+                "M"
             ],
-            "description": "Unit profit of each product type p"
+            "description": "Cost of placing one order with each manufacturer"
         },
         {
-            "name": "plastic_consumption",
-            "symbol": "\\alpha",
+            "name": "units_per_order",
+            "symbol": "q",
             "shape": [
-                "P"
+                "M"
             ],
-            "description": "Plastic consumption coefficient per unit of each product type p"
+            "description": "Number of chairs delivered by one order from each manufacturer"
         },
         {
-            "name": "electronic_consumption",
-            "symbol": "\\beta",
+            "name": "minimum_total_quantity",
+            "symbol": "D^{\\min}",
+            "shape": [],
+            "description": "Lower bound on the total number of chairs ordered"
+        },
+        {
+            "name": "maximum_total_quantity",
+            "symbol": "D^{\\max}",
+            "shape": [],
+            "description": "Upper bound on the total number of chairs ordered"
+        },
+        {
+            "name": "precedence_rules_count",
+            "symbol": "R",
+            "shape": [],
+            "description": "Number of precedence rules in the ordered set \\(\\mathcal{R}\\)"
+        },
+        {
+            "name": "rule_triggers",
+            "symbol": "trigger",
             "shape": [
-                "P"
+                "R"
             ],
-            "description": "Electronic-component consumption coefficient per unit of each product type p"
+            "description": "Triggering manufacturer index for each precedence rule"
         },
         {
-            "name": "plastic_capacity",
-            "symbol": "A",
-            "shape": [],
-            "description": "Total available plastic capacity"
+            "name": "rule_requires",
+            "symbol": "requires",
+            "shape": [
+                "R"
+            ],
+            "description": "Required manufacturer index for each precedence rule"
         },
         {
-            "name": "electronic_capacity",
-            "symbol": "B",
-            "shape": [],
-            "description": "Total available electronic-component capacity"
-        },
-        {
-            "name": "robot_product",
-            "symbol": "p^{robot}",
-            "shape": [],
-            "description": "Distinguished product type identifier for the robot"
-        },
-        {
-            "name": "model_car_product",
-            "symbol": "p^{car}",
-            "shape": [],
-            "description": "Distinguished product type identifier for the model car"
-        },
-        {
-            "name": "building_blocks_product",
-            "symbol": "p^{blocks}",
-            "shape": [],
-            "description": "Distinguished product type identifier for the building blocks"
-        },
-        {
-            "name": "doll_product",
-            "symbol": "p^{doll}",
-            "shape": [],
-            "description": "Distinguished product type identifier for the doll"
-        },
-        {
-            "name": "planning_horizon",
-            "symbol": "H",
-            "shape": [],
-            "description": "Planning horizon count, equal to 1 for this single-period problem"
+            "name": "linked_minimum_quantities",
+            "symbol": "\\ell",
+            "shape": [
+                "R"
+            ],
+            "description": "Linked minimum quantity requirement for each precedence rule"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "order_counts",
             "symbol": "x",
             "shape": [
-                "P"
+                "M"
             ],
             "domain": "integer",
-            "description": "Number of units produced for each product type p"
+            "description": "Integer number of orders placed with each manufacturer"
         },
         {
-            "name": "manufacture_indicator",
+            "name": "selected_manufacturers",
             "symbol": "y",
             "shape": [
-                "P"
+                "M"
             ],
             "domain": "binary",
-            "description": "Binary manufacturing indicator for each product type p"
+            "description": "Binary activation variable indicating whether each manufacturer is used"
         },
         {
-            "name": "total_profit",
+            "name": "total_quantity",
+            "symbol": "Q",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total number of chairs ordered across all manufacturers"
+        },
+        {
+            "name": "total_cost",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total achieved profit"
+            "description": "Total procurement cost"
         }
     ],
     "auxiliary_variables": [
         {
-            "name": "big_m_production_bound",
-            "symbol": "M",
+            "name": "big_m_order_upper_bound",
+            "symbol": "U",
             "shape": [
-                "P"
+                "M"
             ],
-            "domain": "continuous",
-            "description": "Product-specific upper bound used to linearize the link between production quantities and manufacturing indicators; set as a valid upper bound on x_p for each product p"
+            "domain": "integer",
+            "description": "Valid finite per-manufacturer upper bound on the number of orders that can be placed with each manufacturer for activation linking"
         }
     ],
     "constraints": [
         {
-            "name": "plastic_capacity_limit",
-            "description": "Total plastic consumption across all products must not exceed available plastic capacity",
-            "formula": "\\sum_{p\\in P} \\alpha_p x_p \\le A",
+            "name": "total_quantity_definition",
+            "description": "The total quantity equals the sum of chairs delivered by all ordered manufacturer orders.",
+            "formula": "Q = \\sum_{m=1}^{M} q_m x_m",
             "parameters": [
-                "plastic_consumption",
-                "plastic_capacity"
+                "units_per_order"
             ],
             "variables": [
-                "production_quantity"
+                "total_quantity",
+                "order_counts"
             ]
         },
         {
-            "name": "electronic_capacity_limit",
-            "description": "Total electronic-component consumption across all products must not exceed available electronic-component capacity",
-            "formula": "\\sum_{p\\in P} \\beta_p x_p \\le B",
+            "name": "total_quantity_bounds",
+            "description": "The procurement plan must keep the total quantity within the minimum and maximum demand bounds.",
+            "formula": "D^{\\min} \\le Q \\le D^{\\max}",
             "parameters": [
-                "electronic_consumption",
-                "electronic_capacity"
+                "minimum_total_quantity",
+                "maximum_total_quantity"
             ],
             "variables": [
-                "production_quantity"
+                "total_quantity"
             ]
         },
         {
-            "name": "production_requires_activation",
-            "description": "Production is allowed only when the corresponding manufacturing indicator is active, and a product is considered manufactured only when its production quantity is positive",
-            "formula": "x_p \\le M_p y_p \\quad \\forall p\\in P",
-            "parameters": [
-                "product_types"
-            ],
+            "name": "manufacturer_activation_link",
+            "description": "Order counts are only allowed for manufacturers that are selected, enforced with a valid per-manufacturer finite upper bound linking orders to activation.",
+            "formula": "x_m \\le U_m y_m \\quad \\forall m \\in \\mathcal{M}",
+            "parameters": [],
             "variables": [
-                "production_quantity",
-                "manufacture_indicator"
+                "order_counts",
+                "selected_manufacturers"
             ]
         },
         {
-            "name": "robot_excludes_doll",
-            "description": "If the robot product type is manufactured, then the doll product type must not be manufactured",
-            "formula": "y_{p^{robot}} + y_{p^{doll}} \\le 1",
+            "name": "precedence_activation_requirement",
+            "description": "If a triggering manufacturer is selected, then the required manufacturer must also be selected for every precedence rule.",
+            "formula": "y_{trigger[r]} \\le y_{requires[r]} \\quad \\forall r \\in \\mathcal{R}",
             "parameters": [
-                "robot_product",
-                "doll_product"
+                "rule_triggers",
+                "rule_requires"
             ],
             "variables": [
-                "manufacture_indicator"
+                "selected_manufacturers"
             ]
         },
         {
-            "name": "model_car_requires_building_blocks",
-            "description": "If the model-car product type is manufactured, then the building-block product type must also be manufactured",
-            "formula": "y_{p^{car}} \\le y_{p^{blocks}}",
+            "name": "precedence_linked_minimum_quantity",
+            "description": "If a precedence relation is triggered, the required manufacturer must satisfy the linked minimum quantity requirement for every precedence rule.",
+            "formula": "x_{requires[r]} \\ge \\ell[r] \\, y_{trigger[r]} \\quad \\forall r \\in \\mathcal{R}",
             "parameters": [
-                "model_car_product",
-                "building_blocks_product"
+                "linked_minimum_quantities",
+                "rule_requires",
+                "rule_triggers"
             ],
             "variables": [
-                "manufacture_indicator"
+                "order_counts",
+                "selected_manufacturers"
             ]
         },
         {
-            "name": "doll_quantity_limit",
-            "description": "The production quantity of dolls must not exceed the production quantity of model cars",
-            "formula": "x_{p^{doll}} \\le x_{p^{car}}",
+            "name": "total_cost_definition",
+            "description": "The total cost equals the sum of order costs across all manufacturers.",
+            "formula": "Z = \\sum_{m=1}^{M} c_m x_m",
             "parameters": [
-                "doll_product",
-                "model_car_product"
+                "order_costs"
             ],
             "variables": [
-                "production_quantity"
+                "total_cost",
+                "order_counts"
             ]
         },
         {
-            "name": "single_period_decision",
-            "description": "The solution must choose manufacturing and production decisions for the single period",
-            "formula": "H = 1",
-            "parameters": [
-                "planning_horizon"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_integer_production",
-            "description": "Production quantities must be nonnegative integers",
-            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall p\\in P",
-            "parameters": [
-                "product_types"
-            ],
+            "name": "order_count_integrality",
+            "description": "Order counts must be nonnegative integer values.",
+            "formula": "x_m \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall m \\in \\mathcal{M}",
             "variables": [
-                "production_quantity"
+                "order_counts"
             ]
         },
         {
-            "name": "binary_manufacturing_indicator",
-            "description": "Manufacturing indicators must be binary variables",
-            "formula": "y_p \\in \\{0,1\\} \\quad \\forall p\\in P",
-            "parameters": [
-                "product_types"
-            ],
+            "name": "manufacturer_selection_binary",
+            "description": "Manufacturer activation variables must be binary.",
+            "formula": "y_m \\in \\{0,1\\} \\quad \\forall m \\in \\mathcal{M}",
             "variables": [
-                "manufacture_indicator"
+                "selected_manufacturers"
             ]
         },
         {
-            "name": "nonnegative_capacities",
-            "description": "Resource capacities must be nonnegative",
-            "formula": "A \\ge 0,\\; B \\ge 0",
-            "parameters": [
-                "plastic_capacity",
-                "electronic_capacity"
-            ],
-            "variables": []
+            "name": "nonnegative_quantities",
+            "description": "Total quantity and total cost are nonnegative scalar quantities.",
+            "formula": "Q, Z \\ge 0",
+            "variables": [
+                "total_quantity",
+                "total_cost"
+            ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize the total profit from all manufactured and sold toy units",
-            "sense": "maximize"
+            "name": "total_procurement_cost_minimization",
+            "description": "Minimize the total procurement cost while satisfying quantity bounds and precedence requirements",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit from produced toy units across all product types.",
+        "description": "Minimize total procurement cost across all manufacturers while satisfying total quantity bounds and precedence requirements.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z = \\sum_{p\\in P} r_p x_p",
-        "parameters": [
-            "unit_profit"
-        ],
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
         "variables": [
-            "production_quantity",
-            "total_profit"
+            "total_cost"
         ]
     }
 }

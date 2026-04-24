@@ -1,241 +1,359 @@
 {
-    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,\\ldots,T\\}$$.\n- There are $$N$$ investment opportunities indexed by $$j \\in \\mathcal{J}=\\{1,\\ldots,N\\}$$.\n- The decision maker starts with initial liquid capital $$C_0$$ at the beginning of period $$1$$.\n- Each opportunity $$j$$ has an allowed opening set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$, a lock-up duration $$d_j$$, a gross return multiplier $$\\rho_j$$, a per-unit cash requirement $$c_j$$, and a maximum cumulative investment limit $$U_j$$.\n- Capital invested in an opportunity is tied up until the opportunity matures, after which the principal and return are released back into liquid capital.\n- Any liquid capital not invested in a period may be carried forward and used later.\n- Investments may only be made in periods when the corresponding opportunity is open, and the total amount placed into any opportunity may not exceed its investment limit.\n- The available liquid capital in any period cannot be exceeded by the total new investments initiated in that period.\n- The planning goal is to choose the investment amounts over all periods so that the terminal capital at the end of $$T$$ is maximized.\n- A solution is represented by:\n  - $$x_{j,t}$$, the amount invested in opportunity $$j$$ at the beginning of period $$t$$.\n  - $$h_t$$, the liquid capital available at the relevant reporting point of period $$t$$.\n  - $$Z_T$$, the total capital available at the end of period $$T$$.\n\nInput Format\n{\n  \"T\": \"planning horizon length, scalar $$T$$\",\n  \"C0\": \"initial liquid capital at the beginning of period $$1$$, scalar $$C_0$$\",\n  \"N\": \"number of investment opportunities, scalar $$N$$\",\n  \"projects\": [\n    {\n      \"id\": \"project index $$j$$\",\n      \"open_periods\": \"set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$ of periods when a new investment may start\",\n      \"maturity_lag\": \"lock-up duration $$d_j$$ in periods before capital is released\",\n      \"unit_cash_requirement\": \"cash requirement per unit invested, scalar $$c_j$$\",\n      \"gross_return\": \"gross return multiplier $$\\rho_j$$ applied at maturity\",\n      \"max_investment\": \"capacity limit $$U_j$$ on the total amount that can be invested in project $$j$$\"\n    }\n  ]\n}\n\nOutput Format\n{\n  \"investment_plan\": \"array $$x_{j,t}$$ with shape $$N \\\\times T$$; each entry is the planned amount invested in opportunity $$j$$ at the beginning of period $$t$$\",\n  \"liquid_capital_path\": \"array $$h_t$$ with shape $$T+1$$; each entry is the liquid capital available at the chosen reporting point of period $$t$$\",\n  \"terminal_capital\": \"scalar $$Z_T$$; the total capital at the end of period $$T$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"C0\": 300000,\n  \"N\": 4,\n  \"projects\": [\n    {\n      \"id\": 1,\n      \"open_periods\": [1, 2, 3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.2,\n      \"max_investment\": null\n    },\n    {\n      \"id\": 2,\n      \"open_periods\": [1],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.5,\n      \"max_investment\": 150000\n    },\n    {\n      \"id\": 3,\n      \"open_periods\": [2],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.6,\n      \"max_investment\": 200000\n    },\n    {\n      \"id\": 4,\n      \"open_periods\": [3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.4,\n      \"max_investment\": 100000\n    }\n  ]\n}",
+    "problem": "Problem description\n- There is a finite set of products $$\\mathcal P$$, a finite set of process stages $$\\mathcal Q=\\{\\mathsf A,\\mathsf B\\}$$, and a planning horizon $$\\mathcal T$$ over which the production plan is evaluated.\n- Process stage $$\\mathsf A$$ can be executed on a set of machines $$\\mathcal M_{\\mathsf A}$$, and process stage $$\\mathsf B$$ can be executed on a set of machines $$\\mathcal M_{\\mathsf B}$$.\n- Each product $$p\\in\\mathcal P$$ must pass through both process stages in the required order before it becomes a finished item.\n- For each product $$p$$ and process stage $$q$$, only a subset of machines is eligible; these eligibility sets are denoted by $$\\mathcal E_{p}^{q}$$.\n- Each eligible product-machine combination has a unit processing-time parameter, denoted by $$\\tau_{p,m}^{q}$$, which consumes machine-hours on the chosen machine.\n- Each machine $$m$$ has an available effective-hour capacity $$H_m$$ over the planning horizon.\n- Each machine $$m$$ also has an operating-cost parameter $$F_m$$ associated with full-capacity operation.\n- Each product $$p$$ has a raw-material cost parameter $$c_p^{\\mathrm{raw}}$$ per unit and a unit selling price parameter $$\\pi_p$$ per unit.\n- If a generalized instance includes market limits, product demand is denoted by $$d_p$$; this instance does not impose an explicit demand cap.\n- The optimization goal is to choose product quantities and machine assignments so that total profit over $$\\mathcal T$$ is maximized.\n- The business rules require that machine assignments respect eligibility, machine-hours cannot exceed available capacity, and the quantity completed through process $$\\mathsf A$$ for each product must match the quantity that proceeds to process $$\\mathsf B$$.\n\n- A solution is represented by:\n  - $$x_p$$: the total quantity of product $$p\\in\\mathcal P$$ produced and sold.\n  - $$x_{p,m}^{\\mathsf A}$$: the quantity of product $$p$$ routed to machine $$m\\in\\mathcal M_{\\mathsf A}$$ for process stage $$\\mathsf A$$.\n  - $$x_{p,m}^{\\mathsf B}$$: the quantity of product $$p$$ routed to machine $$m\\in\\mathcal M_{\\mathsf B}$$ for process stage $$\\mathsf B$$.\n  - $$u_m$$: the total effective machine-hours used on machine $$m$$.\n  - $$\\Pi$$: the total profit achieved by the production plan.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": {\n      \"symbol\": \"$$\\\\mathcal P$$\",\n      \"description\": \"Finite set of product types indexed by $$p$$.\"\n    },\n    \"processes\": {\n      \"symbol\": \"$$\\\\mathcal Q=\\\\{\\\\mathsf A,\\\\mathsf B\\\\}$$\",\n      \"description\": \"Required process stages.\"\n    },\n    \"machines_A\": {\n      \"symbol\": \"$$\\\\mathcal M_{\\\\mathsf A}$$\",\n      \"description\": \"Machines eligible for process stage $$\\\\mathsf A$$.\"\n    },\n    \"machines_B\": {\n      \"symbol\": \"$$\\\\mathcal M_{\\\\mathsf B}$$\",\n      \"description\": \"Machines eligible for process stage $$\\\\mathsf B$$.\"\n    }\n  },\n  \"parameters\": {\n    \"raw_material_cost\": {\n      \"symbol\": \"$$c_p^{\\\\mathrm{raw}}$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Raw-material cost per unit of product $$p$$.\"\n    },\n    \"sale_price\": {\n      \"symbol\": \"$$\\\\pi_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Unit selling price of product $$p$$.\"\n    },\n    \"processing_time_A\": {\n      \"symbol\": \"$$\\\\tau_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Unit processing time of product $$p$$ on machine $$m\\\\in\\\\mathcal M_{\\\\mathsf A}$$ for process $$\\\\mathsf A$$.\"\n    },\n    \"processing_time_B\": {\n      \"symbol\": \"$$\\\\tau_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Unit processing time of product $$p$$ on machine $$m\\\\in\\\\mathcal M_{\\\\mathsf B}$$ for process $$\\\\mathsf B$$.\"\n    },\n    \"capacity_hours\": {\n      \"symbol\": \"$$H_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Available effective machine-hours of machine $$m$$ over the planning horizon $$\\\\mathcal T$$.\"\n    },\n    \"full_capacity_operating_cost\": {\n      \"symbol\": \"$$F_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Operating-cost parameter associated with using machine $$m$$ at full capacity.\"\n    },\n    \"eligibility\": {\n      \"symbol\": \"$$\\\\mathcal E_p^{q}$$\",\n      \"shape\": \"$$\\\\mathcal P\\\\times\\\\mathcal Q$$\",\n      \"description\": \"Allowed machine set for product $$p$$ at process stage $$q$$.\"\n    },\n    \"demand_optional\": {\n      \"symbol\": \"$$d_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Optional demand or sales-limit parameter for product $$p$$, if included in a generalized instance.\"\n    }\n  },\n  \"decision_variables\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Total quantity of product $$p$$ produced.\"\n    },\n    \"routing_A\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Quantity of product $$p$$ assigned to machine $$m$$ for process stage $$\\\\mathsf A$$.\"\n    },\n    \"routing_B\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Quantity of product $$p$$ assigned to machine $$m$$ for process stage $$\\\\mathsf B$$.\"\n    },\n    \"machine_usage\": {\n      \"symbol\": \"$$u_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Total effective machine-hours used on machine $$m$$.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Produced quantity for each product $$p$$.\"\n    },\n    \"routing_A\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Allocated quantity on each machine $$m\\\\in\\\\mathcal M_{\\\\mathsf A}$$ for process stage $$\\\\mathsf A$$.\"\n    },\n    \"routing_B\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Allocated quantity on each machine $$m\\\\in\\\\mathcal M_{\\\\mathsf B}$$ for process stage $$\\\\mathsf B$$.\"\n    },\n    \"machine_usage\": {\n      \"symbol\": \"$$u_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Effective machine-hours consumed by each machine.\"\n    },\n    \"total_profit\": {\n      \"symbol\": \"$$\\\\Pi$$\",\n      \"shape\": \"$$1$$\",\n      \"description\": \"Maximum total profit achieved by the plan.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\n    {\n      \"id\": \"I\",\n      \"raw_material_cost\": 0.25,\n      \"unit_sale_price\": 1.25\n    },\n    {\n      \"id\": \"II\",\n      \"raw_material_cost\": 0.35,\n      \"unit_sale_price\": 2.00\n    },\n    {\n      \"id\": \"III\",\n      \"raw_material_cost\": 0.50,\n      \"unit_sale_price\": 2.80\n    }\n  ],\n  \"machines_A\": [\n    {\n      \"id\": \"A1\",\n      \"unit_processing_time\": {\n        \"I\": 5,\n        \"II\": 10,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 6000,\n      \"operating_cost_at_full_capacity\": 300\n    },\n    {\n      \"id\": \"A2\",\n      \"unit_processing_time\": {\n        \"I\": 7,\n        \"II\": 9,\n        \"III\": 12\n      },\n      \"effective_machine_hours\": 10000,\n      \"operating_cost_at_full_capacity\": 321\n    }\n  ],\n  \"machines_B\": [\n    {\n      \"id\": \"B1\",\n      \"unit_processing_time\": {\n        \"I\": 6,\n        \"II\": 8,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 4000,\n      \"operating_cost_at_full_capacity\": 250\n    },\n    {\n      \"id\": \"B2\",\n      \"unit_processing_time\": {\n        \"I\": 4,\n        \"II\": null,\n        \"III\": 11\n      },\n      \"effective_machine_hours\": 7000,\n      \"operating_cost_at_full_capacity\": 783\n    },\n    {\n      \"id\": \"B3\",\n      \"unit_processing_time\": {\n        \"I\": 7,\n        \"II\": null,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 4000,\n      \"operating_cost_at_full_capacity\": 200\n    }\n  ],\n  \"eligibility\": {\n    \"I\": {\n      \"A\": [\"A1\", \"A2\"],\n      \"B\": [\"B1\", \"B2\", \"B3\"]\n    },\n    \"II\": {\n      \"A\": [\"A1\", \"A2\"],\n      \"B\": [\"B1\"]\n    },\n    \"III\": {\n      \"A\": [\"A2\"],\n      \"B\": [\"B2\"]\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "planning_horizon_t",
-            "symbol": "T",
+            "name": "products",
+            "symbol": "\\mathcal P",
             "shape": [],
-            "description": "Number of periods in the finite planning horizon"
+            "description": "Finite set of product types, indexed by p"
         },
         {
-            "name": "num_opportunities",
-            "symbol": "N",
+            "name": "stages",
+            "symbol": "\\mathcal Q",
             "shape": [],
-            "description": "Number of investment opportunities"
+            "description": "Set of required process stages {A, B}"
         },
         {
-            "name": "initial_liquid_capital",
-            "symbol": "C_0",
+            "name": "machines_stage_a",
+            "symbol": "\\mathcal M_{\\mathsf A}",
             "shape": [],
-            "description": "Initial liquid capital at the beginning of period 1"
+            "description": "Set of machines eligible for stage A"
         },
         {
-            "name": "allowed_open_periods",
-            "symbol": "\\mathcal{A}",
+            "name": "machines_stage_b",
+            "symbol": "\\mathcal M_{\\mathsf B}",
+            "shape": [],
+            "description": "Set of machines eligible for stage B"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal T",
+            "shape": [],
+            "description": "Planning horizon over which the plan is evaluated"
+        },
+        {
+            "name": "raw_material_cost",
+            "symbol": "c^{\\mathrm{raw}}",
             "shape": [
-                "N",
-                "-"
+                "\\mathcal P"
             ],
-            "description": "Allowed opening periods for each opportunity j"
+            "description": "Raw-material cost per unit of product p"
         },
         {
-            "name": "lock_up_duration",
+            "name": "unit_selling_price",
+            "symbol": "\\pi",
+            "shape": [
+                "\\mathcal P"
+            ],
+            "description": "Unit selling price of product p"
+        },
+        {
+            "name": "processing_time_stage_a",
+            "symbol": "\\tau^{\\mathsf A}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal M_{\\mathsf A}"
+            ],
+            "description": "Unit processing time of product p on machine m for stage A"
+        },
+        {
+            "name": "processing_time_stage_b",
+            "symbol": "\\tau^{\\mathsf B}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal M_{\\mathsf B}"
+            ],
+            "description": "Unit processing time of product p on machine m for stage B"
+        },
+        {
+            "name": "machine_hours_capacity",
+            "symbol": "H",
+            "shape": [
+                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
+            ],
+            "description": "Available effective machine-hours on each machine over the planning horizon"
+        },
+        {
+            "name": "machine_full_capacity_cost",
+            "symbol": "F",
+            "shape": [
+                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
+            ],
+            "description": "Operating-cost parameter associated with full-capacity operation of each machine"
+        },
+        {
+            "name": "eligibility_set",
+            "symbol": "\\mathcal E",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal Q"
+            ],
+            "description": "Eligible machine set for each product and stage"
+        },
+        {
+            "name": "demand_limit",
             "symbol": "d",
             "shape": [
-                "N"
+                "\\mathcal P"
             ],
-            "description": "Lock-up duration for each opportunity"
-        },
-        {
-            "name": "gross_return_multiplier",
-            "symbol": "\\rho",
-            "shape": [
-                "N"
-            ],
-            "description": "Gross return multiplier for each opportunity"
-        },
-        {
-            "name": "unit_cash_requirement",
-            "symbol": "c",
-            "shape": [
-                "N"
-            ],
-            "description": "Per-unit cash requirement for each opportunity"
-        },
-        {
-            "name": "max_investment_limit",
-            "symbol": "U",
-            "shape": [
-                "N"
-            ],
-            "description": "Maximum cumulative investment limit for each opportunity, possibly unbounded if no limit is imposed"
+            "description": "Optional demand or sales-limit parameter for each product in generalized instances"
         }
     ],
     "variables": [
         {
-            "name": "investment_amount",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "N",
-                "T"
+                "\\mathcal P"
             ],
             "domain": "continuous",
-            "description": "Amount invested in opportunity j at the beginning of period t"
+            "description": "Total quantity of product p produced and sold"
         },
         {
-            "name": "liquid_capital_path",
-            "symbol": "h",
+            "name": "assigned_quantity_stage_a",
+            "symbol": "x^{\\mathsf A}",
             "shape": [
-                "T+1"
+                "\\mathcal P",
+                "\\mathcal M_{\\mathsf A}"
             ],
             "domain": "continuous",
-            "description": "Liquid capital available at each reporting point from period 0 through period T"
+            "description": "Quantity of product p routed to machine m for stage A"
         },
         {
-            "name": "terminal_capital",
-            "symbol": "Z_T",
+            "name": "assigned_quantity_stage_b",
+            "symbol": "x^{\\mathsf B}",
+            "shape": [
+                "\\mathcal P",
+                "\\mathcal M_{\\mathsf B}"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product p routed to machine m for stage B"
+        },
+        {
+            "name": "machine_hours_used",
+            "symbol": "u",
+            "shape": [
+                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
+            ],
+            "domain": "continuous",
+            "description": "Total effective machine-hours used on each machine"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
             "shape": [],
             "domain": "continuous",
-            "description": "Total capital available at the end of period T"
+            "description": "Total profit achieved by the production plan"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_investment_amounts",
-            "description": "Investment amounts must be nonnegative",
-            "formula": "x_{j,t} \\ge 0",
+            "name": "nonnegativity_of_decision_variables",
+            "description": "All production, routing, machine-hours, and profit variables are nonnegative continuous quantities.",
+            "formula": "x_p\\ge 0,\\; x_{p,m}^{\\mathsf A}\\ge 0,\\; x_{p,m}^{\\mathsf B}\\ge 0,\\; u_m\\ge 0,\\; \\Pi\\ge 0",
             "parameters": [
-                "planning_horizon_t",
-                "num_opportunities"
+                "products",
+                "machines_stage_a",
+                "machines_stage_b"
             ],
             "variables": [
-                "investment_amount"
+                "production_quantity",
+                "assigned_quantity_stage_a",
+                "assigned_quantity_stage_b",
+                "machine_hours_used",
+                "total_profit"
             ]
         },
         {
-            "name": "nonnegative_liquid_capital",
-            "description": "Liquid capital values must be nonnegative",
-            "formula": "h_t \\ge 0",
+            "name": "machine_eligibility_restriction",
+            "description": "Assignments for each product and stage may use only machines in the corresponding eligibility set.",
+            "formula": "x_{p,m}^{\\mathsf A}=0\\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf A}\\setminus \\mathcal E_p^{\\mathsf A};\\qquad x_{p,m}^{\\mathsf B}=0\\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf B}\\setminus \\mathcal E_p^{\\mathsf B}",
             "parameters": [
-                "planning_horizon_t"
+                "eligibility_set",
+                "products",
+                "stages",
+                "machines_stage_a",
+                "machines_stage_b"
             ],
             "variables": [
-                "liquid_capital_path"
+                "assigned_quantity_stage_a",
+                "assigned_quantity_stage_b"
             ]
         },
         {
-            "name": "nonnegative_terminal_capital",
-            "description": "Terminal capital must be nonnegative",
-            "formula": "Z_T \\ge 0",
+            "name": "machine_capacity_limit",
+            "description": "Machine-hours consumed on each machine must not exceed available effective-hours capacity.",
+            "formula": "u_m=\\sum_{p\\in\\mathcal P}\\tau_{p,m}^{\\mathsf A}x_{p,m}^{\\mathsf A}\\quad \\forall m\\in\\mathcal M_{\\mathsf A};\\qquad u_m=\\sum_{p\\in\\mathcal P}\\tau_{p,m}^{\\mathsf B}x_{p,m}^{\\mathsf B}\\quad \\forall m\\in\\mathcal M_{\\mathsf B};\\qquad u_m\\le H_m\\quad \\forall m\\in\\mathcal M_{\\mathsf A}\\cup\\mathcal M_{\\mathsf B}",
             "parameters": [
-                "planning_horizon_t"
+                "machine_hours_capacity",
+                "processing_time_stage_a",
+                "processing_time_stage_b",
+                "products",
+                "machines_stage_a",
+                "machines_stage_b"
             ],
             "variables": [
-                "terminal_capital"
+                "assigned_quantity_stage_a",
+                "assigned_quantity_stage_b",
+                "machine_hours_used"
             ]
         },
         {
-            "name": "open_period_restriction",
-            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
-            "formula": "t \\in \\mathcal{A}_j",
+            "name": "stage_flow_consistency",
+            "description": "For each product, the quantity completed through stage A must equal the quantity that proceeds to stage B.",
+            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A}=\\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B}=x_p\\quad \\forall p\\in\\mathcal P",
             "parameters": [
-                "allowed_open_periods"
+                "eligibility_set",
+                "products"
             ],
             "variables": [
-                "investment_amount"
+                "assigned_quantity_stage_a",
+                "assigned_quantity_stage_b",
+                "production_quantity"
             ]
         },
         {
-            "name": "opportunity_investment_cap",
-            "description": "Total investment in each opportunity over the horizon may not exceed its maximum investment limit",
-            "formula": "\\sum_t x_{j,t} \\le U_j",
+            "name": "two_stage_processing_order",
+            "description": "Each product must pass through stage A followed by stage B before being considered finished.",
+            "formula": "x_p = \\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A} = \\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B} \\quad \\forall p\\in\\mathcal P",
             "parameters": [
-                "max_investment_limit"
+                "eligibility_set",
+                "products"
             ],
             "variables": [
-                "investment_amount"
+                "production_quantity",
+                "assigned_quantity_stage_a",
+                "assigned_quantity_stage_b"
             ]
         },
         {
-            "name": "period_liquidity_limit",
-            "description": "Total new investments initiated in any period cannot exceed liquid capital available in that period",
-            "formula": "\\sum_j x_{j,t} \\le h_t",
+            "name": "production_balance_stage_a",
+            "description": "The total quantity of each product assigned to stage A across all eligible machines equals the produced quantity.",
+            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A}=x_p\\quad \\forall p\\in\\mathcal P",
             "parameters": [
-                "planning_horizon_t"
+                "eligibility_set",
+                "products"
             ],
             "variables": [
-                "investment_amount",
-                "liquid_capital_path"
+                "assigned_quantity_stage_a",
+                "production_quantity"
             ]
         },
         {
-            "name": "capital_carry_forward",
-            "description": "Liquid capital evolves by carrying forward unused capital from the previous period and adding matured investment proceeds at the start of each period",
-            "formula": "h_t = h_{t-1} - \\sum_{j=1}^{N} x_{j,t-1} + \\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\\ldots,T",
+            "name": "production_balance_stage_b",
+            "description": "The total quantity of each product assigned to stage B across all eligible machines equals the produced quantity.",
+            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B}=x_p\\quad \\forall p\\in\\mathcal P",
             "parameters": [
-                "planning_horizon_t",
-                "gross_return_multiplier",
-                "lock_up_duration"
+                "eligibility_set",
+                "products"
             ],
             "variables": [
-                "liquid_capital_path",
-                "investment_amount"
+                "assigned_quantity_stage_b",
+                "production_quantity"
             ]
         },
         {
-            "name": "maturity_release",
-            "description": "Invested capital is released back into liquid capital exactly after the corresponding lock-up duration with gross return, enforced through the period-to-period capital balance",
-            "formula": "\\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\n\\ldots,T",
+            "name": "machine_hours_definition_stage_a",
+            "description": "Machine-hours used on each stage A machine equal the processing time-weighted sum of assigned quantities.",
+            "formula": "u_m = \\sum_{p\\in\\mathcal P} \\tau_{p,m}^{\\mathsf A} x_{p,m}^{\\mathsf A} \\quad \\forall m\\in\\mathcal M_{\\mathsf A}",
             "parameters": [
-                "lock_up_duration",
-                "gross_return_multiplier"
+                "processing_time_stage_a",
+                "products",
+                "machines_stage_a"
             ],
             "variables": [
-                "investment_amount",
-                "liquid_capital_path"
+                "machine_hours_used",
+                "assigned_quantity_stage_a"
             ]
         },
         {
-            "name": "terminal_capital_reporting",
-            "description": "Terminal capital equals liquid capital at the end of period T",
-            "formula": "Z_T = h_T",
+            "name": "machine_hours_definition_stage_b",
+            "description": "Machine-hours used on each stage B machine equal the processing time-weighted sum of assigned quantities.",
+            "formula": "u_m = \\sum_{p\\in\\mathcal P} \\tau_{p,m}^{\\mathsf B} x_{p,m}^{\\mathsf B} \\quad \\forall m\\in\\mathcal M_{\\mathsf B}",
             "parameters": [
-                "planning_horizon_t"
+                "processing_time_stage_b",
+                "products",
+                "machines_stage_b"
             ],
             "variables": [
-                "terminal_capital",
-                "liquid_capital_path"
+                "machine_hours_used",
+                "assigned_quantity_stage_b"
             ]
         },
         {
-            "name": "opportunity_opening_restriction",
-            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
-            "formula": "x_{j,t} = 0 \\quad \\forall t \\notin \\mathcal{A}_j",
+            "name": "machine_capacity_limit_stage_a",
+            "description": "Machine-hours used on each stage A machine may not exceed its available effective-hours capacity.",
+            "formula": "u_m \\le H_m \\quad \\forall m\\in\\mathcal M_{\\mathsf A}",
             "parameters": [
-                "allowed_open_periods"
+                "machine_hours_capacity",
+                "machines_stage_a"
             ],
             "variables": [
-                "investment_amount"
+                "machine_hours_used"
             ]
         },
         {
-            "name": "initial_capital_condition",
-            "description": "Liquid capital at the start of period 0 equals the initial capital",
-            "formula": "h_0 = C_0",
+            "name": "machine_capacity_limit_stage_b",
+            "description": "Machine-hours used on each stage B machine may not exceed its available effective-hours capacity.",
+            "formula": "u_m \\le H_m \\quad \\forall m\\in\\mathcal M_{\\mathsf B}",
             "parameters": [
-                "initial_liquid_capital"
+                "machine_hours_capacity",
+                "machines_stage_b"
             ],
             "variables": [
-                "liquid_capital_path"
+                "machine_hours_used"
+            ]
+        },
+        {
+            "name": "eligibility_zeroing_stage_a",
+            "description": "Assignments to ineligible stage A machines are fixed to zero.",
+            "formula": "x_{p,m}^{\\mathsf A} = 0 \\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf A}\\setminus \\mathcal E_p^{\\mathsf A}",
+            "parameters": [
+                "eligibility_set",
+                "products",
+                "machines_stage_a"
+            ],
+            "variables": [
+                "assigned_quantity_stage_a"
+            ]
+        },
+        {
+            "name": "eligibility_zeroing_stage_b",
+            "description": "Assignments to ineligible stage B machines are fixed to zero.",
+            "formula": "x_{p,m}^{\\mathsf B} = 0 \\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf B}\\setminus \\mathcal E_p^{\\mathsf B}",
+            "parameters": [
+                "eligibility_set",
+                "products",
+                "machines_stage_b"
+            ],
+            "variables": [
+                "assigned_quantity_stage_b"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "terminal_capital_maximization",
-            "description": "Maximize terminal capital at the end of period T",
+            "name": "profit_maximization",
+            "description": "Maximize total profit over the planning horizon",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize terminal capital at the end of period T.",
+        "description": "Maximize total profit, using revenue minus raw-material costs and a linear machine operating-cost approximation obtained by scaling each machine's full-capacity operating cost by its utilized-hour fraction.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "Z_T",
-        "parameters": [],
+        "formula": "\\Pi = \\sum_{p\\in\\mathcal P}\\left(\\pi_p - c_p^{\\mathrm{raw}}\\right)x_p - \\sum_{m\\in\\mathcal M_{\\mathsf A}\\cup\\mathcal M_{\\mathsf B}} \\frac{F_m}{H_m}u_m",
+        "parameters": [
+            "unit_selling_price",
+            "raw_material_cost",
+            "machine_full_capacity_cost",
+            "machine_hours_capacity"
+        ],
         "variables": [
-            "terminal_capital"
+            "production_quantity",
+            "machine_hours_used",
+            "total_profit"
         ]
     }
 }

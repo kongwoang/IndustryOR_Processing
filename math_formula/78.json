@@ -1,153 +1,286 @@
 {
-    "problem": "Problem description\n- A manufacturing planning problem is given for a furniture factory that produces multiple product types indexed by $$p \\in \\mathcal{P}$$.\n- The planning horizon is a single production period, so all decisions are made for one aggregate time window.\n- For each product type $$p$$, the factory has a unit selling price $$s_p$$, a unit manufacturing cost $$c_p$$, and a unit warehouse-space requirement $$a_p$$.\n- The unit profit for each product type is the difference between its selling price and its manufacturing cost.\n- The factory has a total warehouse-space capacity of $$W$$.\n- The factory must satisfy minimum required production quantities for selected product types, represented by lower-bound demand requirements $$\\ell_p$$.\n- The total number of units produced across all product types cannot exceed the overall production limit $$Q$$.\n- The planning goal is to choose production quantities that maximize total profit while respecting all space and production restrictions.\n- Required business constraints:\n  - Production quantities must be nonnegative and represent feasible integer unit counts.\n  - Total warehouse space used by all produced items must not exceed the available capacity $$W$$.\n  - Production of each product type with a minimum requirement must meet or exceed its lower bound $$\\ell_p$$.\n  - The total number of units produced across all product types must not exceed the production limit $$Q$$.\n  - The objective is to maximize total profit over all product types.\n- A solution is represented by:\n  - $$x_p$$: the number of units of product type $$p$$ to produce.\n  - $$z$$: the resulting total profit of the production plan.\n\nInput Format\n{\n  \"products\": {\n    \"description\": \"Set of product types indexed by $$p \\\\in \\\\mathcal{P}$$.\",\n    \"size\": \"$$P$$\"\n  },\n  \"selling_price\": {\n    \"description\": \"Unit selling price vector $$s_p$$ for each product type $$p \\\\in \\\\mathcal{P}$$.\",\n    \"shape\": \"length $$P$$\"\n  },\n  \"unit_cost\": {\n    \"description\": \"Unit manufacturing cost vector $$c_p$$ for each product type $$p \\\\in \\\\mathcal{P}$$.\",\n    \"shape\": \"length $$P$$\"\n  },\n  \"space_requirement\": {\n    \"description\": \"Unit warehouse-space requirement vector $$a_p$$ for each product type $$p \\\\in \\\\mathcal{P}$$.\",\n    \"shape\": \"length $$P$$\"\n  },\n  \"minimum_production\": {\n    \"description\": \"Minimum required production vector $$\\\\ell_p$$ for product types that have demand lower bounds.\",\n    \"shape\": \"length $$P$$\"\n  },\n  \"warehouse_capacity\": {\n    \"description\": \"Total available warehouse space $$W$$.\"\n  },\n  \"production_limit\": {\n    \"description\": \"Maximum total number of units allowed to be produced $$Q$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"description\": \"Integer production quantity vector $$x_p$$ giving how many units of each product type $$p \\\\in \\\\mathcal{P}$$ to produce.\",\n    \"shape\": \"length $$P$$\"\n  },\n  \"total_profit\": {\n    \"description\": \"Total profit value $$z$$ achieved by the production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"tables\", \"chairs\", \"bookshelves\"],\n  \"selling_price\": [\"$$200$$\", \"$$50$$\", \"$$150$$\"],\n  \"unit_cost\": [\"$$120$$\", \"$$20$$\", \"$$90$$\"],\n  \"space_requirement\": [\"$$5$$\", \"$$2$$\", \"$$3$$\"],\n  \"minimum_production\": [\"$$10$$\", \"$$0$$\", \"$$20$$\"],\n  \"warehouse_capacity\": \"$$500$$\",\n  \"production_limit\": \"$$200$$\"\n}",
+    "problem": "Problem description\n- There is a retail staffing and sales planning problem with clerk categories indexed by $$i \\in \\mathcal{I}$$ over a monthly planning horizon $$\\mathcal{T}$$.\n- Each clerk category has a fixed headcount $$n_i$$, a standard monthly working time per clerk $$h_i$$, a sales productivity rate $$\\alpha_i$$ measured in pairs per hour, a regular wage rate $$w_i$$, and an overtime wage rate $$\\omega_i$$.\n- Each sold pair yields unit profit $$\\pi$$.\n- The store pursues three ordered goals: achieve a target monthly sales volume $$D$$ for goal $$p_1$$, ensure full employment of all clerks for goal $$p_2$$, and minimize overtime usage for goal $$p_3$$.\n- Required business rules:\n  - The number of clerks in each category is fixed.\n  - Regular working time available for each category is limited by the standard monthly hours for that category.\n  - Any working time beyond the standard monthly hours is treated as overtime.\n  - Sales volume is generated from worked hours using the category-specific productivity rate.\n  - Overtime, if used, is compensated at the overtime wage rate of the corresponding category.\n  - The sales target is a priority requirement, and any shortfall or excess relative to that target should be tracked.\n  - Full employment means the plan should utilize the available standard monthly hours for the clerks before relying on overtime.\n  - After higher-priority goals are addressed, overtime should be kept as small as possible.\n  - Labor cost and sales profit may be reported as accounting outputs of the plan.\n- A solution is represented by:\n  - $$x_i$$: regular monthly hours assigned to clerk category $$i$$.\n  - $$y_i$$: overtime monthly hours assigned to clerk category $$i$$.\n  - $$s$$: total number of shoe pairs sold over $$\\mathcal{T}$$.\n  - $$d_g^-$$ and $$d_g^+$$: underachievement and overachievement deviations for each goal $$g \\in \\{1,2,3\\}$$.\n  - Optional reporting quantities such as total wage cost and total sales profit.\n\nInput Format\n{\n  \"clerk_categories\": \"list of clerk categories indexed by $$i \\in \\mathcal{I}$$\",\n  \"headcount\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"fixed number of clerks $$n_i$$ in category $$i$$\"\n  },\n  \"standard_hours\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"standard monthly working hours per clerk $$h_i$$ in category $$i$$\"\n  },\n  \"productivity\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"sales productivity rate $$\\\\alpha_i$$ in pairs per hour for category $$i$$\"\n  },\n  \"regular_wage\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"regular wage rate $$w_i$$ per hour for category $$i$$\"\n  },\n  \"overtime_wage\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"overtime wage rate $$\\\\omega_i$$ per hour for category $$i$$\"\n  },\n  \"unit_profit\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"profit per sold pair $$\\\\pi$$\"\n  },\n  \"sales_target\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"target monthly sales volume $$D$$ for goal $$p_1$$\"\n  },\n  \"goal_priority\": {\n    \"shape\": \"list of length $$3$$\",\n    \"meaning\": \"priority order of goals $$p_1$$, $$p_2$$, and $$p_3$$\"\n  },\n  \"planning_horizon\": {\n    \"shape\": \"set or scalar\",\n    \"meaning\": \"monthly planning horizon $$\\\\mathcal{T}$$\"\n  }\n}\n\nOutput Format\n{\n  \"regular_hours\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$ or $$|\\\\mathcal{I}| \\\\times |\\\\mathcal{T}|$$\",\n    \"meaning\": \"planned regular hours $$x_i$$ or $$x_{i,t}$$\"\n  },\n  \"overtime_hours\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$ or $$|\\\\mathcal{I}| \\\\times |\\\\mathcal{T}|$$\",\n    \"meaning\": \"planned overtime hours $$y_i$$ or $$y_{i,t}$$\"\n  },\n  \"sales_volume\": {\n    \"shape\": \"scalar or $$|\\\\mathcal{T}|$$\",\n    \"meaning\": \"total pairs sold $$s$$ or period sales $$s_t$$\"\n  },\n  \"goal_deviations\": {\n    \"under\": {\n      \"shape\": \"$$3$$ or $$|\\\\mathcal{G}|$$\",\n      \"meaning\": \"underachievement deviations $$d_g^-$$\"\n    },\n    \"over\": {\n      \"shape\": \"$$3$$ or $$|\\\\mathcal{G}|$$\",\n      \"meaning\": \"overachievement deviations $$d_g^+$$\"\n    }\n  },\n  \"optional_reports\": {\n    \"shape\": \"object\",\n    \"meaning\": \"reported total labor cost and total sales profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"clerk_categories\": [\"full_time\", \"part_time\"],\n  \"headcount\": [5, 4],\n  \"standard_hours\": [160, 80],\n  \"productivity\": [5, 2],\n  \"regular_wage\": [1.0, 0.6],\n  \"overtime_wage\": [1.5, 0.7],\n  \"unit_profit\": 0.3,\n  \"sales_target\": 5500,\n  \"goal_priority\": [\"p1\", \"p2\", \"p3\"],\n  \"planning_horizon\": \"one_month\"\n}",
     "parameters": [
         {
-            "name": "num_product_types",
-            "symbol": "P",
+            "name": "clerk_categories",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "I"
+            ],
+            "description": "Set of clerk categories indexed by category index i"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Number of product types indexed by p = 0,...,P-1"
+            "description": "Monthly planning horizon treated as a single month or singleton descriptor"
         },
         {
-            "name": "unit_selling_price",
-            "symbol": "s",
+            "name": "headcount",
+            "symbol": "n",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Unit selling price of product type p"
+            "description": "Fixed headcount in each clerk category"
         },
         {
-            "name": "unit_manufacturing_cost",
-            "symbol": "c",
+            "name": "standard_hours",
+            "symbol": "h",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Unit manufacturing cost of product type p"
+            "description": "Standard monthly working hours per clerk in each category"
         },
         {
-            "name": "unit_warehouse_space_requirement",
-            "symbol": "a",
+            "name": "productivity",
+            "symbol": "\\alpha",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Unit warehouse-space requirement of product type p"
+            "description": "Sales productivity rate in each clerk category measured in pairs per hour"
         },
         {
-            "name": "minimum_required_production",
-            "symbol": "\\ell",
+            "name": "regular_wage",
+            "symbol": "w",
             "shape": [
-                "P"
+                "I"
             ],
-            "description": "Minimum required production quantity for product type p, with 0 if not applicable"
+            "description": "Regular wage rate per hour in each clerk category"
         },
         {
-            "name": "warehouse_capacity",
-            "symbol": "W",
+            "name": "overtime_wage",
+            "symbol": "\\omega",
+            "shape": [
+                "I"
+            ],
+            "description": "Overtime wage rate per hour in each clerk category"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
             "shape": [],
-            "description": "Total available warehouse-space capacity"
+            "description": "Unit profit per sold pair"
         },
         {
-            "name": "production_limit",
-            "symbol": "Q",
+            "name": "sales_target",
+            "symbol": "D",
             "shape": [],
-            "description": "Maximum total number of units that may be produced"
+            "description": "Target monthly sales volume"
+        },
+        {
+            "name": "goal_priority",
+            "symbol": "p",
+            "shape": [
+                "3"
+            ],
+            "description": "Ordered goal priority identifiers for the three lexicographic goals"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "regular_hours",
             "symbol": "x",
             "shape": [
-                "P"
+                "I"
             ],
-            "domain": "integer",
-            "description": "Integer number of units of product type p to produce"
+            "domain": "continuous",
+            "description": "Regular monthly hours assigned to each clerk category"
         },
         {
-            "name": "total_profit",
-            "symbol": "z",
+            "name": "overtime_hours",
+            "symbol": "y",
+            "shape": [
+                "I"
+            ],
+            "domain": "continuous",
+            "description": "Overtime monthly hours assigned to each clerk category"
+        },
+        {
+            "name": "sales_volume",
+            "symbol": "s",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit of the production plan"
+            "description": "Total number of sold pairs over the planning horizon"
+        },
+        {
+            "name": "underachievement_deviation",
+            "symbol": "d^-",
+            "shape": [
+                "3"
+            ],
+            "domain": "continuous",
+            "description": "Underachievement deviation for each of the three ordered goals"
+        },
+        {
+            "name": "overachievement_deviation",
+            "symbol": "d^+",
+            "shape": [
+                "3"
+            ],
+            "domain": "continuous",
+            "description": "Overachievement deviation for each of the three ordered goals"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "total_standard_hours",
+            "symbol": "H",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total available standard monthly hours across all clerk categories"
+        },
+        {
+            "name": "total_overtime_hours",
+            "symbol": "Y",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total overtime hours across all clerk categories"
+        }
+    ],
     "constraints": [
         {
-            "name": "nonnegative_integer_production_quantity",
-            "description": "Production quantities must be feasible integer unit counts for each product type",
-            "formula": "x[p] \\in \\mathbb{Z}_{\\ge 0}",
+            "name": "nonnegative_regular_hours",
+            "description": "Regular monthly hours assigned to each clerk category must be nonnegative.",
+            "formula": "x_i \\geq 0",
+            "parameters": [
+                "headcount",
+                "standard_hours"
+            ],
             "variables": [
-                "production_quantity"
+                "regular_hours"
             ]
         },
         {
-            "name": "warehouse_capacity_limit",
-            "description": "Total warehouse space used by all produced items cannot exceed the available warehouse capacity",
-            "formula": "\\sum_{p=0}^{P-1} a_p x_p \\le W",
+            "name": "nonnegative_overtime_hours",
+            "description": "Overtime monthly hours assigned to each clerk category must be nonnegative.",
+            "formula": "y_i \\geq 0",
             "parameters": [
-                "unit_warehouse_space_requirement",
-                "warehouse_capacity"
+                "headcount",
+                "standard_hours"
             ],
             "variables": [
-                "production_quantity"
+                "overtime_hours"
             ]
         },
         {
-            "name": "production_limit",
-            "description": "The total number of units produced across all product types cannot exceed the overall production limit",
-            "formula": "\\sum_{p=0}^{P-1} x_p \\le Q",
+            "name": "nonnegative_sales_volume",
+            "description": "Total sales volume must be nonnegative.",
+            "formula": "s \\geq 0",
             "parameters": [
-                "production_limit"
+                "sales_target",
+                "unit_profit"
             ],
             "variables": [
-                "production_quantity"
+                "sales_volume"
             ]
         },
         {
-            "name": "minimum_production_requirement",
-            "description": "For each product type, production must meet or exceed the specified minimum required level",
-            "formula": "x_p \\ge \\ell_p \\quad \\forall p \\in \\{0,\\dots,P-1\\}",
+            "name": "nonnegative_goal_deviations",
+            "description": "Underachievement and overachievement deviations for each goal must be nonnegative.",
+            "formula": "d_g^- \\geq 0,\\ d_g^+ \\geq 0",
             "parameters": [
-                "minimum_required_production"
+                "sales_target",
+                "goal_priority"
             ],
             "variables": [
-                "production_quantity"
+                "underachievement_deviation",
+                "overachievement_deviation"
             ]
         },
         {
-            "name": "profit_definition",
-            "description": "The total profit variable equals the sum of per-unit margins times production quantities",
-            "formula": "z = \\sum_{p=0}^{P-1} (s_p - c_p)x_p",
+            "name": "regular_hours_capacity",
+            "description": "Regular hours assigned to each category cannot exceed the available standard hours implied by the fixed headcount in that category.",
+            "formula": "x_i \\leq n_i h_i",
             "parameters": [
-                "unit_selling_price",
-                "unit_manufacturing_cost"
+                "headcount",
+                "standard_hours"
             ],
             "variables": [
-                "production_quantity",
-                "total_profit"
+                "regular_hours"
+            ]
+        },
+        {
+            "name": "overtime_hours_definition",
+            "description": "Overtime hours in each category are nonnegative and represent hours above the regular assignment after standard hours are used.",
+            "formula": "0 \\leq y_i \\leq n_i h_i - x_i",
+            "parameters": [
+                "headcount",
+                "standard_hours"
+            ],
+            "variables": [
+                "overtime_hours",
+                "regular_hours"
+            ]
+        },
+        {
+            "name": "sales_generation_constraint",
+            "description": "Sales volume equals the total output generated from regular and overtime worked hours using category-specific productivity rates.",
+            "formula": "s = \\sum_{i \\in \\mathcal{I}} \\alpha_i (x_i + y_i)",
+            "parameters": [
+                "productivity"
+            ],
+            "variables": [
+                "sales_volume",
+                "regular_hours",
+                "overtime_hours"
+            ]
+        },
+        {
+            "name": "sales_target_balance_with_deviation",
+            "description": "Sales target deviation equation for the first lexicographic goal.",
+            "formula": "s + d_1^- - d_1^+ = D",
+            "parameters": [
+                "sales_target"
+            ],
+            "variables": [
+                "sales_volume",
+                "underachievement_deviation",
+                "overachievement_deviation"
+            ]
+        },
+        {
+            "name": "full_employment_balance_with_deviation",
+            "description": "Full employment deviation equation for the second lexicographic goal, matching regular hours to total available standard hours.",
+            "formula": "\\sum_{i \\in \\mathcal{I}} x_i + d_2^- - d_2^+ = \\sum_{i \\in \\mathcal{I}} n_i h_i",
+            "parameters": [
+                "headcount",
+                "standard_hours"
+            ],
+            "variables": [
+                "regular_hours",
+                "underachievement_deviation",
+                "overachievement_deviation"
+            ]
+        },
+        {
+            "name": "overtime_objective_link",
+            "description": "Link the third lexicographic goal deviation to total overtime hours so minimizing the deviation minimizes overtime usage.",
+            "formula": "d_3^+ = \\sum_{i \\in \\mathcal{I}} y_i",
+            "parameters": [],
+            "variables": [
+                "overachievement_deviation",
+                "overtime_hours"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize total profit of the production plan",
-            "sense": "maximize"
+            "name": "lexicographic_goal_satisfaction",
+            "description": "Satisfy the prioritized goals in lexicographic order: first achieve the monthly sales target, then ensure full employment of available standard hours, then minimize overtime usage.",
+            "sense": "feasibility"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit, defined as the sum over all product types of unit profit \\((s_p-c_p)\\) times produced quantity \\(x_p\\).",
-        "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "z = \\sum_{p=0}^{P-1} (s_p - c_p)x_p",
+        "description": "Use preemption optimization to prioritize the three ordered goals lexicographically: first minimize sales shortfall, then minimize deviation from full employment of standard hours, and finally minimize total overtime hours.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "minimize",
+        "formula": "\\text{lexicographically minimize } \\left(d_1^-,\\ d_2^-,\\ \\sum_{i \\in \\mathcal{I}} y_i\\right)",
         "parameters": [
-            "num_product_types",
-            "unit_selling_price",
-            "unit_manufacturing_cost"
+            "goal_priority"
         ],
         "variables": [
-            "production_quantity",
-            "total_profit"
+            "underachievement_deviation",
+            "overtime_hours"
         ]
     }
 }

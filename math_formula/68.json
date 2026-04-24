@@ -1,191 +1,177 @@
 {
-    "problem": "Problem description\n- This is a single-period cutting-stock planning problem for a homogeneous steel reinforcement workshop.\n- There is one raw stock material with length $$L$$ and a set of finished piece types indexed by $$p \\in \\mathcal{P}$$.\n- Each piece type $$p$$ has required length $$\\ell_p$$ and demand quantity $$d_p$$.\n- The planning horizon is single-period, so the time set is $$\\mathcal{T} = \\{1\\}$$.\n- A feasible cutting pattern $$k \\in \\mathcal{K}$$ specifies how one raw bar can be cut into pieces of the available types while respecting the raw length $$L$$; any leftover length under that pattern is waste $$w_k$$.\n- The planning goal is to choose how many raw bars follow each feasible pattern so that all demanded pieces are produced and total waste is minimized.\n- All pieces have the same diameter, so only lengths and quantities matter in the plan.\n- The workshop may use only nonnegative integer numbers of raw bars for each pattern.\n- Every demand $$d_p$$ must be satisfied by the combined output of the chosen patterns.\n- No cutting pattern may use more total piece length than the available raw bar length $$L$$.\n- Waste is the unused length remaining after cutting a raw bar, and the objective is to minimize the total waste across all used raw bars.\n- A solution is represented by:\n  - $$x_k$$: the number of raw bars cut according to feasible pattern $$k \\in \\mathcal{K}$$.\n  - $$w_k$$: the waste produced by one raw bar under pattern $$k$$.\n  - $$q_p$$: the total number of pieces of type $$p \\in \\mathcal{P}$$ produced by the chosen patterns.\n  - $$Z$$: the total waste of the cutting plan.\n\nInput Format\n{\n  \"T\": \"Single-period planning horizon $$\\mathcal{T} = \\\\{1\\\\}$$\",\n  \"P\": \"Number of piece types, indexed by $$p \\\\in \\\\mathcal{P} = \\\\{1,\\\\dots,P\\\\}$$\",\n  \"L\": \"Length of one raw stock bar\",\n  \"ell\": {\n    \"shape\": \"[$$P$$]\",\n    \"meaning\": \"Required lengths $$\\\\ell_p$$ for each piece type $$p$$\"\n  },\n  \"d\": {\n    \"shape\": \"[$$P$$]\",\n    \"meaning\": \"Demand quantities $$d_p$$ for each piece type $$p$$\"\n  },\n  \"c_w\": \"Unit waste penalty $$c^{\\\\mathrm{w}}$$, used when waste is priced rather than measured directly\"\n}\n\nOutput Format\n{\n  \"selected_patterns\": [\n    {\n      \"pattern_id\": \"$$k$$\",\n      \"composition\": {\n        \"p\": \"Number of pieces of type $$p$$ cut from one raw bar under pattern $$k$$\"\n      },\n      \"bars_used\": \"$$x_k$$\",\n      \"waste_per_bar\": \"$$w_k$$\"\n    }\n  ],\n  \"total_waste\": \"$$Z$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": \"$$1$$\",\n  \"P\": \"$$2$$\",\n  \"L\": \"$$10$$\",\n  \"ell\": [\"$$3$$\", \"$$4$$\"],\n  \"d\": [\"$$90$$\", \"$$60$$\"],\n  \"c_w\": \"$$1$$\"\n}",
+    "problem": "Problem description\n- A single-period transportation planning problem is considered over a monthly planning horizon $$\\mathcal{T}$$.\n- There is a set of supply nodes $$\\mathcal{I}$$ representing coal yards, and a set of demand nodes $$\\mathcal{J}$$ representing residential areas.\n- Each supply node $$i \\in \\mathcal{I}$$ has an available coal quantity $$s_i$$ for the planning horizon.\n- Each demand node $$j \\in \\mathcal{J}$$ has a required coal quantity $$d_j$$ for the planning horizon.\n- The transportation distance from supply node $$i$$ to demand node $$j$$ is denoted by $$\\ell_{ij}$$.\n- The planning goal is to determine how much coal to ship from each supply node to each demand node so that demand is satisfied, supply availability is respected, and total ton-kilometers are minimized.\n- The business rules are:\n  - Coal shipped out of any supply node must not exceed the amount available at that node.\n  - Each demand node must receive enough coal to meet its monthly requirement.\n  - Shipment quantities must be nonnegative.\n  - When the network is balanced, all available supply is allocated and all demand is met.\n- A solution is represented by:\n  - $$x_{ij}$$: the quantity of coal shipped from supply node $$i \\in \\mathcal{I}$$ to demand node $$j \\in \\mathcal{J}$$ over the planning horizon.\n  - $$Z$$: the total transportation burden measured in ton-kilometers.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"Monthly planning horizon.\"\n  },\n  \"supply_nodes\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"meaning\": \"Set of coal yards.\"\n  },\n  \"demand_nodes\": {\n    \"type\": \"set\",\n    \"symbol\": \"$$\\\\mathcal{J}$$\",\n    \"meaning\": \"Set of residential areas.\"\n  },\n  \"supply_availability\": {\n    \"type\": \"vector\",\n    \"symbol\": \"$$s_i$$\",\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"Available coal quantity at each supply node $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"demand_requirements\": {\n    \"type\": \"vector\",\n    \"symbol\": \"$$d_j$$\",\n    \"shape\": \"$$|\\\\mathcal{J}|$$\",\n    \"meaning\": \"Required coal quantity at each demand node $$j \\\\in \\\\mathcal{J}$$.\"\n  },\n  \"distance_matrix\": {\n    \"type\": \"matrix\",\n    \"symbol\": \"$$\\\\ell_{ij}$$\",\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"Distance in kilometers from supply node $$i$$ to demand node $$j$$.\"\n  }\n}\n\nOutput Format\n{\n  \"shipments\": {\n    \"type\": \"matrix\",\n    \"symbol\": \"$$x_{ij}$$\",\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"Coal shipment quantity from supply node $$i$$ to demand node $$j$$.\"\n  },\n  \"total_transportation_burden\": {\n    \"type\": \"scalar\",\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"Total ton-kilometers produced by the shipment plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 1,\n  \"supply_nodes\": [\"A\", \"B\"],\n  \"demand_nodes\": [\"R1\", \"R2\", \"R3\"],\n  \"supply_availability\": {\n    \"A\": 80,\n    \"B\": 100\n  },\n  \"demand_requirements\": {\n    \"R1\": 55,\n    \"R2\": 75,\n    \"R3\": 50\n  },\n  \"distance_matrix\": {\n    \"A\": {\n      \"R1\": 10,\n      \"R2\": 5,\n      \"R3\": 6\n    },\n    \"B\": {\n      \"R1\": 4,\n      \"R2\": 8,\n      \"R3\": 15\n    }\n  }\n}",
     "parameters": [
         {
             "name": "planning_horizon",
-            "symbol": "T",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Number of planning periods in the horizon (single-period setting)"
+            "description": "Monthly planning horizon for the single-period transportation planning model"
         },
         {
-            "name": "num_piece_types",
-            "symbol": "P",
+            "name": "num_supply_nodes",
+            "symbol": "M",
             "shape": [],
-            "description": "Number of finished piece types"
+            "description": "Number of supply nodes in the coal shipping network"
         },
         {
-            "name": "raw_stock_length",
-            "symbol": "L",
+            "name": "num_demand_nodes",
+            "symbol": "N",
             "shape": [],
-            "description": "Length of one raw stock bar"
+            "description": "Number of demand nodes in the coal shipping network"
         },
         {
-            "name": "waste_penalty",
-            "symbol": "c^{\\mathrm{w}}",
-            "shape": [],
-            "description": "Unit penalty applied to total waste if waste is monetized"
-        },
-        {
-            "name": "piece_length",
-            "symbol": "\\ell",
+            "name": "supply_availability",
+            "symbol": "s",
             "shape": [
-                "P"
+                "M"
             ],
-            "description": "Required length of each piece type"
+            "description": "Available coal quantity at each supply node"
         },
         {
-            "name": "demand_quantity",
+            "name": "demand_requirements",
             "symbol": "d",
             "shape": [
-                "P"
+                "N"
             ],
-            "description": "Demand quantity for each piece type"
+            "description": "Required coal quantity at each demand node"
         },
         {
-            "name": "pattern_piece_count",
-            "symbol": "a",
+            "name": "distance_matrix",
+            "symbol": "\\ell",
             "shape": [
-                "K",
-                "P"
+                "M",
+                "N"
             ],
-            "description": "Number of pieces of each type cut from one raw bar under each feasible cutting pattern"
-        },
-        {
-            "name": "pattern_waste",
-            "symbol": "w",
-            "shape": [
-                "K"
-            ],
-            "description": "Waste generated by one raw bar under each feasible cutting pattern"
+            "description": "Transportation distance in kilometers from each supply node to each demand node"
         }
     ],
     "variables": [
         {
-            "name": "bars_used_by_pattern",
+            "name": "shipment_quantity",
             "symbol": "x",
             "shape": [
-                "K"
+                "M",
+                "N"
             ],
-            "domain": "integer",
-            "description": "Number of raw bars cut according to each feasible cutting pattern"
+            "domain": "continuous",
+            "description": "Quantity of coal shipped from each supply node to each demand node"
         },
         {
-            "name": "production_quantity",
-            "symbol": "q",
-            "shape": [
-                "P"
-            ],
-            "domain": "integer",
-            "description": "Total number of pieces produced for each piece type by the selected patterns"
-        },
-        {
-            "name": "total_waste",
+            "name": "total_transportation_burden",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total waste of the cutting plan"
+            "description": "Total transportation burden measured in ton-kilometers"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
+            "name": "shipment_nonnegativity",
+            "description": "Shipment quantities must be nonnegative",
+            "formula": "x_{ij} \\ge 0",
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "supply_limit",
+            "description": "Total shipments out of each supply node must not exceed available supply",
+            "formula": "\\sum_{j=1}^{N} x_{ij} \\le s_i \\quad \\forall i\\in\\mathcal{I}",
+            "parameters": [
+                "supply_availability"
+            ],
+            "variables": [
+                "shipment_quantity"
+            ]
+        },
+        {
             "name": "demand_satisfaction",
-            "description": "Produced quantity for each piece type must cover its demand",
-            "formula": "q[p] \\ge d[p]",
+            "description": "Each demand node must receive enough coal to satisfy demand requirements",
+            "formula": "\\sum_{i=1}^{M} x_{ij} \\ge d_j \\quad \\forall j\\in\\mathcal{J}",
             "parameters": [
-                "demand_quantity"
+                "demand_requirements"
             ],
             "variables": [
-                "production_quantity"
+                "shipment_quantity"
             ]
         },
         {
-            "name": "nonnegative_integer_bars_used",
-            "description": "Number of raw bars assigned to each feasible cutting pattern must be a nonnegative integer",
-            "formula": "x[k] \\in \\mathbb{Z}_{\\ge 0}",
+            "name": "balanced_network_exact_matching",
+            "description": "In a balanced network, total supply and total demand are matched exactly by the shipment plan",
+            "formula": "\\sum_{j=1}^{N} x_{ij} = s_i \\quad \\forall i\\in\\mathcal{I},\\qquad \\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j\\in\\mathcal{J}",
+            "parameters": [
+                "supply_availability",
+                "demand_requirements"
+            ],
             "variables": [
-                "bars_used_by_pattern"
+                "shipment_quantity"
             ]
         },
         {
-            "name": "nonnegative_integer_production",
-            "description": "Total produced quantity for each piece type must be a nonnegative integer",
-            "formula": "q[p] \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "production_quantity"
+            "name": "parameter_nonnegativity_supply",
+            "description": "Supply availability values are nonnegative",
+            "formula": "s[i] \\ge 0",
+            "parameters": [
+                "supply_availability"
             ]
         },
         {
-            "name": "nonnegative_total_waste",
-            "description": "Total waste must be nonnegative",
-            "formula": "Z \\ge 0",
-            "variables": [
-                "total_waste"
+            "name": "parameter_nonnegativity_demand",
+            "description": "Demand requirements are nonnegative",
+            "formula": "d[j] \\ge 0",
+            "parameters": [
+                "demand_requirements"
             ]
         },
         {
-            "name": "pattern_length_feasibility",
-            "description": "Each cutting pattern may use no more total piece length than the raw stock bar length",
-            "formula": "\\sum_{p \\in \\mathcal{P}} a[k][p]\\,\\ell[p] \\le L",
+            "name": "parameter_nonnegativity_distance",
+            "description": "Transportation distances are nonnegative",
+            "formula": "\\ell[i][j] \\ge 0",
             "parameters": [
-                "pattern_piece_count",
-                "piece_length",
-                "raw_stock_length"
-            ],
-            "variables": []
-        },
-        {
-            "name": "pattern_waste_definition",
-            "description": "Waste for each feasible pattern is the unused length remaining after cutting one raw bar",
-            "formula": "w[k] = L - \\sum_{p \\in \\mathcal{P}} a[k][p]\\,\\ell[p]",
-            "parameters": [
-                "pattern_waste",
-                "pattern_piece_count",
-                "piece_length",
-                "raw_stock_length"
-            ],
-            "variables": []
-        },
-        {
-            "name": "total_waste_aggregation",
-            "description": "Total waste is the sum of waste over all used raw bars",
-            "formula": "Z = \\sum_{k \\in \\mathcal{K}} w[k]\\,x[k]",
-            "parameters": [
-                "pattern_waste"
-            ],
-            "variables": [
-                "bars_used_by_pattern",
-                "total_waste"
+                "distance_matrix"
             ]
         },
         {
-            "name": "production_definition",
-            "description": "Total produced quantity for each piece type equals the sum of pieces contributed by all selected patterns",
-            "formula": "q[p] = \\sum_{k \\in \\mathcal{K}} a[k][p] \\, x[k]",
-            "parameters": [
-                "pattern_piece_count"
-            ],
+            "name": "variable_domain_continuous_shipment",
+            "description": "Shipment quantities are continuous variables",
+            "formula": "x[i][j] \\text{ is continuous}",
             "variables": [
-                "production_quantity",
-                "bars_used_by_pattern"
+                "shipment_quantity"
+            ]
+        },
+        {
+            "name": "variable_domain_continuous_burden",
+            "description": "Total transportation burden is a continuous variable",
+            "formula": "Z \\text{ is continuous}",
+            "variables": [
+                "total_transportation_burden"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_waste_minimization",
-            "description": "minimize total waste across all used raw bars; equivalently minimize the waste penalty if waste is monetized",
-            "sense": "minimize"
+            "name": "transportation_burden_minimization",
+            "description": "Minimize the total ton-kilometers associated with the shipment plan",
+            "sense": "maximize"
+        },
+        {
+            "name": "feasibility_shipment_plan",
+            "description": "Find any shipment plan satisfying all supply and demand requirements while respecting nonnegativity",
+            "sense": "feasibility"
         }
     ],
     "final_objective": {
-        "description": "Minimize total waste generated by the selected cutting patterns. The scalar total waste variable Z is minimized directly as the single objective.",
+        "description": "Minimize the total ton-kilometers associated with the shipment plan; the feasibility requirement is enforced through constraints, and the previous maximize sense is corrected to minimize.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "Z",
-        "parameters": [],
+        "formula": "Z = \\sum_{i=1}^{M}\\sum_{j=1}^{N} \\ell_{ij} x_{ij}",
+        "parameters": [
+            "distance_matrix"
+        ],
         "variables": [
-            "total_waste"
+            "shipment_quantity",
+            "total_transportation_burden"
         ]
     }
 }

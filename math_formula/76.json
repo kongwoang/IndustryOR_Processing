@@ -1,279 +1,247 @@
 {
-    "problem": "Problem description\n- This is a single-period assignment-and-setup planning problem with a set of parts $$\\mathcal{P}$$ and a set of candidate machines $$\\mathcal{M}$$.\n- Each part $$p \\in \\mathcal{P}$$ has required quantity $$q_p$$ and must be processed exactly once on one machine.\n- The unit processing cost of assigning part $$p$$ to machine $$m$$ is $$c_{pm}$$.\n- Each machine $$m \\in \\mathcal{M}$$ has a fixed setup cost $$f_m$$ that is incurred once if the machine is used for at least one part.\n- Three machines are distinguished as $$m_A$$, $$m_B$$, and $$m_C$$.\n- Five parts are distinguished as $$p^{(1)}$$, $$p^{(2)}$$, $$p^{(3)}$$, $$p^{(4)}$$, and $$p^{(5)}$$ for special routing restrictions.\n- The planning goal is to minimize the total cost made up of all processing costs and all incurred setup costs.\n\n- Required business constraints:\n  - Every part demand must be fully satisfied.\n  - Each part must be assigned to exactly one machine.\n  - If $$p^{(1)}$$ is assigned to $$m_A$$, then $$p^{(2)}$$ must be assigned to either $$m_B$$ or $$m_C$$.\n  - If $$p^{(1)}$$ is assigned to either $$m_B$$ or $$m_C$$, then $$p^{(2)}$$ must be assigned to $$m_A$$.\n  - Part $$p^{(3)}$$ must be processed on $$m_A$$.\n  - Part $$p^{(4)}$$ must be processed on $$m_B$$.\n  - Part $$p^{(5)}$$ must be processed on $$m_C$$.\n  - The total number of parts assigned to $$m_C$$ must not exceed the capacity limit $$U_C$$.\n  - A machine becomes active if at least one part is assigned to it, and any active machine incurs its setup cost.\n\n- A solution is represented by:\n  - Binary assignment variables $$x_{pm}$$, where $$x_{pm} = 1$$ means part $$p$$ is assigned to machine $$m$$, and $$x_{pm} = 0$$ otherwise.\n  - Binary activation variables $$y_m$$, where $$y_m = 1$$ means machine $$m$$ is used, and $$y_m = 0$$ otherwise.\n  - The minimized total cost of processing plus machine setups.\n\nInput Format\n{\n  \"parts\": {\n    \"count\": \"$$P$$\",\n    \"indices\": \"$$\\\\mathcal{P}$$\"\n  },\n  \"machines\": {\n    \"count\": \"$$M$$\",\n    \"indices\": \"$$\\\\mathcal{M}$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"$$q_p$$ is the required quantity of part $$p$$\"\n  },\n  \"processing_cost\": {\n    \"shape\": \"$$P \\\\times M$$\",\n    \"meaning\": \"$$c_{pm}$$ is the unit processing cost of part $$p$$ on machine $$m$$\"\n  },\n  \"setup_cost\": {\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"$$f_m$$ is the fixed setup cost of machine $$m$$ if it is used\"\n  },\n  \"distinguished_machines\": {\n    \"A\": \"$$m_A$$\",\n    \"B\": \"$$m_B$$\",\n    \"C\": \"$$m_C$$\"\n  },\n  \"distinguished_parts\": {\n    \"first\": \"$$p^{(1)}$$\",\n    \"second\": \"$$p^{(2)}$$\",\n    \"third\": \"$$p^{(3)}$$\",\n    \"fourth\": \"$$p^{(4)}$$\",\n    \"fifth\": \"$$p^{(5)}$$\"\n  },\n  \"routing_rules\": {\n    \"meaning\": \"logical assignment dependencies involving $$p^{(1)}$$ and $$p^{(2)}$$\"\n  },\n  \"fixed_assignments\": {\n    \"meaning\": \"parts with mandatory machine choices\"\n  },\n  \"capacity_limits\": {\n    \"machine_C\": \"$$U_C$$\",\n    \"meaning\": \"maximum number of parts allowed on $$m_C$$\"\n  }\n}\n\nOutput Format\n{\n  \"assignment_matrix\": {\n    \"shape\": \"$$P \\\\times M$$\",\n    \"meaning\": \"$$x_{pm}$$ indicates whether part $$p$$ is assigned to machine $$m$$\"\n  },\n  \"machine_activation\": {\n    \"shape\": \"$$M$$\",\n    \"meaning\": \"$$y_m$$ indicates whether machine $$m$$ is activated\"\n  },\n  \"total_cost\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"the minimized total cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"parts\": [\"$$1$$\", \"$$2$$\", \"$$3$$\", \"$$4$$\", \"$$5$$\", \"$$6$$\", \"$$7$$\", \"$$8$$\", \"$$9$$\", \"$$10$$\"],\n  \"machines\": [\"$$A$$\", \"$$B$$\", \"$$C$$\"],\n  \"processing_cost\": {\n    \"$$A$$\": [\"$$10$$\", \"$$20$$\", \"$$30$$\", \"$$40$$\", \"$$50$$\", \"$$60$$\", \"$$70$$\", \"$$80$$\", \"$$90$$\", \"$$100$$\"],\n    \"$$B$$\": [\"$$15$$\", \"$$25$$\", \"$$35$$\", \"$$45$$\", \"$$55$$\", \"$$65$$\", \"$$75$$\", \"$$85$$\", \"$$95$$\", \"$$105$$\"],\n    \"$$C$$\": [\"$$20$$\", \"$$30$$\", \"$$40$$\", \"$$50$$\", \"$$60$$\", \"$$70$$\", \"$$80$$\", \"$$90$$\", \"$$100$$\", \"$$110$$\"]\n  },\n  \"setup_cost\": {\n    \"$$A$$\": \"$$100$$\",\n    \"$$B$$\": \"$$135$$\",\n    \"$$C$$\": \"$$200$$\"\n  },\n  \"demand\": {\n    \"$$1$$\": \"$$1$$\",\n    \"$$2$$\": \"$$1$$\",\n    \"$$3$$\": \"$$1$$\",\n    \"$$4$$\": \"$$1$$\",\n    \"$$5$$\": \"$$1$$\",\n    \"$$6$$\": \"$$1$$\",\n    \"$$7$$\": \"$$1$$\",\n    \"$$8$$\": \"$$1$$\",\n    \"$$9$$\": \"$$1$$\",\n    \"$$10$$\": \"$$1$$\"\n  },\n  \"fixed_assignments\": [\n    {\n      \"part\": \"$$3$$\",\n      \"machine\": \"$$A$$\"\n    },\n    {\n      \"part\": \"$$4$$\",\n      \"machine\": \"$$B$$\"\n    },\n    {\n      \"part\": \"$$5$$\",\n      \"machine\": \"$$C$$\"\n    }\n  ],\n  \"conditional_rules\": [\n    {\n      \"if\": {\n        \"part\": \"$$1$$\",\n        \"machine\": \"$$A$$\"\n      },\n      \"then\": {\n        \"part\": \"$$2$$\",\n        \"machine_in\": [\"$$B$$\", \"$$C$$\"]\n      }\n    },\n    {\n      \"if\": {\n        \"part\": \"$$1$$\",\n        \"machine_in\": [\"$$B$$\", \"$$C$$\"]\n      },\n      \"then\": {\n        \"part\": \"$$2$$\",\n        \"machine\": \"$$A$$\"\n      }\n    }\n  ],\n  \"capacity_limits\": {\n    \"machine_C\": \"$$3$$\"\n  }\n}",
+    "problem": "Problem description\n- There are $$T$$ ordered planning periods indexed by $$t \\in \\mathcal{T}$$, representing the quarterly planning horizon for timber purchasing, storage, and sales.\n- The company has one warehouse with storage capacity $$K$$ measured in timber volume units.\n- Timber may be purchased at the beginning of each period, then sold in the same period or stored for later periods.\n- The selling price, purchase price, and estimated maximum sales volume may vary by period.\n- The storage charge per unit depends on the number of periods the timber remains in storage, with a base parameter $$a$$ and an age-dependent parameter $$b$$.\n- The planning goal is to maximize total annual profit from timber purchases, storage, and sales.\n- Inventory held in the warehouse must never exceed the storage capacity.\n- Sales in each period must not exceed the estimated maximum sales volume for that period.\n- Timber is not suitable for long-term storage, so all remaining inventory must be cleared by the end of the final period $$T$$.\n- Inventory flow must remain consistent across periods, so timber available in each period can only come from current purchases and previously stored inventory.\n- Storage cost must reflect the time each unit of timber spends in the warehouse.\n- A solution is represented by:\n  - $$x_t$$: the quantity of timber purchased at the beginning of period $$t$$.\n  - $$y_t$$: the quantity of timber sold during period $$t$$.\n  - $$I_t$$: the inventory remaining at the end of period $$t$$.\n  - $$z_{t,\\tau}$$: the quantity purchased in period $$\\tau$$ and sold in period $$t$$, used to track storage age and age-based holding cost, where $$\\tau \\le t$$.\n  - $$Z$$: the total annual profit obtained by the plan.\n\nInput Format\n{\n  \"T\": {\n    \"description\": \"Number of planning periods in the horizon.\",\n    \"symbol\": \"$$T$$\",\n    \"type\": \"integer\"\n  },\n  \"periods\": {\n    \"description\": \"Ordered set of periods indexed by $$t \\\\in \\\\mathcal{T}$$.\",\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"warehouse_capacity\": {\n    \"description\": \"Maximum inventory that can be stored in the warehouse.\",\n    \"symbol\": \"$$K$$\",\n    \"type\": \"scalar\"\n  },\n  \"storage_cost_parameters\": {\n    \"description\": \"Parameters governing per-unit storage charge as a function of storage age.\",\n    \"fields\": {\n      \"base_cost\": {\n        \"symbol\": \"$$a$$\",\n        \"type\": \"scalar\"\n      },\n      \"age_slope\": {\n        \"symbol\": \"$$b$$\",\n        \"type\": \"scalar\"\n      }\n    }\n  },\n  \"initial_inventory\": {\n    \"description\": \"Inventory available before the first period begins.\",\n    \"symbol\": \"$$I_0$$\",\n    \"type\": \"scalar\"\n  },\n  \"final_inventory_requirement\": {\n    \"description\": \"Required inventory remaining after the last period.\",\n    \"symbol\": \"$$I_T$$\",\n    \"type\": \"scalar\"\n  },\n  \"period_data\": {\n    \"description\": \"Period-wise prices and sales limits.\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array of objects\",\n    \"fields\": {\n      \"purchase_price\": {\n        \"description\": \"Unit purchase price in period $$t$$.\",\n        \"symbol\": \"$$c_t^{\\\\mathrm{buy}}$$\",\n        \"type\": \"scalar\"\n      },\n      \"sale_price\": {\n        \"description\": \"Unit sale price in period $$t$$.\",\n        \"symbol\": \"$$c_t^{\\\\mathrm{sell}}$$\",\n        \"type\": \"scalar\"\n      },\n      \"max_sales_volume\": {\n        \"description\": \"Maximum amount that can be sold in period $$t$$.\",\n        \"symbol\": \"$$d_t$$\",\n        \"type\": \"scalar\"\n      }\n    }\n  }\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"description\": \"Optimal quantity purchased at the beginning of each period.\",\n    \"symbol\": \"$$x_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"sales_plan\": {\n    \"description\": \"Optimal quantity sold in each period.\",\n    \"symbol\": \"$$y_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"ending_inventory\": {\n    \"description\": \"Inventory remaining at the end of each period.\",\n    \"symbol\": \"$$I_t$$\",\n    \"shape\": \"$$T$$\",\n    \"type\": \"array\"\n  },\n  \"age_tracked_sales\": {\n    \"description\": \"Optional age-tracked sales quantities for timber purchased in period $$\\\\tau$$ and sold in period $$t$$.\",\n    \"symbol\": \"$$z_{t,\\\\tau}$$\",\n    \"shape\": \"$$T \\\\times T$$\",\n    \"type\": \"lower-triangular array\"\n  },\n  \"objective_value\": {\n    \"description\": \"Maximum total annual profit achieved by the plan.\",\n    \"symbol\": \"$$Z$$\",\n    \"type\": \"scalar\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 4,\n  \"periods\": [\"Winter\", \"Spring\", \"Summer\", \"Autumn\"],\n  \"warehouse_capacity\": 200000,\n  \"storage_cost_parameters\": {\n    \"base_cost\": 70,\n    \"age_slope\": 100\n  },\n  \"initial_inventory\": 0,\n  \"final_inventory_requirement\": 0,\n  \"period_data\": [\n    {\n      \"period\": \"Winter\",\n      \"purchase_price\": 410,\n      \"sale_price\": 425,\n      \"max_sales_volume\": 100\n    },\n    {\n      \"period\": \"Spring\",\n      \"purchase_price\": 430,\n      \"sale_price\": 440,\n      \"max_sales_volume\": 140\n    },\n    {\n      \"period\": \"Summer\",\n      \"purchase_price\": 460,\n      \"sale_price\": 465,\n      \"max_sales_volume\": 200\n    },\n    {\n      \"period\": \"Autumn\",\n      \"purchase_price\": 450,\n      \"sale_price\": 455,\n      \"max_sales_volume\": 160\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "num_parts",
-            "symbol": "P",
+            "name": "planning_horizon_periods",
+            "symbol": "T",
             "shape": [],
-            "description": "Total number of parts in the set of parts"
+            "description": "Number of planning periods in the horizon"
         },
         {
-            "name": "num_machines",
-            "symbol": "M",
-            "shape": [],
-            "description": "Total number of candidate machines"
-        },
-        {
-            "name": "part_quantity",
-            "symbol": "q",
+            "name": "period_set",
+            "symbol": "\\mathcal{T}",
             "shape": [
-                "P"
+                "T"
             ],
-            "description": "Required quantity of each part"
+            "description": "Ordered set of planning periods indexed from 0 to T-1"
         },
         {
-            "name": "processing_cost",
-            "symbol": "c",
+            "name": "warehouse_capacity",
+            "symbol": "K",
+            "shape": [],
+            "description": "Warehouse storage capacity"
+        },
+        {
+            "name": "base_storage_cost",
+            "symbol": "a",
+            "shape": [],
+            "description": "Base storage cost parameter"
+        },
+        {
+            "name": "age_dependent_storage_cost",
+            "symbol": "b",
+            "shape": [],
+            "description": "Age-dependent storage cost parameter"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [],
+            "description": "Initial inventory before period 0"
+        },
+        {
+            "name": "final_inventory_requirement",
+            "symbol": "I_T",
+            "shape": [],
+            "description": "Required inventory after period T-1"
+        },
+        {
+            "name": "purchase_price",
+            "symbol": "c^{\\mathrm{buy}}",
             "shape": [
-                "P",
-                "M"
+                "T"
             ],
-            "description": "Unit processing cost for assigning each part to each machine"
+            "description": "Unit purchase price in each period"
         },
         {
-            "name": "setup_cost",
-            "symbol": "f",
+            "name": "sale_price",
+            "symbol": "c^{\\mathrm{sell}}",
             "shape": [
-                "M"
+                "T"
             ],
-            "description": "Fixed setup cost for each machine if it is used"
+            "description": "Unit sale price in each period"
         },
         {
-            "name": "capacity_m_c",
-            "symbol": "U_C",
-            "shape": [],
-            "description": "Capacity limit on the number of parts assigned to distinguished machine m_C"
-        },
-        {
-            "name": "machine_a",
-            "symbol": "m_A",
-            "shape": [],
-            "description": "Distinguished machine label m_A for special routing rules"
-        },
-        {
-            "name": "machine_b",
-            "symbol": "m_B",
-            "shape": [],
-            "description": "Distinguished machine label m_B for special routing rules"
-        },
-        {
-            "name": "machine_c",
-            "symbol": "m_C",
-            "shape": [],
-            "description": "Distinguished machine label m_C for special routing rules"
-        },
-        {
-            "name": "part_1",
-            "symbol": "p^{(1)}",
-            "shape": [],
-            "description": "Distinguished part p^(1) for special routing rules"
-        },
-        {
-            "name": "part_2",
-            "symbol": "p^{(2)}",
-            "shape": [],
-            "description": "Distinguished part p^(2) for special routing rules"
-        },
-        {
-            "name": "part_3",
-            "symbol": "p^{(3)}",
-            "shape": [],
-            "description": "Distinguished part p^(3) that must be processed on m_A"
-        },
-        {
-            "name": "part_4",
-            "symbol": "p^{(4)}",
-            "shape": [],
-            "description": "Distinguished part p^(4) that must be processed on m_B"
-        },
-        {
-            "name": "part_5",
-            "symbol": "p^{(5)}",
-            "shape": [],
-            "description": "Distinguished part p^(5) that must be processed on m_C"
+            "name": "max_sales_volume",
+            "symbol": "d",
+            "shape": [
+                "T"
+            ],
+            "description": "Maximum sales volume in each period"
         }
     ],
     "variables": [
         {
-            "name": "assignment",
+            "name": "purchase_quantity",
             "symbol": "x",
             "shape": [
-                "P",
-                "M"
+                "T"
             ],
-            "domain": "binary",
-            "description": "Binary assignment variable equal to 1 if part p is assigned to machine m, and 0 otherwise"
+            "domain": "continuous",
+            "description": "Quantity purchased at the beginning of each period"
         },
         {
-            "name": "machine_active",
+            "name": "sales_quantity",
             "symbol": "y",
             "shape": [
-                "M"
+                "T"
             ],
-            "domain": "binary",
-            "description": "Binary activation variable equal to 1 if machine m is used, and 0 otherwise"
-        }
-    ],
-    "auxiliary_variables": [
+            "domain": "continuous",
+            "description": "Quantity sold during each period"
+        },
         {
-            "name": "total_cost",
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Inventory remaining at the end of each period"
+        },
+        {
+            "name": "age_tracked_sales",
             "symbol": "z",
+            "shape": [
+                "T",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity purchased in period tau and sold in period t, defined only for valid pairs with tau <= t"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Auxiliary variable representing the total objective cost for reporting and solver output"
+            "description": "Total annual profit"
         }
     ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "binary_assignment_domain",
-            "description": "Assignment variables are binary",
-            "formula": "x[p][m] \\in \\{0,1\\}",
-            "variables": [
-                "assignment"
-            ]
-        },
-        {
-            "name": "binary_activation_domain",
-            "description": "Activation variables are binary",
-            "formula": "y[m] \\in \\{0,1\\}",
-            "variables": [
-                "machine_active"
-            ]
-        },
-        {
-            "name": "one_machine_per_part",
-            "description": "Each part must be assigned to exactly one machine",
-            "formula": "\\sum_{m=1}^{M} x_{pm} = 1 \\quad \\forall p=1,\\dots,P",
-            "variables": [
-                "assignment"
-            ]
-        },
-        {
-            "name": "machine_activation_link",
-            "description": "A machine is active if and only if at least one part is assigned to it",
-            "formula": "x_{pm} \\leq y_m \\quad \\forall p=1,\\dots,P,\\ \\forall m=1,\\dots,M",
-            "variables": [
-                "assignment",
-                "machine_active"
-            ]
-        },
-        {
-            "name": "conditional_routing_ab",
-            "description": "If part p^(1) is assigned to m_A, then part p^(2) must be assigned to m_B or m_C",
-            "formula": "x_{p^{(1)},m_A} \\leq x_{p^{(2)},m_B} + x_{p^{(2)},m_C}",
+            "name": "nonnegative_inventory_and_flows",
+            "description": "Purchase, sales, inventory, and age-tracked sales quantities are nonnegative.",
+            "formula": "x_t \\geq 0,\\; y_t \\geq 0,\\; I_t \\geq 0,\\; z_{t,\\tau} \\geq 0 \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau \\leq t",
             "parameters": [
-                "machine_a",
-                "machine_b",
-                "machine_c",
-                "part_1",
-                "part_2"
+                "period_set"
             ],
             "variables": [
-                "assignment"
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "age_tracked_sales"
             ]
         },
         {
-            "name": "conditional_routing_ba",
-            "description": "If part p^(1) is assigned to m_B or m_C, then part p^(2) must be assigned to m_A",
-            "formula": "x_{p^{(1)},m_B} + x_{p^{(1)},m_C} \\leq x_{p^{(2)},m_A}",
+            "name": "lower_triangular_age_tracking",
+            "description": "Age-tracked sales are defined only for valid period pairs where the purchase period is not later than the sale period.",
+            "formula": "z_{t,\\tau} = 0 \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau > t",
             "parameters": [
-                "machine_a",
-                "machine_b",
-                "machine_c",
-                "part_1",
-                "part_2"
+                "period_set"
             ],
             "variables": [
-                "assignment"
+                "age_tracked_sales"
             ]
         },
         {
-            "name": "fixed_machine_part_3",
-            "description": "Part p^(3) must be processed on m_A",
-            "formula": "x_{p^{(3)},m_A} = 1",
+            "name": "integrality_if_required",
+            "description": "Decision quantities are treated as continuous nonnegative quantities in the baseline because integrality is not required by the problem statement.",
+            "formula": "x_t \\in \\mathbb{R}_{\\ge 0},\\; y_t \\in \\mathbb{R}_{\\ge 0},\\; I_t \\in \\mathbb{R}_{\\ge 0},\\; z_{t,\\tau} \\in \\mathbb{R}_{\\ge 0} \\quad \\forall t \\in \\mathcal{T},\\; \\forall \\tau \\in \\mathcal{T},\\; \\tau \\le t",
             "parameters": [
-                "machine_a",
-                "part_3"
+                "period_set"
             ],
             "variables": [
-                "assignment"
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory",
+                "age_tracked_sales"
             ]
         },
         {
-            "name": "fixed_machine_part_4",
-            "description": "Part p^(4) must be processed on m_B",
-            "formula": "x_{p^{(4)},m_B} = 1",
+            "name": "warehouse_capacity_limit",
+            "description": "Inventory held in the warehouse cannot exceed the storage capacity in any period.",
+            "formula": "I_t \\le K \\quad \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "machine_b",
-                "part_4"
+                "warehouse_capacity",
+                "period_set"
             ],
             "variables": [
-                "assignment"
+                "ending_inventory"
             ]
         },
         {
-            "name": "fixed_machine_part_5",
-            "description": "Part p^(5) must be processed on m_C",
-            "formula": "x_{p^{(5)},m_C} = 1",
+            "name": "sales_volume_limit",
+            "description": "Sales in each period cannot exceed the period-specific maximum sales volume.",
+            "formula": "y_t \\le d_t \\quad \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "machine_c",
-                "part_5"
+                "max_sales_volume",
+                "period_set"
             ],
             "variables": [
-                "assignment"
+                "sales_quantity"
             ]
         },
         {
-            "name": "machine_c_capacity",
-            "description": "The total number of parts assigned to m_C must not exceed the capacity limit U_C",
-            "formula": "\\sum_{p=1}^{P} x_{p,m_C} \\leq U_C",
+            "name": "inventory_flow_consistency",
+            "description": "Inventory must follow period-by-period flow consistency between purchases, sales, and carried inventory.",
+            "formula": "I_t = I_{t-1} + x_t - y_t \\quad \\forall t=0,\\dots,T-1,\\; I_{-1}=I_0",
             "parameters": [
-                "capacity_m_c",
-                "machine_c"
+                "initial_inventory",
+                "planning_horizon_periods"
             ],
             "variables": [
-                "assignment"
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory"
             ]
         },
         {
-            "name": "explicit_part_quantity_nonuse",
-            "description": "The part quantity parameter q is not used in the binary assignment model; each part is treated as a single indivisible unit assigned exactly once.",
-            "formula": "\\text{No constraint added: q_p is not used in the MILP formulation}",
+            "name": "age_based_storage_cost_tracking",
+            "description": "Storage cost is represented directly in the objective through age-tracked quantities, with cost increasing linearly by age.",
+            "formula": "\\sum_{t=0}^{T-1} \\sum_{\\tau=0}^{t} \\left(a + b(t-\\tau)\\right) z_{t,\\tau}",
             "parameters": [
-                "part_quantity"
-            ],
-            "variables": []
-        },
-        {
-            "name": "total_cost_definition",
-            "description": "Define the reported total cost as the sum of processing and setup costs.",
-            "formula": "z = \\sum_{p=1}^{P}\\sum_{m=1}^{M} c_{pm} x_{pm} + \\sum_{m=1}^{M} f_m y_m",
-            "parameters": [
-                "processing_cost",
-                "setup_cost"
+                "base_storage_cost",
+                "age_dependent_storage_cost"
             ],
             "variables": [
-                "assignment",
-                "machine_active",
-                "total_cost"
+                "age_tracked_sales"
+            ]
+        },
+        {
+            "name": "final_inventory_cleared",
+            "description": "All remaining inventory must be cleared by the end of the final period, matching the required ending inventory at the horizon end.",
+            "formula": "I_{T-1}=I_T",
+            "parameters": [
+                "final_inventory_requirement"
+            ],
+            "variables": [
+                "ending_inventory"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_cost_minimization",
-            "description": "Minimize the total cost consisting of processing costs and machine setup costs",
-            "sense": "minimize"
+            "name": "total_annual_profit_maximization",
+            "description": "Maximize total annual profit from timber purchases, sales, and storage",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total processing and setup cost, and use the auxiliary total_cost variable to report the resulting objective value.",
+        "description": "Maximize total annual profit from timber purchases, sales, and age-dependent storage costs.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "z",
-        "parameters": [],
+        "sense": "maximize",
+        "formula": "Z = \\sum_{t=0}^{T-1} c_t^{\\mathrm{sell}} y_t - \\sum_{t=0}^{T-1} c_t^{\\mathrm{buy}} x_t - \\sum_{t=0}^{T-1} \\sum_{\\tau=0}^{t} \\left(a + b(t-\\tau)\\right) z_{t,\\tau}",
+        "parameters": [
+            "sale_price",
+            "purchase_price",
+            "base_storage_cost",
+            "age_dependent_storage_cost"
+        ],
         "variables": [
-            "total_cost"
+            "total_profit",
+            "sales_quantity",
+            "purchase_quantity",
+            "age_tracked_sales"
         ]
     }
 }

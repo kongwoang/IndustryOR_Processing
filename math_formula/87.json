@@ -1,202 +1,128 @@
 {
-    "problem": "Problem description\n- There is a set of products $$\\mathcal{P}$$ indexed by $$p \\in \\mathcal{P}$$, a set of machines $$\\mathcal{M}$$ indexed by $$m \\in \\mathcal{M}$$, and a planning horizon of periods $$\\mathcal{T}$$ indexed by $$t \\in \\mathcal{T}$$.\n- Each product $$p$$ has a processing time requirement on each machine $$m$$, represented by $$a_{m,p}$$, measured in a consistent time unit per standardized lot.\n- Each machine $$m$$ has an available capacity in each period $$t$$, represented by $$K_{m,t}$$.\n- Each product $$p$$ has an initial on-hand inventory $$I^{0}_{p}$$ at the start of the planning horizon.\n- Each product $$p$$ has a forecast demand in each period $$t$$, represented by $$D_{p,t}$$.\n- Production is allowed in fractional lots, so the production decision is continuous rather than integer.\n- The planning objective is to maximize the total ending inventory across all products at the end of the planning horizon.\n- All demand must be satisfied from available initial inventory plus production, and inventory may not become negative at any point in the planning horizon.\n- Machine time usage created by production must not exceed the available capacity of each machine in each period.\n- Inventory is tracked separately for each product across periods, with beginning inventory carried forward from one period to the next after production and demand fulfillment.\n- No explicit cost or penalty terms are included in the objective for this instance.\n- A solution is represented by:\n  - The production quantity $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$.\n  - The ending inventory level $$I_{p,t}$$, giving the inventory of product $$p$$ remaining at the end of period $$t$$.\n  - The final objective value $$Z$$, giving the total ending inventory at the end of the horizon.\n\nInput Format\n{\n  \"P\": \"number of products $$|\\mathcal{P}|$$\",\n  \"M\": \"number of machines $$|\\mathcal{M}|$$\",\n  \"T\": \"number of planning periods $$|\\mathcal{T}|$$\",\n  \"products\": [\n    \"product identifiers for each $$p \\in \\mathcal{P}$$\"\n  ],\n  \"machines\": [\n    \"machine identifiers for each $$m \\in \\mathcal{M}$$\"\n  ],\n  \"periods\": [\n    \"period identifiers for each $$t \\in \\mathcal{T}$$\"\n  ],\n  \"processing_time\": {\n    \"shape\": \"$$M \\\\times P$$\",\n    \"meaning\": \"Matrix of processing times $$a_{m,p}$$, where each entry is the time required on machine $$m$$ to produce one standardized lot of product $$p$$\"\n  },\n  \"machine_capacity\": {\n    \"shape\": \"$$M \\\\times T$$\",\n    \"meaning\": \"Matrix of available machine capacities $$K_{m,t}$$ for each machine $$m$$ in each period $$t$$\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"Vector of starting inventories $$I^{0}_{p}$$ for each product $$p$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Demand matrix $$D_{p,t}$$ for each product $$p$$ in each period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"production\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Production plan $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Inventory plan $$I_{p,t}$$, giving the ending inventory of product $$p$$ in period $$t$$\"\n  },\n  \"objective_value\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"Total ending inventory $$Z$$ at the end of the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"M\": 2,\n  \"T\": 1,\n  \"products\": [\"liquid\", \"solid\"],\n  \"machines\": [\"Machine 1\", \"Machine 2\"],\n  \"periods\": [\"week 1\"],\n  \"processing_time\": [\n    [50, 24],\n    [30, 33]\n  ],\n  \"machine_capacity\": [\n    [40],\n    [35]\n  ],\n  \"initial_inventory\": [30, 90],\n  \"demand\": [\n    [75],\n    [95]\n  ]\n}",
+    "problem": "Problem description\n- There is a single-period fleet rental planning problem with truck types indexed by $$t \\in \\mathcal{T}$$ and cargo classes indexed by $$k \\in \\mathcal{K}$$.\n- The planning horizon is represented by $$\\mathcal{H}$$ and contains one rental planning period.\n- The input provides a demand vector $$d_k$$ for each cargo class, a capacity matrix $$A_{t,k}$$ for each truck type and cargo class, and a per-kilometer rental cost vector $$c_t$$ for each truck type.\n- The planning goal is to choose how many trucks of each type to rent so that all cargo demand is covered at minimum total rental cost.\n- Some truck types may have different capacities across cargo classes, while others may have equal capacities across cargo classes as specified by the input data.\n- Only whole trucks may be rented, and the rented fleet must be sufficient for every cargo class simultaneously.\n- A solution is represented by:\n  - $$x_t$$: the nonnegative integer number of trucks of type $$t$$ to rent.\n  - $$z$$: the minimized total rental cost, expressed per kilometer unless an explicit travel distance parameter is provided.\n\nInput Format\n{\n  \"sets\": {\n    \"truck_types\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Set of available truck types.\"\n    },\n    \"cargo_classes\": {\n      \"symbol\": \"$$\\\\mathcal{K}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Set of cargo classes, such as $$\\\\{\\\\mathrm{ref},\\\\mathrm{dry}\\\\}$$.\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{H}$$\",\n      \"dimension\": \"One-dimensional set\",\n      \"description\": \"Single-period planning horizon.\"\n    }\n  },\n  \"parameters\": {\n    \"demand\": {\n      \"symbol\": \"$$d_k$$\",\n      \"shape\": \"$$|\\\\mathcal{K}|$$\",\n      \"description\": \"Required amount of cargo for each class $$k$$.\"\n    },\n    \"capacity\": {\n      \"symbol\": \"$$A_{t,k}$$\",\n      \"shape\": \"$$|\\\\mathcal{T}| \\\\times |\\\\mathcal{K}|$$\",\n      \"description\": \"Capacity of truck type $$t$$ for cargo class $$k$$.\"\n    },\n    \"rental_cost_rate\": {\n      \"symbol\": \"$$c_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Rental cost per kilometer for truck type $$t$$.\"\n    }\n  },\n  \"decision_variables\": {\n    \"truck_count\": {\n      \"symbol\": \"$$x_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Number of trucks of type $$t$$ to rent as a nonnegative integer.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"truck_count\": {\n      \"symbol\": \"$$x_t$$\",\n      \"shape\": \"$$|\\\\mathcal{T}|$$\",\n      \"description\": \"Optimal number of trucks of each type to rent.\"\n    },\n    \"total_cost\": {\n      \"symbol\": \"$$z$$\",\n      \"shape\": \"Scalar\",\n      \"description\": \"Minimum total rental cost, expressed per kilometer.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"truck_types\": [\"Type A\", \"Type B\"],\n  \"cargo_classes\": [\"refrigerated\", \"non_refrigerated\"],\n  \"planning_horizon\": [\"single_period\"],\n  \"demand\": {\n    \"refrigerated\": 3000,\n    \"non_refrigerated\": 4000\n  },\n  \"capacity\": {\n    \"Type A\": {\n      \"refrigerated\": 20,\n      \"non_refrigerated\": 40\n    },\n    \"Type B\": {\n      \"refrigerated\": 30,\n      \"non_refrigerated\": 30\n    }\n  },\n  \"rental_cost_rate\": {\n    \"Type A\": 30,\n    \"Type B\": 40\n  }\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of products in the planning set"
-        },
-        {
-            "name": "num_machines",
-            "symbol": "M",
-            "shape": [],
-            "description": "Number of machines in the planning set"
-        },
-        {
-            "name": "num_periods",
-            "symbol": "T",
-            "shape": [],
-            "description": "Number of planning periods in the horizon"
-        },
-        {
-            "name": "processing_time",
-            "symbol": "a",
+            "name": "truck_types",
+            "symbol": "\\mathcal{T}",
             "shape": [
-                "M",
-                "P"
+                "-"
             ],
-            "description": "Processing time required on machine m for product p per standardized lot produced"
+            "description": "Set of truck types, indexed by t=0,\\dots,|\\mathcal{T}|-1"
         },
         {
-            "name": "machine_capacity",
-            "symbol": "K",
+            "name": "cargo_classes",
+            "symbol": "\\mathcal{K}",
             "shape": [
-                "M",
-                "T"
+                "-"
             ],
-            "description": "Available capacity of machine m in period t"
+            "description": "Set of cargo classes, indexed by k=0,\\dots,|\\mathcal{K}|-1"
         },
         {
-            "name": "initial_inventory",
-            "symbol": "I0",
-            "shape": [
-                "P"
-            ],
-            "description": "Initial inventory for each product p"
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{H}",
+            "shape": [],
+            "description": "Single-period planning horizon containing one rental planning period"
         },
         {
             "name": "demand",
-            "symbol": "D",
+            "symbol": "d",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{K}"
             ],
-            "description": "Demand for each product p in each period t"
+            "description": "Required demand for each cargo class k"
+        },
+        {
+            "name": "capacity",
+            "symbol": "A",
+            "shape": [
+                "\\mathcal{T}",
+                "\\mathcal{K}"
+            ],
+            "description": "Capacity of truck type t for cargo class k"
+        },
+        {
+            "name": "rental_cost_rate",
+            "symbol": "c",
+            "shape": [
+                "\\mathcal{T}"
+            ],
+            "description": "Per-kilometer rental cost rate for each truck type t"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "truck_count",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "\\mathcal{T}"
             ],
-            "domain": "continuous",
-            "description": "Production quantity of product p in period t measured in standardized lots"
+            "domain": "integer",
+            "description": "Nonnegative integer number of trucks of each type t to rent"
         },
         {
-            "name": "ending_inventory",
-            "symbol": "I",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Inventory of product p at the end of period t"
-        },
-        {
-            "name": "objective_value",
-            "symbol": "Z",
+            "name": "total_cost",
+            "symbol": "z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total ending inventory at the end of the planning horizon"
+            "description": "Minimized total rental cost, expressed per kilometer unless a travel distance parameter is provided"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "production_continuity",
-            "description": "Production quantity is continuous and may be fractional",
-            "formula": "x_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "name": "truck_count_integrality",
+            "description": "Truck counts are nonnegative integers, so only whole trucks may be rented.",
+            "formula": "x_t \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t\\in\\mathcal{T}",
             "parameters": [
-                "num_products",
-                "num_periods"
+                "truck_types"
             ],
             "variables": [
-                "production_quantity"
+                "truck_count"
             ]
         },
         {
-            "name": "inventory_nonnegativity",
-            "description": "Ending inventory must never be negative for any product and period",
-            "formula": "I_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "name": "cargo_demand_coverage",
+            "description": "For each cargo class k, the total capacity provided by all rented trucks must meet or exceed the required demand d_k.",
+            "formula": "\\sum_{t\\in\\mathcal{T}} A_{t,k} x_t \\ge d_k \\quad \\forall k\\in\\mathcal{K}",
             "parameters": [
-                "num_products",
-                "num_periods"
+                "truck_types",
+                "cargo_classes",
+                "demand",
+                "capacity"
             ],
             "variables": [
-                "ending_inventory"
+                "truck_count"
             ]
         },
         {
-            "name": "machine_capacity_limit",
-            "description": "Production in each period must not exceed available machine capacity on each machine",
-            "formula": "\\sum_{p=1}^{P} a_{m,p} x_{p,t} \\le K_{m,t} \\quad \\forall m=1,\\dots,M,\\; t=1,\\dots,T",
+            "name": "single_period_horizon_structural_assumption",
+            "description": "The planning horizon contains exactly one rental period; this is a structural property of the instance rather than an optimization restriction.",
+            "formula": "|\\mathcal{H}| = 1",
             "parameters": [
-                "num_machines",
-                "num_products",
-                "processing_time",
-                "machine_capacity"
-            ],
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "demand_fulfillment",
-            "description": "Demand for each product and period must be satisfied by beginning inventory plus current-period production, leaving nonnegative ending inventory.",
-            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\n\\dots,T",
-            "parameters": [
-                "num_products",
-                "initial_inventory",
-                "demand"
-            ],
-            "variables": [
-                "production_quantity",
-                "ending_inventory"
-            ]
-        },
-        {
-            "name": "inventory_carryover",
-            "description": "Ending inventory is defined period by period through cumulative balance with demand satisfaction and carryover.",
-            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
-            "parameters": [
-                "num_products",
-                "initial_inventory",
-                "demand"
-            ],
-            "variables": [
-                "production_quantity",
-                "ending_inventory"
-            ]
-        },
-        {
-            "name": "nonnegative_data",
-            "description": "Input quantities such as processing times, capacities, initial inventory, and demand must be nonnegative",
-            "formula": "a_{m,p} \\ge 0,\\; K_{m,t} \\ge 0,\\; I0_p \\ge 0,\\; D_{p,t} \\ge 0",
-            "parameters": [
-                "processing_time",
-                "machine_capacity",
-                "initial_inventory",
-                "demand"
+                "planning_horizon"
             ],
             "variables": []
-        },
-        {
-            "name": "inventory_balance",
-            "description": "Inventory evolves by beginning inventory plus production minus demand in each period, ensuring demand is met and inventory carries forward correctly.",
-            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
-            "parameters": [
-                "num_products",
-                "initial_inventory",
-                "demand"
-            ],
-            "variables": [
-                "production_quantity",
-                "ending_inventory"
-            ]
         }
     ],
     "objectives": [
         {
-            "name": "maximize_total_ending_inventory",
-            "description": "Maximize the total ending inventory at the end of the planning horizon across all products",
-            "sense": "maximize"
+            "name": "total_rental_cost_minimization",
+            "description": "Minimize the total rental cost while ensuring all cargo class demands are covered simultaneously.",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize the total ending inventory at the end of the planning horizon across all products using the final-period inventory variables directly.",
+        "description": "Minimize the total per-kilometer rental cost of the rented truck fleet. Since no travel distance parameter is provided, the objective remains the linear per-kilometer total cost \\(\\sum_{t\\in\\mathcal{T}} c_t x_t\\).",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z = \\sum_{p=1}^{P} I_{p,T}",
+        "sense": "minimize",
+        "formula": "z = \\sum_{t\\in\\mathcal{T}} c_t x_t",
         "parameters": [
-            "num_products"
+            "truck_types",
+            "rental_cost_rate"
         ],
         "variables": [
-            "ending_inventory",
-            "objective_value"
+            "truck_count",
+            "total_cost"
         ]
     }
 }

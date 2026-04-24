@@ -1,279 +1,178 @@
 {
-    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and a finite sequence of planning periods indexed by $$t \\in \\mathcal{T}^{\\mathrm{plan}}$$.\n- For each product and period, the required market demand is given by $$d_{p,t}$$.\n- For each product and period, the unit production cost is given by $$c_{p,t}$$.\n- Each product has a unit storage volume $$v_p$$ measured in cubic meters per unit.\n- The factory has a combined production capacity $$K_t$$ in each period for all products together.\n- The factory has an in-house warehouse with volumetric capacity $$W$$.\n- The in-house warehouse has a per-cubic-meter holding cost $$h_t^{\\mathrm{own}}$$ in each period.\n- External warehouse space may be rented whenever needed, with per-cubic-meter holding cost $$h_t^{\\mathrm{ext}}$$ in each period.\n- The initial inventory at the start of the first planning period is given by $$I_{p,0}$$ for each product.\n- The planning goal is to determine a production and storage schedule over $$\\mathcal{T}^{\\mathrm{plan}}$$ that minimizes total production cost and total inventory holding cost while meeting all demand.\n\n- Required business constraints:\n  - Demand for every product in every planning period must be fully satisfied.\n  - No shortage and no backlogging are allowed.\n  - Production in any period, summed across all products, must not exceed the factory\u2019s available combined capacity.\n  - Inventory must be carried consistently from one period to the next.\n  - The total inventory stored in the factory\u2019s own warehouse in any period must not exceed its volumetric capacity.\n  - Any inventory that does not fit in the factory warehouse may be placed in external storage, which is available as supplementary space and incurs a higher cost.\n  - Inventory space usage must respect each product\u2019s unit volume.\n  - The initial inventory at the beginning of the first planning period is fixed and known.\n\n- A solution is represented by:\n  - $$x_{p,t}$$, the quantity of product $$p$$ produced in period $$t$$.\n  - $$i_{p,t}^{\\mathrm{own}}$$, the quantity of product $$p$$ held in the factory warehouse at the end of period $$t$$.\n  - $$i_{p,t}^{\\mathrm{ext}}$$, the quantity of product $$p$$ held in external storage at the end of period $$t$$.\n  - $$\\mathrm{TC}$$, the total cost of the plan.\n\nInput Format\n{\n  \"products\": {\n    \"count\": \"$$P$$\",\n    \"index_set\": \"$$\\\\mathcal{P}$$\"\n  },\n  \"periods\": {\n    \"count\": \"$$T$$\",\n    \"index_set\": \"$$\\\\mathcal{T}^{\\\\mathrm{plan}}$$\",\n    \"description\": \"Ordered planning periods over which production and inventory are decided\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"entry\": \"$$d_{p,t}$$\",\n    \"description\": \"Demand of product $$p$$ in period $$t$$\"\n  },\n  \"production_cost\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"entry\": \"$$c_{p,t}$$\",\n    \"description\": \"Unit production cost of product $$p$$ in period $$t$$\"\n  },\n  \"unit_volume\": {\n    \"shape\": \"$$P$$\",\n    \"entry\": \"$$v_p$$\",\n    \"description\": \"Volume consumed by one unit of product $$p$$\"\n  },\n  \"production_capacity\": {\n    \"shape\": \"$$T$$\",\n    \"entry\": \"$$K_t$$\",\n    \"description\": \"Combined production capacity in period $$t$$\"\n  },\n  \"own_warehouse_capacity\": {\n    \"shape\": \"scalar\",\n    \"entry\": \"$$W$$\",\n    \"description\": \"Maximum in-house storage volume\"\n  },\n  \"holding_cost_own\": {\n    \"shape\": \"$$T$$\",\n    \"entry\": \"$$h_t^{\\\\mathrm{own}}$$\",\n    \"description\": \"Holding cost per cubic meter for in-house storage in period $$t$$\"\n  },\n  \"holding_cost_external\": {\n    \"shape\": \"$$T$$\",\n    \"entry\": \"$$h_t^{\\\\mathrm{ext}}$$\",\n    \"description\": \"Holding cost per cubic meter for external storage in period $$t$$\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"$$P$$\",\n    \"entry\": \"$$I_{p,0}$$\",\n    \"description\": \"Inventory of product $$p$$ at the start of the first planning period\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"entry\": \"$$x_{p,t}$$\",\n    \"description\": \"Production quantity of product $$p$$ in period $$t$$\"\n  },\n  \"inventory_in_own_warehouse\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"entry\": \"$$i_{p,t}^{\\\\mathrm{own}}$$\",\n    \"description\": \"End-of-period inventory of product $$p$$ stored in the factory warehouse\"\n  },\n  \"inventory_in_external_storage\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"entry\": \"$$i_{p,t}^{\\\\mathrm{ext}}$$\",\n    \"description\": \"End-of-period inventory of product $$p$$ stored in external warehouse space\"\n  },\n  \"total_cost\": {\n    \"shape\": \"scalar\",\n    \"entry\": \"$$\\\\mathrm{TC}$$\",\n    \"description\": \"Minimum total production and storage cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"$$I$$\", \"$$II$$\"],\n  \"periods\": [\"$$\\\\mathrm{Jul}$$\", \"$$\\\\mathrm{Aug}$$\", \"$$\\\\mathrm{Sep}$$\", \"$$\\\\mathrm{Oct}$$\", \"$$\\\\mathrm{Nov}$$\", \"$$\\\\mathrm{Dec}$$\"],\n  \"demand\": {\n    \"$$I$$\": {\n      \"$$\\\\mathrm{Jul}$$\": 30000,\n      \"$$\\\\mathrm{Aug}$$\": 30000,\n      \"$$\\\\mathrm{Sep}$$\": 30000,\n      \"$$\\\\mathrm{Oct}$$\": 100000,\n      \"$$\\\\mathrm{Nov}$$\": 100000,\n      \"$$\\\\mathrm{Dec}$$\": 100000\n    },\n    \"$$II$$\": {\n      \"$$\\\\mathrm{Jul}$$\": 15000,\n      \"$$\\\\mathrm{Aug}$$\": 15000,\n      \"$$\\\\mathrm{Sep}$$\": 15000,\n      \"$$\\\\mathrm{Oct}$$\": 50000,\n      \"$$\\\\mathrm{Nov}$$\": 50000,\n      \"$$\\\\mathrm{Dec}$$\": 50000\n    }\n  },\n  \"production_cost\": {\n    \"$$I$$\": {\n      \"$$\\\\mathrm{Jul}$$\": 4.5,\n      \"$$\\\\mathrm{Aug}$$\": 4.5,\n      \"$$\\\\mathrm{Sep}$$\": 4.5,\n      \"$$\\\\mathrm{Oct}$$\": 4.5,\n      \"$$\\\\mathrm{Nov}$$\": 4.5,\n      \"$$\\\\mathrm{Dec}$$\": 4.5\n    },\n    \"$$II$$\": {\n      \"$$\\\\mathrm{Jul}$$\": 7,\n      \"$$\\\\mathrm{Aug}$$\": 7,\n      \"$$\\\\mathrm{Sep}$$\": 7,\n      \"$$\\\\mathrm{Oct}$$\": 7,\n      \"$$\\\\mathrm{Nov}$$\": 7,\n      \"$$\\\\mathrm{Dec}$$\": 7\n    }\n  },\n  \"unit_volume\": {\n    \"$$I$$\": 0.2,\n    \"$$II$$\": 0.4\n  },\n  \"production_capacity\": {\n    \"$$\\\\mathrm{Jul}$$\": 120000,\n    \"$$\\\\mathrm{Aug}$$\": 120000,\n    \"$$\\\\mathrm{Sep}$$\": 120000,\n    \"$$\\\\mathrm{Oct}$$\": 120000,\n    \"$$\\\\mathrm{Nov}$$\": 120000,\n    \"$$\\\\mathrm{Dec}$$\": 120000\n  },\n  \"own_warehouse_capacity\": 15000,\n  \"holding_cost_own\": {\n    \"$$\\\\mathrm{Jul}$$\": 1,\n    \"$$\\\\mathrm{Aug}$$\": 1,\n    \"$$\\\\mathrm{Sep}$$\": 1,\n    \"$$\\\\mathrm{Oct}$$\": 1,\n    \"$$\\\\mathrm{Nov}$$\": 1,\n    \"$$\\\\mathrm{Dec}$$\": 1\n  },\n  \"holding_cost_external\": {\n    \"$$\\\\mathrm{Jul}$$\": 1.5,\n    \"$$\\\\mathrm{Aug}$$\": 1.5,\n    \"$$\\\\mathrm{Sep}$$\": 1.5,\n    \"$$\\\\mathrm{Oct}$$\": 1.5,\n    \"$$\\\\mathrm{Nov}$$\": 1.5,\n    \"$$\\\\mathrm{Dec}$$\": 1.5\n  },\n  \"initial_inventory\": {\n    \"$$I$$\": 0,\n    \"$$II$$\": 0\n  }\n}",
+    "problem": "Problem description\n- There is a finite set $$\\mathcal{P}$$ of product types, indexed by $$p \\in \\mathcal{P}$$, and a finite set $$\\mathcal{R}$$ of resource types, indexed by $$r \\in \\mathcal{R}$$.\n- The planning horizon is represented by $$\\mathcal{T}$$. This is a single-period production planning problem, so all decisions are made for one planning period.\n- For each product type $$p$$, the input data include unit profit $$\\pi_p$$, resource usage coefficients $$a_{r,p}$$ for each resource $$r$$, and a market demand upper bound $$d_p$$.\n- For each resource type $$r$$, the available capacity is $$b_r$$.\n- The planning goal is to choose production quantities that maximize total profit.\n- Production for each product type must not exceed its market demand limit.\n- Total consumption of each resource across all produced products must stay within the available capacity.\n- Production quantities must be feasible for discrete units and cannot be negative.\n\n- A solution is represented by:\n  - $$x_p$$: the production quantity of product type $$p$$.\n  - $$Z$$: the total profit achieved by the production plan.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"single_period\",\n    \"period_count\": \"$$H$$\"\n  },\n  \"products\": {\n    \"count\": \"$$P$$\",\n    \"index_set\": \"$$\\\\mathcal{P}$$\",\n    \"unit_profit\": \"$$\\\\pi_p$$ for each $$p \\\\in \\\\mathcal{P}$$\",\n    \"resource_requirements\": {\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n      \"meaning\": \"$$a_{r,p}$$ is the amount of resource $$r$$ required to produce one unit of product $$p$$\"\n    },\n    \"demand_upper_bounds\": \"$$d_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"resources\": {\n    \"count\": \"$$R$$\",\n    \"index_set\": \"$$\\\\mathcal{R}$$\",\n    \"capacities\": \"$$b_r$$ for each $$r \\\\in \\\\mathcal{R}$$\"\n  },\n  \"decision_variables\": {\n    \"production_quantities\": \"$$x_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"$$P$$\",\n    \"values\": \"$$x_p$$ for each $$p \\\\in \\\\mathcal{P}$$\",\n    \"meaning\": \"the chosen production quantity of each product type\"\n  },\n  \"objective_value\": {\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"the maximum total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": {\n    \"type\": \"single_period\",\n    \"period_count\": 1\n  },\n  \"products\": [\n    {\n      \"name\": \"high_end\",\n      \"unit_profit\": 300,\n      \"labor_requirement\": 17,\n      \"inspection_requirement\": 8,\n      \"demand_upper_bound\": 50\n    },\n    {\n      \"name\": \"mid_range\",\n      \"unit_profit\": 200,\n      \"labor_requirement\": 10,\n      \"inspection_requirement\": 4,\n      \"demand_upper_bound\": 80\n    },\n    {\n      \"name\": \"low_end\",\n      \"unit_profit\": 100,\n      \"labor_requirement\": 2,\n      \"inspection_requirement\": 2,\n      \"demand_upper_bound\": 150\n    }\n  ],\n  \"resources\": {\n    \"labor_capacity\": 1000,\n    \"inspection_capacity\": 500\n  }\n}",
     "parameters": [
         {
             "name": "num_products",
             "symbol": "P",
             "shape": [],
-            "description": "Number of products in the planning set"
+            "description": "Number of products in the product set $\\mathcal{P}$."
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "num_resources",
+            "symbol": "R",
             "shape": [],
-            "description": "Number of planning periods"
+            "description": "Number of resources in the resource set $\\mathcal{R}$."
         },
         {
-            "name": "demand",
+            "name": "planning_horizon_size",
+            "symbol": "H",
+            "shape": [],
+            "description": "Single-period planning horizon size."
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit for each product."
+        },
+        {
+            "name": "resource_usage",
+            "symbol": "a",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "description": "Resource usage coefficient for each resource-product pair."
+        },
+        {
+            "name": "demand_upper_bound",
             "symbol": "d",
             "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Demand of product $p$ in period $t$"
-        },
-        {
-            "name": "production_cost",
-            "symbol": "c",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Unit production cost of product $p$ in period $t"
-        },
-        {
-            "name": "unit_volume",
-            "symbol": "v",
-            "shape": [
                 "P"
             ],
-            "description": "Unit storage volume of product $p$ in cubic meters per unit"
+            "description": "Market demand upper bound for each product."
         },
         {
-            "name": "production_capacity",
-            "symbol": "K",
+            "name": "resource_capacity",
+            "symbol": "b",
             "shape": [
-                "T"
+                "R"
             ],
-            "description": "Combined production capacity in period $t"
-        },
-        {
-            "name": "own_warehouse_capacity",
-            "symbol": "W",
-            "shape": [],
-            "description": "In-house warehouse volumetric capacity"
-        },
-        {
-            "name": "holding_cost_own",
-            "symbol": "h^{\\mathrm{own}}",
-            "shape": [
-                "T"
-            ],
-            "description": "In-house holding cost per cubic meter in period $t"
-        },
-        {
-            "name": "holding_cost_external",
-            "symbol": "h^{\\mathrm{ext}}",
-            "shape": [
-                "T"
-            ],
-            "description": "External holding cost per cubic meter in period $t"
-        },
-        {
-            "name": "initial_inventory",
-            "symbol": "I_0",
-            "shape": [
-                "P"
-            ],
-            "description": "Initial inventory of product $p$ at the start of period 0"
+            "description": "Available capacity for each resource."
         }
     ],
     "variables": [
         {
-            "name": "production_plan",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "P"
             ],
-            "domain": "continuous",
-            "description": "Quantity of product $p$ produced in period $t$"
+            "domain": "integer",
+            "description": "Production quantity of each product."
         },
         {
-            "name": "inventory_in_own_warehouse",
-            "symbol": "i^{\\mathrm{own}}",
-            "shape": [
-                "P",
-                "T"
-            ],
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
             "domain": "continuous",
-            "description": "Quantity of product $p$ held in the factory warehouse at the end of period $t$"
-        },
-        {
-            "name": "inventory_in_external_storage",
-            "symbol": "i^{\\mathrm{ext}}",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product $p$ held in external storage at the end of period $t$"
+            "description": "Total profit of the production plan."
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_parameters_and_decision_variables",
-            "description": "All demand, costs, volumes, capacities, initial inventory, production quantities, and storage quantities are nonnegative; production and storage quantities are continuous.",
-            "formula": "x_{p,t} \\geq 0,\\; i_{p,t}^{\\mathrm{own}} \\geq 0,\\; i_{p,t}^{\\mathrm{ext}} \\geq 0 \\quad \\forall p=1,\\dots,P,\\; \\forall t=1,\\dots,T",
-            "parameters": [],
-            "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
-            ]
-        },
-        {
-            "name": "full_demand_satisfaction",
-            "description": "Demand for each product in each period must be fully satisfied with no shortage and no backlogging.",
-            "formula": "I_{0,p} + x_{p,1} = d_{p,1} + i_{p,1}^{\\mathrm{own}} + i_{p,1}^{\\mathrm{ext}} \\quad \\forall p=1,\\dots,P\\;\\text{ and }\\; i_{p,t-1}^{\\mathrm{own}} + i_{p,t-1}^{\\mathrm{ext}} + x_{p,t} = d_{p,t} + i_{p,t}^{\\mathrm{own}} + i_{p,t}^{\\mathrm{ext}} \\quad \\forall p=1,\\dots,P,\\; \\forall t=2,\\dots,T",
+            "name": "integer_production_quantity",
+            "description": "Production quantities are integer-valued and nonnegative for each product.",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall p \\in \\{1,\\dots,P\\}",
             "parameters": [
-                "initial_inventory",
-                "demand"
+                "num_products"
             ],
             "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
+                "production_quantity"
             ]
         },
         {
-            "name": "production_capacity_limit",
-            "description": "Total production across all products in each period must not exceed the available production capacity.",
-            "formula": "\\sum_{p=1}^{P} x_{p,t} \\leq K_t \\quad \\forall t=1,\\dots,T",
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities are nonnegative for each product.",
+            "formula": "x_p \\ge 0 \\quad \\forall p \\in \\{1,\\dots,P\\}",
             "parameters": [
-                "production_capacity"
+                "num_products"
             ],
             "variables": [
-                "production_plan"
+                "production_quantity"
             ]
         },
         {
-            "name": "inventory_flow_consistency",
-            "description": "Inventory must propagate consistently across periods using the initial inventory at the start of the planning horizon.",
-            "formula": "I_{0,p} + x_{p,1} = d_{p,1} + i_{p,1}^{\\mathrm{own}} + i_{p,1}^{\\mathrm{ext}} \\quad \\forall p=1,\\dots,P,\\;\\forall t=1",
+            "name": "nonnegative_demand_upper_bound",
+            "description": "Demand upper bounds are nonnegative for each product.",
+            "formula": "d_p \\ge 0 \\quad \\forall p \\in \\{1,\\dots,P\\}",
             "parameters": [
-                "initial_inventory",
-                "demand"
-            ],
-            "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
-            ]
-        },
-        {
-            "name": "own_warehouse_capacity_limit",
-            "description": "The total volume stored in the factory's own warehouse in any period must not exceed the warehouse capacity.",
-            "formula": "\\sum_{p=1}^{P} v_p i_{p,t}^{\\mathrm{own}} \\leq W \\quad \\forall t=1,\\dots,T",
-            "parameters": [
-                "unit_volume",
-                "own_warehouse_capacity"
-            ],
-            "variables": [
-                "inventory_in_own_warehouse"
-            ]
-        },
-        {
-            "name": "external_storage_supplementary_use",
-            "description": "Any inventory that cannot fit in the factory warehouse may be placed in external storage and is accounted for separately at a higher holding cost.",
-            "formula": "i_{p,t}^{\\mathrm{ext}} \\geq 0 \\quad \\forall p=1,\\dots,P,\\; \\forall t=1,\\dots,T",
-            "parameters": [],
-            "variables": [
-                "inventory_in_external_storage"
-            ]
-        },
-        {
-            "name": "product_specific_volume_respect",
-            "description": "Stored quantities must be consistent with product-specific unit storage volumes when measuring warehouse usage.",
-            "formula": "\\sum_{p=1}^{P} v_p i_{p,t}^{\\mathrm{own}} \\leq W \\quad \\forall t=1,\\dots,T",
-            "parameters": [
-                "unit_volume",
-                "own_warehouse_capacity"
-            ],
-            "variables": [
-                "inventory_in_own_warehouse"
-            ]
-        },
-        {
-            "name": "fixed_initial_inventory",
-            "description": "Initial inventory is fixed and known at the start of the first period.",
-            "formula": "I_{0,p} \\text{ is fixed for all } p=1,\\dots,P",
-            "parameters": [
-                "initial_inventory"
+                "demand_upper_bound"
             ],
             "variables": []
         },
         {
-            "name": "nonnegativity_of_decision_variables",
-            "description": "Production and storage quantities must be nonnegative for all products and periods.",
-            "formula": "x_{p,t} \\geq 0,\\; i_{p,t}^{\\mathrm{own}} \\geq 0,\\; i_{p,t}^{\\mathrm{ext}} \\geq 0 \\quad \\forall p=1,\\dots,P,\\; \\forall t=1,\\dots,T",
-            "parameters": [],
-            "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
-            ]
+            "name": "nonnegative_resource_capacity",
+            "description": "Resource capacities are nonnegative for each resource.",
+            "formula": "b_r \\ge 0 \\quad \\forall r \\in \\{1,\\dots,R\\}",
+            "parameters": [
+                "resource_capacity"
+            ],
+            "variables": []
         },
         {
-            "name": "inventory_balance_first_period",
-            "description": "Inventory flow balance in the first period: initial inventory plus production must cover demand and end-of-period inventory split between own and external storage.",
-            "formula": "I_{0,p} + x_{p,1} = d_{p,1} + i_{p,1}^{\\mathrm{own}} + i_{p,1}^{\\mathrm{ext}} \\quad \\forall p=1,\\dots,P",
+            "name": "nonnegative_resource_usage",
+            "description": "Resource usage coefficients are nonnegative for each resource-product pair.",
+            "formula": "a_{r p} \\ge 0 \\quad \\forall r \\in \\{1,\\dots,R\\},\\ \\forall p \\in \\{1,\\dots,P\\}",
             "parameters": [
-                "initial_inventory",
-                "demand"
+                "resource_usage"
+            ],
+            "variables": []
+        },
+        {
+            "name": "demand_limit",
+            "description": "Production of each product does not exceed its market demand upper bound.",
+            "formula": "x_p \\le d_p \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "parameters": [
+                "demand_upper_bound"
             ],
             "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
+                "production_quantity"
             ]
         },
         {
-            "name": "inventory_balance_later_periods",
-            "description": "Inventory flow balance for subsequent periods using prior period ending inventory as the next period starting inventory.",
-            "formula": "i_{p,t-1}^{\\mathrm{own}} + i_{p,t-1}^{\\mathrm{ext}} + x_{p,t} = d_{p,t} + i_{p,t}^{\\mathrm{own}} + i_{p,t}^{\\mathrm{ext}} \\quad \\forall p=1,\\dots,P,\\; \\forall t=2,\\dots,T",
+            "name": "resource_capacity_limit",
+            "description": "Total resource consumption across all products does not exceed available capacity for each resource.",
+            "formula": "\\sum_{p=1}^{P} a_{r p} x_p \\le b_r \\quad \\forall r \\in \\{1,\\dots,R\\}",
             "parameters": [
-                "demand"
+                "resource_usage",
+                "resource_capacity"
             ],
             "variables": [
-                "production_plan",
-                "inventory_in_own_warehouse",
-                "inventory_in_external_storage"
+                "production_quantity"
             ]
         },
         {
-            "name": "inventory_split_nonnegativity",
-            "description": "External storage represents the excess inventory beyond the own warehouse allocation and is modeled as an additional nonnegative inventory channel.",
-            "formula": "i_{p,t}^{\\mathrm{ext}} \\geq 0 \\quad \\forall p=1,\\dots,P,\\; \\forall t=1,\\dots,T",
-            "parameters": [],
-            "variables": [
-                "inventory_in_external_storage"
-            ]
+            "name": "single_period_decision",
+            "description": "Production decisions are made for a single period only.",
+            "formula": "H = 1",
+            "parameters": [
+                "planning_horizon_size"
+            ],
+            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "total_cost_minimization",
-            "description": "Minimize total cost consisting of production cost plus inventory holding cost in own warehouse and external storage while meeting demand and respecting capacities",
+            "name": "profit_maximization",
+            "description": "Maximize total profit of the single-period production plan",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total production cost plus total holding cost in own warehouse and external storage over all products and periods.",
+        "description": "Maximize total profit of the single-period production plan.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "\\sum_{p=1}^{P}\\sum_{t=1}^{T} c_{p,t} x_{p,t} + \\sum_{p=1}^{P}\\sum_{t=1}^{T} h_t^{\\mathrm{own}} v_p i_{p,t}^{\\mathrm{own}} + \\sum_{p=1}^{P}\\sum_{t=1}^{T} h_t^{\\mathrm{ext}} v_p i_{p,t}^{\\mathrm{ext}}",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p=1}^{P} \\pi_p x_p",
         "parameters": [
-            "production_cost",
-            "holding_cost_own",
-            "holding_cost_external",
-            "unit_volume"
+            "unit_profit"
         ],
         "variables": [
-            "production_plan",
-            "inventory_in_own_warehouse",
-            "inventory_in_external_storage"
+            "production_quantity",
+            "total_profit"
         ]
     }
 }

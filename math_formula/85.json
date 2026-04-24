@@ -1,101 +1,86 @@
 {
-    "problem": "Problem description\n- There are $$P$$ finished products indexed by $$p \\in \\mathcal{P}$$, $$R$$ raw materials indexed by $$r \\in \\mathcal{R}$$, optional limited-capacity resources indexed by $$k \\in \\mathcal{K}$$, and planning periods indexed by $$t \\in \\mathcal{T}$$.\n- Each product $$p$$ has a unit selling price $$s_{p,t}$$, a unit variable processing cost $$v_{p,t}$$, and a recipe that specifies the amount $$a_{r,p}$$ of each raw material $$r$$ needed per unit produced.\n- Each raw material $$r$$ has a unit purchase cost $$q_{r,t}$$ and a period-specific purchase limit $$U_{r,t}$$.\n- Each restricted resource $$k$$ has a period-specific capacity $$C_{k,t}$$, and each product $$p$$ may consume a known amount $$b_{k,p}$$ of that resource per unit produced.\n- Market demand may be finite or effectively unlimited, represented by $$D_{p,t}$$, and the department may sell any quantity it produces as long as market demand and production availability permit it.\n- The planning goal is to choose production and purchasing decisions so that total profit over $$\\mathcal{T}$$ is maximized, which also maximizes the manager\u2019s salary if salary is profit-based.\n- Business requirements:\n  - raw material purchases in each period must respect the available purchase limits;\n  - product output must be supported by the available purchased raw materials according to each product\u2019s recipe;\n  - any restricted machine or facility capacity must not be exceeded in any period;\n  - sales cannot exceed what is produced and cannot exceed market demand if a demand limit is provided;\n  - all decision quantities must remain nonnegative.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced in period $$t$$.\n  - $$y_{p,t}$$: quantity of product $$p$$ sold in period $$t$$.\n  - $$u_{r,t}$$: quantity of raw material $$r$$ purchased in period $$t$$.\n  - $$\\Pi$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"integer\",\n    \"description\": \"Number of periods in $$\\\\mathcal{T}$$, with periods indexed by $$t \\\\in \\\\mathcal{T}$$.\"\n  },\n  \"products\": {\n    \"type\": \"array\",\n    \"description\": \"List of products indexed by $$p \\\\in \\\\mathcal{P}$$.\"\n  },\n  \"resources\": {\n    \"type\": \"array\",\n    \"description\": \"List of raw materials indexed by $$r \\\\in \\\\mathcal{R}$$.\"\n  },\n  \"restricted_resources\": {\n    \"type\": \"array\",\n    \"description\": \"List of limited-capacity resources or machines indexed by $$k \\\\in \\\\mathcal{K}$$.\"\n  },\n  \"selling_price\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$s_{p,t}$$ is the unit selling price of product $$p$$ in period $$t$$.\"\n  },\n  \"material_requirements\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n    \"description\": \"$$a_{r,p}$$ is the amount of raw material $$r$$ required per unit of product $$p$$.\"\n  },\n  \"purchase_cost\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$q_{r,t}$$ is the unit purchase cost of raw material $$r$$ in period $$t$$.\"\n  },\n  \"production_cost\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$v_{p,t}$$ is the unit variable processing cost of product $$p$$ in period $$t$$.\"\n  },\n  \"purchase_limit\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$U_{r,t}$$ is the maximum amount of raw material $$r$$ that can be purchased in period $$t$$.\"\n  },\n  \"resource_usage\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{K}| \\\\times |\\\\mathcal{P}|$$\",\n    \"description\": \"$$b_{k,p}$$ is the amount of restricted resource $$k$$ consumed by one unit of product $$p$$.\"\n  },\n  \"resource_capacity\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{K}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$C_{k,t}$$ is the available capacity of restricted resource $$k$$ in period $$t$$.\"\n  },\n  \"demand_limit\": {\n    \"type\": \"matrix or infinite indicator\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$D_{p,t}$$ is the maximum sellable quantity of product $$p$$ in period $$t$$; if demand is unlimited, use $$+\\\\infty$$ or omit this field.\"\n  }\n}\n\nOutput Format\n{\n  \"total_profit\": {\n    \"type\": \"number\",\n    \"description\": \"The optimal value of $$\\\\Pi$$.\"\n  },\n  \"production_plan\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$x_{p,t}$$, the quantity of each product to produce in each period.\"\n  },\n  \"sales_plan\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$y_{p,t}$$, the quantity of each product to sell in each period.\"\n  },\n  \"purchase_plan\": {\n    \"type\": \"matrix\",\n    \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{T}|$$\",\n    \"description\": \"$$u_{r,t}$$, the quantity of each raw material to purchase in each period.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"$$1$$\",\n  \"products\": [\"Meaties\", \"Yummies\"],\n  \"resources\": [\"Grains\", \"Meat\"],\n  \"restricted_resources\": [\"Meaties machine\"],\n  \"selling_price\": [[\"$$2.80$$\"], [\"$$2.00$$\"]],\n  \"material_requirements\": [\n    [\"$$2.0$$\", \"$$3.0$$\"],\n    [\"$$3.0$$\", \"$$1.5$$\"]\n  ],\n  \"purchase_cost\": [[\"$$0.20$$\"], [\"$$0.50$$\"]],\n  \"production_cost\": [[\"$$0.25$$\"], [\"$$0.20$$\"]],\n  \"purchase_limit\": [[\"$$400000$$\"], [\"$$300000$$\"]],\n  \"resource_usage\": [[\"$$1$$\", \"$$0$$\"]],\n  \"resource_capacity\": [[\"$$90000$$\"]],\n  \"demand_limit\": [[\"$$+\\\\infty$$\"], [\"$$+\\\\infty$$\"]]\n}",
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods, and a set of products $$P$$. Each product is produced in standardized batches, and fractional batch quantities are allowed.\n- There is a set of renewable resources $$R$$. In the original case, these resources are automated machine time and manual craftsman time, but the model is written generically for any resource set.\n- Each product $$p \\in P$$ consumes a known amount of each resource $$r \\in R$$ per batch, given by the processing-time parameter $$a_{p,r}$$.\n- Each period $$t \\in T$$ has a known available capacity of each resource $$r \\in R$$, given by the capacity parameter $$b_{r,t}$$.\n- Each product $$p \\in P$$ generates a known unit revenue $$u_p$$ per batch sold.\n- Each resource $$r \\in R$$ has a known operating cost rate $$c_r$$ per hour. Idle resource time has no cost.\n- A time conversion factor $$\\kappa$$ is used when processing times and capacities are expressed in different time units.\n- All produced batches are assumed to be sold, so production quantities and sales quantities coincide, and there is no inventory carryover.\n- A designated product $$p^{\\mathrm{c}} \\in P$$ must satisfy a minimum contract quantity in every period, and the required minimum quantity is given by $$L_t$$.\n- If market demand limits are provided, they act as upper bounds on how much of each product can be sold in each period; otherwise demand is assumed sufficiently large and nonbinding.\n- The planning goal is to choose the production quantities over the horizon so that total profit, defined as total revenue minus total resource operating cost, is maximized.\n- A solution is represented by:\n  - $$x_{p,t}$$: the number of standardized batches of product $$p \\in P$$ produced in period $$t \\in T$$, with fractional values allowed.\n  - $$\\Pi$$: the resulting total profit.\n  - Optionally, the implied resource usage by resource and period.\n\nInput Format\n{\n  \"P\": \"$$P$$, number of products\",\n  \"R\": \"$$R$$, number of renewable resource types\",\n  \"T\": \"$$T$$, number of planning periods\",\n  \"products\": \"$$\\\\{0,1,\\\\ldots,P-1\\\\}$$, product index set\",\n  \"resources\": \"$$\\\\{0,1,\\\\ldots,R-1\\\\}$$, resource index set\",\n  \"periods\": \"$$\\\\{0,1,\\\\ldots,T-1\\\\}$$, period index set\",\n  \"time_conversion_factor\": \"$$\\\\kappa$$, number of minutes per hour\",\n  \"processing_time\": \"$$a_{p,r}$$ with shape $$P\\\\times R$$, minutes of resource $$r$$ required per batch of product $$p$$\",\n  \"available_time\": \"$$b_{r,t}$$ with shape $$R\\\\times T$$, available time of resource $$r$$ in period $$t$$, expressed in hours\",\n  \"unit_revenue\": \"$$u_p$$ with shape $$P$$, revenue per batch of product $$p$$\",\n  \"resource_cost_per_hour\": \"$$c_r$$ with shape $$R$$, operating cost per hour of resource $$r$$\",\n  \"market_demand\": \"$$d_{p,t}$$ with shape $$P\\\\times T$$, optional upper bound on sellable quantity of product $$p$$ in period $$t$$; if omitted, demand is assumed nonbinding\",\n  \"contract_product\": \"$$p^{\\\\mathrm{c}} \\\\in P$$, index of the product subject to the minimum contract requirement\",\n  \"minimum_contract_quantity\": \"$$L_t$$ with shape $$T$$, minimum quantity of product $$p^{\\\\mathrm{c}}$$ that must be produced in period $$t$$\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"$$x_{p,t}$$ with shape $$P\\\\times T$$, nonnegative real-valued production quantities for every product and period\",\n  \"total_profit\": \"$$\\\\Pi$$, scalar objective value representing maximum profit\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"$$X$$\", \"$$Y$$\"],\n  \"resources\": [\"$$\\\\text{machine}$$\", \"$$\\\\text{craftsman}$$\"],\n  \"periods\": [\"$$1$$\"],\n  \"time_conversion_factor\": \"$$60$$\",\n  \"processing_time\": {\n    \"$$X$$\": {\n      \"$$\\\\text{machine}$$\": \"$$13$$\",\n      \"$$\\\\text{craftsman}$$\": \"$$20$$\"\n    },\n    \"$$Y$$\": {\n      \"$$\\\\text{machine}$$\": \"$$19$$\",\n      \"$$\\\\text{craftsman}$$\": \"$$29$$\"\n    }\n  },\n  \"available_time\": {\n    \"$$\\\\text{machine}$$\": {\n      \"$$1$$\": \"$$40$$\"\n    },\n    \"$$\\\\text{craftsman}$$\": {\n      \"$$1$$\": \"$$35$$\"\n    }\n  },\n  \"unit_revenue\": {\n    \"$$X$$\": \"$$20$$\",\n    \"$$Y$$\": \"$$30$$\"\n  },\n  \"resource_cost_per_hour\": {\n    \"$$\\\\text{machine}$$\": \"$$10$$\",\n    \"$$\\\\text{craftsman}$$\": \"$$2$$\"\n  },\n  \"contract_product\": \"$$X$$\",\n  \"minimum_contract_quantity\": {\n    \"$$1$$\": \"$$10$$\"\n  }\n}",
     "parameters": [
         {
             "name": "num_products",
             "symbol": "P",
             "shape": [],
-            "description": "Number of finished products"
+            "description": "Number of products, with product index set {0,1,...,P-1}"
         },
         {
-            "name": "num_raw_materials",
+            "name": "num_resources",
             "symbol": "R",
             "shape": [],
-            "description": "Number of raw materials"
-        },
-        {
-            "name": "num_restricted_resources",
-            "symbol": "K",
-            "shape": [],
-            "description": "Number of restricted-capacity resources"
+            "description": "Number of renewable resource types, with resource index set {0,1,...,R-1}"
         },
         {
             "name": "num_periods",
             "symbol": "T",
             "shape": [],
-            "description": "Number of planning periods"
+            "description": "Number of planning periods, with period index set {0,1,...,T-1}"
         },
         {
-            "name": "selling_price",
-            "symbol": "s",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Unit selling price of product p in period t"
+            "name": "time_conversion_factor",
+            "symbol": "\\kappa",
+            "shape": [],
+            "description": "Time conversion factor between the units used for processing times and capacities"
         },
         {
-            "name": "production_cost",
-            "symbol": "v",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Unit variable processing cost of product p in period t"
-        },
-        {
-            "name": "material_requirements",
+            "name": "processing_time_requirements",
             "symbol": "a",
             "shape": [
-                "R",
-                "P"
+                "P",
+                "R"
             ],
-            "description": "Amount of raw material r required per unit of product p"
+            "description": "Per-batch processing time required for product p on resource r"
         },
         {
-            "name": "purchase_cost",
-            "symbol": "q",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "description": "Unit purchase cost of raw material r in period t"
-        },
-        {
-            "name": "purchase_limit",
-            "symbol": "U",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "description": "Maximum purchasable amount of raw material r in period t"
-        },
-        {
-            "name": "resource_usage",
+            "name": "resource_availability",
             "symbol": "b",
             "shape": [
-                "K",
-                "P"
-            ],
-            "description": "Amount of restricted resource k consumed per unit of product p"
-        },
-        {
-            "name": "resource_capacity",
-            "symbol": "C",
-            "shape": [
-                "K",
+                "R",
                 "T"
             ],
-            "description": "Available capacity of restricted resource k in period t"
+            "description": "Available capacity of resource r in period t"
         },
         {
-            "name": "demand_limit",
-            "symbol": "D",
+            "name": "unit_revenue",
+            "symbol": "u",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit revenue per batch sold for product p"
+        },
+        {
+            "name": "resource_operating_cost",
+            "symbol": "c",
+            "shape": [
+                "R"
+            ],
+            "description": "Operating cost per hour for resource r"
+        },
+        {
+            "name": "market_demand_upper_bound",
+            "symbol": "d",
             "shape": [
                 "P",
                 "T"
             ],
-            "description": "Maximum sellable quantity of product p in period t; may be infinite when demand is unlimited"
+            "description": "Optional market demand upper bound for product p in period t; if absent, demand is nonbinding"
+        },
+        {
+            "name": "contract_product_index",
+            "symbol": "p^{\\mathrm{c}}",
+            "shape": [],
+            "description": "Index of the product subject to the minimum contract requirement"
+        },
+        {
+            "name": "minimum_contract_quantity",
+            "symbol": "L",
+            "shape": [
+                "T"
+            ],
+            "description": "Minimum required quantity of the contract product in each period"
         }
     ],
     "variables": [
@@ -107,148 +92,99 @@
                 "T"
             ],
             "domain": "continuous",
-            "description": "Quantity of product p produced in period t"
-        },
-        {
-            "name": "sales_quantity",
-            "symbol": "y",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product p sold in period t"
-        },
-        {
-            "name": "raw_material_purchase",
-            "symbol": "u",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of raw material r purchased in period t"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "\\Pi",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total profit over the planning horizon"
+            "description": "Number of standardized batches of product p produced in period t, with fractional values allowed"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "raw_material_purchase_limit",
-            "description": "raw material purchases must stay within the per-period purchase limit for each raw material",
-            "formula": "u_{r,t} \\leq U_{r,t} \\quad \\forall r=1,\\dots,R,\\ \\forall t=1,\\dots,T",
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative and fractional values are allowed.",
+            "formula": "x[p][t] \\ge 0",
             "parameters": [
-                "purchase_limit"
-            ],
-            "variables": [
-                "raw_material_purchase"
-            ]
-        },
-        {
-            "name": "production_material_support",
-            "description": "production of each product must be supportable by purchased raw materials according to the recipe requirements",
-            "formula": "\\sum_{p=1}^{P} a_{r,p} x_{p,t} \\leq u_{r,t} \\quad \\forall r=1,\\dots,R,\\ \\forall t=1,\\dots,T",
-            "parameters": [
-                "material_requirements"
-            ],
-            "variables": [
-                "production_quantity",
-                "raw_material_purchase"
-            ]
-        },
-        {
-            "name": "restricted_resource_capacity",
-            "description": "production-induced consumption of each restricted resource must not exceed the available period capacity",
-            "formula": "\\sum_{p=1}^{P} b_{k,p} x_{p,t} \\leq C_{k,t} \\quad \\forall k=1,\\dots,K,\\ \\forall t=1,\\dots,T",
-            "parameters": [
-                "resource_usage",
-                "resource_capacity"
+                "production_quantity"
             ],
             "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "sales_cannot_exceed_production",
-            "description": "sales of each product in each period cannot exceed produced quantity",
-            "formula": "y_{p,t} \\leq x_{p,t} \\quad \\forall p=1,\\dots,P,\\ \\forall t=1,\\dots,T",
+            "name": "resource_capacity_limit",
+            "description": "For each resource r and period t, total processing time used by all products cannot exceed the available capacity, after applying the time conversion factor.",
+            "formula": "\\sum_{p=0}^{P-1} a_{p,r} x_{p,t} \\le \\kappa b_{r,t} \\quad \\forall r=0,\\ldots,R-1,\\; \\forall t=0,\\ldots,T-1",
+            "parameters": [
+                "processing_time_requirements",
+                "resource_availability",
+                "time_conversion_factor",
+                "num_products",
+                "num_resources",
+                "num_periods"
+            ],
             "variables": [
-                "sales_quantity",
                 "production_quantity"
             ]
         },
         {
-            "name": "sales_cannot_exceed_demand",
-            "description": "if demand is finite, sales of each product in each period cannot exceed the demand limit",
-            "formula": "y_{p,t} \\leq D_{p,t} \\quad \\forall p=1,\\dots,P,\\ \\forall t=1,\\dots,T \\text{ such that } D_{p,t}<+\\infty",
+            "name": "contract_minimum_quantity",
+            "description": "The designated contract product must be produced in at least the required minimum quantity in every period.",
+            "formula": "x_{p^{\\mathrm{c}},t} \\ge L_t \\quad \\forall t=0,\\ldots,T-1",
             "parameters": [
-                "demand_limit"
+                "contract_product_index",
+                "minimum_contract_quantity",
+                "num_periods"
             ],
             "variables": [
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "nonnegative_decision_quantities",
-            "description": "all decision quantities must be nonnegative",
-            "formula": "x_{p,t} \\geq 0,\\ y_{p,t} \\geq 0,\\ u_{r,t} \\geq 0 \\quad \\forall p=1,\\dots,P,\\ \\forall r=1,\\dots,R,\\ \\forall t=1,\\dots,T",
-            "variables": [
-                "production_quantity",
-                "sales_quantity",
-                "raw_material_purchase"
-            ]
-        },
-        {
-            "name": "purchase_material_balance",
-            "description": "raw material purchases must be sufficient to support production of all products using the fixed recipes in each period",
-            "formula": "u_{r,t} \\geq \\sum_{p=1}^{P} a_{r,p} x_{p,t} \\quad \\forall r=1,\\dots,R,\\ \\forall t=1,\\dots,T",
-            "parameters": [
-                "material_requirements"
-            ],
-            "variables": [
-                "raw_material_purchase",
                 "production_quantity"
             ]
         },
         {
-            "name": "sales_upper_bound_finite_demand",
-            "description": "if demand is finite, sales of each product in each period cannot exceed the demand limit",
-            "formula": "y_{p,t} \\leq D_{p,t} \\quad \\forall p=1,\\dots,P,\\ \\forall t=1,\\dots,T\\ \\text{ with }\\ D_{p,t}<+\\infty",
+            "name": "demand_upper_bound_if_provided",
+            "description": "If market demand data are provided, sales of each product in each period cannot exceed the given demand upper bound; because production and sales are identical, this is enforced directly on production quantities.",
+            "formula": "x_{p,t} \\le d_{p,t} \\quad \\forall p=0,\\ldots,P-1,\\; \\forall t=0,\\ldots,T-1",
             "parameters": [
-                "demand_limit"
+                "market_demand_upper_bound",
+                "num_products",
+                "num_periods"
             ],
             "variables": [
-                "sales_quantity"
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "production_equals_sales",
+            "description": "All produced batches are sold in the same period, so production quantities and sales quantities are identical and there is no inventory carryover. This is enforced structurally by using only the production variable and no separate sales or inventory variables.",
+            "formula": "\\text{No separate sales variable; } s_{p,t} = x_{p,t} \\text{ is implicit for all } p=0,\\ldots,P-1,\\; t=0,\\ldots,T-1",
+            "parameters": [
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "production_quantity"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "maximize total profit over the planning horizon",
+            "name": "profit_maximization",
+            "description": "Maximize total profit over the planning horizon, defined as total revenue from sold batches minus total resource operating cost.",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "maximize total profit over the planning horizon, defined as total sales revenue minus raw material purchasing costs and variable production costs",
+        "description": "Maximize total profit over the planning horizon, equal to total revenue from produced-and-sold batches minus total resource operating cost. Since production equals sales and no inventory is carried, revenue is linear in production quantities and resource cost is charged on utilized processing time.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "\\Pi = \\sum_{p=1}^{P}\\sum_{t=1}^{T} s_{p,t} y_{p,t} - \\sum_{r=1}^{R}\\sum_{t=1}^{T} q_{r,t} u_{r,t} - \\sum_{p=1}^{P}\\sum_{t=1}^{T} v_{p,t} x_{p,t}",
+        "formula": "\\sum_{p=0}^{P-1}\\sum_{t=0}^{T-1} u_p x_{p,t} - \\sum_{r=0}^{R-1}\\sum_{t=0}^{T-1} c_r \\left(\\frac{1}{\\kappa}\\sum_{p=0}^{P-1} a_{p,r} x_{p,t}\\right)",
         "parameters": [
-            "selling_price",
-            "purchase_cost",
-            "production_cost"
+            "unit_revenue",
+            "resource_operating_cost",
+            "processing_time_requirements",
+            "time_conversion_factor",
+            "num_products",
+            "num_resources",
+            "num_periods"
         ],
         "variables": [
-            "total_profit",
-            "sales_quantity",
-            "raw_material_purchase",
             "production_quantity"
         ]
     }

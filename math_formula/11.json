@@ -1,322 +1,209 @@
 {
-    "problem": "Problem description\n- There is a single-period production planning problem for $$N$$ container types indexed by $$i,j \\in \\mathcal{N}=\\{1,\\ldots,N\\}$$.\n- Each container type $$i$$ is characterized by a volume parameter $$v_i$$, a demand parameter $$d_i$$, and a unit variable production cost $$c_i$$.\n- Each container type has its own dedicated equipment. A fixed setup cost $$f_i$$ is incurred whenever the equipment for type $$i$$ is activated. In this instance, the setup cost is common across types.\n- If a type is not produced, its equipment remains inactive and no setup cost is paid for that type.\n- A produced unit of type $$i$$ may be used to satisfy demand for type $$j$$ only when the volume of type $$i$$ is not smaller than the volume of type $$j$$.\n- Because the types are ordered by nondecreasing volume, larger-volume types may substitute for smaller-volume types, but not the other way around.\n- All demand must be fully met after allowing such substitutions among compatible types.\n- If an external production limit is provided, $$K_i$$ denotes the capacity of type $$i$$; otherwise, no separate capacity limit is specified beyond the demand and substitution rules.\n- The planning goal is to minimize the total cost over the single planning horizon $$\\mathcal{T}=\\{1\\}$$, combining all unit production costs and all setup costs.\n- A solution is represented by:\n  - $$q_i$$: the total quantity produced of container type $$i$$.\n  - $$y_i$$: a binary activation indicator for the equipment of type $$i$$, where $$y_i=1$$ means the equipment is activated.\n  - $$x_{i,j}$$: the quantity produced as type $$i$$ and assigned to satisfy demand of type $$j$$, defined only for compatible pairs.\n  - $$Z$$: the minimized total cost of the production plan.\n\nInput Format\n{\n  \"N\": \"integer, number of container types $$N$$\",\n  \"T\": \"single-period planning horizon $$\\mathcal{T}=\\{1\\}$$\",\n  \"v\": \"array of length $$N$$; $$v_i$$ is the volume of container type $$i$$, with indices ordered so that volumes are nondecreasing\",\n  \"d\": \"array of length $$N$$; $$d_i$$ is the demand for container type $$i$$\",\n  \"c\": \"array of length $$N$$; $$c_i$$ is the unit variable production cost for container type $$i$$\",\n  \"f\": \"scalar; common fixed setup cost incurred when a type's equipment is activated\",\n  \"K\": \"optional array of length $$N$$; $$K_i$$ is the production capacity of type $$i$$ if a capacity limit is supplied\",\n  \"compatibility_rule\": \"type $$i$$ may satisfy demand of type $$j$$ only when $$v_i \\\\ge v_j$$\"\n}\n\nOutput Format\n{\n  \"Z\": \"scalar, minimized total cost\",\n  \"q\": \"array of length $$N$$; $$q_i$$ is the total quantity produced of container type $$i$$\",\n  \"y\": \"binary array of length $$N$$; $$y_i$$ indicates whether the equipment for type $$i$$ is activated\",\n  \"x\": \"matrix of shape $$N \\\\times N$$; $$x_{i,j}$$ is the quantity produced as type $$i$$ and used to meet demand of type $$j$$, defined only for compatible pairs\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 6,\n  \"T\": 1,\n  \"v\": [1500, 2500, 4000, 6000, 9000, 12000],\n  \"d\": [500, 550, 700, 900, 400, 300],\n  \"c\": [5, 8, 10, 12, 16, 18],\n  \"f\": 1200\n}",
+    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and $$R$$ production processes indexed by $$r \\in \\mathcal{R}$$.\n- The planning horizon is one weekly period, represented by $$\\mathcal{T}$$, and the model determines a weekly production plan.\n- Each product uses process time according to a processing-time matrix $$a_{r,p}$$; a zero entry means that product does not use that process.\n- Each process has an available weekly capacity $$C_r$$ and an hourly operating cost $$c_r$$.\n- Each product has a selling price per unit $$s_p$$.\n- The weekly profit is the total sales revenue from produced units minus the operating cost of all used process hours.\n- A minimum output requirement may be imposed for selected products through a lower-bound vector $$\\ell_p$$; in this problem, at least one product has a positive lower bound.\n- A minimum profit target $$\\Pi^{\\min}$$ must be met by the weekly plan.\n- Overtime is not allowed, so no process may use more than its available weekly capacity.\n- Idle time means unused capacity on each process, and lower idle time is preferred with weights proportional to the corresponding hourly costs $$c_r$$.\n- The optimization goal is to choose weekly production quantities that maximize weekly profit while satisfying all capacity, production, and profit requirements, and while keeping weighted idle time as low as possible among feasible plans.\n- A solution is represented by:\n  - $$x_p$$: weekly production quantity of product $$p$$.\n  - $$u_r$$: idle time of process $$r$$ during the week.\n  - $$\\Pi$$: achieved total weekly profit.\n  - $$\\mathbf{x} = \\{x_p\\}_{p \\in \\mathcal{P}}$$ together with $$\\mathbf{u} = \\{u_r\\}_{r \\in \\mathcal{R}}$$ as the complete production plan.\n\nInput Format\n{\n  \"num_products\": \"$$P$$\",\n  \"num_processes\": \"$$R$$\",\n  \"products\": {\n    \"index_set\": \"$$\\\\mathcal{P} = \\\\{1,2,\\\\ldots,P\\\\}$$\",\n    \"meaning\": \"Set of products.\"\n  },\n  \"processes\": {\n    \"index_set\": \"$$\\\\mathcal{R} = \\\\{1,2,\\\\ldots,R\\\\}$$\",\n    \"meaning\": \"Set of production processes.\"\n  },\n  \"planning_horizon\": {\n    \"periods\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"Weekly planning period; the base problem uses a single week.\"\n  },\n  \"processing_time\": {\n    \"shape\": \"$$R \\\\times P$$\",\n    \"symbol\": \"$$a_{r,p}$$\",\n    \"meaning\": \"Hours required from process $$r$$ to produce one unit of product $$p$$.\"\n  },\n  \"capacity\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$C_r$$\",\n    \"meaning\": \"Available weekly capacity in hours for each process $$r$$.\"\n  },\n  \"hourly_cost\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$c_r$$\",\n    \"meaning\": \"Hourly operating cost of each process $$r$$.\"\n  },\n  \"selling_price\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$s_p$$\",\n    \"meaning\": \"Unit selling price of each product $$p$$.\"\n  },\n  \"minimum_profit\": {\n    \"symbol\": \"$$\\\\Pi^{\\\\min}$$\",\n    \"meaning\": \"Minimum required weekly profit.\"\n  },\n  \"minimum_production\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$\\\\ell_p$$\",\n    \"meaning\": \"Minimum weekly production requirement for each product $$p$$; entries may be zero when no lower bound is required.\"\n  },\n  \"idle_time_weight\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$w_r$$\",\n    \"meaning\": \"Weight used for idle-time minimization on each process $$r$$, typically proportional to $$c_r$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$x_p$$\",\n    \"meaning\": \"Weekly production quantity of each product $$p$$.\"\n  },\n  \"idle_time\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$u_r$$\",\n    \"meaning\": \"Unused weekly capacity time for each process $$r$$.\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"meaning\": \"Achieved total weekly profit of the selected plan.\"\n  },\n  \"feasibility_status\": {\n    \"meaning\": \"Indicates whether the returned plan satisfies all production, capacity, and profit requirements.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"num_products\": 2,\n  \"num_processes\": 3,\n  \"products\": [\"Type A\", \"Type B\"],\n  \"processes\": [\"Manufacturing\", \"Assembly\", \"Inspection\"],\n  \"planning_horizon\": \"1 week\",\n  \"processing_time\": [\n    [20, 0],\n    [5, 7],\n    [3, 6]\n  ],\n  \"capacity\": [120, 80, 40],\n  \"hourly_cost\": [12, 8, 10],\n  \"selling_price\": [650, 725],\n  \"minimum_profit\": 3000,\n  \"minimum_production\": [5, 0],\n  \"idle_time_weight\": [12, 8, 10]\n}",
     "parameters": [
         {
-            "name": "num_container_types",
-            "symbol": "N",
+            "name": "num_products",
+            "symbol": "P",
             "shape": [],
-            "description": "Number of container types in the single-period production planning problem"
+            "description": "Total number of products in the weekly production planning problem"
+        },
+        {
+            "name": "num_processes",
+            "symbol": "R",
+            "shape": [],
+            "description": "Total number of production processes in the weekly production planning problem"
         },
         {
             "name": "planning_horizon",
-            "symbol": "\\mathcal{T}",
+            "symbol": "T",
             "shape": [],
-            "description": "Single planning horizon containing one period"
+            "description": "Single weekly planning horizon"
         },
         {
-            "name": "common_setup_cost",
-            "symbol": "f",
-            "shape": [],
-            "description": "Common fixed setup cost incurred when a type is activated, if provided"
-        },
-        {
-            "name": "type_volumes",
-            "symbol": "v",
+            "name": "processing_time",
+            "symbol": "a",
             "shape": [
-                "N"
+                "R",
+                "P"
             ],
-            "description": "Volume of each container type"
+            "description": "Processing-time matrix; hours required from process r to produce one unit of product p"
         },
         {
-            "name": "demands",
-            "symbol": "d",
+            "name": "capacity",
+            "symbol": "C",
             "shape": [
-                "N"
+                "R"
             ],
-            "description": "Demand of each container type"
+            "description": "Weekly capacity in hours available for each process r"
         },
         {
-            "name": "unit_production_costs",
+            "name": "hourly_cost",
             "symbol": "c",
             "shape": [
-                "N"
+                "R"
             ],
-            "description": "Unit production cost of each container type"
+            "description": "Hourly operating cost for each process r"
         },
         {
-            "name": "capacity_limits",
-            "symbol": "K",
+            "name": "selling_price",
+            "symbol": "s",
             "shape": [
-                "N"
+                "P"
             ],
-            "description": "Optional production capacity limit for each container type"
+            "description": "Unit selling price for each product p"
+        },
+        {
+            "name": "minimum_profit",
+            "symbol": "\\Pi_{\\min}",
+            "shape": [],
+            "description": "Minimum required weekly profit"
+        },
+        {
+            "name": "minimum_production",
+            "symbol": "\\ell",
+            "shape": [
+                "P"
+            ],
+            "description": "Minimum weekly production requirement for each product p"
+        },
+        {
+            "name": "idle_time_weight",
+            "symbol": "w",
+            "shape": [
+                "R"
+            ],
+            "description": "Weight used to prefer lower idle time on each process r, typically proportional to hourly cost"
         }
     ],
     "variables": [
         {
-            "name": "total_production",
-            "symbol": "q",
-            "shape": [
-                "N"
-            ],
-            "domain": "continuous",
-            "description": "Total quantity produced of each container type"
-        },
-        {
-            "name": "activation_indicator",
-            "symbol": "y",
-            "shape": [
-                "N"
-            ],
-            "domain": "binary",
-            "description": "Binary activation indicator for the equipment of each container type"
-        },
-        {
-            "name": "assignment_quantity",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "N",
-                "N"
+                "P"
             ],
             "domain": "continuous",
-            "description": "Quantity produced as type i and assigned to satisfy demand of type j for compatible type pairs"
+            "description": "Weekly production quantity of each product p"
         },
         {
-            "name": "total_cost",
-            "symbol": "Z",
+            "name": "idle_time",
+            "symbol": "u",
+            "shape": [
+                "R"
+            ],
+            "domain": "continuous",
+            "description": "Unused capacity on each process r during the week"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
             "shape": [],
             "domain": "continuous",
-            "description": "Minimized total cost over the single planning period"
+            "description": "Achieved total weekly profit"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "compatibility_mask",
-            "symbol": "a",
-            "shape": [
-                "N",
-                "N"
-            ],
-            "domain": "binary",
-            "description": "Binary mask equal to 1 when production type i can satisfy demand type j, i.e., when v[i] \\ge v[j], and 0 otherwise; fixed exogenously by the known volume ordering."
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_total_production",
-            "description": "Total production quantities must be nonnegative",
-            "formula": "q",
+            "name": "capacity_limit",
+            "description": "Process usage must stay within weekly capacity and any unused capacity is recorded as idle time for each process",
+            "formula": "\\sum_{p=0}^{P-1} a_{rp} x_p + u_r = C_r \\quad \\forall r=0,\\dots,R-1",
             "parameters": [
-                "num_container_types"
+                "processing_time",
+                "capacity"
             ],
             "variables": [
-                "total_production"
+                "production_quantity",
+                "idle_time"
             ]
         },
         {
-            "name": "binary_activation",
-            "description": "Equipment activation indicators must be binary",
-            "formula": "y",
+            "name": "minimum_production_requirement",
+            "description": "Each product must meet its specified minimum weekly production requirement",
+            "formula": "x_p \\ge \\ell_p \\quad \\forall p=0,\\dots,P-1",
             "parameters": [
-                "num_container_types"
+                "minimum_production"
             ],
             "variables": [
-                "activation_indicator"
+                "production_quantity"
             ]
         },
         {
-            "name": "nonnegative_assignment_quantity",
-            "description": "Compatible assignment quantities must be nonnegative",
-            "formula": "x",
+            "name": "minimum_profit_requirement",
+            "description": "Achieved weekly profit must meet the required minimum profit target",
+            "formula": "\\Pi \\ge \\Pi_{\\min}",
             "parameters": [
-                "num_container_types",
-                "type_volumes"
+                "minimum_profit"
             ],
             "variables": [
-                "assignment_quantity"
+                "total_profit"
             ]
         },
         {
-            "name": "nonnegative_total_cost",
-            "description": "Total cost must be nonnegative",
-            "formula": "Z",
-            "parameters": [],
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative for all products",
+            "formula": "x_p \\ge 0 \\quad \\forall p=0,\\dots,P-1",
             "variables": [
-                "total_cost"
+                "production_quantity"
             ]
         },
         {
-            "name": "demand_fulfillment",
-            "description": "All demand must be fully satisfied through compatible production assignments",
-            "formula": "d",
-            "parameters": [
-                "num_container_types",
-                "type_volumes",
-                "demands"
-            ],
+            "name": "nonnegative_idle_time",
+            "description": "Idle time must be nonnegative for all processes",
+            "formula": "u_r \\ge 0 \\quad \\forall r=0,\\dots,R-1",
             "variables": [
-                "assignment_quantity"
+                "idle_time"
             ]
         },
         {
-            "name": "compatibility_rule",
-            "description": "Assignments are allowed only from producing type i to demand type j when the producing type volume is at least the demanded type volume",
-            "formula": "v[i] \\ge v[j]",
+            "name": "profit_definition",
+            "description": "Total profit is defined from sales revenue minus operating costs associated with used process hours",
+            "formula": "\\Pi = \\sum_{p=0}^{P-1} s_p x_p - \\sum_{r=0}^{R-1} c_r \\sum_{p=0}^{P-1} a_{rp} x_p",
             "parameters": [
-                "type_volumes"
+                "processing_time",
+                "hourly_cost",
+                "selling_price"
             ],
             "variables": [
-                "assignment_quantity"
+                "production_quantity",
+                "total_profit"
             ]
         },
         {
-            "name": "activation_setup_link",
-            "description": "Producing a type activates its equipment and incurs the fixed setup cost; inactive equipment incurs no setup cost",
-            "formula": "y",
+            "name": "weighted_idle_time_preference",
+            "description": "Among feasible plans, lower weighted idle time is preferred using weights proportional to hourly operating costs",
+            "formula": "\\min \\sum_{r=0}^{R-1} w_r u_r",
             "parameters": [
-                "common_setup_cost"
+                "idle_time_weight"
             ],
             "variables": [
-                "total_production",
-                "activation_indicator"
-            ]
-        },
-        {
-            "name": "capacity_limit_if_provided",
-            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity",
-            "formula": "q",
-            "parameters": [
-                "capacity_limits"
-            ],
-            "variables": [
-                "total_production"
-            ]
-        },
-        {
-            "name": "nonnegative_total_production_bounds",
-            "description": "Total production quantities must be nonnegative",
-            "formula": "q_i \\ge 0 \\quad \\forall i=0,\\ldots,N-1",
-            "parameters": [
-                "num_container_types"
-            ],
-            "variables": [
-                "total_production"
-            ]
-        },
-        {
-            "name": "activation_binary_domain",
-            "description": "Equipment activation indicators must be binary",
-            "formula": "y_i \\in \\{0,1\\} \\quad \\forall i=0,\\ldots,N-1",
-            "parameters": [
-                "num_container_types"
-            ],
-            "variables": [
-                "activation_indicator"
-            ]
-        },
-        {
-            "name": "nonnegative_assignment_quantities",
-            "description": "Assignment quantities must be nonnegative for all compatible type pairs",
-            "formula": "x_{ij} \\ge 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_container_types"
-            ],
-            "variables": [
-                "assignment_quantity"
-            ]
-        },
-        {
-            "name": "total_cost_definition",
-            "description": "Total cost equals production costs plus setup costs",
-            "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
-            "parameters": [
-                "unit_production_costs",
-                "common_setup_cost"
-            ],
-            "variables": [
-                "total_production",
-                "activation_indicator",
-                "total_cost"
-            ]
-        },
-        {
-            "name": "demand_fulfillment_constraint",
-            "description": "All demand must be fully satisfied through compatible production assignments",
-            "formula": "\\sum_{i=0}^{N-1} x_{ij} = d_j \\quad \\forall j=0,\\ldots,N-1",
-            "parameters": [
-                "demands"
-            ],
-            "variables": [
-                "assignment_quantity"
-            ]
-        },
-        {
-            "name": "production_definition",
-            "description": "Total production of each type equals the sum of compatible assignments produced as that type",
-            "formula": "q_i = \\sum_{j=0}^{N-1} x_{ij} \\quad \\forall i=0,\\ldots,N-1",
-            "parameters": [
-                "num_container_types"
-            ],
-            "variables": [
-                "total_production",
-                "assignment_quantity"
-            ]
-        },
-        {
-            "name": "compatibility_fix_incompatible_pairs",
-            "description": "Incompatible assignments are fixed to zero and compatible pairs are left unrestricted by this rule; compatibility is determined by the known volume ordering.",
-            "formula": "x_{ij} = 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\} \\text{ with } v_i < v_j",
-            "parameters": [
-                "type_volumes"
-            ],
-            "variables": [
-                "assignment_quantity"
-            ]
-        },
-        {
-            "name": "activation_production_link",
-            "description": "Producing a type activates its equipment; total production is bounded by a finite big-M derived from demand totals when no explicit capacity is available.",
-            "formula": "q_i \\le U_i y_i \\quad \\forall i=0,\\ldots,N-1",
-            "parameters": [
-                "demands"
-            ],
-            "variables": [
-                "total_production",
-                "activation_indicator"
-            ]
-        },
-        {
-            "name": "capacity_limit_if_provided_constraint",
-            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity.",
-            "formula": "q_i \\le K_i \\quad \\forall i=0,\\ldots,N-1",
-            "parameters": [
-                "capacity_limits"
-            ],
-            "variables": [
-                "total_production"
+                "idle_time"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_cost_minimization",
-            "description": "Minimize the total single-period production and setup cost over the planning horizon",
+            "name": "profit_maximization",
+            "description": "maximize weekly profit subject to capacity, production, and minimum-profit requirements",
+            "sense": "maximize"
+        },
+        {
+            "name": "idle_time_minimization",
+            "description": "minimize weighted idle time across processes among feasible plans, using weights proportional to hourly operating costs",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total single-period cost, consisting of unit production costs and common setup costs for activated types.",
-        "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
+        "description": "Use preemption optimization to first maximize weekly profit, then among all profit-optimal feasible plans minimize weighted idle time across processes.",
+        "objective_combination_method": "preemption_optimization",
+        "sense": "maximize",
+        "formula": "\\text{Lexicographic: } \\max \\Pi \\text{, then } \\min \\sum_{r=0}^{R-1} w_r u_r",
         "parameters": [
-            "unit_production_costs",
-            "common_setup_cost"
+            "idle_time_weight"
         ],
         "variables": [
-            "total_production",
-            "activation_indicator",
-            "total_cost"
+            "total_profit",
+            "idle_time"
         ]
     }
 }

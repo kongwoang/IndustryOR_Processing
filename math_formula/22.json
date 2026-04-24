@@ -1,66 +1,65 @@
 {
-    "problem": "Problem description\n- There is a weekly production planning problem with a set of products $$\\mathcal{P}$$ indexed by $$p$$ and a set of resources $$\\mathcal{R}$$ indexed by $$r$$.\n- Each product $$p \\in \\mathcal{P}$$ has a unit resource usage profile, a unit selling price $$s_p$$, a unit variable production cost $$c_p$$, and an associated special equipment with weekly fixed cost $$f_p$$.\n- Each resource $$r \\in \\mathcal{R}$$ has a weekly availability limit $$b_r$$.\n- A demand parameter $$d_p$$ may be included as an optional upper bound on how many units of product $$p$$ can be sold, but no explicit demand cap is required in this problem instance.\n- The factory decides how many units of each product to produce during the week and whether to activate the corresponding special equipment.\n- Production of any product is allowed only when its corresponding special equipment is activated for the week.\n- The total use of each resource by all produced products must remain within the available weekly capacity of that resource.\n- The planning goal is to maximize total weekly profit, defined as total sales revenue minus total variable production costs minus total fixed equipment costs.\n- A solution is represented by:\n  - $$x_p$$: the weekly production quantity of product $$p$$, where $$x_p \\ge 0$$.\n  - $$y_p$$: a binary activation variable for the special equipment of product $$p$$, where $$y_p = 1$$ means the equipment is used in the week and $$y_p = 0$$ means it is not used.\n  - $$\\Pi$$: the resulting total weekly profit.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": {\n      \"symbol\": \"$$\\\\mathcal{P}$$\",\n      \"description\": \"Set of products, indexed by $$p$$.\"\n    },\n    \"resources\": {\n      \"symbol\": \"$$\\\\mathcal{R}$$\",\n      \"description\": \"Set of resources, indexed by $$r$$.\"\n    },\n    \"time_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"description\": \"Planning periods, indexed by $$t$$; this problem uses a weekly planning horizon.\"\n    }\n  },\n  \"parameters\": {\n    \"resource_usage\": {\n      \"symbol\": \"$$a_{r,p}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}| \\\\times |\\\\mathcal{P}|$$\",\n      \"description\": \"Units of resource $$r$$ required to produce one unit of product $$p$$.\"\n    },\n    \"selling_price\": {\n      \"symbol\": \"$$s_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Unit selling price of product $$p$$.\"\n    },\n    \"variable_cost\": {\n      \"symbol\": \"$$c_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Unit variable production cost of product $$p$$.\"\n    },\n    \"fixed_cost\": {\n      \"symbol\": \"$$f_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Weekly fixed cost for activating the special equipment used to produce product $$p$$.\"\n    },\n    \"resource_capacity\": {\n      \"symbol\": \"$$b_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"description\": \"Weekly available capacity of resource $$r$$.\"\n    },\n    \"demand_cap\": {\n      \"symbol\": \"$$d_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Optional maximum weekly sellable demand for product $$p$$; if omitted, demand is assumed not to bind.\"\n    }\n  },\n  \"assumptions\": {\n    \"equipment_product_link\": \"Each product $$p$$ has one dedicated special equipment.\",\n    \"sales_assumption\": \"All produced units are sold within the week at the stated selling price.\"\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Weekly production quantity for each product $$p$$.\"\n    },\n    \"equipment_activation\": {\n      \"symbol\": \"$$y_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"description\": \"Binary activation decision for the special equipment of each product $$p$$.\"\n    },\n    \"total_profit\": {\n      \"symbol\": \"$$\\\\Pi$$\",\n      \"description\": \"Maximum achievable weekly profit.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"products\": [\"shirt\", \"short_sleeve\", \"casual_cloth\"],\n    \"resources\": [\"labor\", \"material\"],\n    \"time_horizon\": [\"week\"]\n  },\n  \"parameters\": {\n    \"resource_usage\": [\n      [3, 2, 6],\n      [4, 3, 6]\n    ],\n    \"selling_price\": [120, 80, 180],\n    \"variable_cost\": [60, 40, 80],\n    \"fixed_cost\": [2000, 1500, 1000],\n    \"resource_capacity\": [1500, 1600]\n  }\n}",
+    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and a planning horizon of $$T$$ production days indexed by $$t \\in \\mathcal{T}$$.\n- For each product $$p$$, the input data include a demand ceiling $$D_p$$, a unit selling price $$S_p$$, a unit production cost $$C_p$$, a maximum daily production quota $$Q_p$$, a fixed daily activation cost $$F_p$$, and a minimum production batch size $$B_p$$.\n- All production quantities are measured in a common unit of output, and the production plan is made day by day across the horizon.\n- The planning goal is to choose which products to activate on which days and how much to produce so as to maximize total net profit from sales after accounting for production costs and fixed activation costs.\n- A product may be produced on a day only if its production line is activated for that day.\n- If a product is activated on a day, the produced quantity for that product on that day must be at least its minimum batch size.\n- If a product is activated on a day, its produced quantity on that day must not exceed its daily quota.\n- Over the full planning horizon, the total production assigned to each product must not exceed that product\u2019s demand ceiling.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced on day $$t$$.\n  - $$y_{p,t}$$: a binary activation decision, where $$y_{p,t}=1$$ means product $$p$$ is activated on day $$t$$ and $$y_{p,t}=0$$ otherwise.\n  - $$z$$: the total objective value of the selected production plan.\n\nInput Format\n{\n  \"T\": \"integer; number of planning days in the horizon.\",\n  \"P\": \"integer; number of products.\",\n  \"demand_ceiling\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of demand limits $$D_p$$, one value for each product $$p$$.\"\n  },\n  \"selling_price\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit selling prices $$S_p$$, one value for each product $$p$$.\"\n  },\n  \"production_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of unit production costs $$C_p$$, one value for each product $$p$$.\"\n  },\n  \"daily_quota\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of maximum daily production quotas $$Q_p$$, one value for each product $$p$$.\"\n  },\n  \"activation_cost\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of fixed activation costs $$F_p$$, one value for each product $$p$$.\"\n  },\n  \"minimum_batch\": {\n    \"shape\": [\"$$P$$\"],\n    \"meaning\": \"Array of minimum batch sizes $$B_p$$, one value for each product $$p$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Matrix $$x_{p,t}$$ giving the planned production quantity of product $$p$$ on day $$t$$.\"\n  },\n  \"activation_indicator\": {\n    \"shape\": [\"$$P$$\", \"$$T$$\"],\n    \"meaning\": \"Binary matrix $$y_{p,t}$$ indicating whether product $$p$$ is activated on day $$t$$.\"\n  },\n  \"objective_value\": {\n    \"shape\": [\"scalar\"],\n    \"meaning\": \"The total net objective value $$z$$ of the production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 22,\n  \"P\": 3,\n  \"demand_ceiling\": [5300, 4500, 5400],\n  \"selling_price\": [124, 109, 115],\n  \"production_cost\": [73.30, 52.90, 65.40],\n  \"daily_quota\": [500, 450, 550],\n  \"activation_cost\": [170000, 150000, 100000],\n  \"minimum_batch\": [20, 20, 16]\n}",
     "parameters": [
         {
             "name": "num_products",
             "symbol": "P",
             "shape": [],
-            "description": "Number of products in the planning problem"
+            "description": "Integer number of products, with products indexed by $p \\in \\mathcal{P} = \\{0,1,\\dots,P-1\\}$"
         },
         {
-            "name": "num_resources",
-            "symbol": "R",
+            "name": "num_days",
+            "symbol": "T",
             "shape": [],
-            "description": "Number of resources in the planning problem"
+            "description": "Integer number of planning days, with days indexed by $t \\in \\mathcal{T} = \\{0,1,\\dots,T-1\\}$"
         },
         {
-            "name": "resource_usage",
-            "symbol": "a",
+            "name": "demand_ceiling",
+            "symbol": "D",
             "shape": [
-                "R",
                 "P"
             ],
-            "description": "Units of resource $r$ required to produce one unit of product $p$"
+            "description": "Demand ceiling for product $p$"
         },
         {
             "name": "selling_price",
-            "symbol": "s",
+            "symbol": "S",
             "shape": [
                 "P"
             ],
-            "description": "Unit selling price for each product"
+            "description": "Unit selling price for product $p$"
         },
         {
-            "name": "variable_cost",
-            "symbol": "c",
+            "name": "production_cost",
+            "symbol": "C",
             "shape": [
                 "P"
             ],
-            "description": "Unit variable production cost for each product"
+            "description": "Unit production cost for product $p$"
         },
         {
-            "name": "fixed_cost",
-            "symbol": "f",
+            "name": "daily_quota",
+            "symbol": "Q",
             "shape": [
                 "P"
             ],
-            "description": "Weekly fixed cost of activating the dedicated special equipment for each product"
+            "description": "Maximum daily production quota for product $p$"
         },
         {
-            "name": "resource_capacity",
-            "symbol": "b",
-            "shape": [
-                "R"
-            ],
-            "description": "Weekly available capacity for each resource"
-        },
-        {
-            "name": "demand_cap",
-            "symbol": "d",
+            "name": "activation_cost",
+            "symbol": "F",
             "shape": [
                 "P"
             ],
-            "description": "Optional maximum weekly sellable demand for each product"
+            "description": "Fixed daily activation cost for product $p$"
+        },
+        {
+            "name": "minimum_batch",
+            "symbol": "B",
+            "shape": [
+                "P"
+            ],
+            "description": "Minimum production batch size for product $p$"
         }
     ],
     "variables": [
@@ -68,135 +67,138 @@
             "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "P"
+                "P",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Weekly production quantity for each product"
+            "description": "Quantity of product $p$ produced on day $t$"
         },
         {
-            "name": "equipment_activation",
+            "name": "activation_indicator",
             "symbol": "y",
             "shape": [
-                "P"
+                "P",
+                "T"
             ],
             "domain": "binary",
-            "description": "Binary indicator of whether the dedicated special equipment for each product is activated during the week"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "\\Pi",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total weekly profit"
+            "description": "Binary activation indicator for product $p$ on day $t$"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "production_upper_bound",
-            "symbol": "U",
-            "shape": [
-                "P"
-            ],
-            "domain": "continuous",
-            "description": "Finite product-specific upper bound on production used in the on/off activation linking constraint"
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "production_only_if_equipment_activated",
-            "description": "Production of each product is allowed only if its dedicated special equipment is activated; the product-specific big-M bound is used to link output to activation.",
-            "formula": "x_p \\leq M_p y_p \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantity must be nonnegative for each product-day pair",
+            "formula": "x_{p,t} \\ge 0",
             "parameters": [
-                "num_products"
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "binary_activation_indicator",
+            "description": "Activation indicator must be binary for each product-day pair",
+            "formula": "y_{p,t} \\in \\{0,1\\}",
+            "parameters": [
+                "num_products",
+                "num_days"
+            ],
+            "variables": [
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "activation_required_for_production",
+            "description": "Production is allowed only when the activation indicator is on for the same product-day pair",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
+            "parameters": [
+                "daily_quota",
+                "num_products",
+                "num_days"
             ],
             "variables": [
                 "production_quantity",
-                "equipment_activation"
+                "activation_indicator"
             ]
         },
         {
-            "name": "resource_capacity_limit",
-            "description": "Weekly production must not exceed the available capacity of each resource.",
-            "formula": "\\sum_{p=1}^{P} a_{r,p} x_p \\leq b_r \\quad \\forall r \\in \\{1,\\dots,R\\}",
+            "name": "minimum_batch_when_activated",
+            "description": "If a product is activated on a day, its production that day must meet the minimum batch size",
+            "formula": "x_{p,t} \\ge B_p y_{p,t}",
             "parameters": [
-                "resource_usage",
-                "resource_capacity",
+                "minimum_batch",
                 "num_products",
-                "num_resources"
+                "num_days"
             ],
             "variables": [
-                "production_quantity"
+                "production_quantity",
+                "activation_indicator"
             ]
         },
         {
-            "name": "optional_demand_cap",
-            "description": "If a demand cap is provided for a product, production may not exceed that cap; otherwise the constraint is omitted in instances without demand data.",
-            "formula": "x_p \\leq d_p \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "name": "daily_quota_when_activated",
+            "description": "If a product is activated on a day, its production that day must not exceed the daily quota",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
             "parameters": [
-                "demand_cap",
-                "num_products"
+                "daily_quota",
+                "num_products",
+                "num_days"
             ],
             "variables": [
-                "production_quantity"
+                "production_quantity",
+                "activation_indicator"
             ]
         },
         {
-            "name": "all_units_sold_within_week",
-            "description": "All produced units are assumed to be sold within the week at the stated selling price; this is implicit in the profit objective and does not require a separate constraint.",
-            "formula": "x_p = \\,\\text{sales}_p \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "name": "zero_production_when_inactive",
+            "description": "If a product is not activated on a day, production that day must be zero",
+            "formula": "x_{p,t} \\le Q_p y_{p,t}",
             "parameters": [
-                "selling_price",
-                "num_products"
+                "daily_quota",
+                "num_products",
+                "num_days"
             ],
             "variables": [
-                "production_quantity"
+                "production_quantity",
+                "activation_indicator"
             ]
         },
         {
-            "name": "nonnegative_production",
-            "description": "Production quantities must be nonnegative for all products.",
-            "formula": "x_p \\geq 0 \\quad \\forall p \\in \\{1,\\dots,P\\}",
+            "name": "total_production_demand_cap",
+            "description": "Total production of each product across all days must not exceed the product demand ceiling",
+            "formula": "\\sum_{t=0}^{T-1} x_{p,t} \\le D_p",
             "parameters": [
-                "num_products"
+                "demand_ceiling",
+                "num_days"
             ],
             "variables": [
                 "production_quantity"
-            ]
-        },
-        {
-            "name": "binary_equipment_activation",
-            "description": "Equipment activation decisions must be binary for all products.",
-            "formula": "y_p \\in \\{0,1\\} \\quad \\forall p \\in \\{1,\\dots,P\\}",
-            "parameters": [
-                "num_products"
-            ],
-            "variables": [
-                "equipment_activation"
             ]
         }
     ],
     "objectives": [
         {
             "name": "profit_maximization",
-            "description": "Maximize total weekly profit, defined as total sales revenue minus total variable production costs minus total fixed equipment costs.",
+            "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total weekly profit, defined as total sales revenue minus total variable production costs minus total fixed equipment costs.",
+        "description": "Maximize total net profit from sales after accounting for production costs and fixed activation costs. Single-objective MILP formulation; no combination strategy is needed.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "\\Pi = \\sum_{p=1}^{P} (s_p - c_p) x_p - \\sum_{p=1}^{P} f_p y_p",
+        "formula": "\\sum_{p=0}^{P-1}\\sum_{t=0}^{T-1}\\left((S_p-C_p)x_{p,t}-F_p y_{p,t}\\right)",
         "parameters": [
             "selling_price",
-            "variable_cost",
-            "fixed_cost",
-            "num_products"
+            "production_cost",
+            "activation_cost"
         ],
         "variables": [
             "production_quantity",
-            "equipment_activation",
-            "total_profit"
+            "activation_indicator"
         ]
     }
 }

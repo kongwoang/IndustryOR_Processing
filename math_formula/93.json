@@ -1,232 +1,299 @@
 {
-    "problem": "Problem description\n- A single-period blending and procurement planning problem is given with a set of crude inputs $$\\mathcal{R}$$ and a set of gasoline outputs $$\\mathcal{G}$$.\n- One distinguished crude type $$r^\\star \\in \\mathcal{R}$$ must appear in each gasoline product at no less than a product-specific minimum share $$\\alpha_g$$ for every $$g \\in \\mathcal{G}$$.\n- Each finished gasoline type $$g \\in \\mathcal{G}$$ has a unit selling price $$s_g$$.\n- Each crude type $$r \\in \\mathcal{R}$$ has an initial inventory level $$I_r$$.\n- Some crude types may be purchasable from the market, with a total purchase cap $$\\bar P_r$$ for each purchasable crude type $$r$$.\n- Market purchases, when available, may be divided into ordered price blocks indexed by $$k \\in \\mathcal{K}_r$$, each with a block capacity $$U_{r,k}$$ and a unit purchase cost $$c_{r,k}$$.\n- The planning decision determines how much of each crude type to purchase from each price block and how much of each crude type to route into each gasoline product.\n- The optimization goal is to maximize total profit, defined in words as total gasoline sales revenue minus total crude procurement cost.\n- Required business rules:\n  - Each gasoline product must satisfy its minimum content requirement for the distinguished crude type $$r^\\star$$.\n  - The total amount of each crude type used in all gasoline production must not exceed the quantity available from inventory plus purchases.\n  - Purchases from each price block must respect the block capacity and the ordering structure of the tiered market price.\n  - If any product demand limits $$D_g$$ are provided, production and sales of each product must not exceed those limits.\n  - All decision quantities must be nonnegative.\n- A solution is represented by:\n  - $$p_{r,k}$$: the quantity of crude type $$r$$ purchased from market price block $$k$$.\n  - $$x_{r,g}$$: the quantity of crude type $$r$$ blended into gasoline product $$g$$.\n  - $$y_g$$: the total quantity of gasoline product $$g$$ produced.\n  - $$z$$: the achieved total profit.\n\nInput Format\n{\n  \"sets\": {\n    \"raw_materials\": \"List of identifiers for crude inputs, representing $$\\mathcal{R}$$.\",\n    \"products\": \"List of identifiers for gasoline outputs, representing $$\\mathcal{G}$$.\",\n    \"purchasable_raw_materials\": \"Subset of $$\\mathcal{R}$$ that can be bought from the market.\",\n    \"purchase_blocks\": \"For each purchasable crude type $$r$$, an ordered list of price blocks indexed by $$k \\\\in \\\\mathcal{K}_r$$.\"\n  },\n  \"planning_horizon\": {\n    \"horizon\": \"Single-period or multi-period planning set $$\\\\mathcal{T}$$. If the instance is single-period, $$|\\\\mathcal{T}| = 1$$.\"\n  },\n  \"parameters\": {\n    \"initial_inventory\": \"Vector $$I_r$$ for each $$r \\\\in \\\\mathcal{R}$$.\",\n    \"selling_price\": \"Vector $$s_g$$ for each $$g \\\\in \\\\mathcal{G}$$.\",\n    \"minimum_share\": \"Vector $$\\\\alpha_g$$ giving the minimum fraction of the distinguished crude $$r^\\\\star$$ required in each product $$g \\\\in \\\\mathcal{G}$$.\",\n    \"distinguished_crude\": \"Identifier $$r^\\\\star \\\\in \\\\mathcal{R}$$ subject to the minimum share rule.\",\n    \"block_unit_cost\": \"For each purchasable crude type $$r$$ and block $$k$$, the unit cost $$c_{r,k}$$.\",\n    \"block_capacity\": \"For each purchasable crude type $$r$$ and block $$k$$, the maximum purchasable amount $$U_{r,k}$$.\",\n    \"purchase_cap\": \"Optional total market purchase limit $$\\\\bar P_r$$ for each purchasable crude type $$r$$.\",\n    \"demand_upper_bound\": \"Optional sales or production limit $$D_g$$ for each product $$g \\\\in \\\\mathcal{G}$$.\"\n  },\n  \"decision_scope\": {\n    \"procurement\": \"Choose purchase quantities by crude type and price block.\",\n    \"blending\": \"Choose how much of each crude type is allocated to each gasoline product.\",\n    \"production\": \"Choose output quantities for each gasoline product.\"\n  }\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"shape\": \"Nested mapping or array of $$p_{r,k}$$ values, indexed by purchasable crude type $$r$$ and block $$k$$.\",\n    \"meaning\": \"Quantity purchased from each market price block.\"\n  },\n  \"blending_plan\": {\n    \"shape\": \"Matrix $$|\\\\mathcal{R}| \\\\times |\\\\mathcal{G}|$$ containing $$x_{r,g}$$.\",\n    \"meaning\": \"Quantity of each crude type blended into each gasoline product.\"\n  },\n  \"production_plan\": {\n    \"shape\": \"Vector of length $$|\\\\mathcal{G}|$$ containing $$y_g$$.\",\n    \"meaning\": \"Total production quantity of each gasoline product.\"\n  },\n  \"objective_value\": {\n    \"shape\": \"Scalar $$z$$.\",\n    \"meaning\": \"Optimal total profit.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"raw_materials\": [\"A\", \"B\"],\n    \"products\": [\"Type I\", \"Type II\"],\n    \"purchasable_raw_materials\": [\"A\"],\n    \"purchase_blocks\": {\n      \"A\": [\n        {\"block_id\": 1, \"upper_bound\": 500, \"unit_cost\": 10000},\n        {\"block_id\": 2, \"upper_bound\": 500, \"unit_cost\": 8000},\n        {\"block_id\": 3, \"upper_bound\": 500, \"unit_cost\": 6000}\n      ]\n    }\n  },\n  \"planning_horizon\": {\n    \"horizon\": [\"single_period\"]\n  },\n  \"parameters\": {\n    \"initial_inventory\": {\n      \"A\": 500,\n      \"B\": 1000\n    },\n    \"selling_price\": {\n      \"Type I\": 4800,\n      \"Type II\": 5600\n    },\n    \"minimum_share\": {\n      \"Type I\": 0.5,\n      \"Type II\": 0.6\n    },\n    \"distinguished_crude\": \"A\",\n    \"block_unit_cost\": {\n      \"A\": {\n        \"1\": 10000,\n        \"2\": 8000,\n        \"3\": 6000\n      }\n    },\n    \"block_capacity\": {\n      \"A\": {\n        \"1\": 500,\n        \"2\": 500,\n        \"3\": 500\n      }\n    },\n    \"purchase_cap\": {\n      \"A\": 1500\n    },\n    \"demand_upper_bound\": {}\n  },\n  \"decision_scope\": {\n    \"procurement\": \"Choose how much crude oil A to buy from each price block.\",\n    \"blending\": \"Choose how much crude oil A and crude oil B are blended into Type I and Type II gasoline.\",\n    \"production\": \"Choose the output quantities of Type I and Type II gasoline.\"\n  }\n}",
+    "problem": "Problem description\n- There is a production planning setting with a raw material set $$\\mathcal{R}$$, a product set $$\\mathcal{P}$$, an equipment set $$\\mathcal{E}$$, and a planning horizon $$\\mathcal{T}$$.\n- Each product $$p \\in \\mathcal{P}$$ has a product-specific yield from raw material, a product-specific labor requirement, and a unit profit coefficient.\n- Each product is compatible with a required equipment type, and production must be carried out on that compatible equipment.\n- Each equipment type $$e \\in \\mathcal{E}$$ may have a finite processing capacity in each period $$t \\in \\mathcal{T}$$, or it may be effectively unlimited.\n- The available raw material supply and available regular labor hours are limited in each period.\n- The market can absorb all feasible output, so sales are not intended to be the limiting factor unless an explicit demand upper bound is provided in the input data.\n- The planning goal is to choose production and sales decisions over the horizon so that total profit is maximized.\n- Required business constraints:\n  - Do not consume more raw material than is available in any period.\n  - Do not use more regular labor hours than are available in any period.\n  - Produce each product only on its compatible equipment type.\n  - Do not exceed the processing capacity of any equipment type in any period.\n  - If demand upper bounds are provided, do not sell more than those limits.\n  - Keep all production, resource usage, and sales quantities nonnegative.\n  - Ensure that raw material usage, labor usage, and output quantities are consistent with the product-specific conversion and processing requirements.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity of product $$p$$ produced in period $$t$$.\n  - $$m_{p,t}$$: amount of raw material assigned to product $$p$$ in period $$t$$.\n  - $$\\ell_{p,t}$$: labor hours used for product $$p$$ in period $$t$$.\n  - $$s_{p,t}$$: quantity of product $$p$$ sold in period $$t$$, if sales are modeled separately from production.\n  - $$Z$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": \"List of products indexed by $$p \\in \\mathcal{P}$$.\",\n    \"equipment_types\": \"List of equipment types indexed by $$e \\in \\mathcal{E}$$.\",\n    \"periods\": \"List of planning periods indexed by $$t \\in \\mathcal{T}$$.\",\n    \"raw_materials\": \"List of raw materials indexed by $$r \\in \\mathcal{R}$$; for this problem, usually $$|\\mathcal{R}| = 1$$.\"\n  },\n  \"parameters\": {\n    \"yield_per_unit_raw\": \"Array $$\\alpha_p$$ giving output quantity of product $$p$$ per unit of raw material.\",\n    \"labor_hours_per_unit_raw\": \"Array $$\\beta_p$$ giving labor hours required per unit of raw material for product $$p$$.\",\n    \"unit_profit\": \"Array $$\\pi_p$$ giving profit per unit of product $$p$$ sold.\",\n    \"raw_material_supply\": \"Vector $$S_t$$ giving available raw material in period $$t$$.\",\n    \"labor_capacity\": \"Vector $$L_t$$ giving available regular labor hours in period $$t$$.\",\n    \"equipment_capacity\": \"Matrix $$K_{e,t}$$ giving the maximum processing or output capacity of equipment $$e$$ in period $$t$$; use $$+\\infty$$ if uncapped.\",\n    \"compatible_equipment\": \"Mapping $$\\eta_p$$ giving the required equipment type for product $$p$$.\",\n    \"demand_upper_bound\": \"Optional matrix $$D_{p,t}$$ giving the maximum sales quantity of product $$p$$ in period $$t$$; use $$+\\infty$$ when sales are unrestricted.\"\n  },\n  \"decision_variables\": {\n    \"production_quantity\": \"Matrix $$x_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"raw_material_allocation\": \"Matrix $$m_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"labor_usage\": \"Matrix $$\\\\ell_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"sales_quantity\": \"Optional matrix $$s_{p,t}$$ of size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$ if sales are tracked separately.\"\n  }\n}\n\nOutput Format\n{\n  \"objective_value\": \"Scalar $$Z$$ giving the maximum total profit.\",\n  \"production_plan\": {\n    \"shape\": \"Matrix $$x_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"meaning\": \"Planned production quantity for each product $$p$$ in each period $$t$$.\"\n  },\n  \"resource_usage\": {\n    \"raw_material\": {\n      \"shape\": \"Matrix $$m_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n      \"meaning\": \"Raw material assigned to each product $$p$$ in each period $$t$$.\"\n    },\n    \"labor\": {\n      \"shape\": \"Matrix $$\\\\ell_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n      \"meaning\": \"Labor hours consumed by each product $$p$$ in each period $$t$$.\"\n    }\n  },\n  \"sales_plan\": {\n    \"shape\": \"Optional matrix $$s_{p,t}$$ with size $$|\\mathcal{P}| \\\\times |\\mathcal{T}|$$.\",\n    \"meaning\": \"Quantity sold of each product $$p$$ in each period $$t$$, if reported separately from production.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"products\": [\"$$A_1$$\", \"$$A_2$$\"],\n    \"equipment_types\": [\"$$E_1$$\", \"$$E_2$$\"],\n    \"periods\": [\"$$t_1$$\"],\n    \"raw_materials\": [\"$$r_1$$\"]\n  },\n  \"parameters\": {\n    \"yield_per_unit_raw\": {\n      \"$$A_1$$\": \"$$3$$\",\n      \"$$A_2$$\": \"$$4$$\"\n    },\n    \"labor_hours_per_unit_raw\": {\n      \"$$A_1$$\": \"$$12$$\",\n      \"$$A_2$$\": \"$$8$$\"\n    },\n    \"unit_profit\": {\n      \"$$A_1$$\": \"$$24$$\",\n      \"$$A_2$$\": \"$$16$$\"\n    },\n    \"raw_material_supply\": {\n      \"$$t_1$$\": \"$$50$$\"\n    },\n    \"labor_capacity\": {\n      \"$$t_1$$\": \"$$480$$\"\n    },\n    \"equipment_capacity\": {\n      \"$$E_1$$\": {\n        \"$$t_1$$\": \"$$100$$\"\n      },\n      \"$$E_2$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      }\n    },\n    \"compatible_equipment\": {\n      \"$$A_1$$\": \"$$E_1$$\",\n      \"$$A_2$$\": \"$$E_2$$\"\n    },\n    \"demand_upper_bound\": {\n      \"$$A_1$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      },\n      \"$$A_2$$\": {\n        \"$$t_1$$\": \"$$+\\\\infty$$\"\n      }\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "initial_inventory",
-            "symbol": "I",
-            "shape": [
-                "R"
-            ],
-            "description": "Initial inventory of each crude type"
-        },
-        {
-            "name": "selling_price",
-            "symbol": "s",
-            "shape": [
-                "G"
-            ],
-            "description": "Selling price of each gasoline product"
-        },
-        {
-            "name": "minimum_share",
+            "name": "yield_per_unit_raw",
             "symbol": "\\alpha",
             "shape": [
-                "G"
+                "P"
             ],
-            "description": "Minimum required share of the distinguished crude in each gasoline product"
+            "description": "Raw-material-to-output yield for each product"
         },
         {
-            "name": "distinguished_crude",
-            "symbol": "r^\\star",
-            "shape": [],
-            "description": "Distinguished crude type that must be present in every gasoline product"
-        },
-        {
-            "name": "block_unit_cost",
-            "symbol": "c",
+            "name": "labor_hours_per_unit_raw",
+            "symbol": "\\beta",
             "shape": [
-                "R",
-                "K_r"
+                "P"
             ],
-            "description": "Unit purchase cost for each crude type and purchase block"
+            "description": "Labor hours required per unit of raw material for each product"
         },
         {
-            "name": "block_capacity",
-            "symbol": "U",
+            "name": "unit_profit",
+            "symbol": "\\pi",
             "shape": [
-                "R",
-                "K_r"
+                "P"
             ],
-            "description": "Maximum purchasable quantity in each purchase block for each crude type"
+            "description": "Unit profit for each product"
         },
         {
-            "name": "purchase_cap",
-            "symbol": "\\bar P",
+            "name": "raw_material_supply",
+            "symbol": "S",
             "shape": [
-                "R"
+                "T"
             ],
-            "description": "Optional total purchase cap for each crude type"
+            "description": "Raw material supply available in each period"
+        },
+        {
+            "name": "labor_capacity",
+            "symbol": "L",
+            "shape": [
+                "T"
+            ],
+            "description": "Regular labor hours available in each period"
+        },
+        {
+            "name": "equipment_capacity",
+            "symbol": "K",
+            "shape": [
+                "E",
+                "T"
+            ],
+            "description": "Processing capacity of each equipment type in each period"
+        },
+        {
+            "name": "compatible_equipment",
+            "symbol": "\\eta",
+            "shape": [
+                "P"
+            ],
+            "description": "Compatible equipment type required for each product"
         },
         {
             "name": "demand_upper_bound",
             "symbol": "D",
             "shape": [
-                "G"
+                "P",
+                "T"
             ],
-            "description": "Optional upper bound on demand or sales for each gasoline product"
+            "description": "Optional sales upper bound for each product in each period"
         }
     ],
     "variables": [
         {
-            "name": "purchase_quantity",
-            "symbol": "p",
-            "shape": [
-                "R",
-                "K_r"
-            ],
-            "domain": "continuous",
-            "description": "Purchase quantity from each block of each purchasable crude type"
-        },
-        {
-            "name": "blending_quantity",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "R",
-                "G"
+                "P",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Quantity of each crude type blended into each gasoline product"
+            "description": "Quantity of product produced in each period"
         },
         {
-            "name": "production_quantity",
-            "symbol": "y",
+            "name": "raw_material_allocation",
+            "symbol": "m",
             "shape": [
-                "G"
+                "P",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Production quantity of each gasoline product"
+            "description": "Amount of raw material assigned to each product in each period"
+        },
+        {
+            "name": "labor_usage",
+            "symbol": "\\ell",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Labor hours used for each product in each period"
+        },
+        {
+            "name": "sales_quantity",
+            "symbol": "s",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Quantity of product sold in each period"
         },
         {
             "name": "total_profit",
-            "symbol": "z",
+            "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit objective value"
+            "description": "Total profit over the planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_purchase_quantity",
-            "description": "Purchase quantities must be nonnegative for every purchasable crude type and purchase block.",
-            "formula": "p_{rk} \\ge 0",
+            "name": "raw_material_capacity",
+            "description": "Total raw material consumption across all products in each period must not exceed available supply",
+            "formula": "\\sum_{p\\in\\mathcal{P}} m_{p,t} \\leq S_t \\quad \\forall t\\in\\mathcal{T}",
             "parameters": [
-                "block_capacity"
+                "raw_material_supply"
             ],
             "variables": [
-                "purchase_quantity"
+                "raw_material_allocation"
             ]
         },
         {
-            "name": "nonnegative_blending_quantity",
-            "description": "Blending quantities must be nonnegative for every crude type and gasoline product.",
-            "formula": "x_{rg} \\ge 0",
+            "name": "labor_capacity",
+            "description": "Total regular labor usage across all products in each period must not exceed available labor hours",
+            "formula": "\\sum_{p\\in\\mathcal{P}} \\ell_{p,t} \\leq L_t \\quad \\forall t\\in\\mathcal{T}",
             "parameters": [
-                "initial_inventory"
+                "labor_capacity"
             ],
             "variables": [
-                "blending_quantity"
+                "labor_usage"
             ]
         },
         {
-            "name": "nonnegative_production_quantity",
-            "description": "Production quantities must be nonnegative for every gasoline product.",
-            "formula": "y_g \\ge 0",
+            "name": "equipment_compatibility",
+            "description": "Each product may only be produced on its compatible equipment type",
+            "formula": "x_{p,t} \\leq \\sum_{e\\in\\mathcal{E}:\\, e=\\eta_p} K_{e,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
             "parameters": [
-                "selling_price"
+                "compatible_equipment",
+                "equipment_capacity"
             ],
             "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "minimum_share_of_distinguished_crude",
-            "description": "For each gasoline product g, the distinguished crude r^\\star must appear in the blend at least at share alpha_g of total production.",
-            "formula": "x_{r^\\star g} \\ge \\alpha_g y_g",
+            "name": "equipment_capacity",
+            "description": "Processing burden assigned to each equipment type in each period must not exceed its capacity; infinite capacity means no cap",
+            "formula": "\\sum_{p\\in\\mathcal{P}:\\, \\eta_p=e} x_{p,t} \\leq K_{e,t} \\quad \\forall e\\in\\mathcal{E},\\forall t\\in\\mathcal{T}",
             "parameters": [
-                "minimum_share",
-                "distinguished_crude"
+                "compatible_equipment",
+                "equipment_capacity"
             ],
             "variables": [
-                "blending_quantity",
                 "production_quantity"
             ]
         },
         {
-            "name": "crude_availability_balance",
-            "description": "For each crude type, total blending usage cannot exceed initial inventory plus purchases from all available blocks.",
-            "formula": "\\sum_{g\\in\\mathcal{G}} x_{rg} \\le I_r + \\sum_{k\\in\\mathcal{K}_r} p_{rk}",
-            "parameters": [
-                "initial_inventory"
-            ],
-            "variables": [
-                "blending_quantity",
-                "purchase_quantity"
-            ]
-        },
-        {
-            "name": "purchase_block_capacity",
-            "description": "For each purchasable crude type and block, purchases cannot exceed the block capacity.",
-            "formula": "p_{rk} \\le U_{rk}",
-            "parameters": [
-                "block_capacity"
-            ],
-            "variables": [
-                "purchase_quantity"
-            ]
-        },
-        {
-            "name": "purchase_cap_limit",
-            "description": "If a total purchase cap is provided, total purchases of each crude type across all blocks cannot exceed that cap.",
-            "formula": "\\sum_{k\\in\\mathcal{K}_r} p_{rk} \\le \\bar P_r",
-            "parameters": [
-                "purchase_cap"
-            ],
-            "variables": [
-                "purchase_quantity"
-            ]
-        },
-        {
-            "name": "demand_upper_bound",
-            "description": "If demand upper bounds are provided, production of each gasoline product cannot exceed its demand limit.",
-            "formula": "y_g \\le D_g",
+            "name": "sales_upper_bound",
+            "description": "If demand upper bounds are provided, sales for each product in each period cannot exceed them; otherwise sales are unrestricted",
+            "formula": "s_{p,t} \\leq D_{p,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
             "parameters": [
                 "demand_upper_bound"
             ],
             "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "production_resource_consistency",
+            "description": "Raw material usage, labor usage, and output quantities must be consistent with product-specific yield and labor requirements",
+            "formula": "x_{p,t} = \\alpha_p m_{p,t},\\; \\ell_{p,t} = \\beta_p m_{p,t},\\; s_{p,t} = x_{p,t} \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
+            "parameters": [
+                "yield_per_unit_raw",
+                "labor_hours_per_unit_raw"
+            ],
+            "variables": [
+                "production_quantity",
+                "raw_material_allocation",
+                "labor_usage",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative",
+            "formula": "x_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
+            "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "production_definition",
-            "description": "Total production of each gasoline product equals total blended crude input.",
-            "formula": "y_g = \\sum_{r\\in\\mathcal{R}} x_{rg}",
-            "parameters": [],
+            "name": "nonnegative_raw_material_allocation",
+            "description": "Raw material allocations must be nonnegative",
+            "formula": "m_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
             "variables": [
-                "blending_quantity",
-                "production_quantity"
+                "raw_material_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_labor_usage",
+            "description": "Labor usage must be nonnegative",
+            "formula": "\\ell_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
+            "variables": [
+                "labor_usage"
+            ]
+        },
+        {
+            "name": "nonnegative_sales_quantity",
+            "description": "Sales quantities must be nonnegative",
+            "formula": "s_{p,t} \\geq 0 \\quad \\forall p\\in\\mathcal{P},\\forall t\\in\\mathcal{T}",
+            "variables": [
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "profit_variable_definition",
+            "description": "Total profit equals the sum of unit profits times sales quantities over the planning horizon",
+            "formula": "Z = \\sum_{p\\in\\mathcal{P}}\\sum_{t\\in\\mathcal{T}} \\pi_p s_{p,t}",
+            "parameters": [
+                "unit_profit"
+            ],
+            "variables": [
+                "total_profit",
+                "sales_quantity"
+            ]
+        },
+        {
+            "name": "data_nonnegativity",
+            "description": "All supplied data quantities are nonnegative where applicable; supplies, labor availability, capacities, and finite demand bounds are nonnegative, and infinite values indicate uncapped limits",
+            "formula": "input data values are nonnegative when finite",
+            "parameters": [
+                "yield_per_unit_raw",
+                "labor_hours_per_unit_raw",
+                "unit_profit",
+                "raw_material_supply",
+                "labor_capacity",
+                "equipment_capacity",
+                "compatible_equipment",
+                "demand_upper_bound"
+            ],
+            "variables": []
+        },
+        {
+            "name": "continuous_variables",
+            "description": "Decision variables are continuous unless integrality is imposed externally",
+            "formula": "decision variables are continuous",
+            "variables": [
+                "production_quantity",
+                "raw_material_allocation",
+                "labor_usage",
+                "sales_quantity",
+                "total_profit"
+            ]
+        },
+        {
+            "name": "finite_or_unrestricted_capacity",
+            "description": "Finite capacities and demand bounds constrain the model, while plus infinity denotes no restriction",
+            "formula": "+infty indicates no cap on capacity or demand",
+            "parameters": [
+                "equipment_capacity",
+                "demand_upper_bound"
+            ],
+            "variables": [
+                "production_quantity",
+                "sales_quantity"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize total profit defined as gasoline sales revenue minus crude procurement cost",
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit over the planning horizon",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit, defined as total gasoline sales revenue minus total crude procurement cost. The problem has a single clear objective, so no objective-combination method is needed beyond a single-objective formulation.",
+        "description": "Maximize total profit over the planning horizon, where profit equals the sum of unit profits times sales quantities.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "z = \\sum_{g\\in\\mathcal{G}} s_g y_g - \\sum_{r\\in\\mathcal{R}} \\sum_{k\\in\\mathcal{K}_r} c_{rk} p_{rk}",
+        "formula": "Z = \\sum_{p\\in\\mathcal{P}} \\sum_{t\\in\\mathcal{T}} \\pi_p \\, s_{p,t}",
         "parameters": [
-            "selling_price",
-            "block_unit_cost"
+            "unit_profit"
         ],
         "variables": [
-            "production_quantity",
-            "purchase_quantity",
+            "sales_quantity",
             "total_profit"
         ]
     }

@@ -1,209 +1,283 @@
 {
-    "problem": "Problem description\n- There are $$P$$ products indexed by $$p \\in \\mathcal{P}$$ and $$R$$ production processes indexed by $$r \\in \\mathcal{R}$$.\n- The planning horizon is one weekly period, represented by $$\\mathcal{T}$$, and the model determines a weekly production plan.\n- Each product uses process time according to a processing-time matrix $$a_{r,p}$$; a zero entry means that product does not use that process.\n- Each process has an available weekly capacity $$C_r$$ and an hourly operating cost $$c_r$$.\n- Each product has a selling price per unit $$s_p$$.\n- The weekly profit is the total sales revenue from produced units minus the operating cost of all used process hours.\n- A minimum output requirement may be imposed for selected products through a lower-bound vector $$\\ell_p$$; in this problem, at least one product has a positive lower bound.\n- A minimum profit target $$\\Pi^{\\min}$$ must be met by the weekly plan.\n- Overtime is not allowed, so no process may use more than its available weekly capacity.\n- Idle time means unused capacity on each process, and lower idle time is preferred with weights proportional to the corresponding hourly costs $$c_r$$.\n- The optimization goal is to choose weekly production quantities that maximize weekly profit while satisfying all capacity, production, and profit requirements, and while keeping weighted idle time as low as possible among feasible plans.\n- A solution is represented by:\n  - $$x_p$$: weekly production quantity of product $$p$$.\n  - $$u_r$$: idle time of process $$r$$ during the week.\n  - $$\\Pi$$: achieved total weekly profit.\n  - $$\\mathbf{x} = \\{x_p\\}_{p \\in \\mathcal{P}}$$ together with $$\\mathbf{u} = \\{u_r\\}_{r \\in \\mathcal{R}}$$ as the complete production plan.\n\nInput Format\n{\n  \"num_products\": \"$$P$$\",\n  \"num_processes\": \"$$R$$\",\n  \"products\": {\n    \"index_set\": \"$$\\\\mathcal{P} = \\\\{1,2,\\\\ldots,P\\\\}$$\",\n    \"meaning\": \"Set of products.\"\n  },\n  \"processes\": {\n    \"index_set\": \"$$\\\\mathcal{R} = \\\\{1,2,\\\\ldots,R\\\\}$$\",\n    \"meaning\": \"Set of production processes.\"\n  },\n  \"planning_horizon\": {\n    \"periods\": \"$$\\\\mathcal{T}$$\",\n    \"meaning\": \"Weekly planning period; the base problem uses a single week.\"\n  },\n  \"processing_time\": {\n    \"shape\": \"$$R \\\\times P$$\",\n    \"symbol\": \"$$a_{r,p}$$\",\n    \"meaning\": \"Hours required from process $$r$$ to produce one unit of product $$p$$.\"\n  },\n  \"capacity\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$C_r$$\",\n    \"meaning\": \"Available weekly capacity in hours for each process $$r$$.\"\n  },\n  \"hourly_cost\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$c_r$$\",\n    \"meaning\": \"Hourly operating cost of each process $$r$$.\"\n  },\n  \"selling_price\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$s_p$$\",\n    \"meaning\": \"Unit selling price of each product $$p$$.\"\n  },\n  \"minimum_profit\": {\n    \"symbol\": \"$$\\\\Pi^{\\\\min}$$\",\n    \"meaning\": \"Minimum required weekly profit.\"\n  },\n  \"minimum_production\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$\\\\ell_p$$\",\n    \"meaning\": \"Minimum weekly production requirement for each product $$p$$; entries may be zero when no lower bound is required.\"\n  },\n  \"idle_time_weight\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$w_r$$\",\n    \"meaning\": \"Weight used for idle-time minimization on each process $$r$$, typically proportional to $$c_r$$.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"$$P$$\",\n    \"symbol\": \"$$x_p$$\",\n    \"meaning\": \"Weekly production quantity of each product $$p$$.\"\n  },\n  \"idle_time\": {\n    \"shape\": \"$$R$$\",\n    \"symbol\": \"$$u_r$$\",\n    \"meaning\": \"Unused weekly capacity time for each process $$r$$.\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"meaning\": \"Achieved total weekly profit of the selected plan.\"\n  },\n  \"feasibility_status\": {\n    \"meaning\": \"Indicates whether the returned plan satisfies all production, capacity, and profit requirements.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"num_products\": 2,\n  \"num_processes\": 3,\n  \"products\": [\"Type A\", \"Type B\"],\n  \"processes\": [\"Manufacturing\", \"Assembly\", \"Inspection\"],\n  \"planning_horizon\": \"1 week\",\n  \"processing_time\": [\n    [20, 0],\n    [5, 7],\n    [3, 6]\n  ],\n  \"capacity\": [120, 80, 40],\n  \"hourly_cost\": [12, 8, 10],\n  \"selling_price\": [650, 725],\n  \"minimum_profit\": 3000,\n  \"minimum_production\": [5, 0],\n  \"idle_time_weight\": [12, 8, 10]\n}",
+    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of residential areas, and each area in $$\\mathcal{I}$$ is also a candidate location where a chain store may be opened.\n- The planning problem is static and single-period, with planning horizon $$\\mathcal{T}$$ treated as a singleton because no time phasing is involved.\n- A service radius $$R$$ limits how far a residential area may be from an opened store and still be considered covered.\n- For each candidate site $$i \\in \\mathcal{I}$$, the coverage set $$\\mathcal{N}_i \\subseteq \\mathcal{I}$$ lists all residential areas that can be served if a store is opened at $$i$$.\n- Each residential area has one unit of coverage requirement, meaning every area must be included in the service reach of at least one selected store.\n- Opening costs may be represented by parameters $$c_i$$ for candidate sites, and generalized capacity parameters may be represented by $$\\kappa_i$$ if an extended version limits how much service a store can provide; this instance is governed by coverage only.\n- The planning goal is to choose the smallest possible number of store locations, or equivalently the minimum total opening effort under unit opening cost, while ensuring complete coverage of all residential areas.\n- Stores may only be opened at candidate residential areas.\n- A residential area may be both a store location and a covered area.\n- A solution is represented by:\n  - binary opening decisions $$x_i$$ for each $$i \\in \\mathcal{I}$$, where $$x_i = 1$$ means a store is opened at area $$i$$ and $$x_i = 0$$ otherwise\n  - the selected location list containing all areas with $$x_i = 1$$\n  - the total number of opened stores, given by the count of selected locations\n\nInput Format\n{\n  \"$$\\mathcal{I}$$\": \"List of residential area identifiers, indexed by $$i$$, where each identifier is a candidate store location.\",\n  \"$$\\mathcal{T}$$\": \"Planning horizon; for this static coverage problem, $$\\mathcal{T}$$ is a singleton set.\",\n  \"$$R$$\": \"Maximum allowed service distance for coverage.\",\n  \"$$\\mathcal{N}_i$$\": \"For each $$i \\\\in \\\\mathcal{I}$$, the list of residential areas covered by a store opened at $$i$$.\",\n  \"$$q_j$$\": \"Coverage requirement for area $$j \\\\in \\\\mathcal{I}$$; this problem uses one unit of coverage requirement per area.\",\n  \"$$c_i$$\": \"Opening cost for candidate site $$i$$, used if a weighted objective is modeled; unit cost is implied when omitted.\",\n  \"$$\\\\kappa_i$$\": \"Optional capacity parameter for site $$i$$, used only in generalized extensions with service limits.\"\n}\n\nOutput Format\n{\n  \"$$\\\\mathbf{x}$$\": {\n    \"type\": \"binary vector\",\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"Selection status of each candidate site, where $$x_i = 1$$ indicates an opened store at area $$i$$.\"\n  },\n  \"$$S$$\": {\n    \"type\": \"list of area identifiers\",\n    \"meaning\": \"The selected store locations, consisting of all $$i \\\\in \\\\mathcal{I}$$ with $$x_i = 1$$.\"\n  },\n  \"$$K$$\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Total number of opened stores.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"$$R$$\": \"$$800\\\\,\\\\mathrm{m}$$\",\n  \"$$\\\\mathcal{I}$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$D$$\", \"$$E$$\", \"$$F$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n  \"$$\\\\mathcal{N}_i$$\": {\n    \"$$A$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$B$$\": [\"$$B$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$C$$\": [\"$$A$$\", \"$$C$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$D$$\": [\"$$D$$\", \"$$J$$\"],\n    \"$$E$$\": [\"$$A$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$F$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\"],\n    \"$$G$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$H$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$I$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$J$$\": [\"$$D$$\", \"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$K$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$L$$\": [\"$$J$$\", \"$$K$$\", \"$$L$$\"]\n  }\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "num_areas",
+            "symbol": "N",
             "shape": [],
-            "description": "Total number of products in the weekly production planning problem"
+            "description": "Number of residential areas and candidate store sites"
         },
         {
-            "name": "num_processes",
-            "symbol": "R",
-            "shape": [],
-            "description": "Total number of production processes in the weekly production planning problem"
+            "name": "area_set",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "N"
+            ],
+            "description": "Set of residential area identifiers, each also a candidate store location"
         },
         {
             "name": "planning_horizon",
-            "symbol": "T",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Single weekly planning horizon"
+            "description": "Singleton planning horizon set for the static single-period problem"
         },
         {
-            "name": "processing_time",
-            "symbol": "a",
-            "shape": [
-                "R",
-                "P"
-            ],
-            "description": "Processing-time matrix; hours required from process r to produce one unit of product p"
-        },
-        {
-            "name": "capacity",
-            "symbol": "C",
-            "shape": [
-                "R"
-            ],
-            "description": "Weekly capacity in hours available for each process r"
-        },
-        {
-            "name": "hourly_cost",
-            "symbol": "c",
-            "shape": [
-                "R"
-            ],
-            "description": "Hourly operating cost for each process r"
-        },
-        {
-            "name": "selling_price",
-            "symbol": "s",
-            "shape": [
-                "P"
-            ],
-            "description": "Unit selling price for each product p"
-        },
-        {
-            "name": "minimum_profit",
-            "symbol": "\\Pi_{\\min}",
+            "name": "service_radius",
+            "symbol": "R",
             "shape": [],
-            "description": "Minimum required weekly profit"
+            "description": "Maximum allowed service distance for coverage"
         },
         {
-            "name": "minimum_production",
-            "symbol": "\\ell",
+            "name": "coverage_sets",
+            "symbol": "\\mathcal{N}_i",
             "shape": [
-                "P"
+                "N",
+                "N"
             ],
-            "description": "Minimum weekly production requirement for each product p"
+            "description": "Coverage set for each candidate site i indicating which areas can be served by an opened store at i"
         },
         {
-            "name": "idle_time_weight",
-            "symbol": "w",
+            "name": "coverage_requirement",
+            "symbol": "q_j",
             "shape": [
-                "R"
+                "N"
             ],
-            "description": "Weight used to prefer lower idle time on each process r, typically proportional to hourly cost"
+            "description": "Coverage requirement of each area j, equal to one unit per area"
+        },
+        {
+            "name": "opening_cost",
+            "symbol": "c_i",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional opening cost of each candidate site i"
+        },
+        {
+            "name": "site_capacity",
+            "symbol": "\\kappa_i",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional capacity parameter for each site i used in generalized extensions"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
-            "symbol": "x",
+            "name": "open_store",
+            "symbol": "x_i",
             "shape": [
-                "P"
+                "N"
             ],
-            "domain": "continuous",
-            "description": "Weekly production quantity of each product p"
+            "domain": "binary",
+            "description": "Binary opening decision for each candidate site i; 1 indicates a store is opened at area i"
         },
         {
-            "name": "idle_time",
-            "symbol": "u",
+            "name": "selected_locations",
+            "symbol": "S",
             "shape": [
-                "R"
+                "N"
             ],
-            "domain": "continuous",
-            "description": "Unused capacity on each process r during the week"
+            "domain": "sos1",
+            "description": "Selected store locations, consisting of all areas i with x_i=1"
         },
         {
-            "name": "total_profit",
-            "symbol": "\\Pi",
+            "name": "opened_store_count",
+            "symbol": "K",
             "shape": [],
-            "domain": "continuous",
-            "description": "Achieved total weekly profit"
+            "domain": "integer",
+            "description": "Total number of opened stores"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "capacity_limit",
-            "description": "Process usage must stay within weekly capacity and any unused capacity is recorded as idle time for each process",
-            "formula": "\\sum_{p=0}^{P-1} a_{rp} x_p + u_r = C_r \\quad \\forall r=0,\\dots,R-1",
+            "name": "binary_opening_decision",
+            "description": "The store opening decision for each candidate site is binary",
+            "formula": "x_i \\in \\{0,1\\}",
             "parameters": [
-                "processing_time",
-                "capacity"
+                "area_set"
             ],
             "variables": [
-                "production_quantity",
-                "idle_time"
+                "open_store"
             ]
         },
         {
-            "name": "minimum_production_requirement",
-            "description": "Each product must meet its specified minimum weekly production requirement",
-            "formula": "x_p \\ge \\ell_p \\quad \\forall p=0,\\dots,P-1",
+            "name": "selected_locations_definition",
+            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
+            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
             "parameters": [
-                "minimum_production"
+                "area_set"
             ],
             "variables": [
-                "production_quantity"
+                "open_store",
+                "selected_locations"
             ]
         },
         {
-            "name": "minimum_profit_requirement",
-            "description": "Achieved weekly profit must meet the required minimum profit target",
-            "formula": "\\Pi \\ge \\Pi_{\\min}",
+            "name": "opened_store_count_definition",
+            "description": "The opened store count equals the sum of binary opening decisions.",
+            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
             "parameters": [
-                "minimum_profit"
+                "area_set"
             ],
             "variables": [
-                "total_profit"
+                "open_store",
+                "opened_store_count"
             ]
         },
         {
-            "name": "nonnegative_production_quantity",
-            "description": "Production quantities must be nonnegative for all products",
-            "formula": "x_p \\ge 0 \\quad \\forall p=0,\\dots,P-1",
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "nonnegative_idle_time",
-            "description": "Idle time must be nonnegative for all processes",
-            "formula": "u_r \\ge 0 \\quad \\forall r=0,\\dots,R-1",
-            "variables": [
-                "idle_time"
-            ]
-        },
-        {
-            "name": "profit_definition",
-            "description": "Total profit is defined from sales revenue minus operating costs associated with used process hours",
-            "formula": "\\Pi = \\sum_{p=0}^{P-1} s_p x_p - \\sum_{r=0}^{R-1} c_r \\sum_{p=0}^{P-1} a_{rp} x_p",
+            "name": "coverage_requirement",
+            "description": "Every residential area must be covered by at least one selected store within the service radius.",
+            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
             "parameters": [
-                "processing_time",
-                "hourly_cost",
-                "selling_price"
+                "area_set",
+                "coverage_sets",
+                "coverage_requirement"
             ],
             "variables": [
-                "production_quantity",
-                "total_profit"
+                "open_store"
             ]
         },
         {
-            "name": "weighted_idle_time_preference",
-            "description": "Among feasible plans, lower weighted idle time is preferred using weights proportional to hourly operating costs",
-            "formula": "\\min \\sum_{r=0}^{R-1} w_r u_r",
+            "name": "candidate_site_restriction",
+            "description": "Stores may only be opened at candidate sites belonging to the residential area set",
+            "formula": "i \\in \\mathcal{I}",
             "parameters": [
-                "idle_time_weight"
+                "area_set"
             ],
             "variables": [
-                "idle_time"
+                "open_store"
             ]
+        },
+        {
+            "name": "static_single_period_structure",
+            "description": "The model is static and single-period, so there are no time-indexed decisions over the planning horizon",
+            "formula": "\\mathcal{T} \\text{ is a singleton set}",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_set_membership",
+            "description": "Structural data assumption: each precomputed coverage set is a subset of the residential area set.",
+            "formula": "j \\in \\mathcal{N}_i",
+            "parameters": [
+                "coverage_sets",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "unit_coverage_requirement",
+            "description": "Each residential area has unit coverage demand.",
+            "formula": "q_j = 1 \\quad \\forall j \\in \\mathcal{I}",
+            "parameters": [
+                "coverage_requirement",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_service_radius",
+            "description": "The service radius is nonnegative.",
+            "formula": "R \\ge 0",
+            "parameters": [
+                "service_radius"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_set_subset",
+            "description": "Structural data assumption: each coverage set is a subset of the residential area set.",
+            "formula": "\\mathcal{N}_i \\subseteq \\mathcal{I}",
+            "parameters": [
+                "coverage_sets",
+                "area_set"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_parameters",
+            "description": "Optional opening costs and capacities are nonnegative when provided",
+            "formula": "c_i \\ge 0, \\kappa_i \\ge 0",
+            "parameters": [
+                "opening_cost",
+                "site_capacity"
+            ],
+            "variables": []
+        },
+        {
+            "name": "coverage_constraint",
+            "description": "Every residential area j must be covered by at least one opened store i whose coverage set contains j.",
+            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
+            "parameters": [
+                "area_set",
+                "coverage_sets",
+                "coverage_requirement"
+            ],
+            "variables": [
+                "open_store"
+            ]
+        },
+        {
+            "name": "store_count_definition",
+            "description": "The total number of opened stores equals the sum of opening decisions.",
+            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "opened_store_count"
+            ]
+        },
+        {
+            "name": "selected_location_indicator_link",
+            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
+            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
+            "parameters": [
+                "area_set"
+            ],
+            "variables": [
+                "open_store",
+                "selected_locations"
+            ]
+        },
+        {
+            "name": "nonnegative_optional_parameters",
+            "description": "Optional opening costs and capacities are nonnegative when present.",
+            "formula": "c_i \\ge 0,\\ \\kappa_i \\ge 0 \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "opening_cost",
+                "site_capacity",
+                "area_set"
+            ],
+            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "maximize weekly profit subject to capacity, production, and minimum-profit requirements",
-            "sense": "maximize"
+            "name": "minimize_opened_stores",
+            "description": "Find a feasible selection of store locations that covers every residential area while minimizing the number of opened stores",
+            "sense": "minimize"
         },
         {
-            "name": "idle_time_minimization",
-            "description": "minimize weighted idle time across processes among feasible plans, using weights proportional to hourly operating costs",
+            "name": "minimize_opening_effort",
+            "description": "Minimize total opening effort under unit opening cost for opened store locations",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Use preemption optimization to first maximize weekly profit, then among all profit-optimal feasible plans minimize weighted idle time across processes.",
-        "objective_combination_method": "preemption_optimization",
-        "sense": "maximize",
-        "formula": "\\text{Lexicographic: } \\max \\Pi \\text{, then } \\min \\sum_{r=0}^{R-1} w_r u_r",
+        "description": "Minimize the number of opened stores, equivalently the cardinality of the selected location set, in the single-period coverage problem.",
+        "objective_combination_method": "one_objective",
+        "sense": "minimize",
+        "formula": "\\sum_{i \\in \\mathcal{I}} x_i",
         "parameters": [
-            "idle_time_weight"
+            "area_set"
         ],
         "variables": [
-            "total_profit",
-            "idle_time"
+            "open_store"
         ]
     }
 }

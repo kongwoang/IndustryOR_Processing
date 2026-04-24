@@ -1,177 +1,322 @@
 {
-    "problem": "Problem description\n- There is a finite set of crops $$\\mathcal{C}$$, indexed by $$c \\in \\mathcal{C}$$, that can be allocated land on a farm.\n- The farm has a land capacity parameter $$L$$ measured in acres.\n- Each crop $$c \\in \\mathcal{C}$$ has a unit profit parameter $$\\pi_c$$, measured as profit per acre.\n- The planning horizon is a static horizon $$\\mathcal{T}$$, and the decision is a one-stage land allocation over that horizon.\n- A set of proportional land-allocation rules $$\\mathcal{R}$$ may be present; each rule links two crops and specifies a minimum acreage ratio between them.\n- The planning goal is to maximize the total profit obtained from allocating acres to crops.\n\n- The total acreage assigned to all crops must not exceed the available land capacity $$L$$.\n- The acreage assigned to each crop must be nonnegative.\n- Every proportional rule in $$\\mathcal{R}$$ must be respected in the land allocation.\n- For each rule, the designated left crop must receive at least the specified multiple of the acreage assigned to the designated right crop.\n- No additional costs, penalties, or demand requirements are imposed in this instance beyond the stated land-capacity and proportionality rules.\n- A solution is represented by:\n  - $$x_c$$: the acreage allocated to crop $$c \\in \\mathcal{C}$$.\n  - $$Z$$: the resulting total profit of the allocation.\n\nInput Format\n{\n  \"crops\": \"Set $$\\mathcal{C}$$ of crops, indexed by $$c \\in \\mathcal{C}$$.\",\n  \"available_land\": \"Total land capacity $$L$$ in acres.\",\n  \"profit_per_acre\": \"Profit vector $$\\pi$$, where $$\\pi_c$$ is the profit per acre for crop $$c \\in \\mathcal{C}$$.\",\n  \"proportional_rules\": \"Rule set $$\\mathcal{R}$$. Each rule $$r \\in \\mathcal{R}$$ contains left crop $$i_r \\in \\mathcal{C}$$, right crop $$j_r \\in \\mathcal{C}$$, and multiplier $$\\beta_r$$ meaning the acreage of $$i_r$$ must be at least $$\\beta_r$$ times the acreage of $$j_r$$.\",\n  \"planning_horizon\": \"Planning horizon $$\\mathcal{T}$$ for the allocation problem.\",\n  \"optional_demand_data\": \"Optional demand data $$d_{c,t}$$, if a generalized extension requires it; not used in this land-allocation instance.\"\n}\n\nOutput Format\n{\n  \"acreage_by_crop\": \"Allocation vector $$x$$ indexed by $$c \\in \\mathcal{C}$$, where $$x_c$$ is the acreage assigned to crop $$c$$.\",\n  \"total_profit\": \"Scalar $$Z$$ giving the achieved total profit.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"crops\": [\"corn\", \"wheat\", \"soybeans\", \"sorghum\"],\n  \"available_land\": 100,\n  \"profit_per_acre\": {\n    \"corn\": 1500,\n    \"wheat\": 1200,\n    \"soybeans\": 1800,\n    \"sorghum\": 1600\n  },\n  \"proportional_rules\": [\n    {\n      \"left_crop\": \"corn\",\n      \"right_crop\": \"wheat\",\n      \"multiplier\": 2\n    },\n    {\n      \"left_crop\": \"soybeans\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 0.5\n    },\n    {\n      \"left_crop\": \"wheat\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 3\n    }\n  ]\n}",
+    "problem": "Problem description\n- There is a single-period production planning problem for $$N$$ container types indexed by $$i,j \\in \\mathcal{N}=\\{1,\\ldots,N\\}$$.\n- Each container type $$i$$ is characterized by a volume parameter $$v_i$$, a demand parameter $$d_i$$, and a unit variable production cost $$c_i$$.\n- Each container type has its own dedicated equipment. A fixed setup cost $$f_i$$ is incurred whenever the equipment for type $$i$$ is activated. In this instance, the setup cost is common across types.\n- If a type is not produced, its equipment remains inactive and no setup cost is paid for that type.\n- A produced unit of type $$i$$ may be used to satisfy demand for type $$j$$ only when the volume of type $$i$$ is not smaller than the volume of type $$j$$.\n- Because the types are ordered by nondecreasing volume, larger-volume types may substitute for smaller-volume types, but not the other way around.\n- All demand must be fully met after allowing such substitutions among compatible types.\n- If an external production limit is provided, $$K_i$$ denotes the capacity of type $$i$$; otherwise, no separate capacity limit is specified beyond the demand and substitution rules.\n- The planning goal is to minimize the total cost over the single planning horizon $$\\mathcal{T}=\\{1\\}$$, combining all unit production costs and all setup costs.\n- A solution is represented by:\n  - $$q_i$$: the total quantity produced of container type $$i$$.\n  - $$y_i$$: a binary activation indicator for the equipment of type $$i$$, where $$y_i=1$$ means the equipment is activated.\n  - $$x_{i,j}$$: the quantity produced as type $$i$$ and assigned to satisfy demand of type $$j$$, defined only for compatible pairs.\n  - $$Z$$: the minimized total cost of the production plan.\n\nInput Format\n{\n  \"N\": \"integer, number of container types $$N$$\",\n  \"T\": \"single-period planning horizon $$\\mathcal{T}=\\{1\\}$$\",\n  \"v\": \"array of length $$N$$; $$v_i$$ is the volume of container type $$i$$, with indices ordered so that volumes are nondecreasing\",\n  \"d\": \"array of length $$N$$; $$d_i$$ is the demand for container type $$i$$\",\n  \"c\": \"array of length $$N$$; $$c_i$$ is the unit variable production cost for container type $$i$$\",\n  \"f\": \"scalar; common fixed setup cost incurred when a type's equipment is activated\",\n  \"K\": \"optional array of length $$N$$; $$K_i$$ is the production capacity of type $$i$$ if a capacity limit is supplied\",\n  \"compatibility_rule\": \"type $$i$$ may satisfy demand of type $$j$$ only when $$v_i \\\\ge v_j$$\"\n}\n\nOutput Format\n{\n  \"Z\": \"scalar, minimized total cost\",\n  \"q\": \"array of length $$N$$; $$q_i$$ is the total quantity produced of container type $$i$$\",\n  \"y\": \"binary array of length $$N$$; $$y_i$$ indicates whether the equipment for type $$i$$ is activated\",\n  \"x\": \"matrix of shape $$N \\\\times N$$; $$x_{i,j}$$ is the quantity produced as type $$i$$ and used to meet demand of type $$j$$, defined only for compatible pairs\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"N\": 6,\n  \"T\": 1,\n  \"v\": [1500, 2500, 4000, 6000, 9000, 12000],\n  \"d\": [500, 550, 700, 900, 400, 300],\n  \"c\": [5, 8, 10, 12, 16, 18],\n  \"f\": 1200\n}",
     "parameters": [
         {
-            "name": "num_crops",
-            "symbol": "C",
+            "name": "num_container_types",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of crops in the finite crop set"
-        },
-        {
-            "name": "num_rules",
-            "symbol": "R",
-            "shape": [],
-            "description": "Number of proportional land-allocation rules"
-        },
-        {
-            "name": "available_land",
-            "symbol": "L",
-            "shape": [],
-            "description": "Available land capacity in acres"
-        },
-        {
-            "name": "unit_profit_per_acre",
-            "symbol": "\\pi",
-            "shape": [
-                "C"
-            ],
-            "description": "Unit profit per acre for each crop"
-        },
-        {
-            "name": "left_crop_index",
-            "symbol": "i",
-            "shape": [
-                "R"
-            ],
-            "description": "Left crop index for each proportional rule"
-        },
-        {
-            "name": "right_crop_index",
-            "symbol": "j",
-            "shape": [
-                "R"
-            ],
-            "description": "Right crop index for each proportional rule"
-        },
-        {
-            "name": "min_acreage_multiplier",
-            "symbol": "\\beta",
-            "shape": [
-                "R"
-            ],
-            "description": "Minimum acreage multiplier for each proportional rule"
+            "description": "Number of container types in the single-period production planning problem"
         },
         {
             "name": "planning_horizon",
             "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Static one-stage planning horizon descriptor"
+            "description": "Single planning horizon containing one period"
+        },
+        {
+            "name": "common_setup_cost",
+            "symbol": "f",
+            "shape": [],
+            "description": "Common fixed setup cost incurred when a type is activated, if provided"
+        },
+        {
+            "name": "type_volumes",
+            "symbol": "v",
+            "shape": [
+                "N"
+            ],
+            "description": "Volume of each container type"
+        },
+        {
+            "name": "demands",
+            "symbol": "d",
+            "shape": [
+                "N"
+            ],
+            "description": "Demand of each container type"
+        },
+        {
+            "name": "unit_production_costs",
+            "symbol": "c",
+            "shape": [
+                "N"
+            ],
+            "description": "Unit production cost of each container type"
+        },
+        {
+            "name": "capacity_limits",
+            "symbol": "K",
+            "shape": [
+                "N"
+            ],
+            "description": "Optional production capacity limit for each container type"
         }
     ],
     "variables": [
         {
-            "name": "acreage_allocated",
-            "symbol": "x",
+            "name": "total_production",
+            "symbol": "q",
             "shape": [
-                "C"
+                "N"
             ],
             "domain": "continuous",
-            "description": "Acreage allocated to each crop"
+            "description": "Total quantity produced of each container type"
         },
         {
-            "name": "total_profit",
+            "name": "activation_indicator",
+            "symbol": "y",
+            "shape": [
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary activation indicator for the equipment of each container type"
+        },
+        {
+            "name": "assignment_quantity",
+            "symbol": "x",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "continuous",
+            "description": "Quantity produced as type i and assigned to satisfy demand of type j for compatible type pairs"
+        },
+        {
+            "name": "total_cost",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit of the land allocation"
+            "description": "Minimized total cost over the single planning period"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "compatibility_mask",
+            "symbol": "a",
+            "shape": [
+                "N",
+                "N"
+            ],
+            "domain": "binary",
+            "description": "Binary mask equal to 1 when production type i can satisfy demand type j, i.e., when v[i] \\ge v[j], and 0 otherwise; fixed exogenously by the known volume ordering."
+        }
+    ],
     "constraints": [
         {
-            "name": "land_capacity_limit",
-            "description": "Total acreage allocated across all crops cannot exceed available land capacity",
-            "formula": "\\sum_{c=0}^{C-1} x_c \\leq L",
+            "name": "nonnegative_total_production",
+            "description": "Total production quantities must be nonnegative",
+            "formula": "q",
             "parameters": [
-                "available_land"
+                "num_container_types"
             ],
             "variables": [
-                "acreage_allocated"
+                "total_production"
             ]
         },
         {
-            "name": "proportional_rule_enforcement",
-            "description": "For each proportional rule, the acreage of the left crop must be at least the required multiplier times the acreage of the right crop",
-            "formula": "x_{i_r} \\geq \\beta_r x_{j_r} \\quad \\forall r=0,\\dots,R-1",
+            "name": "binary_activation",
+            "description": "Equipment activation indicators must be binary",
+            "formula": "y",
             "parameters": [
-                "left_crop_index",
-                "right_crop_index",
-                "min_acreage_multiplier"
+                "num_container_types"
             ],
             "variables": [
-                "acreage_allocated"
+                "activation_indicator"
             ]
         },
         {
-            "name": "nonnegative_acreage",
-            "description": "No crop acreage may be negative",
-            "formula": "x_c \\geq 0 \\quad \\forall c=0,\\dots,C-1",
+            "name": "nonnegative_assignment_quantity",
+            "description": "Compatible assignment quantities must be nonnegative",
+            "formula": "x",
+            "parameters": [
+                "num_container_types",
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_total_cost",
+            "description": "Total cost must be nonnegative",
+            "formula": "Z",
             "parameters": [],
             "variables": [
-                "acreage_allocated"
+                "total_cost"
             ]
         },
         {
-            "name": "valid_rule_indices",
-            "description": "Each proportional rule references valid crop indices within the crop set",
-            "formula": "0 \\leq i_r < C,\\; 0 \\leq j_r < C \\quad \\forall r=0,\u0000dots,R-1",
+            "name": "demand_fulfillment",
+            "description": "All demand must be fully satisfied through compatible production assignments",
+            "formula": "d",
             "parameters": [
-                "num_crops",
-                "left_crop_index",
-                "right_crop_index"
-            ],
-            "variables": []
-        },
-        {
-            "name": "parameter_domain_constraints",
-            "description": "Basic parameter validity conditions including nonnegative counts, nonnegative land capacity, nonnegative multipliers, and real-valued profits",
-            "formula": "C \\in \\mathbb{Z}_{\\geq 0},\\; R \\in \\mathbb{Z}_{\\geq 0},\\; L \\geq 0,\\; \\beta_r \\geq 0 \\quad \\forall r=0,\\dots,R-1",
-            "parameters": [
-                "num_crops",
-                "num_rules",
-                "available_land",
-                "unit_profit_per_acre",
-                "min_acreage_multiplier"
-            ],
-            "variables": []
-        },
-        {
-            "name": "planning_horizon_static",
-            "description": "The planning horizon is finite and static with no additional time-indexed decision structure used in this instance",
-            "formula": "\\mathcal{T}\\text{ is a static one-stage descriptor}",
-            "parameters": [
-                "planning_horizon"
-            ],
-            "variables": []
-        },
-        {
-            "name": "total_profit_definition",
-            "description": "The total profit variable equals the sum of crop acreages times their unit profits",
-            "formula": "Z = \\sum_{c=0}^{C-1} \\pi_c x_c",
-            "parameters": [
-                "unit_profit_per_acre"
+                "num_container_types",
+                "type_volumes",
+                "demands"
             ],
             "variables": [
-                "acreage_allocated",
-                "total_profit"
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_rule",
+            "description": "Assignments are allowed only from producing type i to demand type j when the producing type volume is at least the demanded type volume",
+            "formula": "v[i] \\ge v[j]",
+            "parameters": [
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "activation_setup_link",
+            "description": "Producing a type activates its equipment and incurs the fixed setup cost; inactive equipment incurs no setup cost",
+            "formula": "y",
+            "parameters": [
+                "common_setup_cost"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "capacity_limit_if_provided",
+            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity",
+            "formula": "q",
+            "parameters": [
+                "capacity_limits"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        },
+        {
+            "name": "nonnegative_total_production_bounds",
+            "description": "Total production quantities must be nonnegative",
+            "formula": "q_i \\ge 0 \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "total_production"
+            ]
+        },
+        {
+            "name": "activation_binary_domain",
+            "description": "Equipment activation indicators must be binary",
+            "formula": "y_i \\in \\{0,1\\} \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "nonnegative_assignment_quantities",
+            "description": "Assignment quantities must be nonnegative for all compatible type pairs",
+            "formula": "x_{ij} \\ge 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\}",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "total_cost_definition",
+            "description": "Total cost equals production costs plus setup costs",
+            "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
+            "parameters": [
+                "unit_production_costs",
+                "common_setup_cost"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator",
+                "total_cost"
+            ]
+        },
+        {
+            "name": "demand_fulfillment_constraint",
+            "description": "All demand must be fully satisfied through compatible production assignments",
+            "formula": "\\sum_{i=0}^{N-1} x_{ij} = d_j \\quad \\forall j=0,\\ldots,N-1",
+            "parameters": [
+                "demands"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "production_definition",
+            "description": "Total production of each type equals the sum of compatible assignments produced as that type",
+            "formula": "q_i = \\sum_{j=0}^{N-1} x_{ij} \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "num_container_types"
+            ],
+            "variables": [
+                "total_production",
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_fix_incompatible_pairs",
+            "description": "Incompatible assignments are fixed to zero and compatible pairs are left unrestricted by this rule; compatibility is determined by the known volume ordering.",
+            "formula": "x_{ij} = 0 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\} \\text{ with } v_i < v_j",
+            "parameters": [
+                "type_volumes"
+            ],
+            "variables": [
+                "assignment_quantity"
+            ]
+        },
+        {
+            "name": "activation_production_link",
+            "description": "Producing a type activates its equipment; total production is bounded by a finite big-M derived from demand totals when no explicit capacity is available.",
+            "formula": "q_i \\le U_i y_i \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "demands"
+            ],
+            "variables": [
+                "total_production",
+                "activation_indicator"
+            ]
+        },
+        {
+            "name": "capacity_limit_if_provided_constraint",
+            "description": "If capacity limits are provided, total production of each type cannot exceed its capacity.",
+            "formula": "q_i \\le K_i \\quad \\forall i=0,\\ldots,N-1",
+            "parameters": [
+                "capacity_limits"
+            ],
+            "variables": [
+                "total_production"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize the total profit from the land allocation",
-            "sense": "maximize"
+            "name": "total_cost_minimization",
+            "description": "Minimize the total single-period production and setup cost over the planning horizon",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize the total profit from the land allocation by maximizing the profit-defining variable Z, which is linked linearly to acreages and per-acre profits.",
+        "description": "Minimize the total single-period cost, consisting of unit production costs and common setup costs for activated types.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "Z",
-        "parameters": [],
+        "sense": "minimize",
+        "formula": "Z = \\sum_{i=0}^{N-1} c_i q_i + f \\sum_{i=0}^{N-1} y_i",
+        "parameters": [
+            "unit_production_costs",
+            "common_setup_cost"
+        ],
         "variables": [
-            "total_profit"
+            "total_production",
+            "activation_indicator",
+            "total_cost"
         ]
     }
 }

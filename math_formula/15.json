@@ -1,186 +1,357 @@
 {
-    "problem": "Problem description\n- There is a single product planned over a finite horizon of $$T$$ periods, indexed by $$t \\in \\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- The planning goal is to determine the monthly purchasing and selling quantities that maximize total profit over the horizon.\n- The store has a storage capacity of $$C$$ units for the product.\n- The initial inventory available at the beginning of the planning horizon is $$I^{0}$$ units.\n- Purchasing is allowed once at the beginning of each period, and sales occur within the same period.\n- The unit purchasing cost in period $$t$$ is $$c^{\\mathrm{buy}}_{t}$$.\n- The unit selling revenue in period $$t$$ is $$c^{\\mathrm{sell}}_{t}$$.\n- Demand or market absorption in each period may be represented by the quantity actually sold in that period, denoted by $$s_{t}$$.\n- Inventory carried from one period to the next is tracked so that stock balance is maintained across the planning horizon.\n- The total inventory held at any time must not exceed the warehouse capacity.\n- The quantity sold in each period cannot exceed the product available from initial inventory plus purchases made up to that period.\n- End-of-period inventory must remain feasible and nonnegative.\n- A solution is represented by:\n  - $$x_{t}$$: quantity purchased in period $$t$$.\n  - $$s_{t}$$: quantity sold in period $$t$$.\n  - $$I_{t}$$: inventory remaining at the end of period $$t$$.\n  - $$Z$$: total profit over the planning horizon.\n\nInput Format\n{\n  \"T\": \"integer, number of planning periods, indexed by $$t \\\\in \\\\mathcal{T}$$\",\n  \"C\": \"nonnegative number, storage capacity of the product\",\n  \"I0\": \"nonnegative number, initial inventory at the beginning of period $$1$$\",\n  \"buy_price\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$c^{\\\\mathrm{buy}}_{t}$$, unit purchasing cost in period $$t$$\"\n  },\n  \"sell_price\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$c^{\\\\mathrm{sell}}_{t}$$, unit selling revenue in period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"purchase_quantity\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$x_{t}$$, quantity purchased in period $$t$$\"\n  },\n  \"sales_quantity\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$s_{t}$$, quantity sold in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"type\": \"array\",\n    \"shape\": \"[T]\",\n    \"meaning\": \"$$I_{t}$$, inventory remaining at the end of period $$t$$\"\n  },\n  \"total_profit\": {\n    \"type\": \"number\",\n    \"meaning\": \"$$Z$$, maximum total profit over the horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"C\": 500,\n  \"I0\": 200,\n  \"buy_price\": [8, 6, 9],\n  \"sell_price\": [9, 8, 10]\n}",
+    "problem": "Problem description\n- There are $$T$$ planning stages indexed by $$t \\in \\{1,\\ldots,T\\}$$.\n- At each stage $$t$$, the factory requires $$R_t$$ usable special tools.\n- The tool requirement profile over the horizon is given by the demand sequence $$\\{R_t\\}_{t=1}^T$$.\n- After a tool is used in a stage, it must leave service and be routed to one of two repair modes before it can be used again.\n- The two repair modes are:\n  - a slow repair mode with unit repair cost $$b$$ and return delay $$p$$ stages,\n  - a fast repair mode with unit repair cost $$c$$ and return delay $$q$$ stages,\n  - where the slow repair mode is cheaper but slower, and the fast repair mode is faster but more expensive.\n- New tools may be purchased at unit cost $$a$$, and new purchases are the most expensive source of tools.\n- The planning horizon ends after stage $$T$$, so any tool returning after stage $$T$$ has no value for feasibility inside the horizon.\n- Optional capacity limits, if provided, are represented by stage-dependent limits such as $$K_t^{\\mathrm{buy}}$$, $$K_t^{\\mathrm{slow}}$$, and $$K_t^{\\mathrm{fast}}$$; otherwise, no explicit capacity limit is imposed.\n- The objective is to minimize the total tool-related spending over the horizon, including new purchases and repair actions.\n- The business rules are:\n  - every stage demand must be fully satisfied,\n  - every tool used in a stage must be assigned to exactly one repair mode afterward,\n  - repaired tools become available again only after their corresponding delay,\n  - tools available at a stage come from earlier purchases and from repairs that have already returned,\n  - all decision quantities are nonnegative integers.\n- A solution is represented by:\n  - the purchase plan $$\\{x_t\\}_{t=1}^T$$, where $$x_t$$ is the number of new tools bought at stage $$t$$,\n  - the slow-repair assignment plan $$\\{y_t^{\\mathrm{slow}}\\}_{t=1}^T$$, where $$y_t^{\\mathrm{slow}}$$ is the number of tools sent to slow repair after stage $$t$$,\n  - the fast-repair assignment plan $$\\{y_t^{\\mathrm{fast}}\\}_{t=1}^T$$, where $$y_t^{\\mathrm{fast}}$$ is the number of tools sent to fast repair after stage $$t$$,\n  - the implied availability profile $$\\{I_t\\}_{t=1}^T$$, where $$I_t$$ is the number of tools available at the start of stage $$t$$,\n  - the total cost $$Z$$ over the planning horizon.\n\nInput Format\n{\n  \"planning_horizon\": \"$$T$$\",\n  \"demand\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$R_t$$ is the number of tools required at stage $$t$$\"\n  },\n  \"purchase_cost\": \"$$a$$\",\n  \"slow_repair\": {\n    \"unit_cost\": \"$$b$$\",\n    \"return_delay\": \"$$p$$\"\n  },\n  \"fast_repair\": {\n    \"unit_cost\": \"$$c$$\",\n    \"return_delay\": \"$$q$$\"\n  },\n  \"initial_available_tools\": {\n    \"symbol\": \"$$I_1$$\",\n    \"type\": \"integer\",\n    \"default\": \"$$0$$\",\n    \"meaning\": \"the number of usable tools available at the start of stage $$1$$\"\n  },\n  \"optional_capacities\": {\n    \"purchase_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{buy}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be purchased at stage $$t$$\"\n    },\n    \"slow_repair_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{slow}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be sent to slow repair at stage $$t$$\"\n    },\n    \"fast_repair_capacity\": {\n      \"symbol\": \"$$K_t^{\\\\mathrm{fast}}$$\",\n      \"type\": \"array or scalar\",\n      \"default\": \"unbounded\",\n      \"meaning\": \"maximum number of tools that can be sent to fast repair at stage $$t$$\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"total_cost\": \"$$Z$$\",\n  \"purchase_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$x_t$$ is the number of new tools purchased at stage $$t$$\"\n  },\n  \"slow_repair_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$y_t^{\\\\mathrm{slow}}$$ is the number of tools sent to slow repair after stage $$t$$\"\n  },\n  \"fast_repair_plan\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$y_t^{\\\\mathrm{fast}}$$ is the number of tools sent to fast repair after stage $$t$$\"\n  },\n  \"availability_profile\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$T$$]\",\n    \"meaning\": \"$$I_t$$ is the number of tools available at the start of stage $$t$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 10,\n  \"demand\": [3, 5, 2, 4, 6, 5, 4, 3, 2, 1],\n  \"purchase_cost\": 10,\n  \"slow_repair\": {\n    \"unit_cost\": 1,\n    \"return_delay\": 3\n  },\n  \"fast_repair\": {\n    \"unit_cost\": 3,\n    \"return_delay\": 1\n  },\n  \"initial_available_tools\": 0\n}",
     "parameters": [
         {
-            "name": "planning_periods",
+            "name": "planning_horizon",
             "symbol": "T",
             "shape": [],
-            "description": "Number of planning periods in the finite horizon"
+            "description": "Number of planning stages in the horizon, indexed by t = 0, ..., T-1"
         },
         {
-            "name": "storage_capacity",
-            "symbol": "C",
-            "shape": [],
-            "description": "Maximum inventory storage capacity"
-        },
-        {
-            "name": "initial_inventory",
-            "symbol": "I_0",
-            "shape": [],
-            "description": "Inventory available at the beginning of period 0"
-        },
-        {
-            "name": "buy_price",
-            "symbol": "c^{buy}",
+            "name": "demand_profile",
+            "symbol": "R",
             "shape": [
                 "T"
             ],
-            "description": "Unit purchasing cost in each period"
+            "description": "Number of usable tools required at each stage t"
         },
         {
-            "name": "sell_price",
-            "symbol": "c^{sell}",
+            "name": "purchase_cost",
+            "symbol": "a",
+            "shape": [],
+            "description": "Unit cost to purchase a new tool"
+        },
+        {
+            "name": "slow_repair_unit_cost",
+            "symbol": "b",
+            "shape": [],
+            "description": "Unit cost of sending a used tool to slow repair"
+        },
+        {
+            "name": "slow_repair_return_delay",
+            "symbol": "p",
+            "shape": [],
+            "description": "Return delay in stages for slow repair"
+        },
+        {
+            "name": "fast_repair_unit_cost",
+            "symbol": "c",
+            "shape": [],
+            "description": "Unit cost of sending a used tool to fast repair"
+        },
+        {
+            "name": "fast_repair_return_delay",
+            "symbol": "q",
+            "shape": [],
+            "description": "Return delay in stages for fast repair"
+        },
+        {
+            "name": "initial_available_tools",
+            "symbol": "I_1",
+            "shape": [],
+            "description": "Initial number of usable tools available before stage t = 0"
+        },
+        {
+            "name": "purchase_capacity",
+            "symbol": "K_{buy}",
             "shape": [
                 "T"
             ],
-            "description": "Unit selling revenue in each period"
+            "description": "Optional maximum number of tools that can be purchased at each stage t"
+        },
+        {
+            "name": "slow_repair_capacity",
+            "symbol": "K_{slow}",
+            "shape": [
+                "T"
+            ],
+            "description": "Optional maximum number of tools that can be sent to slow repair after each stage t"
+        },
+        {
+            "name": "fast_repair_capacity",
+            "symbol": "K_{fast}",
+            "shape": [
+                "T"
+            ],
+            "description": "Optional maximum number of tools that can be sent to fast repair after each stage t"
         }
     ],
     "variables": [
         {
-            "name": "purchase_quantity",
+            "name": "purchase_plan",
             "symbol": "x",
             "shape": [
                 "T"
             ],
-            "domain": "continuous",
-            "description": "Quantity purchased in each period"
+            "domain": "integer",
+            "description": "Number of new tools purchased at each stage t"
         },
         {
-            "name": "sales_quantity",
-            "symbol": "s",
+            "name": "slow_repair_plan",
+            "symbol": "y^{slow}",
             "shape": [
                 "T"
             ],
-            "domain": "continuous",
-            "description": "Quantity sold in each period"
+            "domain": "integer",
+            "description": "Number of tools sent to slow repair after each stage t"
         },
         {
-            "name": "ending_inventory",
+            "name": "fast_repair_plan",
+            "symbol": "y^{fast}",
+            "shape": [
+                "T"
+            ],
+            "domain": "integer",
+            "description": "Number of tools sent to fast repair after each stage t"
+        },
+        {
+            "name": "availability_profile",
             "symbol": "I",
             "shape": [
                 "T"
             ],
-            "domain": "continuous",
-            "description": "Inventory remaining at the end of each period"
+            "domain": "integer",
+            "description": "Number of tools available at the start of each stage t"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_purchase_quantity",
-            "description": "Purchases must be nonnegative in each period.",
-            "formula": "x[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "name": "nonnegative_integer_decision_variables",
+            "description": "All decision variables are nonnegative integers.",
+            "formula": "nonnegative integer domains",
             "parameters": [
-                "planning_periods"
+                "planning_horizon",
+                "demand_profile",
+                "purchase_cost",
+                "slow_repair_unit_cost",
+                "slow_repair_return_delay",
+                "fast_repair_unit_cost",
+                "fast_repair_return_delay",
+                "initial_available_tools",
+                "purchase_capacity",
+                "slow_repair_capacity",
+                "fast_repair_capacity"
             ],
             "variables": [
-                "purchase_quantity"
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan",
+                "availability_profile"
             ]
         },
         {
-            "name": "nonnegative_sales_quantity",
-            "description": "Sales must be nonnegative in each period.",
-            "formula": "s[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "name": "nonnegative_data_parameters",
+            "description": "Demand, costs, delays, and capacities are nonnegative; capacities are integer-valued when provided.",
+            "formula": "nonnegative parameter domains",
             "parameters": [
-                "planning_periods"
-            ],
-            "variables": [
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "nonnegative_ending_inventory",
-            "description": "Ending inventory must be nonnegative in each period.",
-            "formula": "I[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
-            "parameters": [
-                "planning_periods"
-            ],
-            "variables": [
-                "ending_inventory"
-            ]
-        },
-        {
-            "name": "period_index_integrality",
-            "description": "The planning horizon size must be a positive integer.",
-            "formula": "T \\in \\mathbb{Z}_{>0}",
-            "parameters": [
-                "planning_periods"
+                "planning_horizon",
+                "demand_profile",
+                "purchase_cost",
+                "slow_repair_unit_cost",
+                "slow_repair_return_delay",
+                "fast_repair_unit_cost",
+                "fast_repair_return_delay",
+                "initial_available_tools",
+                "purchase_capacity",
+                "slow_repair_capacity",
+                "fast_repair_capacity"
             ],
             "variables": []
         },
         {
-            "name": "capacity_nonnegative",
-            "description": "Storage capacity must be nonnegative.",
-            "formula": "C \\geq 0",
+            "name": "stage_demand_satisfaction",
+            "description": "At each stage, available tools plus purchases and returned repairs must be sufficient to satisfy that stage's demand exactly.",
+            "formula": "stage availability must cover demand",
             "parameters": [
-                "storage_capacity"
-            ],
-            "variables": []
-        },
-        {
-            "name": "initial_inventory_nonnegative",
-            "description": "Initial inventory must be nonnegative.",
-            "formula": "I_0 \\geq 0",
-            "parameters": [
-                "initial_inventory"
-            ],
-            "variables": []
-        },
-        {
-            "name": "purchase_quantity_domain",
-            "description": "Purchase quantities are continuous and nonnegative.",
-            "formula": "x[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
-            "parameters": [
-                "planning_periods"
+                "planning_horizon",
+                "demand_profile",
+                "initial_available_tools",
+                "slow_repair_return_delay",
+                "fast_repair_return_delay"
             ],
             "variables": [
-                "purchase_quantity"
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan",
+                "availability_profile"
             ]
         },
         {
-            "name": "sales_quantity_domain",
-            "description": "Sales quantities are continuous and nonnegative.",
-            "formula": "s[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "name": "exclusive_repair_routing",
+            "description": "Tools used in a stage are assigned to exactly one repair mode afterward.",
+            "formula": "exactly one repair mode per used tool",
             "parameters": [
-                "planning_periods"
+                "planning_horizon"
             ],
             "variables": [
-                "sales_quantity"
+                "slow_repair_plan",
+                "fast_repair_plan"
             ]
         },
         {
-            "name": "ending_inventory_domain",
-            "description": "Ending inventory is continuous and nonnegative.",
-            "formula": "I[t] \\geq 0 \\quad \\forall t=0,1,\\ldots,T-1",
+            "name": "repair_capacity_limits",
+            "description": "Stage-t purchases and repair assignments may not exceed optional stage-dependent capacities when provided.",
+            "formula": "respect optional stage capacities",
             "parameters": [
-                "planning_periods"
+                "planning_horizon",
+                "purchase_capacity",
+                "slow_repair_capacity",
+                "fast_repair_capacity"
             ],
             "variables": [
-                "ending_inventory"
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "availability_from_elapsed_returns_only",
+            "description": "Tools become available only from earlier purchases and from repairs whose delays have already elapsed.",
+            "formula": "I_t = I_{t-1} + x_{t-1} + \\sum_{\\tau=0}^{t-p-1} y^{slow}_\\tau + \\sum_{\\tau=0}^{t-q-1} y^{fast}_\\tau - R_{t-1}",
+            "parameters": [
+                "planning_horizon",
+                "initial_available_tools",
+                "slow_repair_return_delay",
+                "fast_repair_return_delay",
+                "demand_profile"
+            ],
+            "variables": [
+                "availability_profile",
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "horizon_truncation_of_late_returns",
+            "description": "Tools returning after the end of the planning horizon do not contribute to feasibility inside the horizon.",
+            "formula": "\\sum_{\\tau=T-p}^{T-1} y^{slow}_\\tau \\text{ and } \\sum_{\\tau=T-q}^{T-1} y^{fast}_\\tau \\text{ are excluded from any } I_t \\text{ with } t \\leq T-1",
+            "parameters": [
+                "planning_horizon",
+                "slow_repair_return_delay",
+                "fast_repair_return_delay"
+            ],
+            "variables": [
+                "availability_profile",
+                "slow_repair_plan",
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "inventory_balance_and_demand_satisfaction",
+            "description": "For each stage, the available tools at the start of the stage must exactly satisfy demand when combined with same-stage purchases and returns from repairs completed by that stage. This enforces exact satisfaction and defines the availability profile recursively.",
+            "formula": "I_t + x_t + \\sum_{\\tau=0}^{t-p} y^{slow}_\\tau \\mathbf{1}_{t-p\\ge 0} + \\sum_{\\tau=0}^{t-q} y^{fast}_\\tau \\mathbf{1}_{t-q\\ge 0} = R_t + \\sum_{\\tau=0}^{t-1} y^{slow}_\\tau + \\sum_{\\tau=0}^{t-1} y^{fast}_\\tau",
+            "parameters": [
+                "planning_horizon",
+                "demand_profile",
+                "slow_repair_return_delay",
+                "fast_repair_return_delay"
+            ],
+            "variables": [
+                "availability_profile",
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "initial_availability_definition",
+            "description": "The availability at the first stage equals the initially available tools.",
+            "formula": "I_0 = I_1",
+            "parameters": [
+                "initial_available_tools"
+            ],
+            "variables": [
+                "availability_profile"
+            ]
+        },
+        {
+            "name": "repair_routing_equals_used_tools",
+            "description": "Every tool used in a stage is routed to exactly one repair mode after that stage, so the total number sent to repair equals stage demand.",
+            "formula": "y^{slow}_t + y^{fast}_t = R_t",
+            "parameters": [
+                "planning_horizon",
+                "demand_profile"
+            ],
+            "variables": [
+                "slow_repair_plan",
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "purchase_capacity_limits",
+            "description": "If purchase capacities are provided, purchases at each stage cannot exceed the corresponding capacity.",
+            "formula": "x_t \\le K_{buy,t}",
+            "parameters": [
+                "planning_horizon",
+                "purchase_capacity"
+            ],
+            "variables": [
+                "purchase_plan"
+            ]
+        },
+        {
+            "name": "slow_repair_capacity_limits",
+            "description": "If slow repair capacities are provided, the number of tools sent to slow repair at each stage cannot exceed the corresponding capacity.",
+            "formula": "y^{slow}_t \\le K_{slow,t}",
+            "parameters": [
+                "planning_horizon",
+                "slow_repair_capacity"
+            ],
+            "variables": [
+                "slow_repair_plan"
+            ]
+        },
+        {
+            "name": "fast_repair_capacity_limits",
+            "description": "If fast repair capacities are provided, the number of tools sent to fast repair at each stage cannot exceed the corresponding capacity.",
+            "formula": "y^{fast}_t \\le K_{fast,t}",
+            "parameters": [
+                "planning_horizon",
+                "fast_repair_capacity"
+            ],
+            "variables": [
+                "fast_repair_plan"
+            ]
+        },
+        {
+            "name": "nonnegativity_and_integrality_of_decision_variables",
+            "description": "Decision variables are nonnegative integers to represent counts of tools and to preserve exact discrete tool flows.",
+            "formula": "x_t,\\; y^{slow}_t,\\; y^{fast}_t,\\; I_t \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t=0,\\ldots,T-1",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": [
+                "purchase_plan",
+                "slow_repair_plan",
+                "fast_repair_plan",
+                "availability_profile"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "Maximize total profit over the finite planning horizon.",
-            "sense": "maximize"
+            "name": "total_tool_related_spending_minimization",
+            "description": "Minimize total tool-related spending over the horizon, including purchase costs and repair costs.",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit over the finite planning horizon, defined as total sales revenue minus total purchasing cost.",
+        "description": "Minimize total tool-related spending over the horizon, consisting of purchase costs and both repair mode costs.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\max \\; Z = \\sum_{t=0}^{T-1} c^{sell}_t s[t] - \\sum_{t=0}^{T-1} c^{buy}_t x[t]",
+        "sense": "minimize",
+        "formula": "Z = a \\sum_{t=0}^{T-1} x_t + b \\sum_{t=0}^{T-1} y^{slow}_t + c \\sum_{t=0}^{T-1} y^{fast}_t",
         "parameters": [
-            "buy_price",
-            "sell_price",
-            "planning_periods"
+            "purchase_cost",
+            "slow_repair_unit_cost",
+            "fast_repair_unit_cost",
+            "planning_horizon"
         ],
         "variables": [
-            "purchase_quantity",
-            "sales_quantity"
+            "purchase_plan",
+            "slow_repair_plan",
+            "fast_repair_plan"
         ]
     }
 }

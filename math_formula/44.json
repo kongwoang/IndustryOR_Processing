@@ -1,298 +1,196 @@
 {
-    "problem": "Problem description\n- There is a single-period production planning problem with a finite set of products $$\\mathcal{P}$$ and a finite set of limited resources $$\\mathcal{R}$$.\n- Each product $$p \\in \\mathcal{P}$$ consumes a fixed amount of each resource when one unit is produced, and these consumption coefficients are given by $$a_{p,r}$$ for every resource $$r \\in \\mathcal{R}$$.\n- Each resource $$r \\in \\mathcal{R}$$ has an available capacity $$b_r$$ for the planning horizon $$\\mathcal{T}$$.\n- Each product has an ordered set of sales-volume tiers $$\\mathcal{K}_p$$. For each tier $$k \\in \\mathcal{K}_p$$, there is a lower volume bound $$\\ell_{p,k}$$, an upper volume bound $$u_{p,k}$$, and a unit-profit value $$\\pi_{p,k}$$.\n- The unit profit for a product depends on which sales-volume tier its total planned quantity falls into. Higher-volume tiers correspond to lower unit profits, reflecting bulk-discount behavior.\n- The objective is to choose the production and sales quantities for all products so that total profit is maximized while all resource and tier rules are respected.\n- The plan must use nonnegative quantities for all products.\n- The total resource usage implied by the chosen production plan must not exceed the available capacity of any resource.\n- For each product, exactly one sales-volume tier must be active, and the chosen quantity for that product must be consistent with the bounds of that tier.\n- The tier structure for each product is ordered and non-overlapping, with the final tier allowed to extend without an upper limit when applicable.\n- A solution is represented by:\n  - $$x_p$$: the planned production and sales quantity of product $$p$$.\n  - $$k_p$$: the selected sales-volume tier for product $$p$$.\n  - $$y_{p,k}$$: an optional tier-indicator representation showing whether tier $$k$$ is active for product $$p$$.\n  - $$\\Pi$$: the total profit of the selected production plan.\n\nInput Format\n{\n  \"products\": {\n    \"symbol\": \"$$\\\\mathcal{P}$$\",\n    \"type\": \"array[string]\",\n    \"description\": \"Product identifiers indexed by $$p \\\\in \\\\mathcal{P}$$.\"\n  },\n  \"resources\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"type\": \"array[string]\",\n    \"description\": \"Resource identifiers indexed by $$r \\\\in \\\\mathcal{R}$$.\"\n  },\n  \"time_horizon\": {\n    \"symbol\": \"$$\\\\mathcal{T}$$\",\n    \"type\": \"array[string]\",\n    \"description\": \"Planning periods indexed by $$t \\\\in \\\\mathcal{T}$$.\"\n  },\n  \"resource_capacity\": {\n    \"symbol\": \"$$b_r$$\",\n    \"type\": \"array[number]\",\n    \"shape\": \"$$|\\\\mathcal{R}|$$\",\n    \"description\": \"Available capacity of each resource $$r \\\\in \\\\mathcal{R}$$.\"\n  },\n  \"resource_requirement\": {\n    \"symbol\": \"$$a_{p,r}$$\",\n    \"type\": \"matrix[number]\",\n    \"shape\": \"$$|\\\\mathcal{P}| \\\\times |\\\\mathcal{R}|$$\",\n    \"description\": \"Amount of resource $$r$$ required to produce one unit of product $$p$$.\"\n  },\n  \"tier_schedule\": {\n    \"symbol\": \"$$\\\\{(\\\\ell_{p,k},u_{p,k},\\\\pi_{p,k})\\\\}_{k \\\\in \\\\mathcal{K}_p}$$\",\n    \"type\": \"object\",\n    \"description\": \"For each product $$p \\\\in \\\\mathcal{P}$$, an ordered list of sales-volume tiers. Each tier contains a lower bound $$\\\\ell_{p,k}$$, an upper bound $$u_{p,k}$$, and a unit profit $$\\\\pi_{p,k}$$. A missing upper bound means the tier is open-ended.\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"type\": \"array[object]\",\n    \"shape\": \"$$|\\\\mathcal{P}|$$\",\n    \"description\": \"One record per product $$p \\\\in \\\\mathcal{P}$$.\",\n    \"fields\": {\n      \"product\": {\n        \"type\": \"string\",\n        \"description\": \"Product identifier $$p$$.\"\n      },\n      \"quantity\": {\n        \"symbol\": \"$$x_p$$\",\n        \"type\": \"number\",\n        \"description\": \"Chosen production and sales quantity for product $$p$$.\"\n      },\n      \"selected_tier\": {\n        \"symbol\": \"$$k_p$$\",\n        \"type\": \"integer_or_label\",\n        \"description\": \"Active sales-volume tier for product $$p$$.\"\n      }\n    }\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"type\": \"number\",\n    \"description\": \"Total profit achieved by the chosen production plan.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"A\", \"B\", \"C\"],\n  \"resources\": [\"technical_preparation\", \"labor\", \"materials\"],\n  \"time_horizon\": [\"single_period\"],\n  \"resource_capacity\": {\n    \"technical_preparation\": 100,\n    \"labor\": 700,\n    \"materials\": 400\n  },\n  \"resource_requirement\": {\n    \"A\": {\n      \"technical_preparation\": 1,\n      \"labor\": 10,\n      \"materials\": 3\n    },\n    \"B\": {\n      \"technical_preparation\": 2,\n      \"labor\": 4,\n      \"materials\": 2\n    },\n    \"C\": {\n      \"technical_preparation\": 1,\n      \"labor\": 5,\n      \"materials\": 1\n    }\n  },\n  \"tier_schedule\": {\n    \"A\": [\n      {\n        \"lower_bound\": 0,\n        \"upper_bound\": 40,\n        \"unit_profit\": 10\n      },\n      {\n        \"lower_bound\": 40,\n        \"upper_bound\": 100,\n        \"unit_profit\": 9\n      },\n      {\n        \"lower_bound\": 100,\n        \"upper_bound\": 150,\n        \"unit_profit\": 8\n      },\n      {\n        \"lower_bound\": 150,\n        \"upper_bound\": null,\n        \"unit_profit\": 7\n      }\n    ],\n    \"B\": [\n      {\n        \"lower_bound\": 0,\n        \"upper_bound\": 50,\n        \"unit_profit\": 6\n      },\n      {\n        \"lower_bound\": 50,\n        \"upper_bound\": 100,\n        \"unit_profit\": 4\n      },\n      {\n        \"lower_bound\": 100,\n        \"upper_bound\": null,\n        \"unit_profit\": 3\n      }\n    ],\n    \"C\": [\n      {\n        \"lower_bound\": 0,\n        \"upper_bound\": 100,\n        \"unit_profit\": 5\n      },\n      {\n        \"lower_bound\": 100,\n        \"upper_bound\": null,\n        \"unit_profit\": 4\n      }\n    ]\n  }\n}",
+    "problem": "Problem description\n- There are $$m$$ production points indexed by $$i \\in \\mathcal{I}$$, $$n$$ demand points indexed by $$j \\in \\mathcal{J}$$, and $$p$$ intermediate marshaling stations indexed by $$k \\in \\mathcal{K}$$.\n- Each production point $$i$$ has available supply $$a_i$$.\n- Each demand point $$j$$ has required demand $$b_j$$.\n- Each marshaling station $$k$$ has a fixed usage cost $$f_k$$ and a maximum transshipment capacity $$q_k$$.\n- The unit transportation cost from production point $$i$$ to marshaling station $$k$$ is $$c_{ik}$$, and the unit transportation cost from marshaling station $$k$$ to demand point $$j$$ is $$c'_{kj}$$.\n- The instance is assumed to have total available supply at least as large as total demand.\n- The planning goal is to choose shipment quantities and station-usage decisions so that all demand is satisfied at minimum total cost.\n- All material must be routed from production points to demand points through intermediate marshaling stations; direct shipment from a production point to a demand point is not allowed.\n- Every demand point must receive its full required quantity.\n- Shipments leaving any production point cannot exceed that point\u2019s available supply.\n- If a marshaling station is used, the total amount transshipped through it cannot exceed its capacity.\n- If a marshaling station is not used, no material may pass through it and no fixed usage cost is incurred.\n- Flow entering a marshaling station must be matched by flow leaving that station so that material is conserved at the station.\n- A solution is represented by:\n  - $$x_{ik}$$, the quantity shipped from production point $$i$$ to marshaling station $$k$$.\n  - $$y_{kj}$$, the quantity shipped from marshaling station $$k$$ to demand point $$j$$.\n  - $$z_k$$, a binary indicator showing whether marshaling station $$k$$ is used.\n  - $$Z$$, the total transportation-and-usage cost of the plan.\n\nInput Format\n{\n  \"m\": \"integer $$m$$, number of production points\",\n  \"n\": \"integer $$n$$, number of demand points\",\n  \"p\": \"integer $$p$$, number of marshaling stations\",\n  \"supply\": \"array of length $$m$$, where $$supply[i] = a_i$$ is the available supply at production point $$i$$\",\n  \"demand\": \"array of length $$n$$, where $$demand[j] = b_j$$ is the required demand at demand point $$j$$\",\n  \"fixed_cost\": \"array of length $$p$$, where $$fixed\\_cost[k] = f_k$$ is the fixed usage cost of marshaling station $$k$$\",\n  \"capacity\": \"array of length $$p$$, where $$capacity[k] = q_k$$ is the maximum transshipment capacity of marshaling station $$k$$\",\n  \"cost_production_to_station\": \"matrix of shape $$m \\times p$$, where entry $$c_{ik}$$ is the unit cost from production point $$i$$ to marshaling station $$k$$\",\n  \"cost_station_to_demand\": \"matrix of shape $$p \\times n$$, where entry $$c'_{kj}$$ is the unit cost from marshaling station $$k$$ to demand point $$j$$\"\n}\n\nOutput Format\n{\n  \"station_used\": \"binary array of length $$p$$, where $$station\\_used[k] = z_k$$ indicates whether marshaling station $$k$$ is used\",\n  \"shipments_to_station\": \"nonnegative matrix of shape $$m \\times p$$, where entry $$x_{ik}$$ is the shipment from production point $$i$$ to marshaling station $$k$$\",\n  \"shipments_to_demand\": \"nonnegative matrix of shape $$p \\times n$$, where entry $$y_{kj}$$ is the shipment from marshaling station $$k$$ to demand point $$j$$\",\n  \"total_cost\": \"scalar value $$Z$$ giving the minimum total cost of the transportation plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"m\": 2,\n  \"n\": 2,\n  \"p\": 2,\n  \"supply\": [100, 150],\n  \"demand\": [80, 120],\n  \"fixed_cost\": [10, 15],\n  \"capacity\": [100, 100],\n  \"cost_production_to_station\": [[2, 3], [4, 1]],\n  \"cost_station_to_demand\": [[3, 2], [1, 4]]\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "m",
+            "symbol": "m",
             "shape": [],
-            "description": "Number of products in the finite product set"
+            "description": "Integer count of production points; the set of production points is \\mathcal{I} = {0,\\dots,m-1}"
         },
         {
-            "name": "num_resources",
-            "symbol": "R",
+            "name": "n",
+            "symbol": "n",
             "shape": [],
-            "description": "Number of resources in the finite resource set"
+            "description": "Integer count of demand points; the set of demand points is \\mathcal{J} = {0,\\dots,n-1}"
         },
         {
-            "name": "planning_horizon",
-            "symbol": "\\mathcal{T}",
-            "shape": [
-                "-"
-            ],
-            "description": "Identifiers for the single planning horizon period set"
+            "name": "p",
+            "symbol": "p",
+            "shape": [],
+            "description": "Integer count of marshaling stations; the set of stations is \\mathcal{K} = {0,\\dots,p-1}"
         },
         {
-            "name": "resource_capacity",
-            "symbol": "b",
-            "shape": [
-                "R"
-            ],
-            "description": "Available capacity of each resource"
-        },
-        {
-            "name": "resource_consumption",
+            "name": "supply",
             "symbol": "a",
             "shape": [
-                "P",
-                "R"
+                "m"
             ],
-            "description": "Resource consumption per unit of each product for each resource"
+            "description": "Available supply at each production point i \\in \\mathcal{I}"
         },
         {
-            "name": "tier_lower_bound",
-            "symbol": "\\ell",
+            "name": "demand",
+            "symbol": "b",
             "shape": [
-                "P",
-                "K_p"
+                "n"
             ],
-            "description": "Lower bound of each sales-volume tier for each product"
+            "description": "Required demand at each demand point j \\in \\mathcal{J}"
         },
         {
-            "name": "tier_upper_bound",
-            "symbol": "u",
+            "name": "fixed_cost",
+            "symbol": "f",
             "shape": [
-                "P",
-                "K_p"
+                "p"
             ],
-            "description": "Optional upper bound of each sales-volume tier for each product; missing upper bounds are open-ended"
+            "description": "Fixed usage cost of each marshaling station k \\in \\mathcal{K}"
         },
         {
-            "name": "tier_unit_profit",
-            "symbol": "\\pi",
+            "name": "capacity",
+            "symbol": "q",
             "shape": [
-                "P",
-                "K_p"
+                "p"
             ],
-            "description": "Unit profit associated with each sales-volume tier for each product"
+            "description": "Maximum transshipment capacity of each marshaling station k \\in \\mathcal{K}"
         },
         {
-            "name": "num_tiers_per_product",
-            "symbol": "K",
+            "name": "cost_production_to_station",
+            "symbol": "c",
             "shape": [
-                "P"
+                "m",
+                "p"
             ],
-            "description": "Number of ordered tiers available for each product"
+            "description": "Unit shipping cost from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
+        },
+        {
+            "name": "cost_station_to_demand",
+            "symbol": "c'",
+            "shape": [
+                "p",
+                "n"
+            ],
+            "description": "Unit shipping cost from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "shipments_to_station",
             "symbol": "x",
             "shape": [
-                "P"
+                "m",
+                "p"
             ],
             "domain": "continuous",
-            "description": "Planned production and sales quantity of each product"
+            "description": "Quantity shipped from production point i \\in \\mathcal{I} to marshaling station k \\in \\mathcal{K}"
         },
         {
-            "name": "selected_tier",
-            "symbol": "k",
-            "shape": [
-                "P"
-            ],
-            "domain": "integer",
-            "description": "Selected sales-volume tier index for each product"
-        },
-        {
-            "name": "tier_indicator",
+            "name": "shipments_to_demand",
             "symbol": "y",
             "shape": [
-                "P",
-                "K_p"
+                "p",
+                "n"
             ],
-            "domain": "binary",
-            "description": "Binary indicator of whether a tier is active for a product"
+            "domain": "continuous",
+            "description": "Quantity shipped from marshaling station k \\in \\mathcal{K} to demand point j \\in \\mathcal{J}"
         },
         {
-            "name": "total_profit",
-            "symbol": "\\Pi",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total profit of the selected production plan"
+            "name": "station_used",
+            "symbol": "z",
+            "shape": [
+                "p"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if marshaling station k \\in \\mathcal{K} is used, and 0 otherwise"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_production_quantity",
-            "description": "production quantity for each product must be nonnegative",
-            "formula": "x_p \\ge 0 \\quad \\forall p\\in \\mathcal{P}",
+            "name": "demand_satisfaction",
+            "description": "Each demand point must receive exactly its required demand through marshaling stations",
+            "formula": "\\sum_{k=0}^{p-1} y_{kj} = b_j \\quad \\forall j\\in\\{0,\\dots,n-1\\}",
             "parameters": [
-                "production_quantity"
+                "demand"
             ],
             "variables": [
-                "production_quantity"
+                "shipments_to_demand"
             ]
         },
         {
-            "name": "binary_tier_indicator",
-            "description": "tier indicator variables are binary when the indicator representation is used",
-            "formula": "y_{p,k} \\in \\{0,1\\} \\quad \\forall p\\in \\mathcal{P},\\; k\\in \\mathcal{K}_p",
+            "name": "supply_limit",
+            "description": "Total shipment leaving each production point cannot exceed its available supply",
+            "formula": "\\sum_{k=0}^{p-1} x_{ik} \\le a_i \\quad \\forall i\\in\\{0,\\dots,m-1\\}",
+            "parameters": [
+                "supply"
+            ],
+            "variables": [
+                "shipments_to_station"
+            ]
+        },
+        {
+            "name": "station_capacity_usage",
+            "description": "If a station is used, total flow through it is limited by its capacity; if it is not used, no flow may pass through it",
+            "formula": "\\sum_{i=0}^{m-1} x_{ik} = \\sum_{j=0}^{n-1} y_{kj} \\le q_k z_k \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
+            "parameters": [
+                "capacity"
+            ],
+            "variables": [
+                "shipments_to_station",
+                "shipments_to_demand",
+                "station_used"
+            ]
+        },
+        {
+            "name": "station_flow_conservation",
+            "description": "Removed because station balance is now embedded in the station capacity/usage constraint",
+            "formula": "inflow equals outflow at each station",
             "parameters": [],
-            "variables": [
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "single_period_planning",
-            "description": "all production and resource usage decisions apply to the single planning horizon",
-            "formula": "\\text{All decisions are made for the single horizon } \\mathcal{T}",
-            "parameters": [
-                "planning_horizon"
-            ],
-            "variables": [
-                "production_quantity",
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "resource_capacity_limit_linear",
-            "description": "Total resource usage from all products must not exceed each resource capacity",
-            "formula": "\\sum_{p=1}^{P} a_{p,r} x_p \\le b_r \\quad \\forall r\\in \\mathcal{R}",
-            "parameters": [
-                "resource_capacity",
-                "resource_consumption"
-            ],
-            "variables": [
-                "production_quantity"
-            ]
-        },
-        {
-            "name": "single_active_tier_per_product_linear",
-            "description": "Exactly one sales-volume tier is active for each product",
-            "formula": "\\sum_{k\\in \\mathcal{K}_p} y_{p,k} = 1 \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "num_tiers_per_product"
-            ],
-            "variables": [
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "tier_order_and_profit_monotonicity",
-            "description": "Tier intervals are ordered and higher-volume tiers have weakly lower unit profit",
-            "formula": "\\ell_{p,k+1} \\ge u_{p,k},\\; \\pi_{p,k+1} \\le \\pi_{p,k} \\quad \\forall p\\in \\mathcal{P},\\; k\\in \\mathcal{K}_p\\setminus\\{\\max \\mathcal{K}_p\\}",
-            "parameters": [
-                "tier_lower_bound",
-                "tier_upper_bound",
-                "tier_unit_profit",
-                "num_tiers_per_product"
-            ],
             "variables": []
         },
         {
-            "name": "tier_upper_bound_activation",
-            "description": "Production quantity cannot exceed the upper bound of the active tier; the final tier may be open-ended so only finite upper bounds are enforced",
-            "formula": "x_p \\le \\sum_{k\\in \\mathcal{K}_p:\\, u_{p,k}\\neq \\text{null}} u_{p,k} y_{p,k} + M_p\\left(1-\\sum_{k\\in \\mathcal{K}_p:\\, u_{p,k}=\\text{null}} y_{p,k}\\right) \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "tier_upper_bound",
-                "num_tiers_per_product"
-            ],
-            "variables": [
-                "production_quantity",
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "tier_selection_position_link",
-            "description": "Selected tier position equals the position implied by the active tier indicators",
-            "formula": "k_p = \\sum_{k\\in \\mathcal{K}_p} k\\, y_{p,k} \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "num_tiers_per_product"
-            ],
-            "variables": [
-                "selected_tier",
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "tier_profit_definition",
-            "description": "Total profit equals the sum of active tier unit profits times product quantities",
-            "formula": "\\Pi = \\sum_{p=1}^{P} \\sum_{k\\in \\mathcal{K}_p} \\pi_{p,k} x_p y_{p,k}",
-            "parameters": [
-                "tier_unit_profit"
-            ],
-            "variables": [
-                "total_profit",
-                "production_quantity",
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "tier_order_and_profit_monotonicity_linear",
-            "description": "Tier intervals are ordered and higher-volume tiers have weakly lower unit profit",
-            "formula": "\\ell_{p,k+1} \\ge u_{p,k},\\; \\pi_{p,k+1} \\le \\pi_{p,k} \\quad \\forall p\\in \\mathcal{P},\\; k=1,\\dots,K_p-1",
-            "parameters": [
-                "tier_lower_bound",
-                "tier_upper_bound",
-                "tier_unit_profit",
-                "num_tiers_per_product"
-            ],
+            "name": "no_direct_shipping",
+            "description": "Removed because direct production-to-demand shipping is structurally excluded by the variable set; no separate algebraic constraint is needed",
+            "formula": "no direct production to demand shipment",
+            "parameters": [],
             "variables": []
         },
         {
-            "name": "resource_capacity_limit_linearized",
-            "description": "Total resource usage from all products must not exceed each resource capacity",
-            "formula": "\\sum_{p=1}^{P} a_{p,r} x_p \\le b_r \\quad \\forall r\\in \\mathcal{R}",
-            "parameters": [
-                "resource_capacity",
-                "resource_consumption"
-            ],
+            "name": "nonnegative_shipments",
+            "description": "Shipment quantities must be nonnegative",
+            "formula": "x_{ik} \\ge 0 \\; \\forall i\\in\\{0,\\dots,m-1\\},\\forall k\\in\\{0,\\dots,p-1\\},\\qquad y_{kj} \\ge 0 \\; \\forall k\\in\\{0,\\dots,p-1\\},\\forall j\\in\\{0,\\dots,n-1\\}",
             "variables": [
-                "production_quantity"
+                "shipments_to_station",
+                "shipments_to_demand"
             ]
         },
         {
-            "name": "single_active_tier_per_product_linearized",
-            "description": "Exactly one sales-volume tier is active for each product",
-            "formula": "\\sum_{k\\in \\mathcal{K}_p} y_{p,k} = 1 \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "num_tiers_per_product"
-            ],
+            "name": "binary_station_usage",
+            "description": "Station usage indicator must be binary",
+            "formula": "z_k \\in \\{0,1\\} \\quad \\forall k\\in\\{0,\\dots,p-1\\}",
             "variables": [
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "tier_bounds_big_m",
-            "description": "Production quantity must lie within the lower and upper bounds of the active tier using big-M activation",
-            "formula": "x_p \\ge \\sum_{k\\in \\mathcal{K}_p} \\ell_{p,k} y_{p,k} \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "tier_lower_bound",
-                "num_tiers_per_product"
-            ],
-            "variables": [
-                "production_quantity",
-                "tier_indicator"
-            ]
-        },
-        {
-            "name": "selected_tier_position",
-            "description": "Selected tier index is represented as the active tier position",
-            "formula": "k_p \\in \\mathbb{Z},\\; 1\\le k_p \\le K_p \\quad \\forall p\\in \\mathcal{P}",
-            "parameters": [
-                "num_tiers_per_product"
-            ],
-            "variables": [
-                "selected_tier"
+                "station_used"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_profit_maximization",
-            "description": "maximize total profit of the production plan",
-            "sense": "maximize"
+            "name": "total_cost_minimization",
+            "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "maximize total profit from production quantities with tier selection encoded by binary indicators",
+        "description": "Minimize the total transportation cost on both shipment legs plus fixed usage costs for activated marshaling stations.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\max\\ \\Pi",
-        "parameters": [],
+        "sense": "minimize",
+        "formula": "\\sum_{i=0}^{m-1}\\sum_{k=0}^{p-1} c_{ik}x_{ik}+\\sum_{k=0}^{p-1}\\sum_{j=0}^{n-1} c'_{kj}y_{kj}+\\sum_{k=0}^{p-1} f_k z_k",
+        "parameters": [
+            "cost_production_to_station",
+            "cost_station_to_demand",
+            "fixed_cost"
+        ],
         "variables": [
-            "total_profit"
+            "shipments_to_station",
+            "shipments_to_demand",
+            "station_used"
         ]
     }
 }

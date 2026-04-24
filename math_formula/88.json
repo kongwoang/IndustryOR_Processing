@@ -1,77 +1,58 @@
 {
-    "problem": "Problem description\n- There is a planning horizon made up of periods $$t \\in \\mathcal{T}$$, with the given instance corresponding to a weekly production setting.\n- There is a set of liquid products $$p \\in \\mathcal{P}$$; the instance contains the product categories corresponding to $$A$$ and $$B$$.\n- Each product has a unit profit $$\\pi_p$$, a unit production-time requirement $$\\tau_p$$, and a unit storage-space requirement $$\\sigma_p$$.\n- The planning goal is to choose nonnegative production quantities so that total profit from all sold output is maximized.\n- The total production time used in any period must not exceed the available production capacity $$H_t$$.\n- Market-mix requirements may impose minimum proportional output relationships between selected products, represented by ratios $$\\rho_{pq}$$.\n- Storage usage is limited through the product-specific storage coefficients and any direct storage cap parameters $$U_p$$.\n- The business rules require that the output of product $$B$$ must be at least a fixed multiple of the output of product $$A$$.\n- The business rules require that product $$A$$ uses more storage space per unit than product $$B$$.\n- The business rules also impose a direct upper bound on the amount of product $$A$$ that can be stored in the period.\n- All decision quantities must remain nonnegative.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced or sold in period $$t$$.\n  - $$z$$: the total profit achieved by the plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"periods\": \"array of period identifiers with length $$|\\mathcal{T}|$$\",\n    \"unit\": \"planning period label, such as weekly\"\n  },\n  \"products\": {\n    \"product_ids\": \"array of product identifiers with length $$|\\mathcal{P}|$$\"\n  },\n  \"parameters\": {\n    \"unit_profit\": \"vector $$\\pi_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"production_time_per_unit\": \"vector $$\\tau_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"storage_space_per_unit\": \"vector $$\\sigma_p$$ for $$p \\in \\mathcal{P}$$\",\n    \"available_production_time\": \"vector $$H_t$$ for $$t \\in \\mathcal{T}$$\",\n    \"minimum_mix_requirements\": \"list of records $$\\langle p,q,\\rho_{pq} \\rangle$$ meaning product $$p$$ must be produced in at least $$\\rho_{pq}$$ times the quantity of product $$q$$\",\n    \"direct_storage_caps\": \"optional vector $$U_p$$ for $$p \\in \\mathcal{P}$$ giving any direct upper bound on stored quantity\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"quantities\": \"array or table of records $$\\langle t,p,x_{p,t} \\rangle$$ with shape $$|\\mathcal{T}| \\times |\\mathcal{P}|$$\"\n  },\n  \"objective_value\": \"scalar $$z$$ representing total profit\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"periods\": [\"week_1\"],\n    \"unit\": \"weekly\"\n  },\n  \"products\": {\n    \"product_ids\": [\"A\", \"B\"]\n  },\n  \"parameters\": {\n    \"unit_profit\": {\n      \"A\": 30,\n      \"B\": 10\n    },\n    \"production_time_per_unit\": {\n      \"A\": 6,\n      \"B\": 3\n    },\n    \"storage_space_per_unit\": {\n      \"A\": 4,\n      \"B\": 1\n    },\n    \"available_production_time\": {\n      \"week_1\": 40\n    },\n    \"minimum_mix_requirements\": [\n      {\n        \"product\": \"B\",\n        \"reference_product\": \"A\",\n        \"minimum_multiple\": 3\n      }\n    ],\n    \"direct_storage_caps\": {\n      \"A\": 4\n    }\n  }\n}",
+    "problem": "Problem description\n- There is a set of products $$\\mathcal{P}$$ indexed by $$p \\in \\mathcal{P}$$, a set of machines $$\\mathcal{M}$$ indexed by $$m \\in \\mathcal{M}$$, and a planning horizon of periods $$\\mathcal{T}$$ indexed by $$t \\in \\mathcal{T}$$.\n- Each product $$p$$ has a processing time requirement on each machine $$m$$, represented by $$a_{m,p}$$, measured in a consistent time unit per standardized lot.\n- Each machine $$m$$ has an available capacity in each period $$t$$, represented by $$K_{m,t}$$.\n- Each product $$p$$ has an initial on-hand inventory $$I^{0}_{p}$$ at the start of the planning horizon.\n- Each product $$p$$ has a forecast demand in each period $$t$$, represented by $$D_{p,t}$$.\n- Production is allowed in fractional lots, so the production decision is continuous rather than integer.\n- The planning objective is to maximize the total ending inventory across all products at the end of the planning horizon.\n- All demand must be satisfied from available initial inventory plus production, and inventory may not become negative at any point in the planning horizon.\n- Machine time usage created by production must not exceed the available capacity of each machine in each period.\n- Inventory is tracked separately for each product across periods, with beginning inventory carried forward from one period to the next after production and demand fulfillment.\n- No explicit cost or penalty terms are included in the objective for this instance.\n- A solution is represented by:\n  - The production quantity $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$.\n  - The ending inventory level $$I_{p,t}$$, giving the inventory of product $$p$$ remaining at the end of period $$t$$.\n  - The final objective value $$Z$$, giving the total ending inventory at the end of the horizon.\n\nInput Format\n{\n  \"P\": \"number of products $$|\\mathcal{P}|$$\",\n  \"M\": \"number of machines $$|\\mathcal{M}|$$\",\n  \"T\": \"number of planning periods $$|\\mathcal{T}|$$\",\n  \"products\": [\n    \"product identifiers for each $$p \\in \\mathcal{P}$$\"\n  ],\n  \"machines\": [\n    \"machine identifiers for each $$m \\in \\mathcal{M}$$\"\n  ],\n  \"periods\": [\n    \"period identifiers for each $$t \\in \\mathcal{T}$$\"\n  ],\n  \"processing_time\": {\n    \"shape\": \"$$M \\\\times P$$\",\n    \"meaning\": \"Matrix of processing times $$a_{m,p}$$, where each entry is the time required on machine $$m$$ to produce one standardized lot of product $$p$$\"\n  },\n  \"machine_capacity\": {\n    \"shape\": \"$$M \\\\times T$$\",\n    \"meaning\": \"Matrix of available machine capacities $$K_{m,t}$$ for each machine $$m$$ in each period $$t$$\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"Vector of starting inventories $$I^{0}_{p}$$ for each product $$p$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Demand matrix $$D_{p,t}$$ for each product $$p$$ in each period $$t$$\"\n  }\n}\n\nOutput Format\n{\n  \"production\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Production plan $$x_{p,t}$$, giving the number of standardized lots of product $$p$$ produced in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"Inventory plan $$I_{p,t}$$, giving the ending inventory of product $$p$$ in period $$t$$\"\n  },\n  \"objective_value\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"Total ending inventory $$Z$$ at the end of the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"M\": 2,\n  \"T\": 1,\n  \"products\": [\"liquid\", \"solid\"],\n  \"machines\": [\"Machine 1\", \"Machine 2\"],\n  \"periods\": [\"week 1\"],\n  \"processing_time\": [\n    [50, 24],\n    [30, 33]\n  ],\n  \"machine_capacity\": [\n    [40],\n    [35]\n  ],\n  \"initial_inventory\": [30, 90],\n  \"demand\": [\n    [75],\n    [95]\n  ]\n}",
     "parameters": [
         {
-            "name": "periods",
-            "symbol": "\\mathcal{T}",
+            "name": "num_products",
+            "symbol": "P",
             "shape": [],
-            "description": "Set of planning periods in the weekly horizon"
+            "description": "Number of products in the planning set"
         },
         {
-            "name": "products",
-            "symbol": "\\mathcal{P}",
+            "name": "num_machines",
+            "symbol": "M",
             "shape": [],
-            "description": "Set of liquid products"
+            "description": "Number of machines in the planning set"
         },
         {
             "name": "num_periods",
             "symbol": "T",
             "shape": [],
-            "description": "Number of periods in the planning horizon"
+            "description": "Number of planning periods in the horizon"
         },
         {
-            "name": "num_products",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of products in the planning problem"
-        },
-        {
-            "name": "unit_profit",
-            "symbol": "\\pi",
+            "name": "processing_time",
+            "symbol": "a",
             "shape": [
-                "\\mathcal{P}"
+                "M",
+                "P"
             ],
-            "description": "Unit profit for each product"
+            "description": "Processing time required on machine m for product p per standardized lot produced"
         },
         {
-            "name": "production_time_per_unit",
-            "symbol": "\\tau",
+            "name": "machine_capacity",
+            "symbol": "K",
             "shape": [
-                "\\mathcal{P}"
+                "M",
+                "T"
             ],
-            "description": "Production time requirement per unit of each product"
+            "description": "Available capacity of machine m in period t"
         },
         {
-            "name": "storage_space_per_unit",
-            "symbol": "\\sigma",
+            "name": "initial_inventory",
+            "symbol": "I0",
             "shape": [
-                "\\mathcal{P}"
+                "P"
             ],
-            "description": "Storage space requirement per unit of each product"
+            "description": "Initial inventory for each product p"
         },
         {
-            "name": "available_production_time",
-            "symbol": "H",
+            "name": "demand",
+            "symbol": "D",
             "shape": [
-                "\\mathcal{T}"
+                "P",
+                "T"
             ],
-            "description": "Available production time in each period"
-        },
-        {
-            "name": "minimum_mix_requirements",
-            "symbol": "\\rho",
-            "shape": [
-                "\\mathcal{R}"
-            ],
-            "description": "Listed minimum proportional output requirements between ordered product pairs"
-        },
-        {
-            "name": "direct_storage_caps",
-            "symbol": "U",
-            "shape": [
-                "\\mathcal{P}"
-            ],
-            "description": "Direct storage capacity cap for products when provided"
+            "description": "Demand for each product p in each period t"
         }
     ],
     "variables": [
@@ -79,84 +60,143 @@
             "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "\\mathcal{P}",
-                "\\mathcal{T}"
+                "P",
+                "T"
             ],
             "domain": "continuous",
-            "description": "Quantity of product produced or sold for each product in each period"
+            "description": "Production quantity of product p in period t measured in standardized lots"
         },
         {
-            "name": "total_profit",
-            "symbol": "z",
+            "name": "ending_inventory",
+            "symbol": "I",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Inventory of product p at the end of period t"
+        },
+        {
+            "name": "objective_value",
+            "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total profit achieved by the production plan"
+            "description": "Total ending inventory at the end of the planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "production_time_capacity",
-            "description": "Total production time used in each period cannot exceed the available production time for that period.",
-            "formula": "\\sum_{p \\in \\mathcal{P}} \\tau_p \\, x_{p,t} \\le H_t \\quad \\forall t \\in \\mathcal{T}",
+            "name": "production_continuity",
+            "description": "Production quantity is continuous and may be fractional",
+            "formula": "x_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
             "parameters": [
-                "production_time_per_unit",
-                "available_production_time"
+                "num_products",
+                "num_periods"
             ],
             "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "minimum_mix_requirements",
-            "description": "All specified minimum proportional output relationships between product pairs must be satisfied, including the rule that product B must be produced at least a fixed multiple of product A.",
-            "formula": "x_{p,t} \\ge \\rho_{pq} \\, x_{q,t} \\quad \\forall t \\in \\mathcal{T},\\ \\forall (p,q,\\rho_{pq}) \\in \\mathcal{R}",
+            "name": "inventory_nonnegativity",
+            "description": "Ending inventory must never be negative for any product and period",
+            "formula": "I_{p,t} \\ge 0 \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
             "parameters": [
-                "minimum_mix_requirements"
+                "num_products",
+                "num_periods"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "machine_capacity_limit",
+            "description": "Production in each period must not exceed available machine capacity on each machine",
+            "formula": "\\sum_{p=1}^{P} a_{m,p} x_{p,t} \\le K_{m,t} \\quad \\forall m=1,\\dots,M,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_machines",
+                "num_products",
+                "processing_time",
+                "machine_capacity"
             ],
             "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "storage_capacity_limits",
-            "description": "Storage usage must respect product-specific storage coefficients and any direct storage caps, including the direct upper bound on product A.",
-            "formula": "\\sum_{t \\in \\mathcal{T}} \\sigma_p \\, x_{p,t} \\le U_p \\quad \\forall p \\in \\mathcal{P}",
+            "name": "demand_fulfillment",
+            "description": "Demand for each product and period must be satisfied by beginning inventory plus current-period production, leaving nonnegative ending inventory.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\n\\dots,T",
             "parameters": [
-                "storage_space_per_unit",
-                "direct_storage_caps"
+                "num_products",
+                "initial_inventory",
+                "demand"
             ],
             "variables": [
-                "production_quantity"
+                "production_quantity",
+                "ending_inventory"
             ]
         },
         {
-            "name": "nonnegative_production_quantities",
-            "description": "All production quantities must be nonnegative.",
-            "formula": "x_{p,t} \\ge 0 \\quad \\forall p \\in \\mathcal{P},\\ \\forall t \\in \\mathcal{T}",
+            "name": "inventory_carryover",
+            "description": "Ending inventory is defined period by period through cumulative balance with demand satisfaction and carryover.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "initial_inventory",
+                "demand"
+            ],
             "variables": [
-                "production_quantity"
+                "production_quantity",
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "nonnegative_data",
+            "description": "Input quantities such as processing times, capacities, initial inventory, and demand must be nonnegative",
+            "formula": "a_{m,p} \\ge 0,\\; K_{m,t} \\ge 0,\\; I0_p \\ge 0,\\; D_{p,t} \\ge 0",
+            "parameters": [
+                "processing_time",
+                "machine_capacity",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": []
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory evolves by beginning inventory plus production minus demand in each period, ensuring demand is met and inventory carries forward correctly.",
+            "formula": "I_{p,t} = I0_p + \\sum_{\\tau=1}^{t} x_{p,\\tau} - \\sum_{\\tau=1}^{t} D_{p,\\tau} \\quad \\forall p=1,\\dots,P,\\; t=1,\\dots,T",
+            "parameters": [
+                "num_products",
+                "initial_inventory",
+                "demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "maximize total profit from all sold output over all periods",
+            "name": "maximize_total_ending_inventory",
+            "description": "Maximize the total ending inventory at the end of the planning horizon across all products",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "maximize total profit from all sold output over all periods",
+        "description": "Maximize the total ending inventory at the end of the planning horizon across all products using the final-period inventory variables directly.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "z = \\sum_{t \\in \\mathcal{T}} \\sum_{p \\in \\mathcal{P}} \\pi_p \\, x_{p,t}",
+        "formula": "Z = \\sum_{p=1}^{P} I_{p,T}",
         "parameters": [
-            "unit_profit"
+            "num_products"
         ],
         "variables": [
-            "production_quantity",
-            "total_profit"
+            "ending_inventory",
+            "objective_value"
         ]
     }
 }

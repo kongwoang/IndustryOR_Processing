@@ -1,311 +1,196 @@
 {
-    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,2,\\ldots,T\\}$$.\n- The firm trades one or more grain categories indexed by $$g \\in \\mathcal{G}=\\{1,2,\\ldots,G\\}$$.\n- The planning input includes initial inventory $$I_{g,0}$$ for each grain category and initial cash balance $$B_0$$.\n- Each period has an exogenous purchase price $$c_{g,t}$$ and selling price $$s_{g,t}$$ for each grain category.\n- The warehouse has a finite storage capacity $$K$$ for total on-hand inventory across all grain categories.\n- Purchases made in period $$t$$ are delivered in period $$t$$ and are paid for immediately upon delivery.\n- Goods purchased in period $$t$$ cannot be sold until period $$t+1$$ or later.\n- Sales in any period may only use inventory that is already eligible for sale at the start of that period.\n- The cash balance must remain feasible throughout the horizon, with no negative cash unless an explicit financing source is provided.\n- The inventory held in the warehouse at any time must never exceed the storage capacity $$K$$.\n- The ending inventory at the end of period $$T$$ must satisfy the required terminal inventory level $$I^{\\mathrm{req}}_g$$ for each grain category.\n- The optimization goal is to maximize total trading profit over the horizon, using the period-by-period purchase and sales decisions.\n\n- A solution is represented by:\n  - $$x_{g,t}$$, the quantity of grain category $$g$$ purchased in period $$t$$.\n  - $$y_{g,t}$$, the quantity of grain category $$g$$ sold in period $$t$$.\n  - $$I_{g,t}$$, the ending inventory of grain category $$g$$ after period $$t$$.\n  - $$B_t$$, the cash balance after period $$t$$.\n  - $$\\Pi$$, the total profit over the full planning horizon.\n\nInput Format\n{\n  \"T\": \"number of planning periods, indexed by $$t \\\\in \\\\mathcal{T}=\\\\{1,2,\\\\ldots,T\\\\}$$\",\n  \"G\": \"number of grain categories, indexed by $$g \\\\in \\\\mathcal{G}=\\\\{1,2,\\\\ldots,G\\\\}$$\",\n  \"K\": \"warehouse capacity for total inventory\",\n  \"B_0\": \"initial cash balance\",\n  \"I_0\": \"initial inventory vector with shape $$G$$, where $$I_{g,0}$$ is the initial stock of grain category $$g$$\",\n  \"I^{\\\\mathrm{req}}\": \"required ending inventory vector with shape $$G$$, where $$I^{\\\\mathrm{req}}_g$$ is the terminal stock requirement for grain category $$g$$\",\n  \"c\": \"purchase price matrix with shape $$G \\\\times T$$, where $$c_{g,t}$$ is the unit purchase cost of grain category $$g$$ in period $$t$$\",\n  \"s\": \"selling price matrix with shape $$G \\\\times T$$, where $$s_{g,t}$$ is the unit selling price of grain category $$g$$ in period $$t$$\",\n  \"receipt_lag\": \"sellability delay in periods; here the rule is that purchased goods become sellable only after one period\",\n  \"payment_rule\": \"purchase payment is due upon delivery in the purchase period\",\n  \"demand\": \"not exogenous in this problem; sales are decision variables limited by sellable inventory and timing rules\"\n}\n\nOutput Format\n{\n  \"purchase_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$x_{g,t}$$, purchased quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"sales_plan\": {\n    \"shape\": \"$$G \\\\times T$$\",\n    \"meaning\": \"$$y_{g,t}$$, sold quantity of grain category $$g$$ in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$G$$\",\n    \"meaning\": \"$$I_{g,T}$$, ending inventory of each grain category after period $$T$$\"\n  },\n  \"ending_cash\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$B_T$$, cash balance at the end of period $$T$$\"\n  },\n  \"total_profit\": {\n    \"shape\": \"scalar\",\n    \"meaning\": \"$$\\\\Pi$$, total profit over the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"G\": 1,\n  \"K\": 5000,\n  \"B_0\": 20000,\n  \"I_0\": [1000],\n  \"I^{\\\\mathrm{req}}\": [2000],\n  \"c\": [[2.85, 3.05, 2.90]],\n  \"s\": [[3.10, 3.25, 2.95]],\n  \"receipt_lag\": 1,\n  \"payment_rule\": \"purchase payment is due upon delivery in the same month\"\n}",
+    "problem": "Problem description\n- There is a finite set of courses $$\\mathcal{C}$$ and a finite set of academic categories $$\\mathcal{K}$$, with course index $$c \\in \\mathcal{C}$$ and category index $$k \\in \\mathcal{K}$$.\n- The planning problem is a single course-selection period over a horizon $$\\mathcal{T}$$.\n- Each course $$c$$ has a selection cost $$w_c$$, and the original objective is to minimize the total selection cost, which corresponds to minimizing the number of selected courses when all costs are unit costs.\n- Each course may be eligible for one or more categories, described by an eligibility relation $$a_{ck}$$.\n- Each category $$k$$ has a required minimum credit count $$d_k$$, meaning enough selected courses must be credited to that category.\n- Some courses have prerequisite relations, described by a precedence relation $$r_{ij}$$, meaning course $$j$$ must also be selected whenever course $$i$$ is selected.\n- A selected course may be credited to multiple categories if it is eligible for them, and it may satisfy more than one category requirement at the same time.\n- The same selected course may not be counted more than once toward the same category requirement.\n- The planning goal is to choose a smallest feasible set of courses that satisfies all category requirements and all prerequisite requirements.\n- A solution is represented by:\n  - $$x_c \\in \\{0,1\\}$$ for each $$c \\in \\mathcal{C}$$, where $$x_c=1$$ means course $$c$$ is selected.\n  - $$y_{ck} \\in \\{0,1\\}$$ for each eligible pair $$\\left(c,k\\right)$$, where $$y_{ck}=1$$ means selected course $$c$$ is credited toward category $$k$$.\n  - $$z$$, the total number of selected courses.\n\nInput Format\n{\n  \"course_count\": \"integer $$N$$, where $$N = \\left|\\mathcal{C}\\right|$$\",\n  \"category_count\": \"integer $$K$$, where $$K = \\left|\\mathcal{K}\\right|$$\",\n  \"time_horizon\": {\n    \"symbol\": \"$$\\mathcal{T}$$\",\n    \"description\": \"single selection period\"\n  },\n  \"courses\": [\n    {\n      \"id\": \"integer in $$\\\\{0,1,\\\\dots,N-1\\\\}$$\",\n      \"name\": \"string identifier of course $$c$$\",\n      \"selection_cost\": \"cost parameter $$w_c$$\",\n      \"eligible_categories\": \"subset of $$\\\\mathcal{K}$$ that course $$c$$ can satisfy\",\n      \"prerequisites\": \"subset of $$\\\\mathcal{C}$$ that must be selected before course $$c$$\"\n    }\n  ],\n  \"category_requirements\": {\n    \"shape\": \"$$K$$\",\n    \"entry\": \"$$d_k$$\",\n    \"meaning\": \"minimum number of courses that must be credited to category $$k$$\"\n  },\n  \"eligibility_matrix\": {\n    \"shape\": \"$$N \\\\times K$$\",\n    \"entry\": \"$$a_{ck}$$\",\n    \"meaning\": \"$$1$$ if course $$c$$ can satisfy category $$k$$, otherwise $$0$$\"\n  },\n  \"prerequisite_matrix\": {\n    \"shape\": \"$$N \\\\times N$$\",\n    \"entry\": \"$$r_{ij}$$\",\n    \"meaning\": \"$$1$$ if course $$j$$ is a prerequisite of course $$i$$, otherwise $$0$$\"\n  }\n}\n\nOutput Format\n{\n  \"selected_courses\": {\n    \"type\": \"array\",\n    \"meaning\": \"the chosen subset $$S \\\\subseteq \\\\mathcal{C}$$ of courses\"\n  },\n  \"selection_vector\": {\n    \"shape\": \"$$N$$\",\n    \"meaning\": \"$$x_c$$ for each course $$c \\\\in \\\\mathcal{C}$$\"\n  },\n  \"category_credit_matrix\": {\n    \"shape\": \"$$N \\\\times K$$\",\n    \"meaning\": \"$$y_{ck}$$ indicating whether selected course $$c$$ is credited to category $$k$$\"\n  },\n  \"total_selected_courses\": {\n    \"type\": \"integer\",\n    \"meaning\": \"the total number of selected courses $$z$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"course_count\": 7,\n  \"category_count\": 3,\n  \"time_horizon\": \"single selection period\",\n  \"categories\": [\n    \"Mathematics\",\n    \"Operations Research\",\n    \"Computer Science\"\n  ],\n  \"courses\": [\n    {\n      \"id\": 0,\n      \"name\": \"Calculus\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 1,\n      \"name\": \"Operations Research\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Data Structures\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Computer Science\"],\n      \"prerequisites\": [\"Computer Programming\"]\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Management Statistics\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": [\"Calculus\"]\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Computer Simulation\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Operations Research\", \"Computer Science\"],\n      \"prerequisites\": [\"Computer Programming\"]\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Computer Programming\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Computer Science\"],\n      \"prerequisites\": []\n    },\n    {\n      \"id\": 6,\n      \"name\": \"Forecasting\",\n      \"selection_cost\": 1,\n      \"eligible_categories\": [\"Mathematics\", \"Operations Research\"],\n      \"prerequisites\": [\"Management Statistics\"]\n    }\n  ],\n  \"category_requirements\": {\n    \"Mathematics\": 2,\n    \"Operations Research\": 2,\n    \"Computer Science\": 2\n  }\n}",
     "parameters": [
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "course_count",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of trading periods in the planning horizon"
+            "description": "Number of courses in the finite course set $\\mathcal{C}$"
         },
         {
-            "name": "num_grain_categories",
-            "symbol": "G",
-            "shape": [],
-            "description": "Number of grain categories"
-        },
-        {
-            "name": "warehouse_capacity",
+            "name": "category_count",
             "symbol": "K",
             "shape": [],
-            "description": "Maximum total on-hand inventory that can be stored in the warehouse"
+            "description": "Number of academic categories in the finite category set $\\mathcal{K}$"
         },
         {
-            "name": "initial_cash_balance",
-            "symbol": "B_0",
+            "name": "time_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Initial cash balance"
+            "description": "Single course-selection period"
         },
         {
-            "name": "initial_inventory",
-            "symbol": "I_0",
+            "name": "selection_cost",
+            "symbol": "w_c",
             "shape": [
-                "G"
+                "N"
             ],
-            "description": "Initial inventory vector by grain category"
+            "description": "Selection cost of each course $c$"
         },
         {
-            "name": "required_terminal_inventory",
-            "symbol": "I^{\\mathrm{req}}",
+            "name": "eligibility_matrix",
+            "symbol": "a_{ck}",
             "shape": [
-                "G"
+                "N",
+                "K"
             ],
-            "description": "Required ending inventory vector by grain category"
+            "description": "Binary eligibility indicator for course-category pairs; 1 if course $c$ can satisfy category $k$"
         },
         {
-            "name": "purchase_price",
-            "symbol": "c",
+            "name": "category_requirement",
+            "symbol": "d_k",
             "shape": [
-                "G",
-                "T"
+                "K"
             ],
-            "description": "Purchase price matrix by grain category and period"
+            "description": "Minimum required number of credited courses for each category $k$"
         },
         {
-            "name": "selling_price",
-            "symbol": "s",
+            "name": "prerequisite_matrix",
+            "symbol": "r_{ij}",
             "shape": [
-                "G",
-                "T"
+                "N",
+                "N"
             ],
-            "description": "Selling price matrix by grain category and period"
-        },
-        {
-            "name": "receipt_lag",
-            "symbol": "\u007fl",
-            "shape": [],
-            "description": "Number of periods before purchased inventory becomes eligible for sale"
-        },
-        {
-            "name": "payment_rule",
-            "symbol": "\u007fp",
-            "shape": [],
-            "description": "Timing rule indicating that purchases are paid upon delivery in the purchase period"
+            "description": "Binary prerequisite indicator for course pairs; 1 if selecting course $i$ requires selecting course $j$"
         }
     ],
     "variables": [
         {
-            "name": "purchase_quantity",
-            "symbol": "x",
+            "name": "selected_course",
+            "symbol": "x_c",
             "shape": [
-                "G",
-                "T"
+                "N"
             ],
-            "domain": "continuous",
-            "description": "Quantity of grain category purchased in each period"
+            "domain": "binary",
+            "description": "Binary decision variable equal to 1 if course $c$ is selected"
         },
         {
-            "name": "sales_quantity",
-            "symbol": "y",
+            "name": "category_credit",
+            "symbol": "y_{ck}",
             "shape": [
-                "G",
-                "T"
+                "N",
+                "K"
             ],
-            "domain": "continuous",
-            "description": "Quantity of grain category sold in each period"
+            "domain": "binary",
+            "description": "Binary decision variable equal to 1 if selected course $c$ is credited toward category $k$"
         },
         {
-            "name": "ending_inventory",
-            "symbol": "I",
-            "shape": [
-                "G",
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Ending inventory of each grain category after each period"
-        },
-        {
-            "name": "cash_balance",
-            "symbol": "B",
-            "shape": [
-                "T"
-            ],
-            "domain": "continuous",
-            "description": "Cash balance after each period"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "\\Pi",
+            "name": "total_selected_courses",
+            "symbol": "z",
             "shape": [],
-            "domain": "continuous",
-            "description": "Total profit over the full planning horizon"
+            "domain": "integer",
+            "description": "Total number of selected courses"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "purchase_quantity_nonnegative",
-            "description": "Purchase quantities must be nonnegative",
-            "formula": "x[g][t]",
-            "parameters": [
-                "num_grain_categories",
-                "num_periods"
-            ],
+            "name": "selected_course_binary_domain",
+            "description": "The course selection variable is binary for each course",
+            "formula": "x_c \\in \\{0,1\\}",
             "variables": [
-                "purchase_quantity"
+                "selected_course"
             ]
         },
         {
-            "name": "sales_quantity_nonnegative",
-            "description": "Sales quantities must be nonnegative",
-            "formula": "y[g][t]",
+            "name": "category_credit_binary_domain",
+            "description": "The category credit variable is binary for each course-category pair",
+            "formula": "y_{ck} \\in \\{0,1\\}",
             "parameters": [
-                "num_grain_categories",
-                "num_periods"
+                "eligibility_matrix"
             ],
             "variables": [
-                "sales_quantity"
+                "category_credit"
             ]
         },
         {
-            "name": "ending_inventory_nonnegative",
-            "description": "Ending inventory must be nonnegative for each grain category and period",
-            "formula": "I[g][t]",
-            "parameters": [
-                "num_grain_categories",
-                "num_periods"
-            ],
+            "name": "total_selected_courses_integer_domain",
+            "description": "The total selected courses variable is a nonnegative integer",
+            "formula": "z \\in \\mathbb{Z}_{\\ge 0}",
             "variables": [
-                "ending_inventory"
+                "total_selected_courses"
             ]
         },
         {
-            "name": "cash_balance_nonnegative",
-            "description": "Cash balance must remain nonnegative throughout the horizon",
-            "formula": "B[t]",
+            "name": "credit_only_if_selected",
+            "description": "A course may be credited to a category only if the course is selected",
+            "formula": "y_{ck} \\le x_c",
             "parameters": [
-                "num_periods",
-                "initial_cash_balance"
+                "eligibility_matrix"
             ],
             "variables": [
-                "cash_balance"
+                "selected_course",
+                "category_credit"
             ]
         },
         {
-            "name": "warehouse_capacity_limit",
-            "description": "Total on-hand inventory across all grain categories cannot exceed warehouse capacity",
-            "formula": "I[g][t]",
+            "name": "category_minimum_credit",
+            "description": "Each category must receive at least its required minimum number of credited courses",
+            "formula": "\\sum_{c=0}^{N-1} y_{ck} \\ge d_k \\quad \\forall k=0,\\dots,K-1",
             "parameters": [
-                "num_grain_categories",
-                "num_periods",
-                "warehouse_capacity"
+                "category_requirement"
             ],
             "variables": [
-                "ending_inventory"
+                "category_credit"
             ]
         },
         {
-            "name": "sale_eligibility_lag",
-            "description": "Inventory purchased in a period cannot be sold until the following period or later",
-            "formula": "x[g][t] and y[g][t] with receipt lag",
+            "name": "prerequisite_selection",
+            "description": "Selecting a course requires selecting all of its prerequisite courses",
+            "formula": "x_i \\le x_j \\quad \\forall i,j\\in\\{0,\\dots,N-1\\} \\text{ such that } r_{ij}=1",
             "parameters": [
-                "num_grain_categories",
-                "num_periods",
-                "receipt_lag"
+                "prerequisite_matrix"
             ],
             "variables": [
-                "purchase_quantity",
-                "sales_quantity"
+                "selected_course"
             ]
         },
         {
-            "name": "terminal_inventory_requirement",
-            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category",
-            "formula": "I[g][T]",
+            "name": "single_selection_period",
+            "description": "The model applies to one course-selection period only",
+            "formula": "\\mathcal{T} \\text{ is a single selection period",
             "parameters": [
-                "num_grain_categories",
-                "required_terminal_inventory"
-            ],
-            "variables": [
-                "ending_inventory"
+                "time_horizon"
             ]
         },
         {
-            "name": "inventory_balance",
-            "description": "Inventory balance for each grain category and period, with purchases added and sales removed; for the first period, initial inventory is used as the starting level, and for later periods previous ending inventory is carried forward.",
-            "formula": "I_{g,t}=I_{g,t-1}+x_{g,t}-y_{g,t}\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
+            "name": "eligibility_cap",
+            "description": "A course-category pair can receive credit only if the course is eligible for that category; ineligible pairs are forced to zero credit",
+            "formula": "y_{ck} \\le a_{ck}",
             "parameters": [
-                "num_grain_categories",
-                "num_periods",
-                "initial_inventory"
+                "eligibility_matrix"
             ],
             "variables": [
-                "ending_inventory",
-                "purchase_quantity",
-                "sales_quantity"
+                "category_credit"
             ]
         },
         {
-            "name": "cash_balance_update",
-            "description": "Cash balance evolution by period, assuming purchases are paid upon delivery in the same period and sales revenue is received in the same period.",
-            "formula": "B_t=B_{t-1}+\\sum_{g\\in\\mathcal{G}} s_{g,t}y_{g,t}-\\sum_{g\\in\\mathcal{G}} c_{g,t}x_{g,t}\\quad \\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "num_grain_categories",
-                "num_periods",
-                "purchase_price",
-                "selling_price",
-                "initial_cash_balance"
-            ],
+            "name": "total_selected_courses_definition",
+            "description": "Define the total number of selected courses as the sum of course selection variables",
+            "formula": "z = \\sum_{c=0}^{N-1} x_c",
             "variables": [
-                "cash_balance",
-                "purchase_quantity",
-                "sales_quantity"
-            ]
-        },
-        {
-            "name": "warehouse_capacity_total",
-            "description": "Total inventory across all grain categories at the end of each period cannot exceed warehouse capacity.",
-            "formula": "\\sum_{g\\in\\mathcal{G}} I_{g,t}\\le K\\quad \\forall t\\in\\mathcal{T}",
-            "parameters": [
-                "num_grain_categories",
-                "num_periods",
-                "warehouse_capacity"
-            ],
-            "variables": [
-                "ending_inventory"
-            ]
-        },
-        {
-            "name": "terminal_inventory_satisfaction",
-            "description": "Ending inventory at the end of the horizon must meet the required terminal inventory for each grain category.",
-            "formula": "I_{g,T}\\ge I^{\\mathrm{req}}_g\\quad \\forall g\\in\\mathcal{G}",
-            "parameters": [
-                "num_grain_categories",
-                "required_terminal_inventory"
-            ],
-            "variables": [
-                "ending_inventory"
-            ]
-        },
-        {
-            "name": "purchase_sales_nonnegativity",
-            "description": "Decision variables for purchases and sales are nonnegative, and inventory and cash remain nonnegative over the horizon.",
-            "formula": "x_{g,t}\\ge 0,\\ y_{g,t}\\ge 0,\\ I_{g,t}\\ge 0,\\ B_t\\ge 0\\quad \\forall g\\in\\mathcal{G},\\ t\\in\\mathcal{T}",
-            "parameters": [
-                "num_grain_categories",
-                "num_periods"
-            ],
-            "variables": [
-                "purchase_quantity",
-                "sales_quantity",
-                "ending_inventory",
-                "cash_balance"
+                "selected_course",
+                "total_selected_courses"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_trading_profit",
-            "description": "Maximize total trading profit over the planning horizon",
-            "sense": "maximize"
+            "name": "selection_cost_minimization",
+            "description": "Minimize the total selection cost of the chosen courses; under unit costs, this is equivalent to minimizing the number of selected courses",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total trading profit over the planning horizon as final cash minus initial cash, equivalently cumulative sales revenue minus cumulative purchase cost.",
+        "description": "Minimize the total selection cost of the chosen courses.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\Pi = B_T - B_0 = \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} s_{g,t}y_{g,t} - \\sum_{g\\in\\mathcal{G}}\\sum_{t\\in\\mathcal{T}} c_{g,t}x_{g,t}",
+        "sense": "minimize",
+        "formula": "\\sum_{c=0}^{N-1} w_c x_c",
         "parameters": [
-            "initial_cash_balance",
-            "purchase_price",
-            "selling_price",
-            "num_grain_categories",
-            "num_periods"
+            "selection_cost"
         ],
         "variables": [
-            "total_profit",
-            "cash_balance",
-            "purchase_quantity",
-            "sales_quantity"
+            "selected_course"
         ]
     }
 }

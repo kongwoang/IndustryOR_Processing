@@ -1,230 +1,232 @@
 {
-    "problem": "Problem description\n- There is a single-period procurement planning problem for a furniture store that buys identical chairs from a finite set of manufacturers $$\\mathcal{M}$$.\n- For each manufacturer $$m \\in \\mathcal{M}$$, the parameter $$c_m$$ denotes the cost of placing one order, and the parameter $$q_m$$ denotes the number of chairs delivered by one order.\n- The store must choose integer numbers of orders from the available manufacturers, and each chosen manufacturer may also have an activation status indicating whether it is used at all.\n- The total number of chairs ordered must satisfy a lower bound $$D^{\\min}$$ and an upper bound $$D^{\\max}$$.\n- Some manufacturers may have prerequisite relations, represented by a set $$\\mathcal{R}$$ of ordered pairs. If a manufacturer is selected, the required manufacturer in the pair must also be selected and must satisfy the associated linked minimum quantity requirement.\n- The planning goal is to minimize the total procurement cost of all orders while respecting all quantity bounds and prerequisite relations.\n- A solution is represented by:\n  - $$x_m$$: the integer number of orders placed with manufacturer $$m \\in \\mathcal{M}$$\n  - $$y_m$$: a binary activation variable for manufacturer $$m \\in \\mathcal{M}$$, where $$1$$ means the manufacturer is used and $$0$$ means it is not used\n  - $$Q$$: the total number of chairs ordered across all manufacturers\n  - $$Z$$: the total ordering cost to be minimized\n\nInput Format\n{\n  \"manufacturers\": \"Array of manufacturer identifiers representing the set $$\\\\mathcal{M}$$.\",\n  \"order_costs\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its per-order cost $$c_m$$.\",\n  \"units_per_order\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to its fixed order quantity $$q_m$$.\",\n  \"minimum_total_quantity\": \"Scalar lower bound $$D^{\\\\min}$$ on the total chairs ordered.\",\n  \"maximum_total_quantity\": \"Scalar upper bound $$D^{\\\\max}$$ on the total chairs ordered.\",\n  \"precedence_rules\": \"Array of rule objects. Each rule specifies a triggering manufacturer $$i$$, a required manufacturer $$j$$, and a linked minimum quantity $$\\\\ell_{ij}$$ that must be satisfied for $$j$$ whenever $$i$$ is selected.\"\n}\n\nOutput Format\n{\n  \"orders\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the integer decision $$x_m$$, giving the number of orders placed with manufacturer $$m$$.\",\n  \"selected\": \"Map from each $$m \\\\in \\\\mathcal{M}$$ to the binary decision $$y_m$$, indicating whether manufacturer $$m$$ is used.\",\n  \"total_quantity\": \"Scalar $$Q$$ giving the total number of chairs ordered.\",\n  \"total_cost\": \"Scalar $$Z$$ giving the minimized total procurement cost.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"manufacturers\": [\"A\", \"B\", \"C\"],\n  \"order_costs\": {\n    \"A\": 50,\n    \"B\": 45,\n    \"C\": 40\n  },\n  \"units_per_order\": {\n    \"A\": 15,\n    \"B\": 10,\n    \"C\": 10\n  },\n  \"minimum_total_quantity\": 100,\n  \"maximum_total_quantity\": 500,\n  \"precedence_rules\": [\n    {\n      \"trigger\": \"A\",\n      \"requires\": \"B\",\n      \"linked_minimum_quantity\": 10\n    },\n    {\n      \"trigger\": \"B\",\n      \"requires\": \"C\",\n      \"linked_minimum_quantity\": 10\n    }\n  ]\n}",
+    "problem": "Problem description\n- There is a weekly planning horizon $$\\mathcal{T}$$, indexed by $$t\\in\\mathcal{T}$$, and a set of fabric types $$\\mathcal{P}$$, indexed by $$p\\in\\mathcal{P}$$.\n- The factory operates over $$S$$ shifts per week, but the planning is based on the total weekly available production time.\n- Each product $$p$$ has a production rate $$r_p$$ measured in meters per hour.\n- Each product $$p$$ has a minimum required sellable quantity in each period, denoted by $$d^{\\min}_{p,t}$$.\n- Each product $$p$$ has a unit profit $$\\pi_p$$ per meter, which is part of the business data.\n- The factory has regular production capacity $$H_t^{\\mathrm{reg}}$$ in each period and an overtime allowance limited by $$H_t^{\\mathrm{ot,max}}$$.\n- The planning goal is to determine how much of each fabric type to produce and sell, together with how much overtime to use, so that all minimum sales requirements are satisfied, regular production time is fully utilized, overtime stays within the allowed limit, and overtime is minimized as much as possible.\n- The production plan is assumed to be weekly and product-specific, with no mention of inventory carryover, backlogging, or product substitution beyond the stated minimum sales requirements.\n- A solution is represented by:\n  - $$x_{p,t}$$: the quantity of product $$p$$ produced and sold in period $$t$$, measured in meters.\n  - $$z_t^{\\mathrm{reg}}$$: the amount of regular production time used in period $$t$$, measured in hours.\n  - $$o_t$$: the overtime used in period $$t$$, measured in hours.\n  - $$\\eta$$: the overall objective value representing total overtime or its penalty score.\n\nInput Format\n{\n  \"num_products\": \"Integer $$P$$, the number of fabric types in $$\\\\mathcal{P}$$.\",\n  \"num_periods\": \"Integer $$T$$, the number of planning periods in $$\\\\mathcal{T}$$.\",\n  \"num_shifts\": \"Integer $$S$$, the number of shifts per week.\",\n  \"regular_hours\": \"Length-$$T$$ array with entries $$H_t^{\\\\mathrm{reg}}$$, the regular production hours available in each period.\",\n  \"max_overtime_hours\": \"Length-$$T$$ array with entries $$H_t^{\\\\mathrm{ot,max}}$$, the maximum overtime hours allowed in each period.\",\n  \"production_rate\": \"Length-$$P$$ array with entries $$r_p$$, the production rate of product $$p$$ in meters per hour.\",\n  \"minimum_sales_demand\": \"Matrix of size $$P\\\\times T$$ with entries $$d^{\\\\min}_{p,t}$$, the minimum sellable quantity required for product $$p$$ in period $$t$$, in meters.\",\n  \"unit_profit\": \"Length-$$P$$ array with entries $$\\\\pi_p$$, the profit per meter of product $$p$$.\",\n  \"overtime_penalty\": \"Optional scalar $$c^{\\\\mathrm{ot}}$$, the penalty per overtime hour if overtime is evaluated in cost terms.\",\n  \"planning_priority\": \"Ordered list of planning priorities, namely full utilization of regular time, overtime limit compliance, minimum sales satisfaction, and overtime minimization.\"\n}\n\nOutput Format\n{\n  \"objective_value\": \"Scalar $$\\\\eta$$, the minimized overtime amount or overtime penalty value.\",\n  \"period_plan\": [\n    {\n      \"period\": \"$$t$$\",\n      \"regular_hours_used\": \"$$z_t^{\\\\mathrm{reg}}$$\",\n      \"overtime_hours_used\": \"$$o_t$$\",\n      \"product_plan\": [\n        {\n          \"product\": \"$$p$$\",\n          \"quantity_meters\": \"$$x_{p,t}$$\"\n        }\n      ]\n    }\n  ]\n}\n\nExample(s)\n\nInput 1\n{\n  \"num_products\": 2,\n  \"num_periods\": 1,\n  \"num_shifts\": 2,\n  \"regular_hours\": [110],\n  \"max_overtime_hours\": [10],\n  \"production_rate\": [1000, 1000],\n  \"minimum_sales_demand\": [\n    [70000],\n    [45000]\n  ],\n  \"unit_profit\": [2.5, 1.5]\n}",
     "parameters": [
         {
-            "name": "manufacturers_count",
-            "symbol": "M",
+            "name": "num_products",
+            "symbol": "P",
             "shape": [],
-            "description": "Number of manufacturers in the ordered set \\(\\mathcal{M}\\)"
+            "description": "Number of fabric types in the planning set \\(\\mathcal{P}\\)"
         },
         {
-            "name": "order_costs",
-            "symbol": "c",
-            "shape": [
-                "M"
-            ],
-            "description": "Cost of placing one order with each manufacturer"
-        },
-        {
-            "name": "units_per_order",
-            "symbol": "q",
-            "shape": [
-                "M"
-            ],
-            "description": "Number of chairs delivered by one order from each manufacturer"
-        },
-        {
-            "name": "minimum_total_quantity",
-            "symbol": "D^{\\min}",
+            "name": "num_periods",
+            "symbol": "T",
             "shape": [],
-            "description": "Lower bound on the total number of chairs ordered"
+            "description": "Number of planning periods in the horizon \\(\\mathcal{T}\\)"
         },
         {
-            "name": "maximum_total_quantity",
-            "symbol": "D^{\\max}",
+            "name": "num_shifts",
+            "symbol": "S",
             "shape": [],
-            "description": "Upper bound on the total number of chairs ordered"
+            "description": "Number of shifts per week"
         },
         {
-            "name": "precedence_rules_count",
-            "symbol": "R",
+            "name": "regular_hours",
+            "symbol": "H^{\\mathrm{reg}}",
+            "shape": [
+                "T"
+            ],
+            "description": "Regular production hours available in each period"
+        },
+        {
+            "name": "max_overtime_hours",
+            "symbol": "H^{\\mathrm{ot,max}}",
+            "shape": [
+                "T"
+            ],
+            "description": "Maximum overtime hours allowed in each period"
+        },
+        {
+            "name": "production_rate",
+            "symbol": "r",
+            "shape": [
+                "P"
+            ],
+            "description": "Production rate of each fabric type in meters per hour"
+        },
+        {
+            "name": "minimum_sales_demand",
+            "symbol": "d^{\\min}",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Minimum required sellable quantity for each product in each period"
+        },
+        {
+            "name": "unit_profit",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Unit profit per meter for each product"
+        },
+        {
+            "name": "overtime_penalty",
+            "symbol": "c^{\\mathrm{ot}}",
             "shape": [],
-            "description": "Number of precedence rules in the ordered set \\(\\mathcal{R}\\)"
-        },
-        {
-            "name": "rule_triggers",
-            "symbol": "trigger",
-            "shape": [
-                "R"
-            ],
-            "description": "Triggering manufacturer index for each precedence rule"
-        },
-        {
-            "name": "rule_requires",
-            "symbol": "requires",
-            "shape": [
-                "R"
-            ],
-            "description": "Required manufacturer index for each precedence rule"
-        },
-        {
-            "name": "linked_minimum_quantities",
-            "symbol": "\\ell",
-            "shape": [
-                "R"
-            ],
-            "description": "Linked minimum quantity requirement for each precedence rule"
+            "description": "Optional overtime penalty per overtime hour"
         }
     ],
     "variables": [
         {
-            "name": "order_counts",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "M"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Integer number of orders placed with each manufacturer"
+            "domain": "continuous",
+            "description": "Quantity of product produced and sold in each period, in meters"
         },
         {
-            "name": "selected_manufacturers",
-            "symbol": "y",
+            "name": "regular_hours_used",
+            "symbol": "z^{\\mathrm{reg}}",
             "shape": [
-                "M"
+                "T"
             ],
-            "domain": "binary",
-            "description": "Binary activation variable indicating whether each manufacturer is used"
+            "domain": "continuous",
+            "description": "Regular production time used in each period, in hours"
         },
         {
-            "name": "total_quantity",
-            "symbol": "Q",
+            "name": "overtime_used",
+            "symbol": "o",
+            "shape": [
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Overtime used in each period, in hours"
+        },
+        {
+            "name": "objective_value",
+            "symbol": "\\eta",
             "shape": [],
             "domain": "continuous",
-            "description": "Total number of chairs ordered across all manufacturers"
-        },
-        {
-            "name": "total_cost",
-            "symbol": "Z",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total procurement cost"
+            "description": "Overall objective value representing total overtime or its penalty score"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "big_m_order_upper_bound",
-            "symbol": "U",
-            "shape": [
-                "M"
-            ],
-            "domain": "integer",
-            "description": "Valid finite per-manufacturer upper bound on the number of orders that can be placed with each manufacturer for activation linking"
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "total_quantity_definition",
-            "description": "The total quantity equals the sum of chairs delivered by all ordered manufacturer orders.",
-            "formula": "Q = \\sum_{m=1}^{M} q_m x_m",
+            "name": "production_quantity_nonnegative",
+            "description": "Production quantity must be nonnegative for every product and period.",
+            "formula": "x_{p,t} \\ge 0",
             "parameters": [
-                "units_per_order"
+                "minimum_sales_demand"
             ],
             "variables": [
-                "total_quantity",
-                "order_counts"
+                "production_quantity"
             ]
         },
         {
-            "name": "total_quantity_bounds",
-            "description": "The procurement plan must keep the total quantity within the minimum and maximum demand bounds.",
-            "formula": "D^{\\min} \\le Q \\le D^{\\max}",
+            "name": "regular_hours_used_nonnegative",
+            "description": "Regular production hours used must be nonnegative in every period.",
+            "formula": "z_t^{\\mathrm{reg}} \\ge 0",
             "parameters": [
-                "minimum_total_quantity",
-                "maximum_total_quantity"
+                "regular_hours"
             ],
             "variables": [
-                "total_quantity"
+                "regular_hours_used"
             ]
         },
         {
-            "name": "manufacturer_activation_link",
-            "description": "Order counts are only allowed for manufacturers that are selected, enforced with a valid per-manufacturer finite upper bound linking orders to activation.",
-            "formula": "x_m \\le U_m y_m \\quad \\forall m \\in \\mathcal{M}",
-            "parameters": [],
-            "variables": [
-                "order_counts",
-                "selected_manufacturers"
-            ]
-        },
-        {
-            "name": "precedence_activation_requirement",
-            "description": "If a triggering manufacturer is selected, then the required manufacturer must also be selected for every precedence rule.",
-            "formula": "y_{trigger[r]} \\le y_{requires[r]} \\quad \\forall r \\in \\mathcal{R}",
+            "name": "overtime_used_nonnegative",
+            "description": "Overtime used must be nonnegative in every period.",
+            "formula": "o_t \\ge 0",
             "parameters": [
-                "rule_triggers",
-                "rule_requires"
+                "max_overtime_hours"
             ],
             "variables": [
-                "selected_manufacturers"
+                "overtime_used"
             ]
         },
         {
-            "name": "precedence_linked_minimum_quantity",
-            "description": "If a precedence relation is triggered, the required manufacturer must satisfy the linked minimum quantity requirement for every precedence rule.",
-            "formula": "x_{requires[r]} \\ge \\ell[r] \\, y_{trigger[r]} \\quad \\forall r \\in \\mathcal{R}",
+            "name": "minimum_sales_satisfaction",
+            "description": "Each product-period production quantity must satisfy the minimum sellable quantity requirement.",
+            "formula": "x_{p,t} \\ge d^{\\min}_{p,t}",
             "parameters": [
-                "linked_minimum_quantities",
-                "rule_requires",
-                "rule_triggers"
+                "minimum_sales_demand"
             ],
             "variables": [
-                "order_counts",
-                "selected_manufacturers"
+                "production_quantity"
             ]
         },
         {
-            "name": "total_cost_definition",
-            "description": "The total cost equals the sum of order costs across all manufacturers.",
-            "formula": "Z = \\sum_{m=1}^{M} c_m x_m",
+            "name": "regular_time_full_utilization",
+            "description": "Regular production time is fully utilized in each period.",
+            "formula": "z_t^{\\mathrm{reg}} = H_t^{\\mathrm{reg}}",
             "parameters": [
-                "order_costs"
+                "regular_hours"
             ],
             "variables": [
-                "total_cost",
-                "order_counts"
+                "regular_hours_used"
             ]
         },
         {
-            "name": "order_count_integrality",
-            "description": "Order counts must be nonnegative integer values.",
-            "formula": "x_m \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall m \\in \\mathcal{M}",
+            "name": "overtime_capacity_limit",
+            "description": "Overtime used in each period must not exceed the available overtime allowance.",
+            "formula": "o_t \\le H_t^{\\mathrm{ot,max}}",
+            "parameters": [
+                "max_overtime_hours"
+            ],
             "variables": [
-                "order_counts"
+                "overtime_used"
             ]
         },
         {
-            "name": "manufacturer_selection_binary",
-            "description": "Manufacturer activation variables must be binary.",
-            "formula": "y_m \\in \\{0,1\\} \\quad \\forall m \\in \\mathcal{M}",
+            "name": "production_time_balance",
+            "description": "Total production time consumed by all products in a period equals the sum of regular time used and overtime used.",
+            "formula": "\\sum_{p=1}^{P} \\frac{x_{p,t}}{r_p} = z_t^{\\mathrm{reg}} + o_t",
+            "parameters": [
+                "production_rate"
+            ],
             "variables": [
-                "selected_manufacturers"
+                "production_quantity",
+                "regular_hours_used",
+                "overtime_used"
             ]
         },
         {
-            "name": "nonnegative_quantities",
-            "description": "Total quantity and total cost are nonnegative scalar quantities.",
-            "formula": "Q, Z \\ge 0",
+            "name": "objective_value_link",
+            "description": "Link the objective-value variable to total overtime across all periods.",
+            "formula": "\\eta = \\sum_{t=1}^{T} o_t",
+            "parameters": [
+                "num_periods"
+            ],
             "variables": [
-                "total_quantity",
-                "total_cost"
+                "objective_value",
+                "overtime_used"
+            ]
+        },
+        {
+            "name": "period_sales_equals_production",
+            "description": "Since there is no inventory carryover, backlogging, or substitution, sales in each period are exactly equal to production in that period; this is already captured by the production quantity variable.",
+            "formula": "s_{p,t} = x_{p,t}",
+            "parameters": [
+                "minimum_sales_demand"
+            ],
+            "variables": [
+                "production_quantity"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_procurement_cost_minimization",
-            "description": "Minimize the total procurement cost while satisfying quantity bounds and precedence requirements",
+            "name": "overtime_minimization",
+            "description": "Minimize the total overtime used across all planning periods, or the equivalent overtime penalty score if an overtime penalty parameter is used.",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total procurement cost across all manufacturers while satisfying total quantity bounds and precedence requirements.",
+        "description": "Minimize the total overtime used across all planning periods; the objective value variable \\(\\eta\\) is linked to this total overtime. The overtime penalty parameter is not used because the stated planning priority is direct overtime minimization.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "Z",
-        "parameters": [],
+        "formula": "\\eta = \\sum_{t=1}^{T} o_t",
+        "parameters": [
+            "num_periods"
+        ],
         "variables": [
-            "total_cost"
+            "objective_value",
+            "overtime_used"
         ]
     }
 }

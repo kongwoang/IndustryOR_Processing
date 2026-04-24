@@ -1,331 +1,191 @@
 {
-    "problem": "Problem description\n- There is a set of cities $$\\mathcal{N}$$ indexed by $$i,j \\in \\mathcal{N}$$, with a designated start and end city $$s \\in \\mathcal{N}$$.\n- Travel costs are given by a cost matrix $$D \\in \\mathbb{R}^{|\\mathcal{N}| \\times |\\mathcal{N}|}$$, where $$D_{ij}$$ is the distance or travel cost from city $$i$$ to city $$j$$.\n- The planning horizon is a single closed tour, represented by visit positions $$k \\in \\mathcal{K} = \\{1,\\ldots,|\\mathcal{N}|\\}$$.\n- Each city has a unit visit requirement $$r_i$$, meaning every city must be included exactly once in the tour.\n- The planning goal is to minimize the total travel distance of the complete closed route.\n- The route must start at $$s$$, visit every city exactly once, and return to $$s$$.\n- No city may be skipped, repeated, or visited more than once.\n- The selected travel links must form one continuous tour and must not contain disconnected subtours.\n- The travel-cost data may be asymmetric, so $$D_{ij}$$ and $$D_{ji}$$ may differ.\n- No capacity, inventory, workforce, or demand-allocation limits are present beyond the single-visit requirement for each city.\n- A solution is represented by:\n  - $$\\pi_k$$: the city visited at route position $$k$$.\n  - $$x_{ij}$$: a binary indicator showing whether direct travel from city $$i$$ to city $$j$$ is used.\n  - $$L$$: the total distance of the selected closed tour.\n\nInput Format\n{\n  \"n\": {\n    \"type\": \"integer\",\n    \"description\": \"Number of cities in $$\\\\mathcal{N}$$.\"\n  },\n  \"s\": {\n    \"type\": \"integer\",\n    \"description\": \"Index of the designated start and end city $$s$$.\"\n  },\n  \"D\": {\n    \"type\": \"matrix\",\n    \"shape\": \"[$$n$$, $$n$$]\",\n    \"description\": \"Travel cost matrix $$D$$, where $$D_{ij}$$ is the direct travel cost from city $$i$$ to city $$j$$.\"\n  },\n  \"r\": {\n    \"type\": \"vector\",\n    \"shape\": \"[$$n$$]\",\n    \"description\": \"Required visit counts $$r_i$$ for each city; in the standard TSP setting, each entry is unit-valued.\"\n  }\n}\n\nOutput Format\n{\n  \"route\": {\n    \"type\": \"array\",\n    \"shape\": \"[$$n+1$$]\",\n    \"description\": \"Ordered list of city indices representing the closed tour; the first and last entries are $$s$$.\"\n  },\n  \"selected_arcs\": {\n    \"type\": \"matrix\",\n    \"shape\": \"[$$n$$, $$n$$]\",\n    \"description\": \"Binary travel-selection matrix $$X$$, where $$X_{ij} = 1$$ if the tour goes directly from city $$i$$ to city $$j$$, and $$0$$ otherwise.\"\n  },\n  \"total_distance\": {\n    \"type\": \"number\",\n    \"description\": \"Total travel distance of the selected tour.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"n\": 4,\n  \"s\": 1,\n  \"D\": [\n    [0, 10, 20, 12],\n    [10, 0, 5, 10],\n    [20, 5, 0, 8],\n    [15, 12, 8, 0]\n  ],\n  \"r\": [1, 1, 1, 1]\n}",
+    "problem": "Problem description\n- This is a single-period cutting-stock planning problem for a homogeneous steel reinforcement workshop.\n- There is one raw stock material with length $$L$$ and a set of finished piece types indexed by $$p \\in \\mathcal{P}$$.\n- Each piece type $$p$$ has required length $$\\ell_p$$ and demand quantity $$d_p$$.\n- The planning horizon is single-period, so the time set is $$\\mathcal{T} = \\{1\\}$$.\n- A feasible cutting pattern $$k \\in \\mathcal{K}$$ specifies how one raw bar can be cut into pieces of the available types while respecting the raw length $$L$$; any leftover length under that pattern is waste $$w_k$$.\n- The planning goal is to choose how many raw bars follow each feasible pattern so that all demanded pieces are produced and total waste is minimized.\n- All pieces have the same diameter, so only lengths and quantities matter in the plan.\n- The workshop may use only nonnegative integer numbers of raw bars for each pattern.\n- Every demand $$d_p$$ must be satisfied by the combined output of the chosen patterns.\n- No cutting pattern may use more total piece length than the available raw bar length $$L$$.\n- Waste is the unused length remaining after cutting a raw bar, and the objective is to minimize the total waste across all used raw bars.\n- A solution is represented by:\n  - $$x_k$$: the number of raw bars cut according to feasible pattern $$k \\in \\mathcal{K}$$.\n  - $$w_k$$: the waste produced by one raw bar under pattern $$k$$.\n  - $$q_p$$: the total number of pieces of type $$p \\in \\mathcal{P}$$ produced by the chosen patterns.\n  - $$Z$$: the total waste of the cutting plan.\n\nInput Format\n{\n  \"T\": \"Single-period planning horizon $$\\mathcal{T} = \\\\{1\\\\}$$\",\n  \"P\": \"Number of piece types, indexed by $$p \\\\in \\\\mathcal{P} = \\\\{1,\\\\dots,P\\\\}$$\",\n  \"L\": \"Length of one raw stock bar\",\n  \"ell\": {\n    \"shape\": \"[$$P$$]\",\n    \"meaning\": \"Required lengths $$\\\\ell_p$$ for each piece type $$p$$\"\n  },\n  \"d\": {\n    \"shape\": \"[$$P$$]\",\n    \"meaning\": \"Demand quantities $$d_p$$ for each piece type $$p$$\"\n  },\n  \"c_w\": \"Unit waste penalty $$c^{\\\\mathrm{w}}$$, used when waste is priced rather than measured directly\"\n}\n\nOutput Format\n{\n  \"selected_patterns\": [\n    {\n      \"pattern_id\": \"$$k$$\",\n      \"composition\": {\n        \"p\": \"Number of pieces of type $$p$$ cut from one raw bar under pattern $$k$$\"\n      },\n      \"bars_used\": \"$$x_k$$\",\n      \"waste_per_bar\": \"$$w_k$$\"\n    }\n  ],\n  \"total_waste\": \"$$Z$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": \"$$1$$\",\n  \"P\": \"$$2$$\",\n  \"L\": \"$$10$$\",\n  \"ell\": [\"$$3$$\", \"$$4$$\"],\n  \"d\": [\"$$90$$\", \"$$60$$\"],\n  \"c_w\": \"$$1$$\"\n}",
     "parameters": [
         {
-            "name": "num_cities",
-            "symbol": "N",
+            "name": "planning_horizon",
+            "symbol": "T",
             "shape": [],
-            "description": "Number of cities in the tour problem"
+            "description": "Number of planning periods in the horizon (single-period setting)"
         },
         {
-            "name": "start_city",
-            "symbol": "s",
+            "name": "num_piece_types",
+            "symbol": "P",
             "shape": [],
-            "description": "Designated start and end city index"
+            "description": "Number of finished piece types"
         },
         {
-            "name": "travel_costs",
-            "symbol": "D",
-            "shape": [
-                "N",
-                "N"
-            ],
-            "description": "Matrix of direct travel costs from city i to city j"
+            "name": "raw_stock_length",
+            "symbol": "L",
+            "shape": [],
+            "description": "Length of one raw stock bar"
         },
         {
-            "name": "visit_requirements",
-            "symbol": "r",
-            "shape": [
-                "N"
-            ],
-            "description": "Required visit count for each city"
+            "name": "waste_penalty",
+            "symbol": "c^{\\mathrm{w}}",
+            "shape": [],
+            "description": "Unit penalty applied to total waste if waste is monetized"
         },
         {
-            "name": "route_position_set",
-            "symbol": "K",
+            "name": "piece_length",
+            "symbol": "\\ell",
             "shape": [
-                "N"
+                "P"
             ],
-            "description": "Route-position index set for 0-based indexing"
+            "description": "Required length of each piece type"
+        },
+        {
+            "name": "demand_quantity",
+            "symbol": "d",
+            "shape": [
+                "P"
+            ],
+            "description": "Demand quantity for each piece type"
+        },
+        {
+            "name": "pattern_piece_count",
+            "symbol": "a",
+            "shape": [
+                "K",
+                "P"
+            ],
+            "description": "Number of pieces of each type cut from one raw bar under each feasible cutting pattern"
+        },
+        {
+            "name": "pattern_waste",
+            "symbol": "w",
+            "shape": [
+                "K"
+            ],
+            "description": "Waste generated by one raw bar under each feasible cutting pattern"
         }
     ],
     "variables": [
         {
-            "name": "route",
-            "symbol": "\\pi",
-            "shape": [
-                "N+1"
-            ],
-            "domain": "integer",
-            "description": "City visited at each route position, including repeated start city at the final position"
-        },
-        {
-            "name": "selected_arcs",
+            "name": "bars_used_by_pattern",
             "symbol": "x",
             "shape": [
-                "N",
-                "N"
+                "K"
             ],
-            "domain": "binary",
-            "description": "Binary indicator of whether direct travel from city i to city j is used in the tour"
+            "domain": "integer",
+            "description": "Number of raw bars cut according to each feasible cutting pattern"
         },
         {
-            "name": "total_distance",
-            "symbol": "L",
+            "name": "production_quantity",
+            "symbol": "q",
+            "shape": [
+                "P"
+            ],
+            "domain": "integer",
+            "description": "Total number of pieces produced for each piece type by the selected patterns"
+        },
+        {
+            "name": "total_waste",
+            "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total distance of the selected closed tour"
+            "description": "Total waste of the cutting plan"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "mtz_order",
-            "symbol": "u",
-            "shape": [
-                "N"
-            ],
-            "domain": "integer",
-            "description": "MTZ ordering variables used to eliminate subtours in the selected tour"
-        },
-        {
-            "name": "route_assignment",
-            "symbol": "y",
-            "shape": [
-                "N",
-                "N"
-            ],
-            "domain": "binary",
-            "description": "Binary assignment variable indicating whether city i is placed at route position k"
-        },
-        {
-            "name": "route_position_order",
-            "symbol": "u",
-            "shape": [
-                "N"
-            ],
-            "domain": "integer",
-            "description": "MTZ ordering variables used to eliminate subtours in the selected tour"
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "single_continuous_closed_tour",
-            "description": "The selected arcs must form one continuous closed tour over all cities",
-            "formula": "Selected arcs form a single cycle through all cities",
+            "name": "demand_satisfaction",
+            "description": "Produced quantity for each piece type must cover its demand",
+            "formula": "q[p] \\ge d[p]",
             "parameters": [
-                "num_cities"
+                "demand_quantity"
             ],
             "variables": [
-                "selected_arcs"
+                "production_quantity"
             ]
         },
         {
-            "name": "respect_visit_requirements",
-            "description": "The tour must respect the required visit count for each city",
-            "formula": "visit count for each city follows r[i]",
-            "parameters": [
-                "visit_requirements",
-                "num_cities"
-            ],
+            "name": "nonnegative_integer_bars_used",
+            "description": "Number of raw bars assigned to each feasible cutting pattern must be a nonnegative integer",
+            "formula": "x[k] \\in \\mathbb{Z}_{\\ge 0}",
             "variables": [
-                "route",
-                "selected_arcs"
+                "bars_used_by_pattern"
             ]
         },
         {
-            "name": "no_disconnected_subtours",
-            "description": "Disconnected subtours are not allowed",
-            "formula": "No subtours disconnected from the main tour",
-            "parameters": [
-                "num_cities"
-            ],
+            "name": "nonnegative_integer_production",
+            "description": "Total produced quantity for each piece type must be a nonnegative integer",
+            "formula": "q[p] \\in \\mathbb{Z}_{\\ge 0}",
             "variables": [
-                "selected_arcs"
+                "production_quantity"
             ]
         },
         {
-            "name": "binary_selected_arcs",
-            "description": "The arc selection variables are binary",
-            "formula": "selected_arcs[i][j] in {0,1}",
-            "parameters": [
-                "num_cities"
-            ],
+            "name": "nonnegative_total_waste",
+            "description": "Total waste must be nonnegative",
+            "formula": "Z \\ge 0",
             "variables": [
-                "selected_arcs"
+                "total_waste"
             ]
         },
         {
-            "name": "integer_route_positions",
-            "description": "The route position variable takes city indices as integers",
-            "formula": "route[k] is an integer city index",
+            "name": "pattern_length_feasibility",
+            "description": "Each cutting pattern may use no more total piece length than the raw stock bar length",
+            "formula": "\\sum_{p \\in \\mathcal{P}} a[k][p]\\,\\ell[p] \\le L",
             "parameters": [
-                "num_cities"
+                "pattern_piece_count",
+                "piece_length",
+                "raw_stock_length"
+            ],
+            "variables": []
+        },
+        {
+            "name": "pattern_waste_definition",
+            "description": "Waste for each feasible pattern is the unused length remaining after cutting one raw bar",
+            "formula": "w[k] = L - \\sum_{p \\in \\mathcal{P}} a[k][p]\\,\\ell[p]",
+            "parameters": [
+                "pattern_waste",
+                "pattern_piece_count",
+                "piece_length",
+                "raw_stock_length"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_waste_aggregation",
+            "description": "Total waste is the sum of waste over all used raw bars",
+            "formula": "Z = \\sum_{k \\in \\mathcal{K}} w[k]\\,x[k]",
+            "parameters": [
+                "pattern_waste"
             ],
             "variables": [
-                "route"
+                "bars_used_by_pattern",
+                "total_waste"
             ]
         },
         {
-            "name": "nonnegative_total_distance",
-            "description": "The total tour distance is nonnegative",
-            "formula": "total_distance >= 0",
-            "parameters": [],
-            "variables": [
-                "total_distance"
-            ]
-        },
-        {
-            "name": "asymmetric_travel_costs_allowed",
-            "description": "The travel cost matrix may be asymmetric and direct travel costs are taken from D",
-            "formula": "D[i][j] may differ from D[j][i]",
+            "name": "production_definition",
+            "description": "Total produced quantity for each piece type equals the sum of pieces contributed by all selected patterns",
+            "formula": "q[p] = \\sum_{k \\in \\mathcal{K}} a[k][p] \\, x[k]",
             "parameters": [
-                "travel_costs",
-                "num_cities"
+                "pattern_piece_count"
             ],
             "variables": [
-                "selected_arcs",
-                "total_distance"
-            ]
-        },
-        {
-            "name": "fix_total_distance_definition",
-            "description": "Define the total distance as the sum of costs over all selected arcs.",
-            "formula": "L = \\sum_{i=0}^{N-1}\\sum_{j=0}^{N-1} D_{ij} x_{ij}",
-            "parameters": [
-                "travel_costs",
-                "num_cities"
-            ],
-            "variables": [
-                "selected_arcs",
-                "total_distance"
-            ]
-        },
-        {
-            "name": "one_outgoing_arc_per_city",
-            "description": "Each city has exactly one outgoing selected arc in the tour.",
-            "formula": "\\sum_{j=0}^{N-1} x_{ij} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "selected_arcs"
-            ]
-        },
-        {
-            "name": "one_incoming_arc_per_city",
-            "description": "Each city has exactly one incoming selected arc in the tour.",
-            "formula": "\\sum_{i=0}^{N-1} x_{ij} = 1 \\quad \\forall j \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "selected_arcs"
-            ]
-        },
-        {
-            "name": "route_positions_are_a_permutation_of_cities",
-            "description": "Each city must appear exactly once in the route positions using assignment variables to keep the formulation linear.",
-            "formula": "\\sum_{k=0}^{N-1} y_{ik} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\},\\qquad \\sum_{i=0}^{N-1} y_{ik} = 1 \\quad \\forall k \\in \\{0,\\ldots,N-1\\},\\qquad \\pi_k = \\sum_{i=0}^{N-1} i\\, y_{ik} \\quad \\forall k \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "route"
-            ]
-        },
-        {
-            "name": "forbid_self_loops",
-            "description": "No city may be traveled to itself.",
-            "formula": "x_{ii} = 0 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "selected_arcs"
-            ]
-        },
-        {
-            "name": "mtz_order_bounds",
-            "description": "Bounds on MTZ ordering variables for non-start cities.",
-            "formula": "1 \\leq u_i \\leq N-1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\} \\setminus \\{s\\}",
-            "parameters": [
-                "num_cities",
-                "start_city"
-            ],
-            "variables": [
-                "mtz_order"
-            ]
-        },
-        {
-            "name": "fix_start_city_mtz_order",
-            "description": "Anchor the MTZ order at the start city to support a consistent ordering scale.",
-            "formula": "u_s = 0",
-            "parameters": [
-                "start_city"
-            ],
-            "variables": [
-                "mtz_order"
-            ]
-        },
-        {
-            "name": "visit_each_city_exactly_once_by_route_positions",
-            "description": "Each city must be visited exactly once in the closed tour via route positions.",
-            "formula": "\\sum_{k=0}^{N-1} y_{ik} = 1 \\quad \\forall i \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "route_assignment"
-            ]
-        },
-        {
-            "name": "route_positions_linked_to_assignment_variables",
-            "description": "Each route position is linked to a unique city through assignment variables.",
-            "formula": "\\pi_k = \\sum_{i=0}^{N-1} i\\, y_{ik} \\quad \\forall k \\in \\{0,\\ldots,N-1\\}",
-            "parameters": [
-                "num_cities"
-            ],
-            "variables": [
-                "route",
-                "route_assignment"
-            ]
-        },
-        {
-            "name": "mtz_subtour_elimination",
-            "description": "Prevent disconnected subtours by enforcing Miller-Tucker-Zemlin ordering constraints on non-start cities.",
-            "formula": "u_i - u_j + N x_{ij} \\leq N-1 \\quad \\forall i,j \\in \\{0,\\ldots,N-1\\},\\; i \\neq j,\\; i \\neq s,\\; j \\neq s",
-            "parameters": [
-                "num_cities",
-                "start_city"
-            ],
-            "variables": [
-                "selected_arcs",
-                "route_position_order"
-            ]
-        },
-        {
-            "name": "route_starts_and_ends_at_start_city_and_order_anchor",
-            "description": "The route must start and end at the designated start city, and the MTZ order is anchored at the start city.",
-            "formula": "\\pi_0 = s,\\; \\pi_N = s,\\; u_s = 0",
-            "parameters": [
-                "start_city",
-                "num_cities"
-            ],
-            "variables": [
-                "route",
-                "route_position_order"
+                "production_quantity",
+                "bars_used_by_pattern"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_travel_distance_minimization",
-            "description": "Minimize the total travel distance of the complete closed tour",
+            "name": "total_waste_minimization",
+            "description": "minimize total waste across all used raw bars; equivalently minimize the waste penalty if waste is monetized",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total travel distance of the closed tour. This is a single-objective TSP-style model, so no objective combination is needed.",
+        "description": "Minimize total waste generated by the selected cutting patterns. The scalar total waste variable Z is minimized directly as the single objective.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "L = \\sum_{i=0}^{N-1}\\sum_{j=0}^{N-1} D_{ij} x_{ij}",
-        "parameters": [
-            "travel_costs",
-            "num_cities"
-        ],
+        "formula": "Z",
+        "parameters": [],
         "variables": [
-            "selected_arcs",
-            "total_distance"
+            "total_waste"
         ]
     }
 }

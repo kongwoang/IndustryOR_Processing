@@ -1,181 +1,224 @@
 {
-    "problem": "Problem description\n- There is a finite set of products $$\\mathcal{P}$$ indexed by $$p \\in \\mathcal{P}$$, a finite set of raw materials $$\\mathcal{R}$$ indexed by $$r \\in \\mathcal{R}$$, and a planning horizon $$\\mathcal{T}$$.\n- Each product $$p$$ has a unit raw-material requirement, a unit labor requirement, and a unit profit before overtime pay.\n- Each raw material $$r$$ has a limited available supply for the planning horizon.\n- Regular labor is available up to a fixed capacity, and any labor use beyond that capacity must be covered by overtime.\n- Overtime labor has an hourly payment rate and acts as a penalty cost in the planning decision.\n- The planning goal is to choose production quantities and overtime usage so that total profit is maximized while overtime usage is kept as low as possible, subject to all resource limits.\n- Required business constraints:\n  - Production quantities must be nonnegative for every product.\n  - Total consumption of each raw material must not exceed its available supply.\n  - Total labor needed for production must be covered by regular labor and, if necessary, overtime labor.\n  - Overtime is allowed only when regular labor is insufficient.\n  - Overtime payment must be included when evaluating the plan\u2019s profit.\n  - The plan must remain feasible with respect to all material and labor capacities.\n- A solution is represented by:\n  - $$x_p$$: the quantity of product $$p$$ to produce over the planning horizon.\n  - $$o$$: the total overtime labor hours used over the planning horizon.\n  - Optional summary values such as total pre-overtime profit, overtime cost, and net profit.\n\nInput Format\n{\n  \"P\": \"integer $$|\\mathcal{P}|$$, number of products\",\n  \"R\": \"integer $$|\\mathcal{R}|$$, number of raw materials\",\n  \"T\": \"integer $$|\\mathcal{T}|$$, number of planning periods in the horizon\",\n  \"product_names\": \"optional list of length $$P$$ identifying the products in $$\\mathcal{P}$$\",\n  \"material_names\": \"optional list of length $$R$$ identifying the raw materials in $$\\mathcal{R}$$\",\n  \"available_material\": \"vector $$s \\in \\mathbb{R}_{\\ge 0}^{R}$$, where $$s_r$$ is the available amount of raw material $$r$$\",\n  \"material_usage\": \"matrix $$a \\in \\mathbb{R}_{\\ge 0}^{R \\times P}$$, where $$a_{r,p}$$ is the amount of raw material $$r$$ needed per unit of product $$p$$\",\n  \"labor_usage\": \"vector $$h \\in \\mathbb{R}_{\\ge 0}^{P}$$, where $$h_p$$ is the labor hours needed per unit of product $$p$$\",\n  \"regular_labor_capacity\": \"scalar $$L \\in \\mathbb{R}_{\\ge 0}$$, regular labor hours available over the planning horizon\",\n  \"unit_profit\": \"vector $$\\pi \\in \\mathbb{R}^{P}$$, where $$\\pi_p$$ is the profit per unit of product $$p$$ before overtime pay\",\n  \"overtime_wage\": \"scalar $$c^{\\mathrm{ot}} \\in \\mathbb{R}_{\\ge 0}$$, overtime payment per labor hour\"\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"quantity\": \"vector $$x \\in \\mathbb{R}_{\\ge 0}^{P}$$, where $$x_p$$ is the production quantity of product $$p$$\"\n  },\n  \"overtime_plan\": {\n    \"hours\": \"scalar $$o \\in \\mathbb{R}_{\\ge 0}$$, total overtime labor hours used\"\n  },\n  \"objective_summary\": {\n    \"gross_profit\": \"scalar, total profit before overtime payment\",\n    \"overtime_cost\": \"scalar, total overtime payment\",\n    \"net_profit\": \"scalar, total profit after overtime payment\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 2,\n  \"R\": 2,\n  \"T\": 1,\n  \"product_names\": [\"A\", \"B\"],\n  \"material_names\": [\"steel\", \"aluminum\"],\n  \"available_material\": [200, 300],\n  \"material_usage\": [\n    [6, 12],\n    [8, 20]\n  ],\n  \"labor_usage\": [11, 24],\n  \"regular_labor_capacity\": 300,\n  \"unit_profit\": [5000, 11000],\n  \"overtime_wage\": 100\n}",
+    "problem": "Problem description\n- There is a single-period blending and selling planning problem with a finite set of raw materials and a finite set of final products.\n- Let $$\\mathcal{R}$$ be the set of raw materials and let $$\\mathcal{P}$$ be the set of products.\n- A designated subset of raw materials, denoted by $$\\mathcal{R}^{(1)} \\subseteq \\mathcal{R}$$, must be mixed first in an intermediate tank.\n- A designated raw material, denoted by $$r^{(2)} \\in \\mathcal{R}$$, must be added after the first-stage blend to complete the production of each product.\n- Each raw material $$r \\in \\mathcal{R}$$ has sulfur content $$s_r$$, purchase cost $$c_r$$, and available supply limit $$u_r$$.\n- Each product $$p \\in \\mathcal{P}$$ has selling price $$v_p$$, sulfur-content limit $$\\bar{s}_p$$, and market demand limit $$d_p$$.\n- The planning goal is to maximize total profit, defined as total sales revenue minus total raw material purchasing cost.\n- The production plan must respect material availability, demand limits, product quality limits, and the required two-stage mixing sequence.\n- Only nonnegative production and allocation quantities are allowed.\n- A solution is represented by:\n  - $$x_{r,p}^{(1)}$$: the quantity of first-stage raw material $$r \\in \\mathcal{R}^{(1)}$$ allocated to product $$p \\in \\mathcal{P}$$.\n  - $$x_{p}^{(2)}$$: the quantity of the second-stage raw material $$r^{(2)}$$ allocated to product $$p \\in \\mathcal{P}$$.\n  - $$q_p$$: the quantity of product $$p \\in \\mathcal{P}$$ produced and sold.\n  - $$\\Pi$$: the total profit of the plan.\n\nInput Format\n{\n  \"sets\": {\n    \"raw_materials\": {\n      \"symbol\": \"$$\\\\mathcal{R}$$\",\n      \"meaning\": \"identifiers of all raw materials\"\n    },\n    \"products\": {\n      \"symbol\": \"$$\\\\mathcal{P}$$\",\n      \"meaning\": \"identifiers of all final products\"\n    },\n    \"first_stage_materials\": {\n      \"symbol\": \"$$\\\\mathcal{R}^{(1)}$$\",\n      \"meaning\": \"raw materials that must be mixed in the first stage\"\n    },\n    \"second_stage_material\": {\n      \"symbol\": \"$$r^{(2)}$$\",\n      \"meaning\": \"the raw material added in the second stage\"\n    },\n    \"planning_horizon\": {\n      \"symbol\": \"$$\\\\mathcal{T}$$\",\n      \"meaning\": \"single planning period\"\n    }\n  },\n  \"parameters\": {\n    \"sulfur_content\": {\n      \"symbol\": \"$$s_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"sulfur content of raw material $$r$$\"\n    },\n    \"purchase_cost\": {\n      \"symbol\": \"$$c_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"purchase cost per ton of raw material $$r$$\"\n    },\n    \"selling_price\": {\n      \"symbol\": \"$$v_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"selling price per ton of product $$p$$\"\n    },\n    \"sulfur_cap\": {\n      \"symbol\": \"$$\\\\bar{s}_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"maximum allowed sulfur content for product $$p$$\"\n    },\n    \"supply_limit\": {\n      \"symbol\": \"$$u_r$$\",\n      \"shape\": \"$$|\\\\mathcal{R}|$$\",\n      \"meaning\": \"maximum available supply of raw material $$r$$; use $$+\\infty$$ for unlimited supply\"\n    },\n    \"demand_limit\": {\n      \"symbol\": \"$$d_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"maximum market demand for product $$p$$\"\n    }\n  },\n  \"objective\": {\n    \"symbol\": \"$$\\\\Pi$$\",\n    \"meaning\": \"total profit to maximize\"\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"first_stage_allocation\": {\n      \"symbol\": \"$$x_{r,p}^{(1)}$$\",\n      \"shape\": \"$$|\\\\mathcal{R}^{(1)}| \\\\times |\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity of each first-stage raw material allocated to each product\"\n    },\n    \"second_stage_allocation\": {\n      \"symbol\": \"$$x_{p}^{(2)}$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity of the second-stage raw material allocated to each product\"\n    },\n    \"production_quantity\": {\n      \"symbol\": \"$$q_p$$\",\n      \"shape\": \"$$|\\\\mathcal{P}|$$\",\n      \"meaning\": \"quantity produced and sold for each product\"\n    },\n    \"profit\": {\n      \"symbol\": \"$$\\\\Pi$$\",\n      \"shape\": \"scalar\",\n      \"meaning\": \"total profit of the selected production plan\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"raw_materials\": [\"RM_A\", \"RM_B\", \"RM_C\", \"RM_D\"],\n    \"products\": [\"P_A\", \"P_B\"],\n    \"first_stage_materials\": [\"RM_A\", \"RM_B\", \"RM_D\"],\n    \"second_stage_material\": \"RM_C\",\n    \"planning_horizon\": \"single period\"\n  },\n  \"parameters\": {\n    \"sulfur_content_percent\": {\n      \"RM_A\": 3,\n      \"RM_B\": 1,\n      \"RM_C\": 2,\n      \"RM_D\": 1\n    },\n    \"purchase_cost_thousand_yuan_per_ton\": {\n      \"RM_A\": 6,\n      \"RM_B\": 16,\n      \"RM_C\": 10,\n      \"RM_D\": 15\n    },\n    \"selling_price_thousand_yuan_per_ton\": {\n      \"P_A\": 9.15,\n      \"P_B\": 9.15\n    },\n    \"sulfur_cap_percent\": {\n      \"P_A\": 2.5,\n      \"P_B\": 1.5\n    },\n    \"supply_limit_tons\": {\n      \"RM_A\": \"Infinity\",\n      \"RM_B\": \"Infinity\",\n      \"RM_C\": \"Infinity\",\n      \"RM_D\": 50\n    },\n    \"demand_limit_tons\": {\n      \"P_A\": 100,\n      \"P_B\": 200\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of products in the planning problem"
-        },
-        {
-            "name": "num_raw_materials",
+            "name": "raw_material_count",
             "symbol": "R",
             "shape": [],
-            "description": "Number of raw materials in the planning problem"
+            "description": "Number of raw materials in the finite set $\\mathcal{R}$"
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
+            "name": "product_count",
+            "symbol": "P",
             "shape": [],
-            "description": "Number of periods in the planning horizon"
+            "description": "Number of final products in the finite set $\\mathcal{P}$"
         },
         {
-            "name": "product_names",
-            "symbol": "\u001bP",
-            "shape": [
-                "P"
-            ],
-            "description": "Optional identifiers for the products"
-        },
-        {
-            "name": "material_names",
-            "symbol": "\u001bR",
-            "shape": [
-                "R"
-            ],
-            "description": "Optional identifiers for the raw materials"
-        },
-        {
-            "name": "available_material",
+            "name": "sulfur_content",
             "symbol": "s",
             "shape": [
                 "R"
             ],
-            "description": "Available amount of each raw material over the planning horizon"
+            "description": "Sulfur content of each raw material $r \\in \\mathcal{R}$"
         },
         {
-            "name": "material_usage",
-            "symbol": "a",
+            "name": "purchase_cost",
+            "symbol": "c",
             "shape": [
-                "R",
-                "P"
+                "R"
             ],
-            "description": "Unit raw material requirement of each product for each raw material"
+            "description": "Purchase cost of each raw material $r \\in \\mathcal{R}$"
         },
         {
-            "name": "labor_usage",
-            "symbol": "h",
+            "name": "supply_limit",
+            "symbol": "u",
             "shape": [
-                "P"
+                "R"
             ],
-            "description": "Labor hours required per unit of each product"
+            "description": "Available supply limit of each raw material $r \\in \\mathcal{R}$; infinity may denote unlimited supply"
         },
         {
-            "name": "regular_labor_capacity",
-            "symbol": "L",
-            "shape": [],
-            "description": "Regular labor capacity over the planning horizon"
-        },
-        {
-            "name": "unit_profit",
-            "symbol": "\u001bpi",
+            "name": "selling_price",
+            "symbol": "v",
             "shape": [
                 "P"
             ],
-            "description": "Unit profit of each product before overtime payment"
+            "description": "Selling price of each product $p \\in \\mathcal{P}$"
         },
         {
-            "name": "overtime_wage",
-            "symbol": "c^{\\mathrm{ot}}",
-            "shape": [],
-            "description": "Overtime payment rate per labor hour"
+            "name": "sulfur_cap",
+            "symbol": "\\bar{s}",
+            "shape": [
+                "P"
+            ],
+            "description": "Maximum allowed sulfur content for each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "demand_limit",
+            "symbol": "d",
+            "shape": [
+                "P"
+            ],
+            "description": "Market demand limit for each product $p \\in \\mathcal{P}$"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
-            "symbol": "x",
+            "name": "first_stage_allocation",
+            "symbol": "x^{(1)}",
+            "shape": [
+                "R",
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "First-stage allocation quantity from raw material $r \\in \\mathcal{R}^{(1)}$ to product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "second_stage_allocation",
+            "symbol": "x^{(2)}",
             "shape": [
                 "P"
             ],
             "domain": "continuous",
-            "description": "Production quantity of each product"
+            "description": "Second-stage allocation quantity of designated raw material $r^{(2)}$ for each product $p \\in \\mathcal{P}$"
         },
         {
-            "name": "overtime_hours",
-            "symbol": "o",
+            "name": "production_quantity",
+            "symbol": "q",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Production quantity of each product $p \\in \\mathcal{P}$"
+        },
+        {
+            "name": "total_profit",
+            "symbol": "\\Pi",
             "shape": [],
             "domain": "continuous",
-            "description": "Total overtime labor hours used over the planning horizon"
+            "description": "Total profit of the plan"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "raw_material_capacity",
-            "description": "For each raw material r, total consumption across all products cannot exceed available supply.",
-            "formula": "\\sum_{p=1}^{P} a_{r p} x_p \\le s_r \\qquad \\forall r=1,\\dots,R",
+            "name": "nonnegative_first_stage_allocation",
+            "description": "First-stage allocation quantities must be nonnegative",
+            "formula": "x^{(1)}_{r,p} \\ge 0 \\quad \\forall r \\in \\mathcal{R},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "first_stage_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_second_stage_allocation",
+            "description": "Second-stage allocation quantities must be nonnegative",
+            "formula": "x^{(2)}_{p} \\ge 0 \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "second_stage_allocation"
+            ]
+        },
+        {
+            "name": "nonnegative_production_quantity",
+            "description": "Production quantities must be nonnegative",
+            "formula": "q_p \\ge 0 \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "supply_limit_bound",
+            "description": "Raw material usage must not exceed available supply limits",
+            "formula": "\\sum_{p \\in \\mathcal{P}} x^{(1)}_{r,p} \\le u_r \\quad \\forall r \\in \\mathcal{R}^{(1)};\\qquad \\sum_{p \\in \\mathcal{P}} x^{(2)}_{p} \\le u_{r^{(2)}}",
             "parameters": [
-                "available_material",
-                "material_usage"
+                "supply_limit"
+            ],
+            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation"
+            ]
+        },
+        {
+            "name": "demand_limit_bound",
+            "description": "Production quantities must not exceed market demand limits",
+            "formula": "q_p \\le d_p \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [
+                "demand_limit"
             ],
             "variables": [
                 "production_quantity"
             ]
         },
         {
-            "name": "labor_capacity_with_overtime",
-            "description": "Total labor required by production must be covered by regular labor capacity and overtime hours.",
-            "formula": "\\sum_{p=1}^{P} h_p x_p \\le L + o",
+            "name": "sulfur_cap_bound",
+            "description": "Linear sulfur-content limit: weighted sulfur input to each product cannot exceed the product sulfur cap times production quantity",
+            "formula": "\\sum_{r \\in \\mathcal{R}^{(1)}} s_r x^{(1)}_{r,p} + s_{r^{(2)}} x^{(2)}_{p} \\le \\bar{s}_p q_p",
             "parameters": [
-                "labor_usage",
-                "regular_labor_capacity"
+                "sulfur_content",
+                "sulfur_cap"
             ],
             "variables": [
-                "production_quantity",
-                "overtime_hours"
-            ]
-        },
-        {
-            "name": "overtime_nonnegative",
-            "description": "Overtime hours must be nonnegative.",
-            "formula": "o \\ge 0",
-            "variables": [
-                "overtime_hours"
-            ]
-        },
-        {
-            "name": "production_nonnegative",
-            "description": "Production quantities must be nonnegative.",
-            "formula": "x_p \\ge 0 \\qquad \\forall p=1,\\dots,P",
-            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation",
                 "production_quantity"
             ]
         },
         {
-            "name": "variable_domains",
-            "description": "Decision variables are continuous.",
-            "formula": "x_p \\in \\mathbb{R}_{+},\\ o \\in \\mathbb{R}_{+}",
+            "name": "two_stage_mixing_sequence",
+            "description": "Only raw materials in the first-stage set may be allocated in stage one; all other raw-material/product allocations are fixed to zero",
+            "formula": "x^{(1)}_{r,p} = 0 \\quad \\forall r \\in \\mathcal{R} \\setminus \\mathcal{R}^{(1)},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [],
             "variables": [
-                "production_quantity",
-                "overtime_hours"
+                "first_stage_allocation"
             ]
+        },
+        {
+            "name": "production_consistency",
+            "description": "Production quantity equals total blended input for each product across both stages",
+            "formula": "q_p = \\sum_{r \\in \\mathcal{R}^{(1)}} x^{(1)}_{r,p} + x^{(2)}_{p} \\quad \\forall p \\in \\mathcal{P}",
+            "parameters": [],
+            "variables": [
+                "first_stage_allocation",
+                "second_stage_allocation",
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "nonnegative_data_domain",
+            "description": "Supply limits, demand limits, and sulfur caps are nonnegative, and the planning data are finite with the designated subset and second-stage material properly defined",
+            "formula": "u_r \\ge 0,\\ d_p \\ge 0,\\ \\bar{s}_p \\ge 0 \\quad \\forall r \\in \\mathcal{R},\\ \\forall p \\in \\mathcal{P}",
+            "parameters": [
+                "supply_limit",
+                "demand_limit",
+                "sulfur_cap",
+                "raw_material_count",
+                "product_count"
+            ],
+            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "net_profit_maximization",
-            "description": "Maximize total net profit over the planning horizon, defined as total pre-overtime profit minus overtime payment.",
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit, defined as total sales revenue minus total raw-material purchasing cost",
             "sense": "maximize"
-        },
-        {
-            "name": "overtime_minimization_tiebreak",
-            "description": "Prefer lower overtime usage among plans with the same net profit.",
-            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Use preemption optimization to maximize total net profit first, then minimize overtime usage among solutions with the same net profit.",
-        "objective_combination_method": "preemption_optimization",
+        "description": "Maximize total profit, defined as total sales revenue minus total raw-material purchasing cost, with \\Pi recorded as the resulting profit expression",
+        "objective_combination_method": "one_objective",
         "sense": "maximize",
-        "formula": "\\sum_{p=1}^{P} \\pi_p x_p - c^{\\mathrm{ot}} o",
+        "formula": "\\Pi = \\sum_{p \\in \\mathcal{P}} v_p q_p - \\sum_{r \\in \\mathcal{R}^{(1)}} c_r \\sum_{p \\in \\mathcal{P}} x^{(1)}_{r,p} - c_{r^{(2)}} \\sum_{p \\in \\mathcal{P}} x^{(2)}_{p}",
         "parameters": [
-            "unit_profit",
-            "overtime_wage"
+            "selling_price",
+            "purchase_cost"
         ],
         "variables": [
             "production_quantity",
-            "overtime_hours"
+            "first_stage_allocation",
+            "second_stage_allocation"
         ]
     }
 }

@@ -1,310 +1,154 @@
 {
-    "problem": "Problem description\n- A single-period cutting-stock planning problem is considered over a planning horizon $$\\mathcal{T}$$.\n- There is a set of product types $$\\mathcal{P}$$, where each product type $$p \\in \\mathcal{P}$$ has a required cut length $$\\ell_p$$ and a customer demand quantity $$d_p$$.\n- Raw steel pipes are identical and each pipe has length $$L$$ and unit purchase value $$c^{\\mathrm{pipe}}$$.\n- Cutting patterns are used to describe how one raw pipe is cut into pieces of the product types. Each pattern is indexed by $$k \\in \\mathcal{K}$$.\n- The number of distinct cutting patterns used in the plan may not exceed $$K^{\\max}$$.\n- For any chosen cutting pattern, the number of pieces cut from one raw pipe may not exceed $$M^{\\max}$$.\n- For any chosen cutting pattern, the unused leftover length of the raw pipe may not exceed $$W^{\\max}$$.\n- The selected cutting plan must satisfy all customer demands for every product type in $$\\mathcal{P}$$.\n- Each raw pipe is assigned to exactly one cutting pattern.\n- The total cost combines the purchase cost of raw pipes and an additional surcharge that depends on how frequently each cutting pattern is used.\n- The selected cutting patterns are ranked from most frequently used to least frequently used, and the surcharge applied to rank $$r$$ is governed by a multiplier $$\\gamma_r$$.\n- The optimization goal is to choose the cutting patterns and assign raw pipes to them so that the total cost is minimized while respecting all demand, pattern-count, piece-count, and leftover-length requirements.\n- A solution is represented by:\n  - The set of selected cutting patterns, with at most $$K^{\\max}$$ distinct patterns.\n  - For each selected pattern $$k$$, a recipe indicating how many pieces of each product type $$p \\in \\mathcal{P}$$ are cut from one raw pipe.\n  - For each selected pattern, the number of raw pipes assigned to that pattern.\n  - The usage rank of each selected pattern, ordered by frequency of use.\n  - The total cost of the entire cutting plan.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"singleton set\",\n    \"meaning\": \"Single-period horizon $$\\\\mathcal{T}$$\"\n  },\n  \"number_of_product_types\": {\n    \"type\": \"integer\",\n    \"meaning\": \"$$P = |\\\\mathcal{P}|$$\"\n  },\n  \"raw_pipe_length\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Length of one raw pipe, $$L$$\"\n  },\n  \"item_lengths\": {\n    \"type\": \"array\",\n    \"shape\": \"length $$P$$\",\n    \"meaning\": \"Required length of product type $$p$$, denoted by $$\\\\ell_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"demands\": {\n    \"type\": \"array\",\n    \"shape\": \"length $$P$$\",\n    \"meaning\": \"Demand quantity of product type $$p$$, denoted by $$d_p$$ for each $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"unit_raw_pipe_value\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Unit value or purchase cost of one raw pipe, $$c^{\\\\mathrm{pipe}}$$\"\n  },\n  \"max_distinct_patterns\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Maximum number of distinct cutting patterns allowed, $$K^{\\\\max}$$\"\n  },\n  \"max_pieces_per_pipe\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Maximum number of pieces allowed from one raw pipe under any pattern, $$M^{\\\\max}$$\"\n  },\n  \"max_leftover_length\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Maximum allowed leftover length for any pattern, $$W^{\\\\max}$$\"\n  },\n  \"rank_based_surcharge_multipliers\": {\n    \"type\": \"array\",\n    \"shape\": \"length $$K^{\\\\max}$$\",\n    \"meaning\": \"Rank-based surcharge multipliers $$\\\\gamma_r$$ for pattern rank $$r$$, ordered from most frequently used to least frequently used\"\n  }\n}\n\nOutput Format\n{\n  \"selected_patterns\": {\n    \"type\": \"array\",\n    \"shape\": \"up to $$K^{\\\\max}$$ entries\",\n    \"meaning\": \"List of selected cutting patterns\"\n  },\n  \"pattern_details\": {\n    \"type\": \"array\",\n    \"shape\": \"one record per selected pattern\",\n    \"meaning\": {\n      \"pattern_id\": \"Identifier of the selected pattern\",\n      \"recipe\": \"Array of length $$P$$ giving the number of pieces of each product type cut from one raw pipe under this pattern\",\n      \"pipes_assigned\": \"Number of raw pipes assigned to this pattern\",\n      \"usage_rank\": \"Rank of the pattern among selected patterns, with $$1$$ being the most frequently used\",\n      \"rank_multiplier\": \"Surcharge multiplier associated with the usage rank\"\n    }\n  },\n  \"total_cost\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Minimized total cost of raw pipes plus pattern-frequency surcharges\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": [1],\n  \"number_of_product_types\": 4,\n  \"raw_pipe_length\": 1850,\n  \"item_lengths\": [290, 315, 350, 455],\n  \"demands\": [15, 28, 21, 30],\n  \"max_distinct_patterns\": 4,\n  \"max_pieces_per_pipe\": 5,\n  \"max_leftover_length\": 100,\n  \"unit_raw_pipe_value\": 1,\n  \"rank_based_surcharge_multipliers\": [0.1, 0.2, 0.3, 0.4]\n}",
+    "problem": "Problem description\n- There is one beverage product planned over a finite weekly horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T} = \\{1,\\dots,T\\}$$.\n- For each period $$t$$, the input data include market demand $$d_t$$, production capacity $$u_t$$, and unit production cost $$c_t$$.\n- A unit holding cost $$h$$ is incurred for each unit of inventory left after meeting the demand of a period.\n- The plan determines the production quantity $$x_t$$ in each period and the ending inventory level $$I_t$$ after demand is satisfied.\n- The planning goal is to minimize the total cost over the horizon, consisting of production cost and inventory holding cost.\n- Weekly demand must be satisfied on time.\n- Production in any period cannot exceed the available production capacity of that period.\n- Inventory may be carried from one period to the next, but only nonnegative inventory is allowed.\n- Unmet demand is not allowed.\n- A solution is represented by:\n  - $$x_t$$, the planned production quantity in period $$t$$.\n  - $$I_t$$, the inventory remaining at the end of period $$t$$.\n  - $$Z$$, the total cost of the plan over all periods.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"symbol\": \"$$T$$\",\n    \"meaning\": \"Number of planning periods in the horizon\"\n  },\n  \"periods\": {\n    \"symbol\": \"$$\\\\mathcal{T} = \\\\{1,\\\\dots,T\\\\}$$\",\n    \"meaning\": \"Ordered set of weekly periods\"\n  },\n  \"demand\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$d_t$$\",\n    \"meaning\": \"Demand in period $$t$$\"\n  },\n  \"capacity\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$u_t$$\",\n    \"meaning\": \"Maximum producible quantity in period $$t$$\"\n  },\n  \"production_cost\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$c_t$$\",\n    \"meaning\": \"Unit production cost in period $$t$$\"\n  },\n  \"holding_cost\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$h$$\",\n    \"meaning\": \"Unit inventory holding cost charged for leftover inventory in each period\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$I_0$$\",\n    \"meaning\": \"Inventory available at the start of period $$1$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_plan\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$x_t$$\",\n    \"meaning\": \"Planned production quantity in period $$t$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"array of length $$T$$\",\n    \"symbol\": \"$$I_t$$\",\n    \"meaning\": \"Inventory remaining at the end of period $$t$$\"\n  },\n  \"total_cost\": {\n    \"shape\": \"scalar\",\n    \"symbol\": \"$$Z$$\",\n    \"meaning\": \"Total minimized cost over the planning horizon\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 4,\n  \"demand\": [15, 25, 35, 25],\n  \"capacity\": [30, 40, 45, 20],\n  \"production_cost\": [5.0, 5.1, 5.4, 5.5],\n  \"holding_cost\": 0.2,\n  \"initial_inventory\": 0\n}",
     "parameters": [
         {
-            "name": "planning_horizon",
-            "symbol": "\\mathcal{T}",
+            "name": "time_horizon",
+            "symbol": "T",
             "shape": [],
-            "description": "Singleton planning horizon with one period"
+            "description": "Number of planning periods in the finite horizon, indexed by t=0,...,T-1"
         },
         {
-            "name": "num_product_types",
-            "symbol": "P",
-            "shape": [],
-            "description": "Number of product types"
-        },
-        {
-            "name": "product_lengths",
-            "symbol": "\\ell",
-            "shape": [
-                "P"
-            ],
-            "description": "Required cut length for each product type"
-        },
-        {
-            "name": "demands",
+            "name": "demand",
             "symbol": "d",
             "shape": [
-                "P"
+                "T"
             ],
-            "description": "Demand quantity for each product type"
+            "description": "Demand in each period t"
         },
         {
-            "name": "pipe_length",
-            "symbol": "L",
-            "shape": [],
-            "description": "Length of one raw steel pipe"
-        },
-        {
-            "name": "unit_pipe_cost",
-            "symbol": "c^{\\mathrm{pipe}}",
-            "shape": [],
-            "description": "Unit purchase value of one raw pipe"
-        },
-        {
-            "name": "max_distinct_patterns",
-            "symbol": "K^{\\max}",
-            "shape": [],
-            "description": "Maximum number of distinct cutting patterns allowed"
-        },
-        {
-            "name": "max_pieces_per_pipe",
-            "symbol": "M^{\nmax}",
-            "shape": [],
-            "description": "Maximum number of pieces allowed from one raw pipe under any pattern"
-        },
-        {
-            "name": "max_leftover_length",
-            "symbol": "W^{\\max}",
-            "shape": [],
-            "description": "Maximum allowed leftover length for any pattern"
-        },
-        {
-            "name": "rank_surcharge_multipliers",
-            "symbol": "\\gamma",
+            "name": "capacity",
+            "symbol": "u",
             "shape": [
-                "K^{\\max}"
+                "T"
             ],
-            "description": "Surcharge multiplier for each usage rank"
+            "description": "Maximum producible quantity in each period t"
         },
         {
-            "name": "potential_cutting_patterns",
-            "symbol": "\\mathcal{K}",
+            "name": "production_cost",
+            "symbol": "c",
+            "shape": [
+                "T"
+            ],
+            "description": "Unit production cost in each period t"
+        },
+        {
+            "name": "holding_cost",
+            "symbol": "h",
             "shape": [],
-            "description": "Set of potential cutting patterns"
+            "description": "Unit holding cost per unit of ending inventory in each period"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "I_0",
+            "shape": [],
+            "description": "Initial inventory available at the start of period 0"
         }
     ],
     "variables": [
         {
-            "name": "select_pattern",
-            "symbol": "y",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "domain": "binary",
-            "description": "Binary selection variable indicating whether cutting pattern k is selected"
-        },
-        {
-            "name": "pieces_per_pattern_product",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "\\mathcal{K}",
-                "P"
+                "T"
             ],
-            "domain": "integer",
-            "description": "Nonnegative integer number of pieces of product type p cut from one raw pipe under pattern k"
+            "domain": "continuous",
+            "description": "Production quantity in each period t"
         },
         {
-            "name": "pipes_assigned_to_pattern",
-            "symbol": "n",
+            "name": "ending_inventory",
+            "symbol": "I",
             "shape": [
-                "\\mathcal{K}"
+                "T"
             ],
-            "domain": "integer",
-            "description": "Nonnegative integer number of raw pipes assigned to pattern k"
-        },
-        {
-            "name": "pattern_usage_rank",
-            "symbol": "r",
-            "shape": [
-                "\\mathcal{K}"
-            ],
-            "domain": "integer",
-            "description": "Integer usage rank of selected pattern k, ordered from most frequently used to least frequently used"
+            "domain": "continuous",
+            "description": "Ending inventory after demand is satisfied in each period t"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "binary_pattern_selection",
-            "description": "Pattern selection variable is binary",
-            "formula": "y_k \\in \\{0,1\\}",
-            "variables": [
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "nonnegative_integer_pieces",
-            "description": "Pieces per pattern-product are nonnegative integers",
-            "formula": "x_{kp} \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "pieces_per_pattern_product"
-            ]
-        },
-        {
-            "name": "nonnegative_integer_pipes",
-            "description": "Pipes assigned to each pattern are nonnegative integers",
-            "formula": "n_k \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "pipes_assigned_to_pattern"
-            ]
-        },
-        {
-            "name": "integer_pattern_rank",
-            "description": "Pattern usage rank is an integer value",
-            "formula": "r_k \\in \\mathbb{Z}",
-            "variables": [
-                "pattern_usage_rank"
-            ]
-        },
-        {
-            "name": "demand_satisfaction",
-            "description": "The cutting plan must satisfy customer demand for every product type",
-            "formula": "\\sum_{k \\in \\mathcal{K}} n_k x_{kp} \\geq d_p \\quad \\forall p \\in \\mathcal{P}",
+            "name": "period_production_capacity",
+            "description": "Production in each period must not exceed the available capacity",
+            "formula": "x[t] \\leq u[t]",
             "parameters": [
-                "demands"
+                "capacity"
             ],
             "variables": [
-                "pipes_assigned_to_pattern",
-                "pieces_per_pattern_product"
+                "production_quantity"
             ]
         },
         {
-            "name": "max_distinct_patterns",
-            "description": "The number of selected cutting patterns cannot exceed the allowed maximum",
-            "formula": "\\sum_{k \\in \\mathcal{K}} y_k \\leq K^{\\max}",
-            "parameters": [
-                "max_distinct_patterns"
-            ],
-            "variables": [
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "max_pieces_per_pipe",
-            "description": "For any selected pattern, the total number of pieces cut from one raw pipe cannot exceed the maximum allowed",
-            "formula": "\\sum_{p \\in \\mathcal{P}} x_{kp} \\leq M^{\\max} y_k \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "max_pieces_per_pipe"
-            ],
-            "variables": [
-                "pieces_per_pattern_product",
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "max_leftover_length",
-            "description": "For any selected pattern, the leftover length from one raw pipe cannot exceed the maximum allowed",
-            "formula": "L - \\sum_{p \\in \\mathcal{P}} \\ell_p x_{kp} \\leq W^{\\max} + L(1-y_k) \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "pipe_length",
-                "product_lengths",
-                "max_leftover_length"
-            ],
-            "variables": [
-                "pieces_per_pattern_product",
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "exactly_one_pattern_per_pipe",
-            "description": "Each raw pipe is assigned to exactly one cutting pattern; in aggregate form this means every assigned pipe is counted through exactly one pattern variable",
-            "formula": "\\sum_{k \\in \\mathcal{K}} n_k = \\sum_{k \\in \\mathcal{K}} n_k",
+            "name": "nonnegative_inventory",
+            "description": "Ending inventory must remain nonnegative in every period",
+            "formula": "I[t] \\geq 0",
             "parameters": [],
             "variables": [
-                "pipes_assigned_to_pattern"
+                "ending_inventory"
             ]
         },
         {
-            "name": "pattern_frequency_ranking",
-            "description": "Selected patterns are ordered from most frequently used to least frequently used, and rank-based surcharge multipliers are applied according to that order",
-            "formula": "n_i - n_j \\geq 1 - K^{\\max}(1-z_{ij}) \\quad \\forall i,j \\in \\mathcal{K},\\ i<j;\\qquad r_i + 1 \\leq r_j + K^{\\max}(1-z_{ij}) \\quad \\forall i,j \\in \\mathcal{K},\\ i<j",
-            "parameters": [
-                "max_distinct_patterns"
-            ],
-            "variables": [
-                "pipes_assigned_to_pattern",
-                "pattern_usage_rank",
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "raw_pipe_cut_length_limit",
-            "description": "The total cut length in any pattern cannot exceed the raw pipe length",
-            "formula": "\\sum_{p \\in \\mathcal{P}} \\ell_p x_{kp} \\leq L y_k \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [
-                "pipe_length",
-                "product_lengths"
-            ],
-            "variables": [
-                "pieces_per_pattern_product",
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "pattern_selection_linking",
-            "description": "A pattern is selected if and only if it is used; this links binary selection to positive pipe assignment.",
-            "formula": "n_k \\leq U y_k \\quad \\forall k \\in \\mathcal{K}",
+            "name": "nonnegative_production",
+            "description": "Production quantity must be nonnegative in every period",
+            "formula": "x[t] \\geq 0",
             "parameters": [],
             "variables": [
-                "pipes_assigned_to_pattern",
-                "select_pattern"
+                "production_quantity"
             ]
         },
         {
-            "name": "pattern_count_upper_bound",
-            "description": "Each selected pattern corresponds to at least one assigned pipe and the number of selected patterns cannot exceed the maximum allowed",
-            "formula": "n_k \\leq U y_k \\quad \\forall k \\in \\mathcal{K}",
-            "parameters": [],
-            "variables": [
-                "pipes_assigned_to_pattern",
-                "select_pattern"
-            ]
-        },
-        {
-            "name": "pattern_rank_domain_bounds",
-            "description": "Ranks are restricted to the available rank positions for selected patterns",
-            "formula": "0 \\leq r_k \\leq K^{\\max}-1 \\quad \\forall k \\in \\mathcal{K}",
+            "name": "time_horizon_positive_integer",
+            "description": "The planning horizon length is a positive integer",
+            "formula": "T \\in \\mathbb{Z}_{>0}",
             "parameters": [
-                "max_distinct_patterns"
+                "time_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "inventory_balance_initial_period",
+            "description": "Inventory balance in period 0 uses the initial inventory as the starting stock",
+            "formula": "I[0] = I_0 + x[0] - d[0]",
+            "parameters": [
+                "initial_inventory",
+                "demand"
             ],
             "variables": [
-                "pattern_usage_rank"
+                "production_quantity",
+                "ending_inventory"
             ]
         },
         {
-            "name": "pairwise_rank_ordering",
-            "description": "If pattern i is used more frequently than pattern j, then i must receive a better or equal rank than j; this enforces a consistent frequency ordering across selected patterns",
-            "formula": "r_i + 1 \\leq r_j + K^{\\max}(1-z_{ij}) \\quad \\forall i,j \\in \\mathcal{K},\\ i<j",
+            "name": "inventory_balance_subsequent_periods",
+            "description": "Inventory balance for periods t=1,\\dots,T-1 links previous ending inventory, production, demand, and current ending inventory",
+            "formula": "I[t] = I[t-1] + x[t] - d[t] \\quad \\forall t=1,\\dots,T-1",
             "parameters": [
-                "max_distinct_patterns"
+                "demand"
             ],
             "variables": [
-                "pipes_assigned_to_pattern",
-                "pattern_usage_rank"
-            ]
-        },
-        {
-            "name": "rank_tie_handling",
-            "description": "Ties in pipe counts are allowed and do not force a strict rank separation",
-            "formula": "n_i - n_j \\leq K^{\\max} z_{ij} \\quad \\forall i,j \\in \\mathcal{K},\\ i<j",
-            "parameters": [
-                "max_distinct_patterns"
-            ],
-            "variables": [
-                "pipes_assigned_to_pattern"
+                "production_quantity",
+                "ending_inventory"
             ]
         }
     ],
     "objectives": [
         {
             "name": "total_cost_minimization",
-            "description": "Minimize the total cutting-plan cost, including raw pipe purchase cost and rank-based pattern-frequency surcharges",
+            "description": "Minimize total cost over the planning horizon, including production cost and inventory holding cost",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total cost consisting of raw pipe purchase cost plus rank-based surcharge applied to each selected cutting pattern according to its usage rank. The objective remains a single minimization objective, with the rank-based surcharge indexed by the modeled rank variable.",
+        "description": "Minimize total cost over the horizon by summing per-period production cost and ending-inventory holding cost. This is a single linear objective, so no combination strategy is needed.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "c^{\\mathrm{pipe}} \\sum_{k \\in \\mathcal{K}} n_k + \\sum_{k \\in \\mathcal{K}} \\gamma_{r_k} n_k",
+        "formula": "\\sum_{t=0}^{T-1} c[t] x[t] + h \\sum_{t=0}^{T-1} I[t]",
         "parameters": [
-            "unit_pipe_cost",
-            "rank_surcharge_multipliers"
+            "production_cost",
+            "holding_cost"
         ],
         "variables": [
-            "pipes_assigned_to_pattern",
-            "pattern_usage_rank"
+            "production_quantity",
+            "ending_inventory"
         ]
     }
 }

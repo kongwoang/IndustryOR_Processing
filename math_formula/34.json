@@ -1,207 +1,312 @@
 {
-    "problem": "Problem description\n- There is a finite set of batches $$\\mathcal{I}$$ and a finite set of dyeing vats $$\\mathcal{J}$$ arranged in a fixed processing order.\n- Each batch $$i \\in \\mathcal{I}$$ must be processed once in every vat $$j \\in \\mathcal{J}$$, and the processing stages must be completed in the same technological order for every batch.\n- The processing time of batch $$i$$ in vat $$j$$ is given by the parameter $$p_{i,j}$$.\n- The planning horizon is continuous time, and all scheduling decisions are made over that horizon.\n- The planning goal is to minimize the completion time of the last finished batch, i.e. the overall makespan.\n- Required business rules:\n  - Every batch must visit all vats in the prescribed order.\n  - A batch may start processing in a vat only after it has completed the previous vat.\n  - Each vat can process at most one batch at a time.\n  - A batch can be processed by at most one vat at a time.\n  - Processing, once started on a vat, is non-preemptive.\n  - All batches must be completed.\n- The objective is to find a schedule that minimizes the maximum completion time across all batches.\n- The relevant symbols are:\n  - $$N$$: number of batches.\n  - $$M$$: number of vats.\n  - $$\\mathcal{I}=\\{1,\\dots,N\\}$$: set of batch indices.\n  - $$\\mathcal{J}=\\{1,\\dots,M\\}$$: set of vat indices.\n  - $$p_{i,j}$$: processing time of batch $$i$$ in vat $$j$$.\n  - $$s_{i,j}$$: start time of batch $$i$$ in vat $$j$$.\n  - $$c_{i,j}$$: completion time of batch $$i$$ in vat $$j$$.\n  - $$\\pi$$: processing sequence of the batches.\n  - $$C_{\\max}$$: completion time of the last finished batch.\n- A solution is represented by:\n  - an ordered sequence $$\\pi$$ of the batches,\n  - start times $$s_{i,j}$$ for every batch-vat pair,\n  - completion times $$c_{i,j}$$ for every batch-vat pair,\n  - the makespan value $$C_{\\max}$$.\n\nInput Format\n- The input is a JSON-style object describing the scheduling instance.\n- Required fields:\n  - $$N$$: integer, the number of batches.\n  - $$M$$: integer, the number of vats.\n  - $$P$$: a matrix of size $$N \\times M$$, where $$P_{i,j}=p_{i,j}$$ is the processing time of batch $$i$$ in vat $$j$$.\n- Optional fields:\n  - $$\\mathcal{I}$$ and $$\\mathcal{J}$$ may be omitted if indices are implied by $$N$$ and $$M$$.\n- Schema:\n  - $$\\texttt{\\{}$$\n    - $$\\texttt{\"N\"}$$: $$N$$,\n    - $$\\texttt{\"M\"}$$: $$M$$,\n    - $$\\texttt{\"P\"}$$: $$[ [p_{1,1},\\dots,p_{1,M}], \\dots, [p_{N,1},\\dots,p_{N,M}] ]$$\n  - $$\\texttt{\\}}$$\n\nOutput Format\n- The output is a JSON-style object describing the schedule.\n- Required fields:\n  - $$\\pi$$: the chosen batch sequence, represented as a permutation of $$\\{1,\\dots,N\\}$$.\n  - $$S$$: a matrix of size $$N \\times M$$, where $$S_{i,j}=s_{i,j}$$ is the start time of batch $$i$$ in vat $$j$$.\n  - $$C$$: a matrix of size $$N \\times M$$, where $$C_{i,j}=c_{i,j}$$ is the completion time of batch $$i$$ in vat $$j$$.\n  - $$C_{\\max}$$: the makespan, equal to the final completion time of the schedule.\n- Schema:\n  - $$\\texttt{\\{}$$\n    - $$\\texttt{\"pi\"}$$: $$[\\pi_1,\\dots,\\pi_N]$$,\n    - $$\\texttt{\"S\"}$$: $$[ [s_{1,1},\\dots,s_{1,M}], \\dots, [s_{N,1},\\dots,s_{N,M}] ]$$,\n    - $$\\texttt{\"C\"}$$: $$[ [c_{1,1},\\dots,c_{1,M}], \\dots, [c_{N,1},\\dots,c_{N,M}] ]$$,\n    - $$\\texttt{\"Cmax\"}$$: $$C_{\\max}$$\n  - $$\\texttt{\\}}$$\n\nExample(s)\n\nInput 1\n{\n  \"N\": 5,\n  \"M\": 3,\n  \"P\": [\n    [3, 1, 1],\n    [2, 1.5, 1],\n    [3, 1.2, 1.3],\n    [2, 2, 2],\n    [2.1, 2, 3]\n  ]\n}",
+    "problem": "Problem description\n- There is a single batch packing and transportation planning problem over a one-period planning horizon $$\\mathcal{T}$$, with goods indexed by $$i \\in \\mathcal{I}$$ and candidate containers indexed by $$k \\in \\mathcal{K}$$.\n- The product set is generalized as $$\\mathcal{I}$$, with one available quantity parameter $$q_i$$ and one unit-weight parameter $$w_i$$ for each product $$i \\in \\mathcal{I}$$.\n- The container fleet is modeled by a sufficiently large candidate set $$\\mathcal{K}$$. Each used container has a maximum payload capacity $$U$$ and must also satisfy a minimum utilized load requirement $$L$$.\n- Some products may have intra-container packaging rules. These rules are represented by a set of compatibility requirements $$\\mathcal{R}$$. In this problem class, one product may trigger a minimum accompanying quantity of another product within the same container, while the supporting product may still appear without the trigger product.\n- Some products may also have per-used-container minimum load requirements. In this problem class, a designated product may be required to appear in at least a fixed minimum quantity in every container that is used.\n- The planning goal is to transport the entire required batch using the fewest possible number of containers while respecting container capacity, minimum-load, inventory, and packaging compatibility requirements.\n- The available goods for the concrete instance are the five products $$A$$, $$B$$, $$C$$, $$D$$, and $$E$$.\n- The business rules for the concrete instance are:\n  - Each used container may carry at most $$60$$ tons in total.\n  - Each used container must carry at least $$18$$ tons in total.\n  - The available quantities are $$120$$ units of $$A$$, $$90$$ units of $$B$$, $$300$$ units of $$C$$, $$90$$ units of $$D$$, and $$120$$ units of $$E$$.\n  - The unit weights are $$0.5$$ tons for $$A$$, $$1$$ ton for $$B$$, $$0.4$$ tons for $$C$$, $$0.6$$ tons for $$D$$, and $$0.65$$ tons for $$E$$.\n  - If a container contains any units of $$A$$, then that same container must also contain at least $$1$$ unit of $$C$$.\n  - Product $$C$$ may be loaded without product $$A$$.\n  - Every used container must contain at least $$12$$ units of $$D$$.\n  - All required goods must be assigned to containers without exceeding the available inventory.\n- A solution is represented by:\n  - $$y_k$$, a binary container-usage indicator for each $$k \\in \\mathcal{K}$$, where $$y_k = 1$$ means container $$k$$ is used.\n  - $$x_{ik}$$, the integer number of units of product $$i \\in \\mathcal{I}$$ loaded into container $$k \\in \\mathcal{K}$$.\n  - The total number of used containers, which is the objective value to be minimized.\n  - The packing allocation by container, including the quantity of each product placed in each container.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"periods\": 1,\n    \"meaning\": \"single-period batch packing horizon $$\\\\mathcal{T}$$\"\n  },\n  \"products\": {\n    \"index_set\": \"$$\\\\mathcal{I}$$\",\n    \"items\": [\n      {\n        \"id\": \"A\",\n        \"available_quantity\": \"$$q_A$$\",\n        \"unit_weight_tons\": \"$$w_A$$\"\n      },\n      {\n        \"id\": \"B\",\n        \"available_quantity\": \"$$q_B$$\",\n        \"unit_weight_tons\": \"$$w_B$$\"\n      },\n      {\n        \"id\": \"C\",\n        \"available_quantity\": \"$$q_C$$\",\n        \"unit_weight_tons\": \"$$w_C$$\"\n      },\n      {\n        \"id\": \"D\",\n        \"available_quantity\": \"$$q_D$$\",\n        \"unit_weight_tons\": \"$$w_D$$\"\n      },\n      {\n        \"id\": \"E\",\n        \"available_quantity\": \"$$q_E$$\",\n        \"unit_weight_tons\": \"$$w_E$$\"\n      }\n    ]\n  },\n  \"containers\": {\n    \"index_set_size\": \"$$K$$\",\n    \"meaning\": \"candidate containers indexed by $$k \\\\in \\\\mathcal{K} = \\\\{1,2,\\\\dots,K\\\\}$$\",\n    \"maximum_load_tons\": \"$$U$$\",\n    \"minimum_load_tons_if_used\": \"$$L$$\"\n  },\n  \"compatibility_rules\": {\n    \"meaning\": \"intra-container packaging rules indexed by $$r \\\\in \\\\mathcal{R}$$\",\n    \"rules\": [\n      {\n        \"trigger_product\": \"A\",\n        \"required_product\": \"C\",\n        \"minimum_required_quantity\": \"$$\\\\alpha_{A,C}$$\"\n      }\n    ]\n  },\n  \"product_specific_minimums_if_container_is_used\": {\n    \"meaning\": \"per-used-container minimum quantities for designated products\",\n    \"minimum_units\": {\n      \"D\": \"$$m_D$$\"\n    }\n  },\n  \"objective\": {\n    \"meaning\": \"minimize the number of used containers\"\n  }\n}\n\nOutput Format\n{\n  \"objective_value\": {\n    \"meaning\": \"minimum number of used containers\",\n    \"symbol\": \"$$z^*$$\"\n  },\n  \"container_plan\": {\n    \"index_set\": \"$$\\\\mathcal{K}$$\",\n    \"items\": [\n      {\n        \"container_id\": \"$$k$$\",\n        \"used\": \"$$y_k$$\",\n        \"loads_by_product\": {\n          \"A\": \"$$x_{A k}$$\",\n          \"B\": \"$$x_{B k}$$\",\n          \"C\": \"$$x_{C k}$$\",\n          \"D\": \"$$x_{D k}$$\",\n          \"E\": \"$$x_{E k}$$\"\n        },\n        \"total_weight_tons\": \"$$W_k$$\"\n      }\n    ]\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": {\n    \"periods\": 1\n  },\n  \"products\": {\n    \"items\": [\n      {\n        \"id\": \"A\",\n        \"available_quantity\": 120,\n        \"unit_weight_tons\": 0.5\n      },\n      {\n        \"id\": \"B\",\n        \"available_quantity\": 90,\n        \"unit_weight_tons\": 1\n      },\n      {\n        \"id\": \"C\",\n        \"available_quantity\": 300,\n        \"unit_weight_tons\": 0.4\n      },\n      {\n        \"id\": \"D\",\n        \"available_quantity\": 90,\n        \"unit_weight_tons\": 0.6\n      },\n      {\n        \"id\": \"E\",\n        \"available_quantity\": 120,\n        \"unit_weight_tons\": 0.65\n      }\n    ]\n  },\n  \"containers\": {\n    \"index_set_size\": 23,\n    \"maximum_load_tons\": 60,\n    \"minimum_load_tons_if_used\": 18\n  },\n  \"compatibility_rules\": {\n    \"rules\": [\n      {\n        \"trigger_product\": \"A\",\n        \"required_product\": \"C\",\n        \"minimum_required_quantity\": 1\n      }\n    ]\n  },\n  \"product_specific_minimums_if_container_is_used\": {\n    \"minimum_units\": {\n      \"D\": 12\n    }\n  }\n}",
     "parameters": [
         {
-            "name": "num_batches",
-            "symbol": "N",
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Number of batches; defines the batch index set $\\mathcal{I}=\\{0,1,\\dots,N-1\\}$."
+            "description": "One-period planning horizon"
         },
         {
-            "name": "num_vats",
-            "symbol": "M",
+            "name": "product_set",
+            "symbol": "\\mathcal{I}",
             "shape": [],
-            "description": "Number of dyeing vats; defines the vat index set $\\mathcal{J}=\\{0,1,\\dots,M-1\\}$."
+            "description": "Set of products indexed over the five listed items A, B, C, D, E"
         },
         {
-            "name": "processing_time",
-            "symbol": "p",
+            "name": "candidate_container_set",
+            "symbol": "\\mathcal{K}",
+            "shape": [],
+            "description": "Set of candidate containers, with size K"
+        },
+        {
+            "name": "available_quantity",
+            "symbol": "q",
             "shape": [
-                "N",
-                "M"
+                "\\mathcal{I}"
             ],
-            "description": "Processing time of batch $i$ in vat $j$."
+            "description": "Available quantity of each product"
+        },
+        {
+            "name": "unit_weight",
+            "symbol": "w",
+            "shape": [
+                "\\mathcal{I}"
+            ],
+            "description": "Unit weight of each product in tons"
+        },
+        {
+            "name": "maximum_payload",
+            "symbol": "U",
+            "shape": [],
+            "description": "Maximum payload per used container in tons"
+        },
+        {
+            "name": "minimum_utilized_load",
+            "symbol": "L",
+            "shape": [],
+            "description": "Minimum utilized load per used container in tons"
+        },
+        {
+            "name": "compatibility_requirements",
+            "symbol": "\\mathcal{R}",
+            "shape": [],
+            "description": "Set of intra-container compatibility requirements"
+        },
+        {
+            "name": "minimum_required_quantity",
+            "symbol": "\\alpha",
+            "shape": [
+                "\\mathcal{R}",
+                "2"
+            ],
+            "description": "Minimum required quantity of supporting product for each compatibility rule"
+        },
+        {
+            "name": "per_used_container_minimum",
+            "symbol": "m",
+            "shape": [
+                "\\mathcal{I}"
+            ],
+            "description": "Per-used-container minimum quantity requirement for designated products"
+        },
+        {
+            "name": "number_of_candidate_containers",
+            "symbol": "K",
+            "shape": [],
+            "description": "Number of candidate containers"
         }
     ],
     "variables": [
         {
-            "name": "batch_sequence",
-            "symbol": "\\pi",
+            "name": "container_usage",
+            "symbol": "y",
             "shape": [
-                "N"
+                "\\mathcal{K}"
+            ],
+            "domain": "binary",
+            "description": "Binary indicator equal to 1 if container k is used"
+        },
+        {
+            "name": "loaded_quantity",
+            "symbol": "x",
+            "shape": [
+                "\\mathcal{I}",
+                "\\mathcal{K}"
             ],
             "domain": "integer",
-            "description": "Ordered sequence (permutation) of the batches in processing order."
+            "description": "Integer quantity of product i loaded into container k"
         },
         {
-            "name": "start_time",
-            "symbol": "s",
-            "shape": [
-                "N",
-                "M"
-            ],
-            "domain": "continuous",
-            "description": "Start time of batch $i$ in vat $j$."
-        },
-        {
-            "name": "completion_time",
-            "symbol": "c",
-            "shape": [
-                "N",
-                "M"
-            ],
-            "domain": "continuous",
-            "description": "Completion time of batch $i$ in vat $j$."
-        },
-        {
-            "name": "makespan",
-            "symbol": "C_{\\max}",
+            "name": "minimum_number_of_used_containers",
+            "symbol": "z^*",
             "shape": [],
-            "domain": "continuous",
-            "description": "Completion time of the last finished batch."
+            "domain": "integer",
+            "description": "Minimum number of used containers"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "positive_instance_sizes",
-            "description": "the number of batches and the number of vats must be positive integers",
-            "formula": "N, M \\in \\mathbb{Z}_{>0}",
+            "name": "nonnegative_inventory_and_weights",
+            "description": "Available quantities must be nonnegative and unit weights must be positive",
+            "formula": "q_i \\geq 0,\\; w_i > 0",
             "parameters": [
-                "num_batches",
-                "num_vats"
-            ]
+                "available_quantity",
+                "unit_weight"
+            ],
+            "variables": []
         },
         {
-            "name": "nonnegative_processing_times",
-            "description": "processing times must be nonnegative for all batch-vat pairs",
-            "formula": "p[i][j] \\ge 0",
+            "name": "container_bounds_validity",
+            "description": "Container load bounds must be positive and minimum load should not exceed maximum payload",
+            "formula": "U > 0,\\; L \\geq 0,\\; L \\leq U",
             "parameters": [
-                "processing_time"
-            ]
+                "maximum_payload",
+                "minimum_utilized_load"
+            ],
+            "variables": []
         },
         {
-            "name": "nonnegative_times",
-            "description": "Start times, completion times, and makespan must be nonnegative.",
-            "formula": "s_{i,j} \\ge 0,\\ c_{i,j} \\ge 0,\\ C_{\\max} \\ge 0\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
-            "variables": [
-                "start_time",
-                "completion_time",
-                "makespan"
-            ]
-        },
-        {
-            "name": "permutation_sequence",
-            "description": "The batch sequence variable must be a permutation of all batch indices.",
-            "formula": "\\pi \\in \\mathrm{Perm}(\\mathcal{I})",
-            "variables": [
-                "batch_sequence"
-            ]
-        },
-        {
-            "name": "nonpreemptive_processing",
-            "description": "once a batch starts in a vat it must run continuously until completion",
-            "formula": "non-preemptive processing",
-            "variables": [
-                "start_time",
-                "completion_time"
-            ]
-        },
-        {
-            "name": "fixed_vat_order",
-            "description": "each batch must visit the vats in the same prescribed technological order",
-            "formula": "j-1 \\rightarrow j",
-            "variables": [
-                "batch_sequence",
-                "start_time",
-                "completion_time"
-            ]
-        },
-        {
-            "name": "precedence_within_batch",
-            "description": "a batch may start in a vat only after it has completed the previous vat",
-            "formula": "s[i][j] after c[i][j-1]",
-            "variables": [
-                "start_time",
-                "completion_time"
-            ]
-        },
-        {
-            "name": "single_batch_per_vat",
-            "description": "each vat can process at most one batch at a time; enforced via the common batch sequence representation and non-overlap timing logic",
-            "formula": "\\text{No overlap of batches on any vat consistent with the common permutation }\\pi",
-            "variables": [
-                "batch_sequence",
-                "start_time",
-                "completion_time"
-            ]
-        },
-        {
-            "name": "single_vat_per_batch",
-            "description": "a batch can be processed by at most one vat at a time; this is already implied by the fixed technological order and stage-wise timing",
-            "formula": "\\text{Implied by } s_{i,j} \\ge c_{i,j-1}\\ \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}\\setminus\\{0\\}",
-            "variables": [
-                "start_time",
-                "completion_time"
-            ]
-        },
-        {
-            "name": "all_batches_completed",
-            "description": "All batches must be completed by the end of the schedule; this is enforced by the makespan definition.",
-            "formula": "C_{\\max} \\ge c_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
-            "variables": [
-                "completion_time",
-                "makespan"
-            ]
-        },
-        {
-            "name": "processing_time_consistency",
-            "description": "Completion times equal start times plus the fixed processing times for every batch-vat pair.",
-            "formula": "c_{i,j} = s_{i,j} + p_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
+            "name": "compatibility_thresholds_nonnegative",
+            "description": "Compatibility minimum required quantities must be nonnegative",
+            "formula": "\\alpha_{r} \\geq 0 \\quad \\forall r \\in \\mathcal{R}",
             "parameters": [
-                "processing_time"
+                "minimum_required_quantity",
+                "compatibility_requirements"
+            ],
+            "variables": []
+        },
+        {
+            "name": "designated_minimums_nonnegative",
+            "description": "Per-used-container minimum quantities must be nonnegative for designated products",
+            "formula": "m_i \\geq 0 \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "per_used_container_minimum"
+            ],
+            "variables": []
+        },
+        {
+            "name": "loaded_quantity_integrality",
+            "description": "Loaded quantities must be integer and nonnegative for every product and container",
+            "formula": "x_{ik} \\in \\mathbb{Z}_{\\geq 0} \\quad \\forall i \\in \\mathcal{I},\\; \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "product_set",
+                "candidate_container_set"
             ],
             "variables": [
-                "start_time",
-                "completion_time"
+                "loaded_quantity"
             ]
         },
         {
-            "name": "within_batch_vat_order",
-            "description": "Each batch must start in vat j only after completing vat j-1, preserving the fixed technological order.",
-            "formula": "s_{i,j} \\ge c_{i,j-1}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}\\setminus\\{0\\}",
-            "parameters": [],
+            "name": "container_usage_binary",
+            "description": "Container usage indicators must be binary for every candidate container",
+            "formula": "y_k \\in \\{0,1\\} \\quad \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "candidate_container_set"
+            ],
             "variables": [
-                "start_time",
-                "completion_time"
+                "container_usage"
             ]
         },
         {
-            "name": "makespan_definition",
-            "description": "The makespan is at least the completion time of every batch in every vat.",
-            "formula": "C_{\\max} \\ge c_{i,j}\\quad \\forall i\\in\\mathcal{I},\\ \\forall j\\in\\mathcal{J}",
-            "parameters": [],
+            "name": "nonnegative_container_load",
+            "description": "The total load in any container must be nonnegative",
+            "formula": "W[k]",
+            "parameters": [
+                "unit_weight",
+                "loaded_quantity"
+            ],
             "variables": [
-                "completion_time",
-                "makespan"
+                "loaded_quantity"
             ]
+        },
+        {
+            "name": "inventory_not_exceeded",
+            "description": "The total assigned quantity of each product cannot exceed available inventory",
+            "formula": "\\sum_{k \\in \\mathcal{K}} x_{ik} \\leq q_i \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "available_quantity",
+                "candidate_container_set",
+                "product_set"
+            ],
+            "variables": [
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "unused_container_has_no_load",
+            "description": "If a container is not used, then all assigned product quantities in that container must be zero",
+            "formula": "x_{ik} \\leq q_i y_k \\quad \\forall i \\in \\mathcal{I},\\; \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "available_quantity",
+                "candidate_container_set",
+                "product_set"
+            ],
+            "variables": [
+                "container_usage",
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "container_capacity_bounds",
+            "description": "For each used container, the total payload must lie within the minimum utilized load and maximum payload bounds",
+            "formula": "L y_k \\leq \\sum_{i \\in \\mathcal{I}} w_i x_{ik} \\leq U y_k \\quad \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "minimum_utilized_load",
+                "maximum_payload",
+                "unit_weight",
+                "loaded_quantity"
+            ],
+            "variables": [
+                "container_usage",
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "compatibility_rule_a_requires_c",
+            "description": "If any units of product A are loaded into a container, that same container must also contain at least the required minimum quantity of product C",
+            "formula": "x_{Ck} \\geq \\alpha_{r_{AC}} y_k \\quad \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "minimum_required_quantity",
+                "candidate_container_set"
+            ],
+            "variables": [
+                "container_usage",
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "supporting_product_optional_without_trigger",
+            "description": "The supporting product in a compatibility rule may appear even when the trigger product is absent",
+            "formula": "x_{Ck} \\geq 0 \\quad \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "compatibility_requirements",
+                "candidate_container_set"
+            ],
+            "variables": [
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "minimum_d_when_container_used",
+            "description": "Every used container must contain at least the designated minimum quantity of product D",
+            "formula": "x_{Dk} \\geq m_D y_k \\quad \\forall k \\in \\mathcal{K}",
+            "parameters": [
+                "per_used_container_minimum",
+                "candidate_container_set"
+            ],
+            "variables": [
+                "container_usage",
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "all_required_goods_assigned",
+            "description": "All available goods are assigned across containers without omission",
+            "formula": "\\sum_{k \\in \\mathcal{K}} x_{ik} = q_i \\quad \\forall i \\in \\mathcal{I}",
+            "parameters": [
+                "available_quantity",
+                "candidate_container_set",
+                "product_set"
+            ],
+            "variables": [
+                "loaded_quantity"
+            ]
+        },
+        {
+            "name": "single_period_horizon",
+            "description": "The planning horizon is single-period",
+            "formula": "|\\mathcal{T}|=1",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "makespan_minimization",
-            "description": "minimize the completion time of the last finished batch",
-            "sense": "maximize"
+            "name": "minimize_used_containers",
+            "description": "Minimize the total number of used containers in the packing plan",
+            "sense": "minimize"
+        },
+        {
+            "name": "find_feasible_packing",
+            "description": "Find any packing allocation that satisfies all capacity, compatibility, inventory, and product-specific minimum requirements if multiple optimal solutions exist",
+            "sense": "find_all"
         }
     ],
     "final_objective": {
-        "description": "Minimize the makespan, i.e., the completion time of the last finished batch.",
+        "description": "Minimize the total number of used containers; the auxiliary scalar variable z^* represents this minimum number and is linked to the binary container-usage variables.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "C_{\\max}",
-        "parameters": [],
+        "formula": "z^* = \\sum_{k \\in \\mathcal{K}} y_k",
+        "parameters": [
+            "candidate_container_set"
+        ],
         "variables": [
-            "makespan"
+            "minimum_number_of_used_containers",
+            "container_usage"
         ]
     }
 }

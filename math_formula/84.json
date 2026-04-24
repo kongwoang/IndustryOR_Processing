@@ -1,191 +1,197 @@
 {
-    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods, and a set of products $$P$$. Each product is produced in standardized batches, and fractional batch quantities are allowed.\n- There is a set of renewable resources $$R$$. In the original case, these resources are automated machine time and manual craftsman time, but the model is written generically for any resource set.\n- Each product $$p \\in P$$ consumes a known amount of each resource $$r \\in R$$ per batch, given by the processing-time parameter $$a_{p,r}$$.\n- Each period $$t \\in T$$ has a known available capacity of each resource $$r \\in R$$, given by the capacity parameter $$b_{r,t}$$.\n- Each product $$p \\in P$$ generates a known unit revenue $$u_p$$ per batch sold.\n- Each resource $$r \\in R$$ has a known operating cost rate $$c_r$$ per hour. Idle resource time has no cost.\n- A time conversion factor $$\\kappa$$ is used when processing times and capacities are expressed in different time units.\n- All produced batches are assumed to be sold, so production quantities and sales quantities coincide, and there is no inventory carryover.\n- A designated product $$p^{\\mathrm{c}} \\in P$$ must satisfy a minimum contract quantity in every period, and the required minimum quantity is given by $$L_t$$.\n- If market demand limits are provided, they act as upper bounds on how much of each product can be sold in each period; otherwise demand is assumed sufficiently large and nonbinding.\n- The planning goal is to choose the production quantities over the horizon so that total profit, defined as total revenue minus total resource operating cost, is maximized.\n- A solution is represented by:\n  - $$x_{p,t}$$: the number of standardized batches of product $$p \\in P$$ produced in period $$t \\in T$$, with fractional values allowed.\n  - $$\\Pi$$: the resulting total profit.\n  - Optionally, the implied resource usage by resource and period.\n\nInput Format\n{\n  \"P\": \"$$P$$, number of products\",\n  \"R\": \"$$R$$, number of renewable resource types\",\n  \"T\": \"$$T$$, number of planning periods\",\n  \"products\": \"$$\\\\{0,1,\\\\ldots,P-1\\\\}$$, product index set\",\n  \"resources\": \"$$\\\\{0,1,\\\\ldots,R-1\\\\}$$, resource index set\",\n  \"periods\": \"$$\\\\{0,1,\\\\ldots,T-1\\\\}$$, period index set\",\n  \"time_conversion_factor\": \"$$\\\\kappa$$, number of minutes per hour\",\n  \"processing_time\": \"$$a_{p,r}$$ with shape $$P\\\\times R$$, minutes of resource $$r$$ required per batch of product $$p$$\",\n  \"available_time\": \"$$b_{r,t}$$ with shape $$R\\\\times T$$, available time of resource $$r$$ in period $$t$$, expressed in hours\",\n  \"unit_revenue\": \"$$u_p$$ with shape $$P$$, revenue per batch of product $$p$$\",\n  \"resource_cost_per_hour\": \"$$c_r$$ with shape $$R$$, operating cost per hour of resource $$r$$\",\n  \"market_demand\": \"$$d_{p,t}$$ with shape $$P\\\\times T$$, optional upper bound on sellable quantity of product $$p$$ in period $$t$$; if omitted, demand is assumed nonbinding\",\n  \"contract_product\": \"$$p^{\\\\mathrm{c}} \\\\in P$$, index of the product subject to the minimum contract requirement\",\n  \"minimum_contract_quantity\": \"$$L_t$$ with shape $$T$$, minimum quantity of product $$p^{\\\\mathrm{c}}$$ that must be produced in period $$t$$\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"$$x_{p,t}$$ with shape $$P\\\\times T$$, nonnegative real-valued production quantities for every product and period\",\n  \"total_profit\": \"$$\\\\Pi$$, scalar objective value representing maximum profit\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"$$X$$\", \"$$Y$$\"],\n  \"resources\": [\"$$\\\\text{machine}$$\", \"$$\\\\text{craftsman}$$\"],\n  \"periods\": [\"$$1$$\"],\n  \"time_conversion_factor\": \"$$60$$\",\n  \"processing_time\": {\n    \"$$X$$\": {\n      \"$$\\\\text{machine}$$\": \"$$13$$\",\n      \"$$\\\\text{craftsman}$$\": \"$$20$$\"\n    },\n    \"$$Y$$\": {\n      \"$$\\\\text{machine}$$\": \"$$19$$\",\n      \"$$\\\\text{craftsman}$$\": \"$$29$$\"\n    }\n  },\n  \"available_time\": {\n    \"$$\\\\text{machine}$$\": {\n      \"$$1$$\": \"$$40$$\"\n    },\n    \"$$\\\\text{craftsman}$$\": {\n      \"$$1$$\": \"$$35$$\"\n    }\n  },\n  \"unit_revenue\": {\n    \"$$X$$\": \"$$20$$\",\n    \"$$Y$$\": \"$$30$$\"\n  },\n  \"resource_cost_per_hour\": {\n    \"$$\\\\text{machine}$$\": \"$$10$$\",\n    \"$$\\\\text{craftsman}$$\": \"$$2$$\"\n  },\n  \"contract_product\": \"$$X$$\",\n  \"minimum_contract_quantity\": {\n    \"$$1$$\": \"$$10$$\"\n  }\n}",
+    "problem": "Problem description\n- There is a candidate set $$\\mathcal{C}$$ indexed by $$i \\in \\mathcal{C}$$.\n- The recruitment decision is made over one planning horizon $$\\mathcal{T}$$.\n- Each candidate $$i$$ has a hiring cost $$k_i$$, a work-experience value $$e_i$$, and a qualification label $$q_i \\in \\mathcal{Q}$$.\n- A binary attribute $$a_i \\in \\{0,1\\}$$ indicates whether candidate $$i$$ has an advanced degree level, meaning master\u2019s degree or doctoral degree.\n- The company wants to choose a subset of candidates that minimizes the total hiring cost.\n- The hiring plan must satisfy the following business rules:\n  - each candidate is either hired or not hired;\n  - the total number of hired candidates must stay between the minimum hiring requirement $$L$$ and the maximum hiring limit $$U$$;\n  - the total hiring cost must not exceed the available budget $$B$$;\n  - at least one selected candidate must have an advanced degree level;\n  - the total work experience of all selected candidates must be at least the required experience threshold $$E^{\\min}$$;\n  - for each incompatible pair of candidates in the conflict set $$\\mathcal{I}$$, at most one of the two may be selected.\n- A solution is represented by:\n  - binary selection variables $$x_i$$ for all $$i \\in \\mathcal{C}$$, where $$x_i=1$$ means candidate $$i$$ is hired and $$x_i=0$$ means candidate $$i$$ is not hired;\n  - the selected candidate subset $$\\mathcal{S} \\subseteq \\mathcal{C}$$ induced by the binary selection variables.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"name\": \"$$\\mathcal{T}$$\",\n    \"description\": \"Recruitment planning horizon\"\n  },\n  \"candidates\": {\n    \"name\": \"$$\\mathcal{C}$$\",\n    \"type\": \"array\",\n    \"shape\": \"$$n$$ entries, where $$n = |\\mathcal{C}|$$\",\n    \"fields\": {\n      \"id\": \"Candidate identifier\",\n      \"hiring_cost\": \"$$k_i$$, hiring cost of candidate $$i$$\",\n      \"experience\": \"$$e_i$$, work experience of candidate $$i$$\",\n      \"qualification\": \"$$q_i \\\\in \\\\mathcal{Q}$$, qualification label of candidate $$i$$\",\n      \"advanced_degree_flag\": \"$$a_i \\\\in \\\\{0,1\\\\}$$, equals $$1$$ if candidate $$i$$ has a master\u2019s degree or doctoral degree\"\n    }\n  },\n  \"budget\": \"$$B$$, maximum total hiring cost\",\n  \"minimum_hires\": \"$$L$$, minimum number of hires\",\n  \"maximum_hires\": \"$$U$$, maximum number of hires\",\n  \"minimum_advanced_degree_hires\": \"$$G$$, minimum number of selected candidates with $$a_i = 1$$\",\n  \"minimum_total_experience\": \"$$E^{\\min}$$, minimum total experience required from selected candidates\",\n  \"incompatible_pairs\": {\n    \"name\": \"$$\\mathcal{I}$$\",\n    \"type\": \"array\",\n    \"shape\": \"list of unordered index pairs $$\\\\{i,j\\\\}$$ with $$i,j \\\\in \\\\mathcal{C}$$\",\n    \"description\": \"Pairs of candidates that cannot both be selected\"\n  }\n}\n\nOutput Format\n{\n  \"selection\": {\n    \"name\": \"$$x$$\",\n    \"type\": \"array\",\n    \"shape\": \"$$n$$ binary entries, where $$n = |\\mathcal{C}|$$\",\n    \"description\": \"Binary hiring decision for each candidate $$i \\\\in \\\\mathcal{C}$$; $$x_i = 1$$ if candidate $$i$$ is selected and $$x_i = 0$$ otherwise\"\n  },\n  \"selected_candidates\": {\n    \"name\": \"$$\\\\mathcal{S}$$\",\n    \"type\": \"array\",\n    \"shape\": \"subset of $$\\\\mathcal{C}$$\",\n    \"description\": \"Indices or identifiers of the selected candidates\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": \"Recruitment period\",\n  \"candidates\": [\n    {\n      \"id\": \"A\",\n      \"hiring_cost\": 8100,\n      \"experience\": 3,\n      \"qualification\": \"Bachelor's degree\",\n      \"advanced_degree_flag\": 0\n    },\n    {\n      \"id\": \"B\",\n      \"hiring_cost\": 20000,\n      \"experience\": 10,\n      \"qualification\": \"Master's degree\",\n      \"advanced_degree_flag\": 1\n    },\n    {\n      \"id\": \"C\",\n      \"hiring_cost\": 21000,\n      \"experience\": 4,\n      \"qualification\": \"Doctoral degree\",\n      \"advanced_degree_flag\": 1\n    },\n    {\n      \"id\": \"D\",\n      \"hiring_cost\": 3000,\n      \"experience\": 3,\n      \"qualification\": \"No degree\",\n      \"advanced_degree_flag\": 0\n    },\n    {\n      \"id\": \"E\",\n      \"hiring_cost\": 8000,\n      \"experience\": 7,\n      \"qualification\": \"No degree\",\n      \"advanced_degree_flag\": 0\n    }\n  ],\n  \"budget\": 35000,\n  \"minimum_hires\": 2,\n  \"maximum_hires\": 3,\n  \"minimum_advanced_degree_hires\": 1,\n  \"minimum_total_experience\": 12,\n  \"incompatible_pairs\": [\n    [\"A\", \"E\"]\n  ]\n}",
     "parameters": [
         {
-            "name": "num_products",
-            "symbol": "P",
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Number of products, with product index set {0,1,...,P-1}"
+            "description": "Single planning horizon over which the hiring decision is made"
         },
         {
-            "name": "num_resources",
-            "symbol": "R",
+            "name": "candidate_count",
+            "symbol": "N",
             "shape": [],
-            "description": "Number of renewable resource types, with resource index set {0,1,...,R-1}"
+            "description": "Number of candidates in the candidate set"
         },
         {
-            "name": "num_periods",
-            "symbol": "T",
-            "shape": [],
-            "description": "Number of planning periods, with period index set {0,1,...,T-1}"
+            "name": "hiring_cost",
+            "symbol": "k",
+            "shape": [
+                "N"
+            ],
+            "description": "Hiring cost of each candidate"
         },
         {
-            "name": "time_conversion_factor",
-            "symbol": "\\kappa",
-            "shape": [],
-            "description": "Time conversion factor between the units used for processing times and capacities"
+            "name": "experience",
+            "symbol": "e",
+            "shape": [
+                "N"
+            ],
+            "description": "Work experience value of each candidate"
         },
         {
-            "name": "processing_time_requirements",
+            "name": "qualification_label",
+            "symbol": "q",
+            "shape": [
+                "N"
+            ],
+            "description": "Qualification label of each candidate"
+        },
+        {
+            "name": "advanced_degree_flag",
             "symbol": "a",
             "shape": [
-                "P",
-                "R"
+                "N"
             ],
-            "description": "Per-batch processing time required for product p on resource r"
+            "description": "Binary advanced-degree indicator for each candidate"
         },
         {
-            "name": "resource_availability",
-            "symbol": "b",
-            "shape": [
-                "R",
-                "T"
-            ],
-            "description": "Available capacity of resource r in period t"
-        },
-        {
-            "name": "unit_revenue",
-            "symbol": "u",
-            "shape": [
-                "P"
-            ],
-            "description": "Unit revenue per batch sold for product p"
-        },
-        {
-            "name": "resource_operating_cost",
-            "symbol": "c",
-            "shape": [
-                "R"
-            ],
-            "description": "Operating cost per hour for resource r"
-        },
-        {
-            "name": "market_demand_upper_bound",
-            "symbol": "d",
-            "shape": [
-                "P",
-                "T"
-            ],
-            "description": "Optional market demand upper bound for product p in period t; if absent, demand is nonbinding"
-        },
-        {
-            "name": "contract_product_index",
-            "symbol": "p^{\\mathrm{c}}",
+            "name": "budget",
+            "symbol": "B",
             "shape": [],
-            "description": "Index of the product subject to the minimum contract requirement"
+            "description": "Total budget cap for selected candidates"
         },
         {
-            "name": "minimum_contract_quantity",
+            "name": "minimum_hires",
             "symbol": "L",
+            "shape": [],
+            "description": "Minimum number of hires required"
+        },
+        {
+            "name": "maximum_hires",
+            "symbol": "U",
+            "shape": [],
+            "description": "Maximum number of hires allowed"
+        },
+        {
+            "name": "minimum_advanced_degree_hires",
+            "symbol": "G",
+            "shape": [],
+            "description": "Minimum number of selected candidates with advanced degree flag equal to 1"
+        },
+        {
+            "name": "minimum_total_experience",
+            "symbol": "E^{\\min}",
+            "shape": [],
+            "description": "Minimum total experience required among selected candidates"
+        },
+        {
+            "name": "incompatible_pairs",
+            "symbol": "\\mathcal{I}",
             "shape": [
-                "T"
+                "-",
+                "2"
             ],
-            "description": "Minimum required quantity of the contract product in each period"
+            "description": "Set of unordered incompatible candidate pairs"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "selection",
             "symbol": "x",
             "shape": [
-                "P",
-                "T"
+                "N"
             ],
-            "domain": "continuous",
-            "description": "Number of standardized batches of product p produced in period t, with fractional values allowed"
+            "domain": "binary",
+            "description": "Binary selection variable indicating whether each candidate is selected"
+        },
+        {
+            "name": "selected_candidates",
+            "symbol": "\\mathcal{S}",
+            "shape": [
+                "-"
+            ],
+            "domain": "sos1",
+            "description": "Selected subset of candidates induced by the selection vector"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_production_quantity",
-            "description": "Production quantities must be nonnegative and fractional values are allowed.",
-            "formula": "x[p][t] \\ge 0",
-            "parameters": [
-                "production_quantity"
-            ],
+            "name": "binary_selection_domain",
+            "description": "Each candidate is either selected or not selected",
+            "formula": "x_i \\in \\{0,1\\}",
             "variables": [
-                "production_quantity"
+                "selection"
             ]
         },
         {
-            "name": "resource_capacity_limit",
-            "description": "For each resource r and period t, total processing time used by all products cannot exceed the available capacity, after applying the time conversion factor.",
-            "formula": "\\sum_{p=0}^{P-1} a_{p,r} x_{p,t} \\le \\kappa b_{r,t} \\quad \\forall r=0,\\ldots,R-1,\\; \\forall t=0,\\ldots,T-1",
+            "name": "hire_count_bounds",
+            "description": "The number of selected candidates must lie between the minimum and maximum hire limits",
+            "formula": "L \\leq \\sum_{i=1}^{N} x_i \\leq U",
             "parameters": [
-                "processing_time_requirements",
-                "resource_availability",
-                "time_conversion_factor",
-                "num_products",
-                "num_resources",
-                "num_periods"
+                "minimum_hires",
+                "maximum_hires"
             ],
             "variables": [
-                "production_quantity"
+                "selection"
             ]
         },
         {
-            "name": "contract_minimum_quantity",
-            "description": "The designated contract product must be produced in at least the required minimum quantity in every period.",
-            "formula": "x_{p^{\\mathrm{c}},t} \\ge L_t \\quad \\forall t=0,\\ldots,T-1",
+            "name": "budget_cap",
+            "description": "The total hiring cost of selected candidates must not exceed the budget cap",
+            "formula": "\\sum_{i=1}^{N} k_i x_i \\leq B",
             "parameters": [
-                "contract_product_index",
-                "minimum_contract_quantity",
-                "num_periods"
+                "hiring_cost",
+                "budget"
             ],
             "variables": [
-                "production_quantity"
+                "selection"
             ]
         },
         {
-            "name": "demand_upper_bound_if_provided",
-            "description": "If market demand data are provided, sales of each product in each period cannot exceed the given demand upper bound; because production and sales are identical, this is enforced directly on production quantities.",
-            "formula": "x_{p,t} \\le d_{p,t} \\quad \\forall p=0,\\ldots,P-1,\\; \\forall t=0,\\ldots,T-1",
+            "name": "minimum_advanced_degree_hires",
+            "description": "At least the required number of selected candidates must have advanced degree flag equal to 1",
+            "formula": "\\sum_{i=1}^{N} a_i x_i \\geq G",
             "parameters": [
-                "market_demand_upper_bound",
-                "num_products",
-                "num_periods"
+                "advanced_degree_flag",
+                "minimum_advanced_degree_hires"
             ],
             "variables": [
-                "production_quantity"
+                "selection"
             ]
         },
         {
-            "name": "production_equals_sales",
-            "description": "All produced batches are sold in the same period, so production quantities and sales quantities are identical and there is no inventory carryover. This is enforced structurally by using only the production variable and no separate sales or inventory variables.",
-            "formula": "\\text{No separate sales variable; } s_{p,t} = x_{p,t} \\text{ is implicit for all } p=0,\\ldots,P-1,\\; t=0,\\ldots,T-1",
+            "name": "minimum_total_experience",
+            "description": "The total work experience of selected candidates must be at least the required minimum",
+            "formula": "\\sum_{i=1}^{N} e_i x_i \\geq E^{\\min}",
             "parameters": [
-                "num_products",
-                "num_periods"
+                "experience",
+                "minimum_total_experience"
             ],
             "variables": [
-                "production_quantity"
+                "selection"
+            ]
+        },
+        {
+            "name": "incompatible_pair_exclusion",
+            "description": "For every incompatible pair, both candidates cannot be selected together",
+            "formula": "x_i + x_j \\leq 1 \\quad \\forall (i,j) \\in \\mathcal{I}",
+            "parameters": [
+                "incompatible_pairs"
+            ],
+            "variables": [
+                "selection"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize total profit over the planning horizon, defined as total revenue from sold batches minus total resource operating cost.",
-            "sense": "maximize"
+            "name": "total_hiring_cost_minimization",
+            "description": "Minimize the total hiring cost of the selected candidates",
+            "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit over the planning horizon, equal to total revenue from produced-and-sold batches minus total resource operating cost. Since production equals sales and no inventory is carried, revenue is linear in production quantities and resource cost is charged on utilized processing time.",
+        "description": "Minimize the total hiring cost of the selected candidates using the binary selection vector over the candidate set.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\sum_{p=0}^{P-1}\\sum_{t=0}^{T-1} u_p x_{p,t} - \\sum_{r=0}^{R-1}\\sum_{t=0}^{T-1} c_r \\left(\\frac{1}{\\kappa}\\sum_{p=0}^{P-1} a_{p,r} x_{p,t}\\right)",
+        "sense": "minimize",
+        "formula": "\\sum_{i=1}^{N} k_i x_i",
         "parameters": [
-            "unit_revenue",
-            "resource_operating_cost",
-            "processing_time_requirements",
-            "time_conversion_factor",
-            "num_products",
-            "num_resources",
-            "num_periods"
+            "hiring_cost"
         ],
         "variables": [
-            "production_quantity"
+            "selection"
         ]
     }
 }

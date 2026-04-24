@@ -1,283 +1,262 @@
 {
-    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of residential areas, and each area in $$\\mathcal{I}$$ is also a candidate location where a chain store may be opened.\n- The planning problem is static and single-period, with planning horizon $$\\mathcal{T}$$ treated as a singleton because no time phasing is involved.\n- A service radius $$R$$ limits how far a residential area may be from an opened store and still be considered covered.\n- For each candidate site $$i \\in \\mathcal{I}$$, the coverage set $$\\mathcal{N}_i \\subseteq \\mathcal{I}$$ lists all residential areas that can be served if a store is opened at $$i$$.\n- Each residential area has one unit of coverage requirement, meaning every area must be included in the service reach of at least one selected store.\n- Opening costs may be represented by parameters $$c_i$$ for candidate sites, and generalized capacity parameters may be represented by $$\\kappa_i$$ if an extended version limits how much service a store can provide; this instance is governed by coverage only.\n- The planning goal is to choose the smallest possible number of store locations, or equivalently the minimum total opening effort under unit opening cost, while ensuring complete coverage of all residential areas.\n- Stores may only be opened at candidate residential areas.\n- A residential area may be both a store location and a covered area.\n- A solution is represented by:\n  - binary opening decisions $$x_i$$ for each $$i \\in \\mathcal{I}$$, where $$x_i = 1$$ means a store is opened at area $$i$$ and $$x_i = 0$$ otherwise\n  - the selected location list containing all areas with $$x_i = 1$$\n  - the total number of opened stores, given by the count of selected locations\n\nInput Format\n{\n  \"$$\\mathcal{I}$$\": \"List of residential area identifiers, indexed by $$i$$, where each identifier is a candidate store location.\",\n  \"$$\\mathcal{T}$$\": \"Planning horizon; for this static coverage problem, $$\\mathcal{T}$$ is a singleton set.\",\n  \"$$R$$\": \"Maximum allowed service distance for coverage.\",\n  \"$$\\mathcal{N}_i$$\": \"For each $$i \\\\in \\\\mathcal{I}$$, the list of residential areas covered by a store opened at $$i$$.\",\n  \"$$q_j$$\": \"Coverage requirement for area $$j \\\\in \\\\mathcal{I}$$; this problem uses one unit of coverage requirement per area.\",\n  \"$$c_i$$\": \"Opening cost for candidate site $$i$$, used if a weighted objective is modeled; unit cost is implied when omitted.\",\n  \"$$\\\\kappa_i$$\": \"Optional capacity parameter for site $$i$$, used only in generalized extensions with service limits.\"\n}\n\nOutput Format\n{\n  \"$$\\\\mathbf{x}$$\": {\n    \"type\": \"binary vector\",\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"Selection status of each candidate site, where $$x_i = 1$$ indicates an opened store at area $$i$$.\"\n  },\n  \"$$S$$\": {\n    \"type\": \"list of area identifiers\",\n    \"meaning\": \"The selected store locations, consisting of all $$i \\\\in \\\\mathcal{I}$$ with $$x_i = 1$$.\"\n  },\n  \"$$K$$\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Total number of opened stores.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"$$R$$\": \"$$800\\\\,\\\\mathrm{m}$$\",\n  \"$$\\\\mathcal{I}$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$D$$\", \"$$E$$\", \"$$F$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n  \"$$\\\\mathcal{N}_i$$\": {\n    \"$$A$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$B$$\": [\"$$B$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$C$$\": [\"$$A$$\", \"$$C$$\", \"$$G$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$D$$\": [\"$$D$$\", \"$$J$$\"],\n    \"$$E$$\": [\"$$A$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$F$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\"],\n    \"$$G$$\": [\"$$A$$\", \"$$C$$\", \"$$E$$\", \"$$G$$\"],\n    \"$$H$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$I$$\": [\"$$A$$\", \"$$B$$\", \"$$C$$\", \"$$H$$\", \"$$I$$\"],\n    \"$$J$$\": [\"$$D$$\", \"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$K$$\": [\"$$F$$\", \"$$J$$\", \"$$K$$\", \"$$L$$\"],\n    \"$$L$$\": [\"$$J$$\", \"$$K$$\", \"$$L$$\"]\n  }\n}",
+    "problem": "Problem description\n- There is a single-period production planning problem with a product set $$P$$ indexed by $$p \\in P$$, and a planning horizon $$\\mathcal{T}$$ with $$\\lvert \\mathcal{T} \\rvert = 1$$.\n- Each product $$p \\in P$$ has a unit profit $$\\pi_p$$, a wood requirement per unit $$a^{\\mathrm{wood}}_p$$, and a steel requirement per unit $$a^{\\mathrm{steel}}_p$$.\n- The manufacturer has total available wood $$W$$ and total available steel $$S$$.\n- The planning goal is to choose which product types to manufacture and how many units of each selected product to produce so that total profit is maximized.\n- Production quantities are nonnegative integers, and each product type is either manufactured or not manufactured.\n- The available wood and steel must not be exceeded by the total production plan.\n- If a product type is not selected for manufacture, its production quantity must be zero.\n- If a product type is selected, its production quantity must be compatible with the available resource limits.\n- The logical business rules are:\n  - if the truck product type is manufactured, the train product type must not be manufactured;\n  - if the boat product type is manufactured, the airplane product type must also be manufactured;\n  - the number of boats produced cannot exceed the number of trains produced.\n- A solution is represented by:\n  - $$x_p$$: the integer number of units produced of product $$p \\in P$$;\n  - $$y_p$$: a binary indicator showing whether product $$p \\in P$$ is manufactured;\n  - $$K$$: the number of product types that are manufactured.\n\nInput Format\n{\n  \"products\": {\n    \"symbol\": \"$$P$$\",\n    \"type\": \"array of product identifiers\",\n    \"description\": \"The set of product types indexed by $$p \\in P$$\"\n  },\n  \"unit_profit\": {\n    \"symbol\": \"$$\\\\pi_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Unit profit for each product $$p \\\\in P$$\"\n  },\n  \"wood_capacity\": {\n    \"symbol\": \"$$W$$\",\n    \"type\": \"number\",\n    \"description\": \"Total available wood\"\n  },\n  \"wood_requirement\": {\n    \"symbol\": \"$$a^{\\\\mathrm{wood}}_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Wood required per unit of product $$p \\\\in P$$\"\n  },\n  \"steel_capacity\": {\n    \"symbol\": \"$$S$$\",\n    \"type\": \"number\",\n    \"description\": \"Total available steel\"\n  },\n  \"steel_requirement\": {\n    \"symbol\": \"$$a^{\\\\mathrm{steel}}_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of numbers\",\n    \"description\": \"Steel required per unit of product $$p \\\\in P$$\"\n  },\n  \"market_demand\": {\n    \"symbol\": \"$$D_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"optional array of numbers\",\n    \"description\": \"Maximum sellable quantity for each product $$p \\\\in P$$; if omitted, no separate demand cap is imposed\"\n  },\n  \"forbidden_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{F}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that manufacturing $$p$$ prohibits manufacturing $$q$$\"\n  },\n  \"implication_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{I}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that manufacturing $$p$$ requires manufacturing $$q$$\"\n  },\n  \"quantity_ordering_pairs\": {\n    \"symbol\": \"$$\\\\mathcal{R}$$\",\n    \"type\": \"array of ordered pairs\",\n    \"description\": \"Pairs $$(p,q)$$ such that the production quantity of $$p$$ cannot exceed the production quantity of $$q$$\"\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"symbol\": \"$$x_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of integers\",\n    \"description\": \"Optimal production quantity for each product $$p \\\\in P$$\"\n  },\n  \"manufacture_indicator\": {\n    \"symbol\": \"$$y_p$$\",\n    \"shape\": \"[$$|P|$$]\",\n    \"type\": \"array of binary values\",\n    \"description\": \"Whether product $$p \\\\in P$$ is manufactured\"\n  },\n  \"manufactured_type_count\": {\n    \"symbol\": \"$$K$$\",\n    \"type\": \"integer\",\n    \"description\": \"Number of product types selected for manufacture\"\n  },\n  \"total_profit\": {\n    \"symbol\": \"$$Z^*$$\",\n    \"type\": \"number\",\n    \"description\": \"Maximum achievable total profit\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\"truck\", \"airplane\", \"boat\", \"train\"],\n  \"unit_profit\": [5, 10, 8, 7],\n  \"wood_capacity\": 890,\n  \"wood_requirement\": [12, 20, 15, 10],\n  \"steel_capacity\": 500,\n  \"steel_requirement\": [6, 3, 5, 4],\n  \"forbidden_pairs\": [[\"truck\", \"train\"]],\n  \"implication_pairs\": [[\"boat\", \"airplane\"]],\n  \"quantity_ordering_pairs\": [[\"boat\", \"train\"]]\n}",
     "parameters": [
         {
-            "name": "num_areas",
-            "symbol": "N",
+            "name": "product_types",
+            "symbol": "P",
             "shape": [],
-            "description": "Number of residential areas and candidate store sites"
+            "description": "Set of product types"
         },
         {
-            "name": "area_set",
-            "symbol": "\\mathcal{I}",
-            "shape": [
-                "N"
-            ],
-            "description": "Set of residential area identifiers, each also a candidate store location"
-        },
-        {
-            "name": "planning_horizon",
+            "name": "time_periods",
             "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Singleton planning horizon set for the static single-period problem"
+            "description": "Planning horizon with a single period"
         },
         {
-            "name": "service_radius",
-            "symbol": "R",
+            "name": "wood_capacity",
+            "symbol": "W",
             "shape": [],
-            "description": "Maximum allowed service distance for coverage"
+            "description": "Total available wood capacity"
         },
         {
-            "name": "coverage_sets",
-            "symbol": "\\mathcal{N}_i",
-            "shape": [
-                "N",
-                "N"
-            ],
-            "description": "Coverage set for each candidate site i indicating which areas can be served by an opened store at i"
+            "name": "steel_capacity",
+            "symbol": "S",
+            "shape": [],
+            "description": "Total available steel capacity"
         },
         {
-            "name": "coverage_requirement",
-            "symbol": "q_j",
+            "name": "unit_profit",
+            "symbol": "\\pi",
             "shape": [
-                "N"
+                "P"
             ],
-            "description": "Coverage requirement of each area j, equal to one unit per area"
+            "description": "Unit profit for each product type"
         },
         {
-            "name": "opening_cost",
-            "symbol": "c_i",
+            "name": "wood_requirement",
+            "symbol": "a^{\\mathrm{wood}}",
             "shape": [
-                "N"
+                "P"
             ],
-            "description": "Optional opening cost of each candidate site i"
+            "description": "Wood usage per unit for each product type"
         },
         {
-            "name": "site_capacity",
-            "symbol": "\\kappa_i",
+            "name": "steel_requirement",
+            "symbol": "a^{\\mathrm{steel}}",
             "shape": [
-                "N"
+                "P"
             ],
-            "description": "Optional capacity parameter for each site i used in generalized extensions"
+            "description": "Steel usage per unit for each product type"
+        },
+        {
+            "name": "market_demand",
+            "symbol": "D",
+            "shape": [
+                "P"
+            ],
+            "description": "Optional maximum sellable quantity for each product type, if provided"
+        },
+        {
+            "name": "forbidden_pairs",
+            "symbol": "\\mathcal{F}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where manufacturing the first forbids manufacturing the second"
+        },
+        {
+            "name": "implication_pairs",
+            "symbol": "\\mathcal{I}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where manufacturing the first requires manufacturing the second"
+        },
+        {
+            "name": "quantity_ordering_pairs",
+            "symbol": "\\mathcal{R}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered pairs of product types where the first product quantity cannot exceed the second"
         }
     ],
     "variables": [
         {
-            "name": "open_store",
-            "symbol": "x_i",
+            "name": "production_quantity",
+            "symbol": "x",
             "shape": [
-                "N"
+                "P"
+            ],
+            "domain": "integer",
+            "description": "Production quantity for each product type"
+        },
+        {
+            "name": "manufacture_indicator",
+            "symbol": "y",
+            "shape": [
+                "P"
             ],
             "domain": "binary",
-            "description": "Binary opening decision for each candidate site i; 1 indicates a store is opened at area i"
+            "description": "Binary indicator equal to 1 if the product type is manufactured and 0 otherwise"
         },
         {
-            "name": "selected_locations",
-            "symbol": "S",
-            "shape": [
-                "N"
-            ],
-            "domain": "sos1",
-            "description": "Selected store locations, consisting of all areas i with x_i=1"
-        },
-        {
-            "name": "opened_store_count",
+            "name": "manufactured_type_count",
             "symbol": "K",
             "shape": [],
             "domain": "integer",
-            "description": "Total number of opened stores"
+            "description": "Number of product types manufactured"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "production_upper_bound",
+            "symbol": "U",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Per-product upper bound used in the selection-linking constraint, computed as the minimum of the resource-implied and demand-implied limits for each product."
+        }
+    ],
     "constraints": [
         {
-            "name": "binary_opening_decision",
-            "description": "The store opening decision for each candidate site is binary",
-            "formula": "x_i \\in \\{0,1\\}",
+            "name": "wood_capacity_limit",
+            "description": "Total wood usage by all production quantities cannot exceed available wood capacity",
+            "formula": "\\sum_{p\\in P} a^{\\mathrm{wood}}_p x_p \\leq W",
             "parameters": [
-                "area_set"
+                "wood_capacity",
+                "wood_requirement"
             ],
             "variables": [
-                "open_store"
+                "production_quantity"
             ]
         },
         {
-            "name": "selected_locations_definition",
-            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
-            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
+            "name": "steel_capacity_limit",
+            "description": "Total steel usage by all production quantities cannot exceed available steel capacity",
+            "formula": "\\sum_{p\\in P} a^{\\mathrm{steel}}_p x_p \\leq S",
             "parameters": [
-                "area_set"
+                "steel_capacity",
+                "steel_requirement"
             ],
             "variables": [
-                "open_store",
-                "selected_locations"
+                "production_quantity"
             ]
         },
         {
-            "name": "opened_store_count_definition",
-            "description": "The opened store count equals the sum of binary opening decisions.",
-            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
+            "name": "link_production_to_selection",
+            "description": "Production is allowed only if a product is selected, and if selected it may produce at most the per-product upper bound.",
+            "formula": "x_p \\leq U_p y_p \\quad \\forall p\\in P",
             "parameters": [
-                "area_set"
+                "wood_capacity",
+                "steel_capacity",
+                "market_demand"
             ],
             "variables": [
-                "open_store",
-                "opened_store_count"
+                "production_quantity",
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "coverage_requirement",
-            "description": "Every residential area must be covered by at least one selected store within the service radius.",
-            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
+            "name": "market_demand_cap",
+            "description": "If a market demand cap is provided, production quantity for each product cannot exceed its demand limit.",
+            "formula": "x_p \\leq D_p \\quad \\forall p\\in P",
             "parameters": [
-                "area_set",
-                "coverage_sets",
-                "coverage_requirement"
+                "market_demand"
             ],
             "variables": [
-                "open_store"
+                "production_quantity"
             ]
         },
         {
-            "name": "candidate_site_restriction",
-            "description": "Stores may only be opened at candidate sites belonging to the residential area set",
-            "formula": "i \\in \\mathcal{I}",
+            "name": "forbidden_manufacturing_pairs",
+            "description": "For each forbidden pair, manufacturing the first product forbids manufacturing the second product",
+            "formula": "y_p + y_q \\leq 1 \\quad \\forall (p,q)\\in \\mathcal{F}",
             "parameters": [
-                "area_set"
+                "forbidden_pairs"
             ],
             "variables": [
-                "open_store"
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "static_single_period_structure",
-            "description": "The model is static and single-period, so there are no time-indexed decisions over the planning horizon",
-            "formula": "\\mathcal{T} \\text{ is a singleton set}",
+            "name": "implication_manufacturing_pairs",
+            "description": "For each implication pair, manufacturing the first product requires manufacturing the second product",
+            "formula": "y_p \\leq y_q \\quad \\forall (p,q)\\in \\mathcal{I}",
             "parameters": [
-                "planning_horizon"
-            ],
-            "variables": []
-        },
-        {
-            "name": "coverage_set_membership",
-            "description": "Structural data assumption: each precomputed coverage set is a subset of the residential area set.",
-            "formula": "j \\in \\mathcal{N}_i",
-            "parameters": [
-                "coverage_sets",
-                "area_set"
-            ],
-            "variables": []
-        },
-        {
-            "name": "unit_coverage_requirement",
-            "description": "Each residential area has unit coverage demand.",
-            "formula": "q_j = 1 \\quad \\forall j \\in \\mathcal{I}",
-            "parameters": [
-                "coverage_requirement",
-                "area_set"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_service_radius",
-            "description": "The service radius is nonnegative.",
-            "formula": "R \\ge 0",
-            "parameters": [
-                "service_radius"
-            ],
-            "variables": []
-        },
-        {
-            "name": "coverage_set_subset",
-            "description": "Structural data assumption: each coverage set is a subset of the residential area set.",
-            "formula": "\\mathcal{N}_i \\subseteq \\mathcal{I}",
-            "parameters": [
-                "coverage_sets",
-                "area_set"
-            ],
-            "variables": []
-        },
-        {
-            "name": "nonnegative_parameters",
-            "description": "Optional opening costs and capacities are nonnegative when provided",
-            "formula": "c_i \\ge 0, \\kappa_i \\ge 0",
-            "parameters": [
-                "opening_cost",
-                "site_capacity"
-            ],
-            "variables": []
-        },
-        {
-            "name": "coverage_constraint",
-            "description": "Every residential area j must be covered by at least one opened store i whose coverage set contains j.",
-            "formula": "\\sum_{i \\in \\mathcal{I}: j \\in \\mathcal{N}_i} x_i \\ge q_j \\quad \\forall j \\in \\mathcal{I}",
-            "parameters": [
-                "area_set",
-                "coverage_sets",
-                "coverage_requirement"
+                "implication_pairs"
             ],
             "variables": [
-                "open_store"
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "store_count_definition",
-            "description": "The total number of opened stores equals the sum of opening decisions.",
-            "formula": "K = \\sum_{i \\in \\mathcal{I}} x_i",
+            "name": "quantity_ordering_pairs",
+            "description": "For each quantity ordering pair, the production quantity of the first product cannot exceed the production quantity of the second product",
+            "formula": "x_p \\leq x_q \\quad \\forall (p,q)\\in \\mathcal{R}",
             "parameters": [
-                "area_set"
+                "quantity_ordering_pairs"
             ],
             "variables": [
-                "open_store",
-                "opened_store_count"
+                "production_quantity"
             ]
         },
         {
-            "name": "selected_location_indicator_link",
-            "description": "Bookkeeping relation: the selected locations correspond exactly to the indices with open decision equal to one, represented symbolically rather than as an algebraic set constraint.",
-            "formula": "S = \\{ i \\in \\mathcal{I} : x_i = 1 \\}",
-            "parameters": [
-                "area_set"
-            ],
+            "name": "manufactured_type_count_definition",
+            "description": "The count variable equals the number of products with manufacture indicator equal to one",
+            "formula": "K = \\sum_{p\\in P} y_p",
             "variables": [
-                "open_store",
-                "selected_locations"
+                "manufactured_type_count",
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "nonnegative_optional_parameters",
-            "description": "Optional opening costs and capacities are nonnegative when present.",
-            "formula": "c_i \\ge 0,\\ \\kappa_i \\ge 0 \\quad \\forall i \\in \\mathcal{I}",
+            "name": "single_period_horizon",
+            "description": "The planning horizon is single-period with exactly one time period.",
+            "formula": "|\\mathcal{T}| = 1",
             "parameters": [
-                "opening_cost",
-                "site_capacity",
-                "area_set"
+                "time_periods"
+            ]
+        },
+        {
+            "name": "production_upper_bound_definition",
+            "description": "Define the per-product upper bound used in the linking constraint as the minimum of the available resource-based and optional demand-based limits.",
+            "formula": "U_p = \\min\\left(\\left\\lfloor \\min\\left(\\frac{W}{a^{\\mathrm{wood}}_p},\\frac{S}{a^{\\mathrm{steel}}_p}\\right)\\right\\rfloor, D_p\\right) \\quad \\forall p\\in P",
+            "parameters": [
+                "wood_capacity",
+                "steel_capacity",
+                "wood_requirement",
+                "steel_requirement",
+                "market_demand"
             ],
-            "variables": []
+            "variables": [
+                "production_quantity"
+            ]
         }
     ],
     "objectives": [
         {
-            "name": "minimize_opened_stores",
-            "description": "Find a feasible selection of store locations that covers every residential area while minimizing the number of opened stores",
-            "sense": "minimize"
-        },
-        {
-            "name": "minimize_opening_effort",
-            "description": "Minimize total opening effort under unit opening cost for opened store locations",
-            "sense": "minimize"
+            "name": "total_profit_maximization",
+            "description": "Maximize total profit across all manufactured products",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the number of opened stores, equivalently the cardinality of the selected location set, in the single-period coverage problem.",
+        "description": "Maximize total profit from produced quantities across all products in the single-period planning model.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "\\sum_{i \\in \\mathcal{I}} x_i",
+        "sense": "maximize",
+        "formula": "\\sum_{p\\in P} \\pi_p x_p",
         "parameters": [
-            "area_set"
+            "product_types",
+            "unit_profit"
         ],
         "variables": [
-            "open_store"
+            "production_quantity"
         ]
     }
 }

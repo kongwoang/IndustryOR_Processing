@@ -1,290 +1,184 @@
 {
-    "problem": "Problem description\n- The planning horizon is divided into $$K$$ consecutive time periods over a total horizon of $$H$$ hours, with periods indexed by $$t \\in \\mathcal{T}$$.\n- The hospital must staff nurses to meet a required demand level $$d_t$$ in every period $$t$$.\n- There are two nurse categories indexed by $$i \\in \\mathcal{I}$$, where $$\\mathcal{I} = \\{\\mathrm{reg}, \\mathrm{con}\\}$$, representing regular nurses and contract nurses.\n- Allowed shift start batches are indexed by $$s \\in \\mathcal{S}$$. A nurse assigned to batch $$s$$ starts at time $$\\tau_s$$ and works continuously for a shift length of $$L$$ hours.\n- Regular nurses and contract nurses have the same shift length and the same coverage behavior; they differ only in hourly labor cost.\n- The hourly labor cost for regular nurses is $$c^{\\mathrm{reg}}$$, and the hourly labor cost for contract nurses is $$c^{\\mathrm{con}}$$.\n- The planning goal is to choose how many nurses of each type to start in each allowed batch so that every period\u2019s demand is covered at minimum total labor cost.\n- Staffing decisions must be nonnegative integers.\n- Every hired nurse must work a full shift once assigned, and a shift may cover one or more adjacent periods depending on the overlap between the shift interval and the planning periods.\n- The model should determine whether any contract nurses are used and, if so, how many are hired in total and by start batch.\n- A solution is represented by:\n  - $$x_{s}^{\\mathrm{reg}}$$, the number of regular nurses starting in batch $$s \\in \\mathcal{S}$$.\n  - $$x_{s}^{\\mathrm{con}}$$, the number of contract nurses starting in batch $$s \\in \\mathcal{S}$$.\n  - $$y^{\\mathrm{con}}$$, a binary indicator showing whether contract nurses are used at all.\n  - $$X^{\\mathrm{reg}}$$, the total number of regular nurses hired across all batches.\n  - $$X^{\\mathrm{con}}$$, the total number of contract nurses hired across all batches.\n  - $$Z$$, the total labor cost of the staffing plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Total planning horizon $$H$$ in hours.\"\n  },\n  \"periods\": {\n    \"type\": \"array\",\n    \"length\": \"$$K$$\",\n    \"meaning\": \"Ordered planning periods indexed by $$t \\in \\mathcal{T}$$.\",\n    \"items\": {\n      \"start_time\": \"string\",\n      \"end_time\": \"string\",\n      \"demand\": \"integer; required nurse count $$d_t$$ for period $$t$$.\"\n    }\n  },\n  \"shift_starts\": {\n    \"type\": \"array\",\n    \"length\": \"$$S$$\",\n    \"meaning\": \"Allowed shift start times $$\\\\tau_s$$ indexed by $$s \\\\in \\\\mathcal{S}$$.\"\n  },\n  \"shift_duration\": {\n    \"type\": \"number\",\n    \"meaning\": \"Shift length $$L$$ in hours.\"\n  },\n  \"nurse_types\": {\n    \"type\": \"object\",\n    \"meaning\": \"Nurse categories $$\\\\mathcal{I} = \\\\{\\\\mathrm{reg}, \\\\mathrm{con}\\\\}$$.\",\n    \"fields\": {\n      \"regular\": {\n        \"hourly_cost\": \"number; regular nurse hourly cost $$c^{\\\\mathrm{reg}}$$.\"\n      },\n      \"contract\": {\n        \"hourly_cost\": \"number; contract nurse hourly cost $$c^{\\\\mathrm{con}}$$.\"\n      }\n    }\n  },\n  \"coverage_rule\": {\n    \"type\": \"string\",\n    \"meaning\": \"Describes how a shift starting at $$\\\\tau_s$$ and lasting $$L$$ hours covers the planning periods; the derived coverage indicator may be represented by $$a_{t,s}$$.\"\n  }\n}\n\nOutput Format\n{\n  \"hire_plan\": {\n    \"regular_by_start\": {\n      \"type\": \"array\",\n      \"length\": \"$$S$$\",\n      \"meaning\": \"Values $$x_s^{\\\\mathrm{reg}}$$ for each shift-start batch $$s \\\\in \\\\mathcal{S}$$.\"\n    },\n    \"contract_by_start\": {\n      \"type\": \"array\",\n      \"length\": \"$$S$$\",\n      \"meaning\": \"Values $$x_s^{\\\\mathrm{con}}$$ for each shift-start batch $$s \\\\in \\\\mathcal{S}$$.\"\n    },\n    \"use_contract_nurses\": {\n      \"type\": \"boolean\",\n      \"meaning\": \"Indicator $$y^{\\\\mathrm{con}}$$ showing whether any contract nurses are hired.\"\n    }\n  },\n  \"summary\": {\n    \"total_regular_hires\": {\n      \"type\": \"integer\",\n      \"meaning\": \"Total regular nurses hired, $$X^{\\\\mathrm{reg}}$$.\"\n    },\n    \"total_contract_hires\": {\n      \"type\": \"integer\",\n      \"meaning\": \"Total contract nurses hired, $$X^{\\\\mathrm{con}}$$.\"\n    },\n    \"total_labor_cost\": {\n      \"type\": \"number\",\n      \"meaning\": \"Objective value $$Z$$.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": 24,\n  \"periods\": [\n    {\n      \"start_time\": \"02:00\",\n      \"end_time\": \"06:00\",\n      \"demand\": 10\n    },\n    {\n      \"start_time\": \"06:00\",\n      \"end_time\": \"10:00\",\n      \"demand\": 15\n    },\n    {\n      \"start_time\": \"10:00\",\n      \"end_time\": \"14:00\",\n      \"demand\": 25\n    },\n    {\n      \"start_time\": \"14:00\",\n      \"end_time\": \"18:00\",\n      \"demand\": 20\n    },\n    {\n      \"start_time\": \"18:00\",\n      \"end_time\": \"22:00\",\n      \"demand\": 18\n    },\n    {\n      \"start_time\": \"22:00\",\n      \"end_time\": \"02:00\",\n      \"demand\": 12\n    }\n  ],\n  \"shift_starts\": [\n    \"02:00\",\n    \"06:00\",\n    \"10:00\",\n    \"14:00\",\n    \"18:00\",\n    \"22:00\"\n  ],\n  \"shift_duration\": 8,\n  \"nurse_types\": {\n    \"regular\": {\n      \"hourly_cost\": 10\n    },\n    \"contract\": {\n      \"hourly_cost\": 15\n    }\n  }\n}",
+    "problem": "Problem description\n- There is a finite planning horizon $$\\mathcal{T}$$ of ordered periods indexed by $$t$$, and a set of products $$\\mathcal{P}$$ indexed by $$p$$.\n- The original instance contains one product, but the structure is written in a general multi-product form.\n- Initial on-hand inventory is given by $$I^0_p$$ for each product $$p \\in \\mathcal{P}$$.\n- Storage is limited by a warehouse capacity $$C$$, and the total inventory kept in storage must never exceed this limit at any time.\n- Unit purchase costs are given by $$c^b_{p,t}$$ for each product-period pair, and unit selling revenues are given by $$c^s_{p,t}$$.\n- Purchases are made at the beginning of each period, and sales are made during that same period.\n- Inventory that is not sold in a period carries forward to the next period.\n- The planning goal is to choose how much to purchase and how much to sell in each period so that the total net financial return over the planning horizon is as large as possible.\n- Required business rules:\n  - purchase quantities must be nonnegative;\n  - sales quantities must be nonnegative;\n  - sales in any period can only come from inventory available after that period\u2019s purchases;\n  - ending inventory in each period must remain nonnegative;\n  - inventory in storage must stay within the warehouse capacity;\n  - if an optional exogenous sales cap $$D_{p,t}$$ is provided, sales must also respect that cap.\n- A solution is represented by:\n  - $$x_{p,t}$$: quantity purchased for product $$p$$ at the beginning of period $$t$$;\n  - $$y_{p,t}$$: quantity sold for product $$p$$ during period $$t$$;\n  - $$s_{p,t}$$: ending inventory of product $$p$$ after period $$t$$;\n  - $$Z$$: total net revenue achieved over the full planning horizon.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"count\": \"$$T$$\",\n    \"period_labels\": \"ordered list of length $$T$$\"\n  },\n  \"products\": {\n    \"count\": \"$$P$$\",\n    \"labels\": \"ordered list of length $$P$$\"\n  },\n  \"initial_inventory\": {\n    \"shape\": \"$$P$$\",\n    \"meaning\": \"starting inventory vector $$I^0_p$$ for each product $$p$$\"\n  },\n  \"storage_capacity\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"warehouse capacity parameter $$C$$\"\n  },\n  \"purchase_price\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"unit purchase cost matrix $$c^b_{p,t}$$\"\n  },\n  \"selling_price\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"unit selling revenue matrix $$c^s_{p,t}$$\"\n  },\n  \"optional_demand_cap\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"meaning\": \"optional sales-limit matrix $$D_{p,t}$$ if the application includes one; otherwise omitted\"\n  }\n}\n\nOutput Format\n{\n  \"purchase_quantity\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"ordering\": \"aligned with the input period order\",\n    \"meaning\": \"purchase plan $$x_{p,t}$$\"\n  },\n  \"sales_quantity\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"ordering\": \"aligned with the input period order\",\n    \"meaning\": \"sales plan $$y_{p,t}$$\"\n  },\n  \"ending_inventory\": {\n    \"shape\": \"$$P \\\\times T$$\",\n    \"ordering\": \"aligned with the input period order\",\n    \"meaning\": \"ending inventory plan $$s_{p,t}$$\"\n  },\n  \"total_net_revenue\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"objective value $$Z$$ achieved by the plan\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"count\": 6,\n    \"period_labels\": [\"July\", \"August\", \"September\", \"October\", \"November\", \"December\"]\n  },\n  \"products\": {\n    \"count\": 1,\n    \"labels\": [\"product_1\"]\n  },\n  \"initial_inventory\": [200],\n  \"storage_capacity\": 500,\n  \"purchase_price\": [[28, 24, 25, 27, 23, 23]],\n  \"selling_price\": [[29, 24, 26, 28, 22, 25]]\n}",
     "parameters": [
         {
-            "name": "total_planning_horizon",
-            "symbol": "H",
-            "shape": [],
-            "description": "Total planning horizon in hours"
-        },
-        {
             "name": "num_periods",
-            "symbol": "K",
+            "symbol": "T",
             "shape": [],
-            "description": "Number of planning periods in the horizon"
+            "description": "Number of periods in the planning horizon"
         },
         {
-            "name": "period_demand",
-            "symbol": "d",
-            "shape": [
-                "K"
-            ],
-            "description": "Required nurse demand in each planning period"
-        },
-        {
-            "name": "allowed_shift_starts",
-            "symbol": "\\mathcal{S}",
-            "shape": [
-                "S"
-            ],
-            "description": "Set of allowed shift-start batches"
-        },
-        {
-            "name": "shift_start_time",
-            "symbol": "\\tau",
-            "shape": [
-                "S"
-            ],
-            "description": "Shift start time for each allowed batch"
-        },
-        {
-            "name": "shift_length_hours",
-            "symbol": "L",
+            "name": "num_products",
+            "symbol": "P",
             "shape": [],
-            "description": "Length of each shift in hours"
+            "description": "Number of products in the planning problem"
         },
         {
-            "name": "nurse_categories",
-            "symbol": "\\mathcal{I}",
+            "name": "initial_inventory",
+            "symbol": "I^0",
             "shape": [
-                "2"
+                "P"
             ],
-            "description": "Set of nurse categories: regular and contract"
+            "description": "Initial on-hand inventory for each product"
         },
         {
-            "name": "regular_hourly_cost",
-            "symbol": "c^{reg}",
+            "name": "warehouse_capacity",
+            "symbol": "C",
             "shape": [],
-            "description": "Hourly labor cost for a regular nurse"
+            "description": "Maximum total inventory that can be held in storage at any time"
         },
         {
-            "name": "contract_hourly_cost",
-            "symbol": "c^{con}",
-            "shape": [],
-            "description": "Hourly labor cost for a contract nurse"
-        },
-        {
-            "name": "coverage_indicator",
-            "symbol": "a",
+            "name": "purchase_price",
+            "symbol": "c^b",
             "shape": [
-                "K",
-                "S"
+                "P",
+                "T"
             ],
-            "description": "Binary coverage indicator equal to 1 if shift batch s covers period t, and 0 otherwise"
+            "description": "Unit purchase cost for each product-period pair"
+        },
+        {
+            "name": "selling_price",
+            "symbol": "c^s",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Unit selling revenue for each product-period pair"
+        },
+        {
+            "name": "optional_demand_cap",
+            "symbol": "D",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Optional exogenous sales cap for each product-period pair, when provided"
         }
     ],
     "variables": [
         {
-            "name": "regular_nurses_by_start",
-            "symbol": "x^{reg}",
+            "name": "purchase_quantity",
+            "symbol": "x",
             "shape": [
-                "S"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of regular nurses starting in each allowed shift batch"
+            "domain": "continuous",
+            "description": "Purchase quantity for each product at the beginning of each period"
         },
         {
-            "name": "contract_nurses_by_start",
-            "symbol": "x^{con}",
+            "name": "sales_quantity",
+            "symbol": "y",
             "shape": [
-                "S"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of contract nurses starting in each allowed shift batch"
+            "domain": "continuous",
+            "description": "Sales quantity for each product during each period"
         },
         {
-            "name": "use_contract_nurses",
-            "symbol": "y^{con}",
-            "shape": [],
-            "domain": "binary",
-            "description": "Binary indicator equal to 1 if any contract nurses are used, 0 otherwise"
+            "name": "ending_inventory",
+            "symbol": "s",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "domain": "continuous",
+            "description": "Ending inventory for each product after each period"
         },
         {
-            "name": "total_regular_hires",
-            "symbol": "X^{reg}",
-            "shape": [],
-            "domain": "integer",
-            "description": "Total number of regular nurses hired across all batches"
-        },
-        {
-            "name": "total_contract_hires",
-            "symbol": "X^{con}",
-            "shape": [],
-            "domain": "integer",
-            "description": "Total number of contract nurses hired across all batches"
-        },
-        {
-            "name": "total_labor_cost",
+            "name": "total_net_revenue",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total labor cost of the staffing plan"
+            "description": "Total net financial return over the planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "demand_coverage",
-            "description": "For each planning period, total nurse coverage from all allowed shift starts and both nurse categories must meet required demand",
-            "formula": "\\sum_{s=1}^{S} a_{t,s}\\left(x^{reg}_s + x^{con}_s\\right) \\ge d_t \\qquad \\forall t=1,\\dots,K",
+            "name": "nonnegative_decision_variables",
+            "description": "Purchase quantities, sales quantities, and ending inventories are nonnegative continuous amounts",
+            "formula": "x_{p,t} \\geq 0,\\; y_{p,t} \\geq 0,\\; s_{p,t} \\geq 0 \\quad \\forall p \\in \\mathcal{P},\\; \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "period_demand",
-                "coverage_indicator"
+                "num_products",
+                "num_periods"
             ],
             "variables": [
-                "regular_nurses_by_start",
-                "contract_nurses_by_start"
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory"
             ]
         },
         {
-            "name": "nonnegative_integer_regular_starts",
-            "description": "Regular nurses started in each allowed batch must be nonnegative integers",
-            "formula": "x^{reg} are nonnegative integers",
+            "name": "inventory_capacity_limit",
+            "description": "Total inventory stored in any period cannot exceed warehouse capacity",
+            "formula": "\\sum_{p \\in \\mathcal{P}} s_{p,t} \\leq C \\quad \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "allowed_shift_starts"
+                "warehouse_capacity",
+                "num_products",
+                "num_periods"
             ],
             "variables": [
-                "regular_nurses_by_start"
+                "ending_inventory"
             ]
         },
         {
-            "name": "nonnegative_integer_contract_starts",
-            "description": "Contract nurses started in each allowed batch must be nonnegative integers",
-            "formula": "x^{con} are nonnegative integers",
+            "name": "optional_sales_cap",
+            "description": "Sales in each product-period may not exceed the optional exogenous demand cap when it is provided",
+            "formula": "y_{p,t} \\leq D_{p,t} \\quad \\forall p \\in \\mathcal{P},\\; \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "allowed_shift_starts"
+                "optional_demand_cap",
+                "num_products",
+                "num_periods"
             ],
             "variables": [
-                "contract_nurses_by_start"
+                "sales_quantity"
             ]
         },
         {
-            "name": "contract_usage_binary",
-            "description": "Contract usage indicator must be binary",
-            "formula": "y^{con} \\in \\{0,1\\}",
-            "variables": [
-                "use_contract_nurses"
-            ]
-        },
-        {
-            "name": "nonnegative_integer_total_regular_hires",
-            "description": "Total regular hires must be a nonnegative integer",
-            "formula": "X^{reg} \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "total_regular_hires"
-            ]
-        },
-        {
-            "name": "nonnegative_integer_total_contract_hires",
-            "description": "Total contract hires must be a nonnegative integer",
-            "formula": "X^{con} \\in \\mathbb{Z}_{\\ge 0}",
-            "variables": [
-                "total_contract_hires"
-            ]
-        },
-        {
-            "name": "nonnegative_total_labor_cost",
-            "description": "Total labor cost must be nonnegative",
-            "formula": "Z \\ge 0",
-            "variables": [
-                "total_labor_cost"
-            ]
-        },
-        {
-            "name": "allowed_shift_starts_only",
-            "description": "Nurses may start only at allowed shift-start batches",
-            "formula": "x^{reg}_s, x^{con}_s \\in \\mathbb{Z}_{\\ge 0} \\qquad \\forall s=1,\\dots,S",
+            "name": "inventory_flow_consistency",
+            "description": "Purchases occur at the beginning of each period, sales occur during the period, and unsold inventory carries forward to the next period through inventory balance",
+            "formula": "s_{p,t} = I^0_p + x_{p,t} - y_{p,t} \\quad \\forall p \\in \\mathcal{P},\\; \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "allowed_shift_starts"
+                "initial_inventory",
+                "num_periods",
+                "num_products"
             ],
             "variables": [
-                "regular_nurses_by_start",
-                "contract_nurses_by_start"
+                "purchase_quantity",
+                "sales_quantity",
+                "ending_inventory"
             ]
         },
         {
-            "name": "full_shift_once_started",
-            "description": "Every assigned nurse works a full shift once started",
-            "formula": "a_{t,s}=1 \\text{ if shift } s \\text{ covers period } t \\text{ under shift length } L",
+            "name": "end_inventory_nonnegative",
+            "description": "Ending inventory for each product must remain nonnegative in every period",
+            "formula": "s_{p,t} \\geq 0 \\quad \\forall p \\in \\mathcal{P},\\; \\forall t \\in \\mathcal{T}",
             "parameters": [
-                "shift_length_hours"
+                "num_products",
+                "num_periods"
             ],
             "variables": [
-                "regular_nurses_by_start",
-                "contract_nurses_by_start"
-            ]
-        },
-        {
-            "name": "regular_and_contract_same_coverage",
-            "description": "Regular and contract nurses share the same coverage pattern determined by the overlap indicator and the same shift duration",
-            "formula": "a_{t,s}^{reg}=a_{t,s}^{con}=a_{t,s} \\qquad \\forall t=1,\\dots,K,\\; s=1,\\dots,S",
-            "parameters": [
-                "coverage_indicator",
-                "shift_length_hours"
-            ],
-            "variables": [
-                "regular_nurses_by_start",
-                "contract_nurses_by_start"
-            ]
-        },
-        {
-            "name": "contract_indicator_status",
-            "description": "Contract usage indicator records whether any contract nurses are used",
-            "formula": "\\sum_{s=1}^{S} x^{con}_s \\le M y^{con}",
-            "variables": [
-                "use_contract_nurses",
-                "contract_nurses_by_start"
-            ]
-        },
-        {
-            "name": "aggregate_hires_regular",
-            "description": "Total regular hires represent the aggregate hires across all batches for regular nurses",
-            "formula": "X^{reg} = \\sum_{s=1}^{S} x^{reg}_s",
-            "variables": [
-                "total_regular_hires",
-                "regular_nurses_by_start"
-            ]
-        },
-        {
-            "name": "aggregate_hires_contract",
-            "description": "Total contract hires represent the aggregate hires across all batches for contract nurses",
-            "formula": "X^{con} = \\sum_{s=1}^{S} x^{con}_s",
-            "variables": [
-                "total_contract_hires",
-                "contract_nurses_by_start"
-            ]
-        },
-        {
-            "name": "total_labor_cost_definition",
-            "description": "Total labor cost equals the sum of regular and contract labor costs across all starts",
-            "formula": "Z = L\\left(c^{reg} \\sum_{s=1}^{S} x^{reg}_s + c^{con} \\sum_{s=1}^{S} x^{con}_s\\right)",
-            "parameters": [
-                "shift_length_hours",
-                "regular_hourly_cost",
-                "contract_hourly_cost"
-            ],
-            "variables": [
-                "regular_nurses_by_start",
-                "contract_nurses_by_start",
-                "total_labor_cost"
+                "ending_inventory"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_labor_cost_minimization",
-            "description": "Minimize the total labor cost of the staffing plan while meeting demand in every planning period",
-            "sense": "minimize"
+            "name": "total_net_revenue_maximization",
+            "description": "Maximize total net financial return over the planning horizon, represented by total_net_revenue",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total labor cost of the staffing plan while meeting demand in every planning period.",
+        "description": "Maximize total net financial return over the planning horizon by maximizing total_net_revenue.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
+        "sense": "maximize",
         "formula": "Z",
         "parameters": [],
         "variables": [
-            "total_labor_cost"
+            "total_net_revenue"
         ]
     }
 }

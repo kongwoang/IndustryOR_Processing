@@ -1,195 +1,156 @@
 {
-    "problem": "Problem description\n- There is a set $$\\mathcal{I}$$ of non-preemptive activities, indexed by $$i \\in \\mathcal{I}$$, each with a fixed duration $$d_i$$ measured in days.\n- The activities form a precedence network described by a set of immediate precedence pairs $$\\mathcal{P} \\subseteq \\mathcal{I} \\times \\mathcal{I}$$, where each pair means that the predecessor must finish before the successor can begin.\n- The schedule is planned over a time horizon $$T$$ measured in days.\n- A uniform work cost is incurred at rate $$c_{\\mathrm{work}}$$ per day for the project timeline.\n- A special machine must be rented continuously over a designated interval determined by two anchor activities, one that marks the rental start and one that marks the rental end.\n- The machine rental cost is incurred at rate $$c_{\\mathrm{mach}}$$ per day over that rental interval.\n- The planning goal is to choose feasible activity start times so that all precedence requirements are respected and the total cost from work time and machine rental time is minimized.\n- A solution is represented by:\n  - $$s_i$$, the start time of activity $$i \\in \\mathcal{I}$$,\n  - $$f_i$$, the finish time of activity $$i \\in \\mathcal{I}$$,\n  - $$C_{\\max}$$, the project completion time,\n  - $$r_{\\mathrm{mach}}$$, the total rental duration of the special machine,\n  - $$Z$$, the total project cost.\n\nInput Format\n{\n  \"activities\": {\n    \"type\": \"array\",\n    \"description\": \"List of activities in $$\\\\mathcal{I}$$, indexed by $$i$$.\",\n    \"items\": {\n      \"id\": \"activity identifier\",\n      \"duration\": \"processing time $$d_i$$ in days\"\n    }\n  },\n  \"precedence_arcs\": {\n    \"type\": \"array\",\n    \"description\": \"List of ordered pairs in $$\\\\mathcal{P}$$, where each pair indicates that the first activity must finish before the second activity starts.\",\n    \"items\": {\n      \"predecessor\": \"activity index $$i$$\",\n      \"successor\": \"activity index $$j$$\"\n    }\n  },\n  \"work_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily work cost $$c_{\\\\mathrm{work}}$$.\"\n  },\n  \"machine_rental_cost_per_day\": {\n    \"type\": \"number\",\n    \"description\": \"Daily rental cost $$c_{\\\\mathrm{mach}}$$ for the special machine.\"\n  },\n  \"machine_start_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{s}}$$ whose start time defines the beginning of the machine rental interval.\"\n  },\n  \"machine_end_activity\": {\n    \"type\": \"activity\",\n    \"description\": \"Anchor activity $$i^{\\\\mathrm{e}}$$ whose finish time defines the end of the machine rental interval.\"\n  },\n  \"time_horizon\": {\n    \"type\": \"number\",\n    \"description\": \"Planning horizon $$T$$ in days, if an upper bound on completion time is needed.\"\n  },\n  \"time_unit\": {\n    \"type\": \"string\",\n    \"description\": \"Time is measured in days.\"\n  }\n}\n\nOutput Format\n{\n  \"start_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned start time $$s_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"finish_times\": {\n    \"type\": \"object\",\n    \"description\": \"Planned finish time $$f_i$$ for each activity $$i \\\\in \\\\mathcal{I}$$.\"\n  },\n  \"project_completion_time\": {\n    \"type\": \"number\",\n    \"description\": \"Project completion time $$C_{\\\\max}$$.\"\n  },\n  \"machine_rental_duration\": {\n    \"type\": \"number\",\n    \"description\": \"Total machine rental duration $$r_{\\\\mathrm{mach}}$$.\"\n  },\n  \"total_cost\": {\n    \"type\": \"number\",\n    \"description\": \"Minimum total cost $$Z$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"activities\": [\n    {\n      \"id\": \"A\",\n      \"duration\": 4\n    },\n    {\n      \"id\": \"B\",\n      \"duration\": 3\n    },\n    {\n      \"id\": \"C\",\n      \"duration\": 5\n    },\n    {\n      \"id\": \"D\",\n      \"duration\": 2\n    },\n    {\n      \"id\": \"E\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"F\",\n      \"duration\": 10\n    },\n    {\n      \"id\": \"G\",\n      \"duration\": 1\n    }\n  ],\n  \"precedence_arcs\": [\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"G\"\n    },\n    {\n      \"predecessor\": \"A\",\n      \"successor\": \"D\"\n    },\n    {\n      \"predecessor\": \"E\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"G\",\n      \"successor\": \"F\"\n    },\n    {\n      \"predecessor\": \"D\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"C\"\n    },\n    {\n      \"predecessor\": \"F\",\n      \"successor\": \"B\"\n    }\n  ],\n  \"work_cost_per_day\": 1000,\n  \"machine_rental_cost_per_day\": 5000,\n  \"machine_start_activity\": \"A\",\n  \"machine_end_activity\": \"B\",\n  \"time_unit\": \"day\"\n}",
+    "problem": "Problem description\n- There is a finite set $$I$$ of children, indexed by $$i \\in I$$.\n- Each child $$i \\in I$$ has an associated selection cost $$w_i$$.\n- The family must choose a subset $$S \\subseteq I$$ of children for the trip.\n- The number of selected children is limited by a maximum capacity $$K$$.\n- The family also requires that the selected group contain at least a minimum number $$L$$ of children.\n- There is a designated subset $$I^{\\mathrm{fix}} \\subseteq I$$ of mandatory children that must always be included.\n- There is a set of ordered incompatibility rules $$\\mathcal{F} \\subseteq I \\times I$$, where selecting a child in the first position makes the child in the second position unavailable.\n- There is a set of ordered prerequisite rules $$\\mathcal{R} \\subseteq I \\times I$$, where selecting a child in the first position requires selecting the child in the second position as well.\n- The planning goal is to select a feasible subset of children with minimum total selection cost.\n\n- The selected group must not exceed the trip capacity $$K$$.\n- The selected group must contain at least $$L$$ children.\n- Every child in $$I^{\\mathrm{fix}}$$ must be selected.\n- Every incompatibility rule in $$\\mathcal{F}$$ must be respected.\n- Every prerequisite rule in $$\\mathcal{R}$$ must be respected.\n- The objective is to minimize the sum of the costs of all selected children.\n\n- A solution is represented by:\n  - A binary decision variable $$x_i \\in \\{0,1\\}$$ for each $$i \\in I$$, where $$x_i = 1$$ means child $$i$$ is selected and $$x_i = 0$$ means child $$i$$ is not selected.\n  - The selected set $$S = \\{\\, i \\in I \\mid x_i = 1 \\,\\}$$.\n  - The resulting total cost of the chosen subset.\n\nInput Format\n{\n  \"children_set\": \"finite set $$I$$ of children\",\n  \"children_count\": \"number of children $$n = |I|$$\",\n  \"selection_costs\": {\n    \"type\": \"vector of length $$n$$\",\n    \"meaning\": \"$$w_i$$ is the cost of selecting child $$i$$ for each $$i \\\\in I$$\"\n  },\n  \"capacity_limit\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"maximum number of children that may be selected, denoted by $$K$$\"\n  },\n  \"minimum_selected\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"minimum number of children that must be selected, denoted by $$L$$\"\n  },\n  \"mandatory_children\": {\n    \"type\": \"subset of $$I$$\",\n    \"meaning\": \"$$I^{\\\\mathrm{fix}}$$, the set of children that must be selected\"\n  },\n  \"forbidden_pairs\": {\n    \"type\": \"list of ordered pairs\",\n    \"meaning\": \"each pair $$(i,j) \\\\in \\\\mathcal{F}$$ means that if $$i$$ is selected, then $$j$$ cannot be selected\"\n  },\n  \"prerequisite_pairs\": {\n    \"type\": \"list of ordered pairs\",\n    \"meaning\": \"each pair $$(i,j) \\\\in \\\\mathcal{R}$$ means that if $$i$$ is selected, then $$j$$ must also be selected\"\n  },\n  \"objective\": {\n    \"type\": \"minimization\",\n    \"meaning\": \"minimize the total cost of the selected children\"\n  }\n}\n\nOutput Format\n{\n  \"selected_children\": {\n    \"type\": \"list\",\n    \"meaning\": \"the identifiers of all selected children in the optimal feasible solution\"\n  },\n  \"selection_vector\": {\n    \"type\": \"binary vector\",\n    \"shape\": \"$$n$$\",\n    \"meaning\": \"$$x_i = 1$$ if child $$i$$ is selected and $$x_i = 0$$ otherwise\"\n  },\n  \"total_cost\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"the minimized sum of the selected children\u2019s costs\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"children_set\": [\"Alice\", \"Bob\", \"Charlie\", \"Diana\", \"Ella\"],\n  \"selection_costs\": {\n    \"Alice\": 1000,\n    \"Bob\": 900,\n    \"Charlie\": 600,\n    \"Diana\": 500,\n    \"Ella\": 700\n  },\n  \"capacity_limit\": 3,\n  \"minimum_selected\": 2,\n  \"mandatory_children\": [\"Bob\"],\n  \"forbidden_pairs\": [\n    [\"Alice\", \"Diana\"],\n    [\"Bob\", \"Charlie\"]\n  ],\n  \"prerequisite_pairs\": [\n    [\"Charlie\", \"Diana\"],\n    [\"Diana\", \"Ella\"]\n  ]\n}",
     "parameters": [
         {
-            "name": "num_activities",
+            "name": "children_count",
             "symbol": "N",
             "shape": [],
-            "description": "The number of activities in the project network"
+            "description": "Number of children in the finite set $I$"
         },
         {
-            "name": "num_precedence_arcs",
-            "symbol": "P",
-            "shape": [],
-            "description": "The number of immediate precedence arcs"
-        },
-        {
-            "name": "activity_durations",
-            "symbol": "d",
+            "name": "selection_costs",
+            "symbol": "w",
             "shape": [
                 "N"
             ],
-            "description": "Duration of activity $i$ in days"
+            "description": "Selection cost of each child in the ordered set $I$"
         },
         {
-            "name": "precedence_arcs",
-            "symbol": "p",
+            "name": "capacity_limit",
+            "symbol": "K",
+            "shape": [],
+            "description": "Maximum number of selected children"
+        },
+        {
+            "name": "minimum_selected",
+            "symbol": "L",
+            "shape": [],
+            "description": "Minimum number of selected children"
+        },
+        {
+            "name": "mandatory_children",
+            "symbol": "I^{\\mathrm{fix}}",
             "shape": [
-                "P",
+                "-"
+            ],
+            "description": "Set of mandatory children that must be selected"
+        },
+        {
+            "name": "forbidden_pairs",
+            "symbol": "\\mathcal{F}",
+            "shape": [
+                "-",
                 "2"
             ],
-            "description": "The precedence arc list where each arc stores predecessor and successor activity indices"
+            "description": "Ordered incompatibility pairs of children"
         },
         {
-            "name": "time_horizon",
-            "symbol": "T",
-            "shape": [],
-            "description": "Planning horizon in days"
-        },
-        {
-            "name": "work_cost_per_day",
-            "symbol": "c_{\\mathrm{work}}",
-            "shape": [],
-            "description": "Uniform work cost rate per day over the project timeline"
-        },
-        {
-            "name": "machine_rental_cost_per_day",
-            "symbol": "c_{\\mathrm{mach}}",
-            "shape": [],
-            "description": "Machine rental cost rate per day over the rental interval"
-        },
-        {
-            "name": "machine_start_activity",
-            "symbol": "i^{\\mathrm{s}}",
-            "shape": [],
-            "description": "Index of the anchor activity whose start time defines the beginning of the machine rental interval"
-        },
-        {
-            "name": "machine_end_activity",
-            "symbol": "i^{\\mathrm{e}}",
-            "shape": [],
-            "description": "Index of the anchor activity whose finish time defines the end of the machine rental interval"
+            "name": "prerequisite_pairs",
+            "symbol": "\\mathcal{R}",
+            "shape": [
+                "-",
+                "2"
+            ],
+            "description": "Ordered prerequisite pairs of children"
         }
     ],
     "variables": [
         {
-            "name": "start_times",
-            "symbol": "s",
+            "name": "selection_vector",
+            "symbol": "x",
             "shape": [
                 "N"
             ],
-            "domain": "continuous",
-            "description": "Start time of each activity"
-        },
-        {
-            "name": "finish_times",
-            "symbol": "f",
-            "shape": [
-                "N"
-            ],
-            "domain": "continuous",
-            "description": "Finish time of each activity"
-        },
-        {
-            "name": "project_completion_time",
-            "symbol": "C_{\\max}",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Project completion time"
-        },
-        {
-            "name": "machine_rental_duration",
-            "symbol": "r_{\\mathrm{mach}}",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total machine rental duration"
-        },
-        {
-            "name": "total_cost",
-            "symbol": "Z",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Total project cost"
+            "domain": "binary",
+            "description": "Binary decision variable indicating whether each child is selected"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "precedence_feasibility",
-            "description": "Each immediate precedence relation must be respected so a predecessor finishes before its successor starts.",
-            "formula": "s_j \\ge f_i \\qquad \\forall (i,j) \\in \\mathcal{P}",
+            "name": "binary_selection_vector",
+            "description": "Selection variables are binary for each child",
+            "formula": "x_i \\in \\{0,1\\}",
             "parameters": [
-                "precedence_arcs"
+                "children_count"
             ],
             "variables": [
-                "start_times",
-                "finish_times"
+                "selection_vector"
             ]
         },
         {
-            "name": "activity_timing_definitions",
-            "description": "Start and finish times are linked by fixed durations, with nonnegative start times and an upper bound by the planning horizon.",
-            "formula": "f_i = s_i + d_i,\\quad 0 \\le s_i \\le T,\\quad 0 \\le f_i \\le T\\qquad \\forall i \\in \\mathcal{I}",
+            "name": "minimum_selected_children",
+            "description": "The selected group must contain at least the minimum number of children",
+            "formula": "\\sum_{i=1}^{N} x_i \\ge L",
             "parameters": [
-                "activity_durations",
-                "time_horizon"
+                "minimum_selected"
             ],
             "variables": [
-                "start_times",
-                "finish_times"
+                "selection_vector"
             ]
         },
         {
-            "name": "project_completion_time_definition",
-            "description": "The project completion time equals the latest activity finish time and is bounded by the planning horizon.",
-            "formula": "C_{\\max} \\ge f_i \\qquad \\forall i \\in \\mathcal{I},\\qquad C_{\\max} \\le T",
+            "name": "maximum_selected_children",
+            "description": "The selected group must not exceed the capacity limit",
+            "formula": "\\sum_{i=1}^{N} x_i \\le K",
             "parameters": [
-                "time_horizon"
+                "capacity_limit"
             ],
             "variables": [
-                "finish_times",
-                "project_completion_time"
+                "selection_vector"
             ]
         },
         {
-            "name": "machine_rental_duration_definition",
-            "description": "The machine rental duration is the nonnegative difference between the designated end-anchor finish time and start-anchor start time.",
-            "formula": "r_{\\mathrm{mach}} = f_{i^{\\mathrm{e}}} - s_{i^{\\mathrm{s}}},\\qquad r_{\\mathrm{mach}} \\ge 0",
+            "name": "mandatory_children_selected",
+            "description": "Every mandatory child must be selected",
+            "formula": "x_i = 1 \\;\\; \\forall i \\in I^{\\mathrm{fix}}",
             "parameters": [
-                "machine_start_activity",
-                "machine_end_activity"
+                "mandatory_children"
             ],
             "variables": [
-                "start_times",
-                "finish_times",
-                "machine_rental_duration"
+                "selection_vector"
             ]
         },
         {
-            "name": "total_cost_definition",
-            "description": "The total cost equals work-time cost over the project completion time plus machine rental cost over the rental duration.",
-            "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
+            "name": "forbidden_pair_exclusion",
+            "description": "For each ordered incompatibility pair, selecting the first child forbids selecting the second child",
+            "formula": "x_i + x_j \\le 1 \\;\\; \\forall (i,j) \\in \\mathcal{F}",
             "parameters": [
-                "work_cost_per_day",
-                "machine_rental_cost_per_day"
+                "forbidden_pairs"
             ],
             "variables": [
-                "project_completion_time",
-                "machine_rental_duration",
-                "total_cost"
+                "selection_vector"
+            ]
+        },
+        {
+            "name": "prerequisite_pair_inclusion",
+            "description": "For each ordered prerequisite pair, selecting the first child requires selecting the second child",
+            "formula": "x_i \\le x_j \\;\\; \\forall (i,j) \\in \\mathcal{R}",
+            "parameters": [
+                "prerequisite_pairs"
+            ],
+            "variables": [
+                "selection_vector"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_project_cost_minimization",
-            "description": "Minimize the total project cost composed of work-time cost and machine rental cost",
+            "name": "minimize_total_selection_cost",
+            "description": "Minimize the total selection cost of the chosen children",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total project cost, defined as the sum of uniform work-time cost over the project completion time and machine rental cost over the rental duration.",
+        "description": "Minimize the total selection cost of the chosen children.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "Z = c_{\\mathrm{work}} C_{\\max} + c_{\\mathrm{mach}} r_{\\mathrm{mach}}",
+        "formula": "\\sum_{i=1}^{N} w_i x_i",
         "parameters": [
-            "work_cost_per_day",
-            "machine_rental_cost_per_day"
+            "selection_costs"
         ],
         "variables": [
-            "project_completion_time",
-            "machine_rental_duration",
-            "total_cost"
+            "selection_vector"
         ]
     }
 }

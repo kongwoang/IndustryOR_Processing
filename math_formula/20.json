@@ -1,254 +1,250 @@
 {
-    "problem": "Problem description\n- There is a single-period procurement planning problem with a finite supplier set $$\\mathcal{S}$$ containing the designated suppliers $$A$$, $$B$$, and $$C$$.\n- Each supplier $$i \\in \\mathcal{S}$$ has an order cost parameter $$c_i$$ and a fixed lot-size parameter $$q_i$$, meaning one order from supplier $$i$$ provides exactly $$q_i$$ tables.\n- The restaurant chooses a nonnegative integer number of orders from each supplier, and may use supplier-activation indicators to express conditional purchasing rules.\n- The total number of tables obtained from all suppliers must be at least the minimum required demand level $$D^{\\min}$$ and must not exceed the maximum allowed supply level $$D^{\\max}$$.\n- If supplier $$A$$ is used, then supplier $$B$$ must provide at least the required minimum quantity $$L_{A \\rightarrow B}$$ of tables.\n- If supplier $$B$$ is used, then supplier $$C$$ must also be used.\n- The planning goal is to minimize the total procurement cost across all suppliers.\n- A solution is represented by:\n  - $$x_i$$: the nonnegative integer number of orders placed with supplier $$i \\in \\mathcal{S}$$.\n  - $$z_i$$: a binary indicator showing whether supplier $$i$$ is used.\n  - $$t_i$$: the total number of tables procured from supplier $$i$$.\n  - $$T$$: the total number of tables ordered across all suppliers.\n  - $$Z$$: the minimum total procurement cost achieved by the plan.\n\nInput Format\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\mathcal{S}$$\",\n    \"size\": \"$$S$$\",\n    \"elements\": \"A finite set of suppliers indexed by $$i \\\\in \\\\mathcal{S}$$\"\n  },\n  \"supplier_parameters\": [\n    {\n      \"id\": \"$$i$$\",\n      \"cost_per_order\": \"$$c_i$$\",\n      \"tables_per_order\": \"$$q_i$$\"\n    }\n  ],\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\mathcal{H}$$\",\n    \"size\": \"$$H$$\",\n    \"description\": \"The ordering horizon, which may be a single period or multiple periods\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$D^{\\\\min}$$\",\n    \"maximum_total_tables\": \"$$D^{\\\\max}$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$L_{ij}$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$i$$\",\n      \"required_supplier\": \"$$j$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for all $$i \\\\in \\\\mathcal{S}$$\",\n    \"supplier_usage\": \"Binary for all $$i \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nOutput Format\n{\n  \"orders_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{x} = (x_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The integer number of orders placed with each supplier\"\n  },\n  \"supplier_usage\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{z} = (z_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The binary supplier-activation vector\"\n  },\n  \"tables_by_supplier\": {\n    \"shape\": \"$$S$$\",\n    \"symbol\": \"$$\\\\mathbf{t} = (t_i)_{i \\\\in \\\\mathcal{S}}$$\",\n    \"description\": \"The total number of tables procured from each supplier\"\n  },\n  \"total_tables\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$T$$\",\n    \"description\": \"The total number of tables ordered across all suppliers\"\n  },\n  \"total_cost\": {\n    \"shape\": \"$$1$$\",\n    \"symbol\": \"$$Z$$\",\n    \"description\": \"The minimum total procurement cost\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"supplier_set\": {\n    \"name\": \"$$\\\\{A,B,C\\\\}$$\",\n    \"size\": \"$$3$$\",\n    \"elements\": [\n      {\n        \"id\": \"$$A$$\",\n        \"cost_per_order\": \"$$120$$\",\n        \"tables_per_order\": \"$$20$$\"\n      },\n      {\n        \"id\": \"$$B$$\",\n        \"cost_per_order\": \"$$110$$\",\n        \"tables_per_order\": \"$$15$$\"\n      },\n      {\n        \"id\": \"$$C$$\",\n        \"cost_per_order\": \"$$100$$\",\n        \"tables_per_order\": \"$$15$$\"\n      }\n    ]\n  },\n  \"planning_horizon\": {\n    \"period_set\": \"$$\\\\{1\\\\}$$\",\n    \"size\": \"$$1$$\",\n    \"description\": \"Single ordering period\"\n  },\n  \"demand_limits\": {\n    \"minimum_total_tables\": \"$$150$$\",\n    \"maximum_total_tables\": \"$$600$$\"\n  },\n  \"logical_rules\": [\n    {\n      \"type\": \"quantity_dependency\",\n      \"trigger_supplier\": \"$$A$$\",\n      \"required_supplier\": \"$$B$$\",\n      \"minimum_quantity_if_trigger_used\": \"$$30$$\"\n    },\n    {\n      \"type\": \"usage_dependency\",\n      \"trigger_supplier\": \"$$B$$\",\n      \"required_supplier\": \"$$C$$\"\n    }\n  ],\n  \"variable_domains\": {\n    \"order_counts\": \"Nonnegative integer-valued for each supplier\",\n    \"supplier_usage\": \"Binary for each supplier\"\n  }\n}",
+    "problem": "Problem description\n- This is a single-period production planning problem with a finite set of toy product types indexed by $$p \\in P$$, where $$|P|$$ is the number of available toy types.\n- Each product type $$p$$ has a unit profit $$r_p$$, a plastic consumption coefficient $$\\alpha_p$$, and an electronic-component consumption coefficient $$\\beta_p$$.\n- The available resource limits are a plastic capacity $$A$$ and an electronic-component capacity $$B$$.\n- The planning goal is to choose which toy types to manufacture and how many units of each type to produce so that total profit is maximized while respecting all resource limits and logical business rules.\n- The product portfolio contains distinguished product types corresponding to robots, model cars, building blocks, and dolls.\n- Manufacturing quantities are linked to binary activation decisions so that a product type is considered manufactured only when its production quantity is positive.\n- The available resource pools must not be exceeded by the total resource consumption of all manufactured products.\n- If the robot product type is manufactured, then the doll product type must not be manufactured.\n- If the model-car product type is manufactured, then the building-block product type must also be manufactured.\n- The number of dolls produced cannot exceed the number of model cars produced.\n- The objective is to maximize the total profit from all manufactured and sold toy units.\n- A solution is represented by:\n  - A production quantity vector $$x \\in \\mathbb{Z}_{\\ge 0}^{|P|}$$, where $$x_p$$ is the number of units produced for product type $$p$$.\n  - A binary manufacturing vector $$y \\in \\{0,1\\}^{|P|}$$, where $$y_p = 1$$ means product type $$p$$ is manufactured and $$y_p = 0$$ means it is not manufactured.\n  - Optionally, the total achieved profit $$Z$$ as a scalar output.\n\nInput Format\n{\n  \"planning_horizon\": {\n    \"type\": \"integer\",\n    \"meaning\": \"Number of planning periods $$H$$. For this problem, the instance is single-period, so $$H = 1$$.\"\n  },\n  \"products\": {\n    \"type\": \"array\",\n    \"meaning\": \"List of product identifiers indexed by $$p \\in P$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"unit_profit\": {\n    \"type\": \"array\",\n    \"meaning\": \"Unit profit vector $$r_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"resource_usage\": {\n    \"plastic\": {\n      \"type\": \"array\",\n      \"meaning\": \"Plastic usage coefficients $$\\alpha_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    },\n    \"electronics\": {\n      \"type\": \"array\",\n      \"meaning\": \"Electronic-component usage coefficients $$\\beta_p$$ for each product type $$p$$.\",\n      \"shape\": \"$$|P|$$\"\n    }\n  },\n  \"resource_capacity\": {\n    \"plastic\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available plastic capacity $$A$$.\"\n    },\n    \"electronics\": {\n      \"type\": \"scalar\",\n      \"meaning\": \"Total available electronic-component capacity $$B$$.\"\n    }\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the robot product type is manufactured, the doll product type must not be manufactured.\"\n    },\n    \"model_car_requires_blocks\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"If the model-car product type is manufactured, the building-block product type must also be manufactured.\"\n    },\n    \"doll_quantity_limit_relative_to_model_cars\": {\n      \"type\": \"pair of product indices\",\n      \"meaning\": \"The production quantity of dolls must not exceed the production quantity of model cars.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"production_quantity\": {\n    \"type\": \"array\",\n    \"meaning\": \"Optimal production quantity vector $$x_p$$ for each product type $$p$$.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"manufacture_indicator\": {\n    \"type\": \"array\",\n    \"meaning\": \"Binary manufacturing vector $$y_p$$ indicating whether each product type is manufactured.\",\n    \"shape\": \"$$|P|$$\"\n  },\n  \"total_profit\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"Maximum achievable profit $$Z$$ under all resource and logical constraints.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"planning_horizon\": 1,\n  \"products\": [\"robot\", \"model_car\", \"building_blocks\", \"doll\"],\n  \"unit_profit\": [15, 8, 12, 5],\n  \"resource_usage\": {\n    \"plastic\": [30, 10, 20, 15],\n    \"electronics\": [8, 5, 3, 2]\n  },\n  \"resource_capacity\": {\n    \"plastic\": 1200,\n    \"electronics\": 800\n  },\n  \"logical_relations\": {\n    \"robot_excludes_doll\": [\"robot\", \"doll\"],\n    \"model_car_requires_blocks\": [\"model_car\", \"building_blocks\"],\n    \"doll_quantity_limit_relative_to_model_cars\": [\"doll\", \"model_car\"]\n  }\n}",
     "parameters": [
         {
-            "name": "supplier_set",
-            "symbol": "\\mathcal{S}",
+            "name": "product_types",
+            "symbol": "P",
             "shape": [],
-            "description": "Finite supplier set containing the suppliers A, B, and C"
+            "description": "Finite set of product types indexed by p in P using 0-based indexing"
         },
         {
-            "name": "num_suppliers",
-            "symbol": "S",
-            "shape": [],
-            "description": "Number of suppliers in the supplier set"
-        },
-        {
-            "name": "order_cost",
-            "symbol": "c",
+            "name": "unit_profit",
+            "symbol": "r",
             "shape": [
-                "\\mathcal{S}"
+                "P"
             ],
-            "description": "Cost per order for each supplier"
+            "description": "Unit profit of each product type p"
         },
         {
-            "name": "tables_per_order",
-            "symbol": "q",
+            "name": "plastic_consumption",
+            "symbol": "\\alpha",
             "shape": [
-                "\\mathcal{S}"
+                "P"
             ],
-            "description": "Number of tables obtained per order from each supplier"
+            "description": "Plastic consumption coefficient per unit of each product type p"
         },
         {
-            "name": "min_total_tables",
-            "symbol": "D^{\\min}",
-            "shape": [],
-            "description": "Minimum allowed total tables procured"
+            "name": "electronic_consumption",
+            "symbol": "\\beta",
+            "shape": [
+                "P"
+            ],
+            "description": "Electronic-component consumption coefficient per unit of each product type p"
         },
         {
-            "name": "max_total_tables",
-            "symbol": "D^{\\max}",
+            "name": "plastic_capacity",
+            "symbol": "A",
             "shape": [],
-            "description": "Maximum allowed total tables procured"
+            "description": "Total available plastic capacity"
         },
         {
-            "name": "min_tables_if_a_used_and_b_required",
-            "symbol": "L_{A\\rightarrow B}",
+            "name": "electronic_capacity",
+            "symbol": "B",
             "shape": [],
-            "description": "Minimum number of tables supplier B must provide if supplier A is used"
+            "description": "Total available electronic-component capacity"
+        },
+        {
+            "name": "robot_product",
+            "symbol": "p^{robot}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the robot"
+        },
+        {
+            "name": "model_car_product",
+            "symbol": "p^{car}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the model car"
+        },
+        {
+            "name": "building_blocks_product",
+            "symbol": "p^{blocks}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the building blocks"
+        },
+        {
+            "name": "doll_product",
+            "symbol": "p^{doll}",
+            "shape": [],
+            "description": "Distinguished product type identifier for the doll"
+        },
+        {
+            "name": "planning_horizon",
+            "symbol": "H",
+            "shape": [],
+            "description": "Planning horizon count, equal to 1 for this single-period problem"
         }
     ],
     "variables": [
         {
-            "name": "orders_by_supplier",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "\\mathcal{S}"
+                "P"
             ],
             "domain": "integer",
-            "description": "Nonnegative integer number of orders placed with each supplier"
+            "description": "Number of units produced for each product type p"
         },
         {
-            "name": "supplier_usage",
-            "symbol": "z",
+            "name": "manufacture_indicator",
+            "symbol": "y",
             "shape": [
-                "\\mathcal{S}"
+                "P"
             ],
             "domain": "binary",
-            "description": "Binary indicator equal to 1 if the corresponding supplier is used, otherwise 0"
+            "description": "Binary manufacturing indicator for each product type p"
         },
         {
-            "name": "tables_by_supplier",
-            "symbol": "t",
-            "shape": [
-                "\\mathcal{S}"
-            ],
+            "name": "total_profit",
+            "symbol": "Z",
+            "shape": [],
             "domain": "continuous",
-            "description": "Total number of tables procured from each supplier"
+            "description": "Total achieved profit"
         }
     ],
-    "auxiliary_variables": [],
+    "auxiliary_variables": [
+        {
+            "name": "big_m_production_bound",
+            "symbol": "M",
+            "shape": [
+                "P"
+            ],
+            "domain": "continuous",
+            "description": "Product-specific upper bound used to linearize the link between production quantities and manufacturing indicators; set as a valid upper bound on x_p for each product p"
+        }
+    ],
     "constraints": [
         {
-            "name": "nonnegative_integer_orders",
-            "description": "Order counts are nonnegative integers for each supplier",
-            "formula": "x_i \\in \\mathbb{Z}_{\\ge 0}",
+            "name": "plastic_capacity_limit",
+            "description": "Total plastic consumption across all products must not exceed available plastic capacity",
+            "formula": "\\sum_{p\\in P} \\alpha_p x_p \\le A",
             "parameters": [
-                "supplier_set"
+                "plastic_consumption",
+                "plastic_capacity"
             ],
             "variables": [
-                "orders_by_supplier"
+                "production_quantity"
             ]
         },
         {
-            "name": "binary_supplier_usage",
-            "description": "Supplier usage indicators are binary for each supplier",
-            "formula": "z_i \\in \\{0,1\\}",
+            "name": "electronic_capacity_limit",
+            "description": "Total electronic-component consumption across all products must not exceed available electronic-component capacity",
+            "formula": "\\sum_{p\\in P} \\beta_p x_p \\le B",
             "parameters": [
-                "supplier_set"
+                "electronic_consumption",
+                "electronic_capacity"
             ],
             "variables": [
-                "supplier_usage"
+                "production_quantity"
             ]
         },
         {
-            "name": "nonnegative_tables_by_supplier",
-            "description": "Tables procured from each supplier are nonnegative",
-            "formula": "t_i \\ge 0",
+            "name": "production_requires_activation",
+            "description": "Production is allowed only when the corresponding manufacturing indicator is active, and a product is considered manufactured only when its production quantity is positive",
+            "formula": "x_p \\le M_p y_p \\quad \\forall p\\in P",
             "parameters": [
-                "supplier_set"
+                "product_types"
             ],
             "variables": [
-                "tables_by_supplier"
+                "production_quantity",
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "nonnegative_total_tables",
-            "description": "Total tables procured across all suppliers are nonnegative",
-            "formula": "T \\ge 0",
-            "parameters": [],
+            "name": "robot_excludes_doll",
+            "description": "If the robot product type is manufactured, then the doll product type must not be manufactured",
+            "formula": "y_{p^{robot}} + y_{p^{doll}} \\le 1",
+            "parameters": [
+                "robot_product",
+                "doll_product"
+            ],
             "variables": [
-                "total_tables"
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "total_tables_bounds",
-            "description": "Total tables procured must stay within the minimum and maximum demand limits",
-            "formula": "D^{\\min} \\le T \\le D^{\\max}",
+            "name": "model_car_requires_building_blocks",
+            "description": "If the model-car product type is manufactured, then the building-block product type must also be manufactured",
+            "formula": "y_{p^{car}} \\le y_{p^{blocks}}",
             "parameters": [
-                "min_total_tables",
-                "max_total_tables"
+                "model_car_product",
+                "building_blocks_product"
             ],
             "variables": [
-                "total_tables"
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "supplier_tables_from_orders",
-            "description": "Tables obtained from each supplier are determined exactly by the supplier order count and lot size.",
-            "formula": "t_i = q_i x_i \\quad \\forall i \\in \\mathcal{S}",
+            "name": "doll_quantity_limit",
+            "description": "The production quantity of dolls must not exceed the production quantity of model cars",
+            "formula": "x_{p^{doll}} \\le x_{p^{car}}",
             "parameters": [
-                "tables_per_order",
-                "supplier_set"
+                "doll_product",
+                "model_car_product"
             ],
             "variables": [
-                "tables_by_supplier",
-                "orders_by_supplier"
+                "production_quantity"
             ]
         },
         {
-            "name": "supplier_a_triggers_b_minimum_quantity",
-            "description": "If supplier A is used, supplier B must provide at least the specified minimum number of tables.",
-            "formula": "t_B \\ge L_{A\\rightarrow B} z_A",
+            "name": "single_period_decision",
+            "description": "The solution must choose manufacturing and production decisions for the single period",
+            "formula": "H = 1",
             "parameters": [
-                "min_tables_if_a_used_and_b_required"
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_integer_production",
+            "description": "Production quantities must be nonnegative integers",
+            "formula": "x_p \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall p\\in P",
+            "parameters": [
+                "product_types"
             ],
             "variables": [
-                "tables_by_supplier",
-                "supplier_usage"
+                "production_quantity"
             ]
         },
         {
-            "name": "supplier_b_implies_supplier_c_usage",
-            "description": "If supplier B is used, supplier C must also be used.",
-            "formula": "z_B \\le z_C",
+            "name": "binary_manufacturing_indicator",
+            "description": "Manufacturing indicators must be binary variables",
+            "formula": "y_p \\in \\{0,1\\} \\quad \\forall p\\in P",
             "parameters": [
-                "supplier_usage"
+                "product_types"
             ],
             "variables": [
-                "supplier_usage"
+                "manufacture_indicator"
             ]
         },
         {
-            "name": "tables_link_orders",
-            "description": "Tables procured from each supplier equal the number of orders times tables per order.",
-            "formula": "t_i = q_i x_i",
+            "name": "nonnegative_capacities",
+            "description": "Resource capacities must be nonnegative",
+            "formula": "A \\ge 0,\\; B \\ge 0",
             "parameters": [
-                "tables_per_order"
+                "plastic_capacity",
+                "electronic_capacity"
             ],
-            "variables": [
-                "tables_by_supplier",
-                "orders_by_supplier"
-            ]
-        },
-        {
-            "name": "total_tables_definition",
-            "description": "Total tables equal the sum of tables procured from all suppliers.",
-            "formula": "T = \\sum_{i \\in \\mathcal{S}} t_i",
-            "parameters": [
-                "supplier_set"
-            ],
-            "variables": [
-                "total_tables",
-                "tables_by_supplier"
-            ]
-        },
-        {
-            "name": "usage_links_orders",
-            "description": "An order count can be positive only if the corresponding supplier is used.",
-            "formula": "x_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
-            "parameters": [
-                "supplier_set"
-            ],
-            "variables": [
-                "orders_by_supplier",
-                "supplier_usage"
-            ]
-        },
-        {
-            "name": "usage_links_tables",
-            "description": "Tables procured from a supplier are zero when the supplier is not used.",
-            "formula": "t_i \\le M_i z_i \\quad \\forall i \\in \\mathcal{S}",
-            "parameters": [
-                "supplier_set"
-            ],
-            "variables": [
-                "tables_by_supplier",
-                "supplier_usage"
-            ]
-        },
-        {
-            "name": "supplier_usage_implied_by_orders",
-            "description": "If a supplier receives any positive order, the supplier must be marked as used.",
-            "formula": "x_i \\ge z_i \\quad \\forall i \\in \\mathcal{S}",
-            "parameters": [
-                "supplier_set"
-            ],
-            "variables": [
-                "orders_by_supplier",
-                "supplier_usage"
-            ]
+            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "total_procurement_cost_minimization",
-            "description": "Minimize total procurement cost across all suppliers",
-            "sense": "minimize"
+            "name": "profit_maximization",
+            "description": "Maximize the total profit from all manufactured and sold toy units",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total procurement cost across all suppliers by summing each supplier's per-order cost times the number of orders placed.",
+        "description": "Maximize total profit from produced toy units across all product types.",
         "objective_combination_method": "one_objective",
-        "sense": "minimize",
-        "formula": "Z = \\sum_{i \\in \\mathcal{S}} c_i x_i",
+        "sense": "maximize",
+        "formula": "Z = \\sum_{p\\in P} r_p x_p",
         "parameters": [
-            "supplier_set",
-            "order_cost"
+            "unit_profit"
         ],
         "variables": [
-            "orders_by_supplier",
-            "total_cost"
+            "production_quantity",
+            "total_profit"
         ]
     }
 }

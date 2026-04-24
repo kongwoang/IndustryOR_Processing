@@ -1,359 +1,248 @@
 {
-    "problem": "Problem description\n- There is a finite set of products $$\\mathcal P$$, a finite set of process stages $$\\mathcal Q=\\{\\mathsf A,\\mathsf B\\}$$, and a planning horizon $$\\mathcal T$$ over which the production plan is evaluated.\n- Process stage $$\\mathsf A$$ can be executed on a set of machines $$\\mathcal M_{\\mathsf A}$$, and process stage $$\\mathsf B$$ can be executed on a set of machines $$\\mathcal M_{\\mathsf B}$$.\n- Each product $$p\\in\\mathcal P$$ must pass through both process stages in the required order before it becomes a finished item.\n- For each product $$p$$ and process stage $$q$$, only a subset of machines is eligible; these eligibility sets are denoted by $$\\mathcal E_{p}^{q}$$.\n- Each eligible product-machine combination has a unit processing-time parameter, denoted by $$\\tau_{p,m}^{q}$$, which consumes machine-hours on the chosen machine.\n- Each machine $$m$$ has an available effective-hour capacity $$H_m$$ over the planning horizon.\n- Each machine $$m$$ also has an operating-cost parameter $$F_m$$ associated with full-capacity operation.\n- Each product $$p$$ has a raw-material cost parameter $$c_p^{\\mathrm{raw}}$$ per unit and a unit selling price parameter $$\\pi_p$$ per unit.\n- If a generalized instance includes market limits, product demand is denoted by $$d_p$$; this instance does not impose an explicit demand cap.\n- The optimization goal is to choose product quantities and machine assignments so that total profit over $$\\mathcal T$$ is maximized.\n- The business rules require that machine assignments respect eligibility, machine-hours cannot exceed available capacity, and the quantity completed through process $$\\mathsf A$$ for each product must match the quantity that proceeds to process $$\\mathsf B$$.\n\n- A solution is represented by:\n  - $$x_p$$: the total quantity of product $$p\\in\\mathcal P$$ produced and sold.\n  - $$x_{p,m}^{\\mathsf A}$$: the quantity of product $$p$$ routed to machine $$m\\in\\mathcal M_{\\mathsf A}$$ for process stage $$\\mathsf A$$.\n  - $$x_{p,m}^{\\mathsf B}$$: the quantity of product $$p$$ routed to machine $$m\\in\\mathcal M_{\\mathsf B}$$ for process stage $$\\mathsf B$$.\n  - $$u_m$$: the total effective machine-hours used on machine $$m$$.\n  - $$\\Pi$$: the total profit achieved by the production plan.\n\nInput Format\n{\n  \"sets\": {\n    \"products\": {\n      \"symbol\": \"$$\\\\mathcal P$$\",\n      \"description\": \"Finite set of product types indexed by $$p$$.\"\n    },\n    \"processes\": {\n      \"symbol\": \"$$\\\\mathcal Q=\\\\{\\\\mathsf A,\\\\mathsf B\\\\}$$\",\n      \"description\": \"Required process stages.\"\n    },\n    \"machines_A\": {\n      \"symbol\": \"$$\\\\mathcal M_{\\\\mathsf A}$$\",\n      \"description\": \"Machines eligible for process stage $$\\\\mathsf A$$.\"\n    },\n    \"machines_B\": {\n      \"symbol\": \"$$\\\\mathcal M_{\\\\mathsf B}$$\",\n      \"description\": \"Machines eligible for process stage $$\\\\mathsf B$$.\"\n    }\n  },\n  \"parameters\": {\n    \"raw_material_cost\": {\n      \"symbol\": \"$$c_p^{\\\\mathrm{raw}}$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Raw-material cost per unit of product $$p$$.\"\n    },\n    \"sale_price\": {\n      \"symbol\": \"$$\\\\pi_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Unit selling price of product $$p$$.\"\n    },\n    \"processing_time_A\": {\n      \"symbol\": \"$$\\\\tau_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Unit processing time of product $$p$$ on machine $$m\\\\in\\\\mathcal M_{\\\\mathsf A}$$ for process $$\\\\mathsf A$$.\"\n    },\n    \"processing_time_B\": {\n      \"symbol\": \"$$\\\\tau_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Unit processing time of product $$p$$ on machine $$m\\\\in\\\\mathcal M_{\\\\mathsf B}$$ for process $$\\\\mathsf B$$.\"\n    },\n    \"capacity_hours\": {\n      \"symbol\": \"$$H_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Available effective machine-hours of machine $$m$$ over the planning horizon $$\\\\mathcal T$$.\"\n    },\n    \"full_capacity_operating_cost\": {\n      \"symbol\": \"$$F_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Operating-cost parameter associated with using machine $$m$$ at full capacity.\"\n    },\n    \"eligibility\": {\n      \"symbol\": \"$$\\\\mathcal E_p^{q}$$\",\n      \"shape\": \"$$\\\\mathcal P\\\\times\\\\mathcal Q$$\",\n      \"description\": \"Allowed machine set for product $$p$$ at process stage $$q$$.\"\n    },\n    \"demand_optional\": {\n      \"symbol\": \"$$d_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Optional demand or sales-limit parameter for product $$p$$, if included in a generalized instance.\"\n    }\n  },\n  \"decision_variables\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Total quantity of product $$p$$ produced.\"\n    },\n    \"routing_A\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Quantity of product $$p$$ assigned to machine $$m$$ for process stage $$\\\\mathsf A$$.\"\n    },\n    \"routing_B\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Quantity of product $$p$$ assigned to machine $$m$$ for process stage $$\\\\mathsf B$$.\"\n    },\n    \"machine_usage\": {\n      \"symbol\": \"$$u_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Total effective machine-hours used on machine $$m$$.\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"solution\": {\n    \"production_quantity\": {\n      \"symbol\": \"$$x_p$$\",\n      \"shape\": \"$$|\\\\mathcal P|$$\",\n      \"description\": \"Produced quantity for each product $$p$$.\"\n    },\n    \"routing_A\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf A}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf A}|$$\",\n      \"description\": \"Allocated quantity on each machine $$m\\\\in\\\\mathcal M_{\\\\mathsf A}$$ for process stage $$\\\\mathsf A$$.\"\n    },\n    \"routing_B\": {\n      \"symbol\": \"$$x_{p,m}^{\\\\mathsf B}$$\",\n      \"shape\": \"$$|\\\\mathcal P|\\\\times|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Allocated quantity on each machine $$m\\\\in\\\\mathcal M_{\\\\mathsf B}$$ for process stage $$\\\\mathsf B$$.\"\n    },\n    \"machine_usage\": {\n      \"symbol\": \"$$u_m$$\",\n      \"shape\": \"$$|\\\\mathcal M_{\\\\mathsf A}|+|\\\\mathcal M_{\\\\mathsf B}|$$\",\n      \"description\": \"Effective machine-hours consumed by each machine.\"\n    },\n    \"total_profit\": {\n      \"symbol\": \"$$\\\\Pi$$\",\n      \"shape\": \"$$1$$\",\n      \"description\": \"Maximum total profit achieved by the plan.\"\n    }\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"products\": [\n    {\n      \"id\": \"I\",\n      \"raw_material_cost\": 0.25,\n      \"unit_sale_price\": 1.25\n    },\n    {\n      \"id\": \"II\",\n      \"raw_material_cost\": 0.35,\n      \"unit_sale_price\": 2.00\n    },\n    {\n      \"id\": \"III\",\n      \"raw_material_cost\": 0.50,\n      \"unit_sale_price\": 2.80\n    }\n  ],\n  \"machines_A\": [\n    {\n      \"id\": \"A1\",\n      \"unit_processing_time\": {\n        \"I\": 5,\n        \"II\": 10,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 6000,\n      \"operating_cost_at_full_capacity\": 300\n    },\n    {\n      \"id\": \"A2\",\n      \"unit_processing_time\": {\n        \"I\": 7,\n        \"II\": 9,\n        \"III\": 12\n      },\n      \"effective_machine_hours\": 10000,\n      \"operating_cost_at_full_capacity\": 321\n    }\n  ],\n  \"machines_B\": [\n    {\n      \"id\": \"B1\",\n      \"unit_processing_time\": {\n        \"I\": 6,\n        \"II\": 8,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 4000,\n      \"operating_cost_at_full_capacity\": 250\n    },\n    {\n      \"id\": \"B2\",\n      \"unit_processing_time\": {\n        \"I\": 4,\n        \"II\": null,\n        \"III\": 11\n      },\n      \"effective_machine_hours\": 7000,\n      \"operating_cost_at_full_capacity\": 783\n    },\n    {\n      \"id\": \"B3\",\n      \"unit_processing_time\": {\n        \"I\": 7,\n        \"II\": null,\n        \"III\": null\n      },\n      \"effective_machine_hours\": 4000,\n      \"operating_cost_at_full_capacity\": 200\n    }\n  ],\n  \"eligibility\": {\n    \"I\": {\n      \"A\": [\"A1\", \"A2\"],\n      \"B\": [\"B1\", \"B2\", \"B3\"]\n    },\n    \"II\": {\n      \"A\": [\"A1\", \"A2\"],\n      \"B\": [\"B1\"]\n    },\n    \"III\": {\n      \"A\": [\"A2\"],\n      \"B\": [\"B2\"]\n    }\n  }\n}",
+    "problem": "Problem description\n- A single service location requires staffing over a planning horizon $$H$$ divided into $$T$$ equal time periods indexed by $$t \\in \\mathcal{T}$$.\n- There is a set of allowed shift start times indexed by $$s \\in \\mathcal{S}$$. Each shift has a fixed duration $$L$$ and may continue across the end of the planning horizon if needed.\n- Demand data $$d_t$$ gives the required number of salespeople in each period $$t \\in \\mathcal{T}$$.\n- Coverage data $$a_{t,s}$$ indicates whether a salesperson starting shift $$s$$ is available in period $$t$$.\n- Decision variables $$x_s$$ represent the number of salespeople assigned to each allowed shift start time $$s \\in \\mathcal{S}$$.\n- The planning goal is to minimize the total number of salespeople scheduled while meeting all staffing requirements in every period.\n- Business constraints:\n  - Every time period must be staffed with at least the required number of salespeople.\n  - Salespeople may only start work at the allowed shift start times.\n  - Each salesperson works continuously for the full shift duration $$L$$ once assigned.\n  - All staffing quantities must be nonnegative integers.\n- A solution is represented by:\n  - The integer assignment vector $$x = (x_s)_{s \\in \\mathcal{S}}$$.\n  - The minimum total workforce size $$Z$$.\n\nInput Format\n{\n  \"H\": {\n    \"type\": \"scalar\",\n    \"meaning\": \"planning horizon length\"\n  },\n  \"T\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of equal planning periods\"\n  },\n  \"period_length\": {\n    \"type\": \"scalar $$\\\\Delta$$\",\n    \"meaning\": \"length of each planning period\"\n  },\n  \"S\": {\n    \"type\": \"integer\",\n    \"meaning\": \"number of allowed shift start times\"\n  },\n  \"shift_duration\": {\n    \"type\": \"scalar $$L$$\",\n    \"meaning\": \"duration of each shift\"\n  },\n  \"shift_starts\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"allowed shift start times for each $$s \\\\in \\\\mathcal{S}$$\"\n  },\n  \"demand\": {\n    \"type\": \"array of length $$T$$\",\n    \"meaning\": \"required staffing level $$d_t$$ for each period $$t \\\\in \\\\mathcal{T}$$\"\n  },\n  \"coverage\": {\n    \"type\": \"optional binary matrix of shape $$T \\\\times S$$\",\n    \"meaning\": \"coverage indicator $$a_{t,s}$$, where $$1$$ means shift $$s$$ covers period $$t$$ and $$0$$ otherwise\"\n  }\n}\n\nOutput Format\n{\n  \"total_salespeople\": {\n    \"type\": \"integer\",\n    \"meaning\": \"minimum total number of scheduled salespeople, denoted by $$Z$$\"\n  },\n  \"shift_assignments\": {\n    \"type\": \"array of length $$S$$\",\n    \"meaning\": \"integer values $$x_s$$ for each allowed shift start time $$s \\\\in \\\\mathcal{S}$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"H\": 24,\n  \"T\": 6,\n  \"period_length\": 4,\n  \"S\": 6,\n  \"shift_duration\": 8,\n  \"shift_starts\": [\"02:00\", \"06:00\", \"10:00\", \"14:00\", \"18:00\", \"22:00\"],\n  \"periods\": [\n    {\"start\": \"02:00\", \"end\": \"06:00\"},\n    {\"start\": \"06:00\", \"end\": \"10:00\"},\n    {\"start\": \"10:00\", \"end\": \"14:00\"},\n    {\"start\": \"14:00\", \"end\": \"18:00\"},\n    {\"start\": \"18:00\", \"end\": \"22:00\"},\n    {\"start\": \"22:00\", \"end\": \"02:00\"}\n  ],\n  \"demand\": [10, 15, 25, 20, 18, 12]\n}",
     "parameters": [
         {
-            "name": "products",
-            "symbol": "\\mathcal P",
-            "shape": [],
-            "description": "Finite set of product types, indexed by p"
-        },
-        {
-            "name": "stages",
-            "symbol": "\\mathcal Q",
-            "shape": [],
-            "description": "Set of required process stages {A, B}"
-        },
-        {
-            "name": "machines_stage_a",
-            "symbol": "\\mathcal M_{\\mathsf A}",
-            "shape": [],
-            "description": "Set of machines eligible for stage A"
-        },
-        {
-            "name": "machines_stage_b",
-            "symbol": "\\mathcal M_{\\mathsf B}",
-            "shape": [],
-            "description": "Set of machines eligible for stage B"
-        },
-        {
-            "name": "planning_horizon",
-            "symbol": "\\mathcal T",
-            "shape": [],
-            "description": "Planning horizon over which the plan is evaluated"
-        },
-        {
-            "name": "raw_material_cost",
-            "symbol": "c^{\\mathrm{raw}}",
-            "shape": [
-                "\\mathcal P"
-            ],
-            "description": "Raw-material cost per unit of product p"
-        },
-        {
-            "name": "unit_selling_price",
-            "symbol": "\\pi",
-            "shape": [
-                "\\mathcal P"
-            ],
-            "description": "Unit selling price of product p"
-        },
-        {
-            "name": "processing_time_stage_a",
-            "symbol": "\\tau^{\\mathsf A}",
-            "shape": [
-                "\\mathcal P",
-                "\\mathcal M_{\\mathsf A}"
-            ],
-            "description": "Unit processing time of product p on machine m for stage A"
-        },
-        {
-            "name": "processing_time_stage_b",
-            "symbol": "\\tau^{\\mathsf B}",
-            "shape": [
-                "\\mathcal P",
-                "\\mathcal M_{\\mathsf B}"
-            ],
-            "description": "Unit processing time of product p on machine m for stage B"
-        },
-        {
-            "name": "machine_hours_capacity",
-            "symbol": "H",
-            "shape": [
-                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
-            ],
-            "description": "Available effective machine-hours on each machine over the planning horizon"
-        },
-        {
-            "name": "machine_full_capacity_cost",
-            "symbol": "F",
-            "shape": [
-                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
-            ],
-            "description": "Operating-cost parameter associated with full-capacity operation of each machine"
-        },
-        {
-            "name": "eligibility_set",
-            "symbol": "\\mathcal E",
-            "shape": [
-                "\\mathcal P",
-                "\\mathcal Q"
-            ],
-            "description": "Eligible machine set for each product and stage"
-        },
-        {
-            "name": "demand_limit",
+            "name": "demand",
             "symbol": "d",
             "shape": [
-                "\\mathcal P"
+                "T"
             ],
-            "description": "Optional demand or sales-limit parameter for each product in generalized instances"
+            "description": "Period-by-period staffing demand"
+        },
+        {
+            "name": "coverage_indicator",
+            "symbol": "a",
+            "shape": [
+                "T",
+                "S"
+            ],
+            "description": "Binary indicator of whether shift start s covers period t"
+        },
+        {
+            "name": "planning_horizon_length",
+            "symbol": "H",
+            "shape": [],
+            "description": "Planning horizon length"
+        },
+        {
+            "name": "num_periods",
+            "symbol": "T",
+            "shape": [],
+            "description": "Number of equal planning periods"
+        },
+        {
+            "name": "period_length",
+            "symbol": "\\Delta",
+            "shape": [],
+            "description": "Length of each planning period"
+        },
+        {
+            "name": "num_shift_starts",
+            "symbol": "S",
+            "shape": [],
+            "description": "Number of allowed shift start times"
+        },
+        {
+            "name": "shift_duration",
+            "symbol": "L",
+            "shape": [],
+            "description": "Duration of each shift"
+        },
+        {
+            "name": "shift_starts",
+            "symbol": "\\sigma",
+            "shape": [
+                "S"
+            ],
+            "description": "Allowed shift start times indexed by shift start"
         }
     ],
     "variables": [
         {
-            "name": "production_quantity",
+            "name": "staff_assigned_by_shift",
             "symbol": "x",
             "shape": [
-                "\\mathcal P"
+                "S"
             ],
-            "domain": "continuous",
-            "description": "Total quantity of product p produced and sold"
+            "domain": "integer",
+            "description": "Integer number of salespeople assigned to start each shift"
         },
         {
-            "name": "assigned_quantity_stage_a",
-            "symbol": "x^{\\mathsf A}",
-            "shape": [
-                "\\mathcal P",
-                "\\mathcal M_{\\mathsf A}"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product p routed to machine m for stage A"
-        },
-        {
-            "name": "assigned_quantity_stage_b",
-            "symbol": "x^{\\mathsf B}",
-            "shape": [
-                "\\mathcal P",
-                "\\mathcal M_{\\mathsf B}"
-            ],
-            "domain": "continuous",
-            "description": "Quantity of product p routed to machine m for stage B"
-        },
-        {
-            "name": "machine_hours_used",
-            "symbol": "u",
-            "shape": [
-                "\\mathcal M_{\\mathsf A} \\cup \\mathcal M_{\\mathsf B}"
-            ],
-            "domain": "continuous",
-            "description": "Total effective machine-hours used on each machine"
-        },
-        {
-            "name": "total_profit",
-            "symbol": "\\Pi",
+            "name": "total_scheduled_salespeople",
+            "symbol": "Z",
             "shape": [],
-            "domain": "continuous",
-            "description": "Total profit achieved by the production plan"
+            "domain": "integer",
+            "description": "Total number of scheduled salespeople"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegativity_of_decision_variables",
-            "description": "All production, routing, machine-hours, and profit variables are nonnegative continuous quantities.",
-            "formula": "x_p\\ge 0,\\; x_{p,m}^{\\mathsf A}\\ge 0,\\; x_{p,m}^{\\mathsf B}\\ge 0,\\; u_m\\ge 0,\\; \\Pi\\ge 0",
+            "name": "nonnegative_integer_staff_assignments",
+            "description": "The number of salespeople assigned to each shift start is a nonnegative integer.",
+            "formula": "x_s \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall s \\in \\{0,\\dots,S-1\\}",
             "parameters": [
-                "products",
-                "machines_stage_a",
-                "machines_stage_b"
+                "num_shift_starts"
             ],
             "variables": [
-                "production_quantity",
-                "assigned_quantity_stage_a",
-                "assigned_quantity_stage_b",
-                "machine_hours_used",
-                "total_profit"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "machine_eligibility_restriction",
-            "description": "Assignments for each product and stage may use only machines in the corresponding eligibility set.",
-            "formula": "x_{p,m}^{\\mathsf A}=0\\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf A}\\setminus \\mathcal E_p^{\\mathsf A};\\qquad x_{p,m}^{\\mathsf B}=0\\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf B}\\setminus \\mathcal E_p^{\\mathsf B}",
-            "parameters": [
-                "eligibility_set",
-                "products",
-                "stages",
-                "machines_stage_a",
-                "machines_stage_b"
-            ],
+            "name": "nonnegative_integer_total_scheduled_salespeople",
+            "description": "The total number of scheduled salespeople is a nonnegative integer.",
+            "formula": "Z \\in \\mathbb{Z}_{\\ge 0}",
+            "parameters": [],
             "variables": [
-                "assigned_quantity_stage_a",
-                "assigned_quantity_stage_b"
+                "total_scheduled_salespeople"
             ]
         },
         {
-            "name": "machine_capacity_limit",
-            "description": "Machine-hours consumed on each machine must not exceed available effective-hours capacity.",
-            "formula": "u_m=\\sum_{p\\in\\mathcal P}\\tau_{p,m}^{\\mathsf A}x_{p,m}^{\\mathsf A}\\quad \\forall m\\in\\mathcal M_{\\mathsf A};\\qquad u_m=\\sum_{p\\in\\mathcal P}\\tau_{p,m}^{\\mathsf B}x_{p,m}^{\\mathsf B}\\quad \\forall m\\in\\mathcal M_{\\mathsf B};\\qquad u_m\\le H_m\\quad \\forall m\\in\\mathcal M_{\\mathsf A}\\cup\\mathcal M_{\\mathsf B}",
+            "name": "binary_coverage_indicator",
+            "description": "Coverage indicators are binary values indicating whether a shift starting at s covers period t.",
+            "formula": "a_{t,s} \\in \\{0,1\\}\\quad \\forall t \\in \\{0,\\dots,T-1\\},\\ \\forall s \\in \\{0,\\dots,S-1\\}",
             "parameters": [
-                "machine_hours_capacity",
-                "processing_time_stage_a",
-                "processing_time_stage_b",
-                "products",
-                "machines_stage_a",
-                "machines_stage_b"
+                "num_periods",
+                "num_shift_starts"
+            ],
+            "variables": []
+        },
+        {
+            "name": "nonnegative_integer_demand",
+            "description": "Period demand is nonnegative and integer-valued for each period.",
+            "formula": "d_t \\in \\mathbb{Z}_{\\ge 0}\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
+            "parameters": [
+                "num_periods",
+                "demand"
+            ],
+            "variables": []
+        },
+        {
+            "name": "positive_problem_dimensions",
+            "description": "Core sizing parameters are positive.",
+            "formula": "H > 0,\\ T \\in \\mathbb{Z}_{>0},\\ \\Delta > 0,\\ S \\in \\mathbb{Z}_{>0},\\ L > 0",
+            "parameters": [
+                "planning_horizon_length",
+                "num_periods",
+                "period_length",
+                "num_shift_starts",
+                "shift_duration"
+            ],
+            "variables": []
+        },
+        {
+            "name": "period_partition_structure",
+            "description": "The planning horizon is partitioned into T equal periods of length Delta.",
+            "formula": "[0,H) = \\bigcup_{t=0}^{T-1} [t\\Delta,(t+1)\\Delta)\\quad \\text{and}\\quad \\Delta = \\frac{H}{T}",
+            "parameters": [
+                "planning_horizon_length",
+                "num_periods",
+                "period_length"
+            ],
+            "variables": []
+        },
+        {
+            "name": "shift_start_restriction",
+            "description": "Salespeople may only start at allowed shift start times.",
+            "formula": "x_s \\text{ is defined only for } s \\in \\{0,\\dots,S-1\\}",
+            "parameters": [
+                "shift_starts",
+                "num_shift_starts"
             ],
             "variables": [
-                "assigned_quantity_stage_a",
-                "assigned_quantity_stage_b",
-                "machine_hours_used"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "stage_flow_consistency",
-            "description": "For each product, the quantity completed through stage A must equal the quantity that proceeds to stage B.",
-            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A}=\\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B}=x_p\\quad \\forall p\\in\\mathcal P",
+            "name": "fixed_shift_duration",
+            "description": "Each salesperson assigned to a shift works continuously for the full shift duration.",
+            "formula": "\\text{Each shift assigned to } x_s \\text{ lasts for } L \\text{ time units}",
             "parameters": [
-                "eligibility_set",
-                "products"
+                "shift_duration"
             ],
             "variables": [
-                "assigned_quantity_stage_a",
-                "assigned_quantity_stage_b",
-                "production_quantity"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "two_stage_processing_order",
-            "description": "Each product must pass through stage A followed by stage B before being considered finished.",
-            "formula": "x_p = \\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A} = \\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B} \\quad \\forall p\\in\\mathcal P",
+            "name": "coverage_requirement",
+            "description": "Every period must receive staffing coverage sufficient to meet or exceed demand.",
+            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\n\\dots,T-1\\}",
             "parameters": [
-                "eligibility_set",
-                "products"
+                "demand",
+                "coverage_indicator",
+                "num_periods",
+                "num_shift_starts"
             ],
             "variables": [
-                "production_quantity",
-                "assigned_quantity_stage_a",
-                "assigned_quantity_stage_b"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "production_balance_stage_a",
-            "description": "The total quantity of each product assigned to stage A across all eligible machines equals the produced quantity.",
-            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf A}} x_{p,m}^{\\mathsf A}=x_p\\quad \\forall p\\in\\mathcal P",
+            "name": "coverage_indicator_semantics",
+            "description": "A shift assignment covers a period whenever the corresponding coverage indicator equals 1.",
+            "formula": "a_{t,s}=1 \\Rightarrow \\text{shift } s \\text{ covers period } t",
             "parameters": [
-                "eligibility_set",
-                "products"
+                "coverage_indicator"
             ],
             "variables": [
-                "assigned_quantity_stage_a",
-                "production_quantity"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "production_balance_stage_b",
-            "description": "The total quantity of each product assigned to stage B across all eligible machines equals the produced quantity.",
-            "formula": "\\sum_{m\\in\\mathcal E_p^{\\mathsf B}} x_{p,m}^{\\mathsf B}=x_p\\quad \\forall p\\in\\mathcal P",
+            "name": "shift_wraparound_possible",
+            "description": "Shifts may extend beyond the end of the planning horizon if needed.",
+            "formula": "\\text{Coverage is allowed for periods beyond } H \\text{ when a shift extends past the horizon end}",
             "parameters": [
-                "eligibility_set",
-                "products"
+                "planning_horizon_length",
+                "shift_duration"
             ],
             "variables": [
-                "assigned_quantity_stage_b",
-                "production_quantity"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "machine_hours_definition_stage_a",
-            "description": "Machine-hours used on each stage A machine equal the processing time-weighted sum of assigned quantities.",
-            "formula": "u_m = \\sum_{p\\in\\mathcal P} \\tau_{p,m}^{\\mathsf A} x_{p,m}^{\\mathsf A} \\quad \\forall m\\in\\mathcal M_{\\mathsf A}",
+            "name": "staffing_coverage_constraint",
+            "description": "Each period must be staffed to at least its required demand using the assigned shift coverage indicators.",
+            "formula": "\\sum_{s=0}^{S-1} a_{t,s} x_s \\ge d_t\\quad \\forall t \\in \\{0,\\dots,T-1\\}",
             "parameters": [
-                "processing_time_stage_a",
-                "products",
-                "machines_stage_a"
+                "demand",
+                "coverage_indicator",
+                "num_periods",
+                "num_shift_starts"
             ],
             "variables": [
-                "machine_hours_used",
-                "assigned_quantity_stage_a"
+                "staff_assigned_by_shift"
             ]
         },
         {
-            "name": "machine_hours_definition_stage_b",
-            "description": "Machine-hours used on each stage B machine equal the processing time-weighted sum of assigned quantities.",
-            "formula": "u_m = \\sum_{p\\in\\mathcal P} \\tau_{p,m}^{\\mathsf B} x_{p,m}^{\\mathsf B} \\quad \\forall m\\in\\mathcal M_{\\mathsf B}",
+            "name": "total_salespeople_definition",
+            "description": "The total scheduled workforce equals the sum of the assigned staff across all allowed shift starts.",
+            "formula": "Z = \\sum_{s=0}^{S-1} x_s",
             "parameters": [
-                "processing_time_stage_b",
-                "products",
-                "machines_stage_b"
+                "num_shift_starts"
             ],
             "variables": [
-                "machine_hours_used",
-                "assigned_quantity_stage_b"
-            ]
-        },
-        {
-            "name": "machine_capacity_limit_stage_a",
-            "description": "Machine-hours used on each stage A machine may not exceed its available effective-hours capacity.",
-            "formula": "u_m \\le H_m \\quad \\forall m\\in\\mathcal M_{\\mathsf A}",
-            "parameters": [
-                "machine_hours_capacity",
-                "machines_stage_a"
-            ],
-            "variables": [
-                "machine_hours_used"
-            ]
-        },
-        {
-            "name": "machine_capacity_limit_stage_b",
-            "description": "Machine-hours used on each stage B machine may not exceed its available effective-hours capacity.",
-            "formula": "u_m \\le H_m \\quad \\forall m\\in\\mathcal M_{\\mathsf B}",
-            "parameters": [
-                "machine_hours_capacity",
-                "machines_stage_b"
-            ],
-            "variables": [
-                "machine_hours_used"
-            ]
-        },
-        {
-            "name": "eligibility_zeroing_stage_a",
-            "description": "Assignments to ineligible stage A machines are fixed to zero.",
-            "formula": "x_{p,m}^{\\mathsf A} = 0 \\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf A}\\setminus \\mathcal E_p^{\\mathsf A}",
-            "parameters": [
-                "eligibility_set",
-                "products",
-                "machines_stage_a"
-            ],
-            "variables": [
-                "assigned_quantity_stage_a"
-            ]
-        },
-        {
-            "name": "eligibility_zeroing_stage_b",
-            "description": "Assignments to ineligible stage B machines are fixed to zero.",
-            "formula": "x_{p,m}^{\\mathsf B} = 0 \\quad \\forall p\\in\\mathcal P,\\; \\forall m\\in\\mathcal M_{\\mathsf B}\\setminus \\mathcal E_p^{\\mathsf B}",
-            "parameters": [
-                "eligibility_set",
-                "products",
-                "machines_stage_b"
-            ],
-            "variables": [
-                "assigned_quantity_stage_b"
+                "staff_assigned_by_shift",
+                "total_scheduled_salespeople"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "profit_maximization",
-            "description": "Maximize total profit over the planning horizon",
+            "name": "minimize_total_scheduled_salespeople",
+            "description": "Minimize the total number of scheduled salespeople while satisfying all period staffing requirements",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total profit, using revenue minus raw-material costs and a linear machine operating-cost approximation obtained by scaling each machine's full-capacity operating cost by its utilized-hour fraction.",
+        "description": "Minimize the total number of scheduled salespeople by minimizing the scalar total workforce variable Z; this is a single-objective MILP, so no combination strategy is needed.",
         "objective_combination_method": "one_objective",
-        "sense": "maximize",
-        "formula": "\\Pi = \\sum_{p\\in\\mathcal P}\\left(\\pi_p - c_p^{\\mathrm{raw}}\\right)x_p - \\sum_{m\\in\\mathcal M_{\\mathsf A}\\cup\\mathcal M_{\\mathsf B}} \\frac{F_m}{H_m}u_m",
-        "parameters": [
-            "unit_selling_price",
-            "raw_material_cost",
-            "machine_full_capacity_cost",
-            "machine_hours_capacity"
-        ],
+        "sense": "minimize",
+        "formula": "Z",
+        "parameters": [],
         "variables": [
-            "production_quantity",
-            "machine_hours_used",
-            "total_profit"
+            "total_scheduled_salespeople"
         ]
     }
 }

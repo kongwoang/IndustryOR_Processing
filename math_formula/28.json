@@ -1,238 +1,241 @@
 {
-    "problem": "Problem description\n- There is a single-period staffing allocation problem with two indexed sets: branches $$\\mathcal R$$ and specialties $$\\mathcal S$$. Applicant groups are indexed by $$\\mathcal T$$.\n- Each branch-specialty pair has a required demand represented by the parameter $$d_{r,s}$$ for every $$r \\in \\mathcal R$$ and $$s \\in \\mathcal S$$.\n- Each applicant type has an available headcount represented by the parameter $$n_t$$ for every $$t \\in \\mathcal T$$.\n- Each applicant type $$t$$ can only be assigned to a subset of specialties, denoted by $$\\mathcal S_t^{\\mathrm{cap}} \\subseteq \\mathcal S$$.\n- Each applicant type $$t$$ has one preferred specialty, denoted by $$s_t^{\\mathrm{pref}} \\in \\mathcal S$$, and one preferred branch, denoted by $$r_t^{\\mathrm{pref}} \\in \\mathcal R$$.\n- The planning priorities are lexicographic and ordered as $$p_1 \\succ p_2 \\succ p_3$$.\n- Priority $$p_1$$ means that staffing demand for all branch-specialty requirements should be satisfied as fully as possible.\n- Priority $$p_2$$ means that as many recruited people as possible should be placed in their preferred specialty, up to the target count $$Q_2$$.\n- Priority $$p_3$$ means that as many recruited people as possible should be placed in their preferred branch, up to the target count $$Q_3$$.\n- The planning goal is to find an assignment that respects applicant availability and capability limits while optimizing the priorities in order.\n- Assignments that violate an applicant type\u2019s allowed specialties are not permitted.\n- No applicant type may be used beyond its available number $$n_t$$.\n- Demand shortfalls, specialty-preference shortfalls, and branch-preference shortfalls are tracked as deviation quantities for the goal-planning hierarchy.\n- A solution is represented by:\n  - $$x_{t,r,s}$$: the number of applicants of type $$t$$ assigned to branch $$r$$ in specialty $$s$$.\n  - $$u_{r,s}$$: the unmet demand remaining for branch $$r$$ and specialty $$s$$.\n  - $$v_2$$: the shortfall from the preferred-specialty target $$Q_2$$.\n  - $$v_3$$: the shortfall from the preferred-branch target $$Q_3$$.\n  - Optional reporting quantities may include the number of assigned applicants who satisfy $$p_2$$ and the number who satisfy $$p_3$$.\n\nInput Format\n{\n  \"branches\": \"$$\\\\mathcal R$$, the set of branch locations\",\n  \"specialties\": \"$$\\\\mathcal S$$, the set of professional specialties\",\n  \"applicant_types\": \"$$\\\\mathcal T$$, the set of applicant categories\",\n  \"demand\": \"matrix $$d_{r,s}$$ with shape $$R \\\\times S$$, where $$d_{r,s}$$ is the required headcount of specialty $$s$$ at branch $$r$$\",\n  \"available_supply\": \"vector $$n_t$$ with shape $$T$$, where $$n_t$$ is the number of applicants of type $$t$$\",\n  \"feasible_specialties\": \"list $$\\\\mathcal S_t^{\\\\mathrm{cap}}$$ for each $$t \\\\in \\\\mathcal T$$, giving the specialties that type $$t$$ can handle\",\n  \"preferred_specialty\": \"vector $$s_t^{\\\\mathrm{pref}}$$ with shape $$T$$, where $$s_t^{\\\\mathrm{pref}}$$ is the preferred specialty of type $$t$$\",\n  \"preferred_branch\": \"vector $$r_t^{\\\\mathrm{pref}}$$ with shape $$T$$, where $$r_t^{\\\\mathrm{pref}}$$ is the preferred branch of type $$t$$\",\n  \"priority_levels\": [\"$$p_1$$\", \"$$p_2$$\", \"$$p_3$$\"],\n  \"priority_targets\": {\n    \"preferred_specialty_target\": \"$$Q_2$$, the target number of recruits whose assigned specialty matches their preference\",\n    \"preferred_branch_target\": \"$$Q_3$$, the target number of recruits whose assigned branch matches their preference\"\n  }\n}\n\nOutput Format\n{\n  \"assignment\": \"tensor $$x_{t,r,s}$$ with shape $$T \\\\times R \\\\times S$$, giving the number of applicants of type $$t$$ assigned to branch $$r$$ and specialty $$s$$\",\n  \"unmet_demand\": \"matrix $$u_{r,s}$$ with shape $$R \\\\times S$$, giving the remaining unmet demand after assignment\",\n  \"priority_shortfall\": {\n    \"p_1\": \"overall demand shortfall summary for priority $$p_1$$\",\n    \"p_2\": \"shortfall $$v_2$$ from the preferred-specialty target $$Q_2$$\",\n    \"p_3\": \"shortfall $$v_3$$ from the preferred-branch target $$Q_3$$\"\n  },\n  \"priority_attainment_report\": {\n    \"preferred_specialty_matches\": \"count of assigned applicants whose specialty matches $$s_t^{\\\\mathrm{pref}}$$\",\n    \"preferred_branch_matches\": \"count of assigned applicants whose branch matches $$r_t^{\\\\mathrm{pref}}$$\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"branches\": [\"Donghai City\", \"Nanjiang City\"],\n  \"specialties\": [$$1$$, $$2$$, $$3$$],\n  \"applicant_types\": [$$1$$, $$2$$, $$3$$, $$4$$, $$5$$, $$6$$],\n  \"demand\": {\n    \"Donghai City\": {\n      $$1$$: $$1000$$,\n      $$2$$: $$2000$$,\n      $$3$$: $$1500$$\n    },\n    \"Nanjiang City\": {\n      $$1$$: $$2000$$,\n      $$2$$: $$1000$$,\n      $$3$$: $$1000$$\n    }\n  },\n  \"available_supply\": {\n    $$1$$: $$1500$$,\n    $$2$$: $$1500$$,\n    $$3$$: $$1500$$,\n    $$4$$: $$1500$$,\n    $$5$$: $$1500$$,\n    $$6$$: $$1500$$\n  },\n  \"feasible_specialties\": {\n    $$1$$: [$$1$$, $$2$$],\n    $$2$$: [$$2$$, $$3$$],\n    $$3$$: [$$1$$, $$3$$],\n    $$4$$: [$$1$$, $$3$$],\n    $$5$$: [$$2$$, $$3$$],\n    $$6$$: [$$3$$]\n  },\n  \"preferred_specialty\": {\n    $$1$$: $$1$$,\n    $$2$$: $$2$$,\n    $$3$$: $$1$$,\n    $$4$$: $$3$$,\n    $$5$$: $$3$$,\n    $$6$$: $$3$$\n  },\n  \"preferred_branch\": {\n    $$1$$: \"Donghai City\",\n    $$2$$: \"Donghai City\",\n    $$3$$: \"Nanjiang City\",\n    $$4$$: \"Nanjiang City\",\n    $$5$$: \"Donghai City\",\n    $$6$$: \"Nanjiang City\"\n  },\n  \"priority_targets\": {\n    \"preferred_specialty_target\": $$8000$$,\n    \"preferred_branch_target\": $$8000$$\n  }\n}",
+    "problem": "Problem description\n- There is a finite planning horizon of $$T$$ periods indexed by $$t \\in \\mathcal{T}=\\{1,\\ldots,T\\}$$.\n- There are $$N$$ investment opportunities indexed by $$j \\in \\mathcal{J}=\\{1,\\ldots,N\\}$$.\n- The decision maker starts with initial liquid capital $$C_0$$ at the beginning of period $$1$$.\n- Each opportunity $$j$$ has an allowed opening set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$, a lock-up duration $$d_j$$, a gross return multiplier $$\\rho_j$$, a per-unit cash requirement $$c_j$$, and a maximum cumulative investment limit $$U_j$$.\n- Capital invested in an opportunity is tied up until the opportunity matures, after which the principal and return are released back into liquid capital.\n- Any liquid capital not invested in a period may be carried forward and used later.\n- Investments may only be made in periods when the corresponding opportunity is open, and the total amount placed into any opportunity may not exceed its investment limit.\n- The available liquid capital in any period cannot be exceeded by the total new investments initiated in that period.\n- The planning goal is to choose the investment amounts over all periods so that the terminal capital at the end of $$T$$ is maximized.\n- A solution is represented by:\n  - $$x_{j,t}$$, the amount invested in opportunity $$j$$ at the beginning of period $$t$$.\n  - $$h_t$$, the liquid capital available at the relevant reporting point of period $$t$$.\n  - $$Z_T$$, the total capital available at the end of period $$T$$.\n\nInput Format\n{\n  \"T\": \"planning horizon length, scalar $$T$$\",\n  \"C0\": \"initial liquid capital at the beginning of period $$1$$, scalar $$C_0$$\",\n  \"N\": \"number of investment opportunities, scalar $$N$$\",\n  \"projects\": [\n    {\n      \"id\": \"project index $$j$$\",\n      \"open_periods\": \"set $$\\mathcal{A}_j \\subseteq \\mathcal{T}$$ of periods when a new investment may start\",\n      \"maturity_lag\": \"lock-up duration $$d_j$$ in periods before capital is released\",\n      \"unit_cash_requirement\": \"cash requirement per unit invested, scalar $$c_j$$\",\n      \"gross_return\": \"gross return multiplier $$\\rho_j$$ applied at maturity\",\n      \"max_investment\": \"capacity limit $$U_j$$ on the total amount that can be invested in project $$j$$\"\n    }\n  ]\n}\n\nOutput Format\n{\n  \"investment_plan\": \"array $$x_{j,t}$$ with shape $$N \\\\times T$$; each entry is the planned amount invested in opportunity $$j$$ at the beginning of period $$t$$\",\n  \"liquid_capital_path\": \"array $$h_t$$ with shape $$T+1$$; each entry is the liquid capital available at the chosen reporting point of period $$t$$\",\n  \"terminal_capital\": \"scalar $$Z_T$$; the total capital at the end of period $$T$$\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 3,\n  \"C0\": 300000,\n  \"N\": 4,\n  \"projects\": [\n    {\n      \"id\": 1,\n      \"open_periods\": [1, 2, 3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.2,\n      \"max_investment\": null\n    },\n    {\n      \"id\": 2,\n      \"open_periods\": [1],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.5,\n      \"max_investment\": 150000\n    },\n    {\n      \"id\": 3,\n      \"open_periods\": [2],\n      \"maturity_lag\": 2,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.6,\n      \"max_investment\": 200000\n    },\n    {\n      \"id\": 4,\n      \"open_periods\": [3],\n      \"maturity_lag\": 1,\n      \"unit_cash_requirement\": 1,\n      \"gross_return\": 1.4,\n      \"max_investment\": 100000\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "num_branches",
-            "symbol": "R",
-            "shape": [],
-            "description": "Number of branches"
-        },
-        {
-            "name": "num_specialties",
-            "symbol": "S",
-            "shape": [],
-            "description": "Number of specialties"
-        },
-        {
-            "name": "num_applicant_types",
+            "name": "planning_horizon_t",
             "symbol": "T",
             "shape": [],
-            "description": "Number of applicant types"
+            "description": "Number of periods in the finite planning horizon"
         },
         {
-            "name": "demand",
-            "symbol": "d",
-            "shape": [
-                "R",
-                "S"
-            ],
-            "description": "Required demand for each branch-specialty pair"
+            "name": "num_opportunities",
+            "symbol": "N",
+            "shape": [],
+            "description": "Number of investment opportunities"
         },
         {
-            "name": "available_supply",
-            "symbol": "n",
-            "shape": [
-                "T"
-            ],
-            "description": "Available headcount for each applicant type"
+            "name": "initial_liquid_capital",
+            "symbol": "C_0",
+            "shape": [],
+            "description": "Initial liquid capital at the beginning of period 1"
         },
         {
-            "name": "feasible_specialties",
-            "symbol": "\\mathcal S^{cap}",
+            "name": "allowed_open_periods",
+            "symbol": "\\mathcal{A}",
             "shape": [
-                "T",
+                "N",
                 "-"
             ],
-            "description": "Feasible specialty subset for each applicant type"
+            "description": "Allowed opening periods for each opportunity j"
         },
         {
-            "name": "preferred_specialty",
-            "symbol": "s^{pref}",
+            "name": "lock_up_duration",
+            "symbol": "d",
             "shape": [
-                "T"
+                "N"
             ],
-            "description": "Preferred specialty for each applicant type"
+            "description": "Lock-up duration for each opportunity"
         },
         {
-            "name": "preferred_branch",
-            "symbol": "r^{pref}",
+            "name": "gross_return_multiplier",
+            "symbol": "\\rho",
             "shape": [
-                "T"
+                "N"
             ],
-            "description": "Preferred branch for each applicant type"
+            "description": "Gross return multiplier for each opportunity"
         },
         {
-            "name": "preferred_specialty_target",
-            "symbol": "Q_2",
-            "shape": [],
-            "description": "Target number of applicants placed in their preferred specialty"
+            "name": "unit_cash_requirement",
+            "symbol": "c",
+            "shape": [
+                "N"
+            ],
+            "description": "Per-unit cash requirement for each opportunity"
         },
         {
-            "name": "preferred_branch_target",
-            "symbol": "Q_3",
-            "shape": [],
-            "description": "Target number of applicants placed in their preferred branch"
+            "name": "max_investment_limit",
+            "symbol": "U",
+            "shape": [
+                "N"
+            ],
+            "description": "Maximum cumulative investment limit for each opportunity, possibly unbounded if no limit is imposed"
         }
     ],
     "variables": [
         {
-            "name": "assignment",
+            "name": "investment_amount",
             "symbol": "x",
             "shape": [
-                "T",
-                "R",
-                "S"
+                "N",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of applicants of type t assigned to branch r in specialty s"
+            "domain": "continuous",
+            "description": "Amount invested in opportunity j at the beginning of period t"
         },
         {
-            "name": "unmet_demand",
-            "symbol": "u",
+            "name": "liquid_capital_path",
+            "symbol": "h",
             "shape": [
-                "R",
-                "S"
+                "T+1"
             ],
             "domain": "continuous",
-            "description": "Unmet demand for each branch-specialty pair"
+            "description": "Liquid capital available at each reporting point from period 0 through period T"
         },
         {
-            "name": "preferred_specialty_shortfall",
-            "symbol": "v_2",
+            "name": "terminal_capital",
+            "symbol": "Z_T",
             "shape": [],
             "domain": "continuous",
-            "description": "Shortfall from the preferred-specialty target"
-        },
-        {
-            "name": "preferred_branch_shortfall",
-            "symbol": "v_3",
-            "shape": [],
-            "domain": "continuous",
-            "description": "Shortfall from the preferred-branch target"
+            "description": "Total capital available at the end of period T"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "assignment_type_capacity",
-            "description": "Assignments are only permitted to specialties allowed for each applicant type.",
-            "formula": "x_{t,r,s} = 0 \\quad \\forall t=0,\\dots,T-1,\\;\\forall r=0,\\dots,R-1,\\;\\forall s \\notin \\mathcal S^{cap}_t",
+            "name": "nonnegative_investment_amounts",
+            "description": "Investment amounts must be nonnegative",
+            "formula": "x_{j,t} \\ge 0",
             "parameters": [
-                "feasible_specialties"
+                "planning_horizon_t",
+                "num_opportunities"
             ],
             "variables": [
-                "assignment"
+                "investment_amount"
             ]
         },
         {
-            "name": "assignment_supply_limit",
-            "description": "The total number of applicants assigned for each type cannot exceed its available supply.",
-            "formula": "\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} x_{t,r,s} \\le n_t \\quad \\forall t=0,\\dots,T-1",
+            "name": "nonnegative_liquid_capital",
+            "description": "Liquid capital values must be nonnegative",
+            "formula": "h_t \\ge 0",
             "parameters": [
-                "available_supply"
+                "planning_horizon_t"
             ],
             "variables": [
-                "assignment"
+                "liquid_capital_path"
             ]
         },
         {
-            "name": "nonnegative_unmet_demand",
-            "description": "Unmet demand values must be nonnegative.",
-            "formula": "u_{r,s} \\ge 0 \\quad \\forall r,s",
-            "variables": [
-                "unmet_demand"
-            ]
-        },
-        {
-            "name": "nonnegative_preference_shortfalls",
-            "description": "Preference shortfall variables must be nonnegative.",
-            "formula": "v_2 \\ge 0,\\; v_3 \\ge 0",
-            "variables": [
-                "preferred_specialty_shortfall",
-                "preferred_branch_shortfall"
-            ]
-        },
-        {
-            "name": "demand_shortfall_tracking",
-            "description": "Each branch-specialty demand is matched by assigned applicants plus unmet demand, with no overstaffing.",
-            "formula": "\\sum_{t=0}^{T-1} x_{t,r,s} + u_{r,s} = d_{r,s} \\quad \\forall r=0,\\dots,R-1,\\;\\forall s=0,\\dots,S-1",
+            "name": "nonnegative_terminal_capital",
+            "description": "Terminal capital must be nonnegative",
+            "formula": "Z_T \\ge 0",
             "parameters": [
-                "demand"
+                "planning_horizon_t"
             ],
             "variables": [
-                "assignment",
-                "unmet_demand"
+                "terminal_capital"
             ]
         },
         {
-            "name": "lexicographic_priority_order",
-            "description": "Objectives are optimized in the order demand satisfaction, preferred specialty attainment, then preferred branch attainment.",
-            "formula": "p_1 \\succ p_2 \\succ p_3",
+            "name": "open_period_restriction",
+            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
+            "formula": "t \\in \\mathcal{A}_j",
             "parameters": [
-                "preferred_specialty_target",
-                "preferred_branch_target"
+                "allowed_open_periods"
             ],
             "variables": [
-                "unmet_demand",
-                "preferred_specialty_shortfall",
-                "preferred_branch_shortfall"
+                "investment_amount"
             ]
         },
         {
-            "name": "preferred_specialty_shortfall_definition",
-            "description": "The shortfall from the preferred-specialty target equals target minus the number of assigned applicants placed in their preferred specialty.",
-            "formula": "\\sum_{t=0}^{T-1}\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} \\mathbf{1}_{\\{s=s^{pref}_t\\}} x_{t,r,s} + v_2 = Q_2",
+            "name": "opportunity_investment_cap",
+            "description": "Total investment in each opportunity over the horizon may not exceed its maximum investment limit",
+            "formula": "\\sum_t x_{j,t} \\le U_j",
             "parameters": [
-                "preferred_specialty",
-                "preferred_specialty_target"
+                "max_investment_limit"
             ],
             "variables": [
-                "assignment",
-                "preferred_specialty_shortfall"
+                "investment_amount"
             ]
         },
         {
-            "name": "preferred_branch_shortfall_definition",
-            "description": "The shortfall from the preferred-branch target equals target minus the number of assigned applicants placed in their preferred branch.",
-            "formula": "\\sum_{t=0}^{T-1}\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} \\mathbf{1}_{\\{r=r^{pref}_t\\}} x_{t,r,s} + v_3 = Q_3",
+            "name": "period_liquidity_limit",
+            "description": "Total new investments initiated in any period cannot exceed liquid capital available in that period",
+            "formula": "\\sum_j x_{j,t} \\le h_t",
             "parameters": [
-                "preferred_branch",
-                "preferred_branch_target"
+                "planning_horizon_t"
             ],
             "variables": [
-                "assignment",
-                "preferred_branch_shortfall"
+                "investment_amount",
+                "liquid_capital_path"
             ]
         },
         {
-            "name": "nonnegative_integer_assignment_domain",
-            "description": "Assignment variables must be nonnegative integers.",
-            "formula": "x_{t,r,s} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall t,r,s",
+            "name": "capital_carry_forward",
+            "description": "Liquid capital evolves by carrying forward unused capital from the previous period and adding matured investment proceeds at the start of each period",
+            "formula": "h_t = h_{t-1} - \\sum_{j=1}^{N} x_{j,t-1} + \\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\\ldots,T",
+            "parameters": [
+                "planning_horizon_t",
+                "gross_return_multiplier",
+                "lock_up_duration"
+            ],
             "variables": [
-                "assignment"
+                "liquid_capital_path",
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "maturity_release",
+            "description": "Invested capital is released back into liquid capital exactly after the corresponding lock-up duration with gross return, enforced through the period-to-period capital balance",
+            "formula": "\\sum_{j=1}^{N} \\sum_{\\tau=1}^{t-1} \\mathbf{1}_{\\{\\tau + d_j = t\\}}\\, \\rho_j x_{j,\\tau} \\quad \\forall t=1,\n\\ldots,T",
+            "parameters": [
+                "lock_up_duration",
+                "gross_return_multiplier"
+            ],
+            "variables": [
+                "investment_amount",
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "terminal_capital_reporting",
+            "description": "Terminal capital equals liquid capital at the end of period T",
+            "formula": "Z_T = h_T",
+            "parameters": [
+                "planning_horizon_t"
+            ],
+            "variables": [
+                "terminal_capital",
+                "liquid_capital_path"
+            ]
+        },
+        {
+            "name": "opportunity_opening_restriction",
+            "description": "Investments may only be initiated in allowed opening periods for each opportunity",
+            "formula": "x_{j,t} = 0 \\quad \\forall t \\notin \\mathcal{A}_j",
+            "parameters": [
+                "allowed_open_periods"
+            ],
+            "variables": [
+                "investment_amount"
+            ]
+        },
+        {
+            "name": "initial_capital_condition",
+            "description": "Liquid capital at the start of period 0 equals the initial capital",
+            "formula": "h_0 = C_0",
+            "parameters": [
+                "initial_liquid_capital"
+            ],
+            "variables": [
+                "liquid_capital_path"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "lexicographic_demand_and_preference_satisfaction",
-            "description": "Lexicographically prioritize satisfying staffing demand as fully as possible, then maximize placement in preferred specialties up to the target, then maximize placement in preferred branches up to the target.",
-            "sense": "feasibility"
+            "name": "terminal_capital_maximization",
+            "description": "Maximize terminal capital at the end of period T",
+            "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Use preemption optimization to prioritize minimizing total unmet staffing demand first, then minimizing preferred-specialty shortfall, and finally minimizing preferred-branch shortfall, reflecting lexicographic priorities p_1 \\succ p_2 \\succ p_3.",
-        "objective_combination_method": "preemption_optimization",
-        "sense": "minimize",
-        "formula": "\\left(\\sum_{r=0}^{R-1}\\sum_{s=0}^{S-1} u_{r,s},\\; v_2,\\; v_3\\right)",
-        "parameters": [
-            "num_branches",
-            "num_specialties"
-        ],
+        "description": "Maximize terminal capital at the end of period T.",
+        "objective_combination_method": "one_objective",
+        "sense": "maximize",
+        "formula": "Z_T",
+        "parameters": [],
         "variables": [
-            "unmet_demand",
-            "preferred_specialty_shortfall",
-            "preferred_branch_shortfall"
+            "terminal_capital"
         ]
     }
 }

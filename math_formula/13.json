@@ -1,269 +1,177 @@
 {
-    "problem": "Problem description\n- There is a single meal-planning horizon $$\\mathcal{T}=\\{1\\}$$.\n- The available food items are partitioned into protein items indexed by $$p \\in \\mathcal{P}$$ and vegetable items indexed by $$v \\in \\mathcal{V}$$.\n- Each protein item $$p \\in \\mathcal{P}$$ has a protein yield $$\\pi_p$$ per unit, a unit cost $$c_p$$, and a unit weight $$w_p$$. Protein items may be purchased in any nonnegative quantity measured in units of $$100\\text{g}$$.\n- Each vegetable item $$v \\in \\mathcal{V}$$ has a protein yield $$\\pi_v$$ per pack, a pack cost $$c_v$$, and a pack weight $$w_v$$. Vegetable purchases are made in packs.\n- The planning goal is to choose a combination of protein and vegetable purchases that maximizes total protein intake for the meal.\n- The total spending must stay within the budget $$B$$.\n- The total purchased food weight must not exceed the weight limit $$W^{\\max}$$.\n- At least $$K$$ distinct vegetable types must be selected.\n- A vegetable type may only be purchased if it is selected.\n- A solution is represented by:\n  - $$x_p$$: purchased quantity of protein item $$p \\in \\mathcal{P}$$, measured in units of $$100\\text{g}$$.\n  - $$z_v$$: purchased number of packs of vegetable item $$v \\in \\mathcal{V}$$.\n  - $$y_v$$: binary selection indicator for vegetable item $$v \\in \\mathcal{V}$$, where $$1$$ means selected and $$0$$ means not selected.\n  - $$Z$$: total protein achieved by the chosen meal plan.\n\nInput Format\n{\n  \"time_horizon\": {\n    \"periods\": \"$$\\\\mathcal{T}=\\\\{1\\\\}$$\"\n  },\n  \"protein_items\": {\n    \"count\": \"$$|\\\\mathcal{P}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{P}|$$\",\n    \"protein_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$\\\\pi_p$$ is the protein yield per unit for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"cost_per_unit\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$c_p$$ is the unit cost for protein item $$p \\\\in \\\\mathcal{P}$$\",\n    \"weight_per_unit_g\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$w_p$$ is the unit weight for protein item $$p \\\\in \\\\mathcal{P}$$\"\n  },\n  \"vegetable_items\": {\n    \"count\": \"$$|\\\\mathcal{V}|$$\",\n    \"names\": \"array of length $$|\\\\mathcal{V}|$$\",\n    \"protein_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$\\\\pi_v$$ is the protein yield per pack for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"cost_per_pack\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$c_v$$ is the pack cost for vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n    \"weight_per_pack_g\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$w_v$$ is the pack weight for vegetable item $$v \\\\in \\\\mathcal{V}$$\"\n  },\n  \"budget\": \"$$B$$, the maximum total spending allowed\",\n  \"max_total_weight_g\": \"$$W^{\\\\max}$$, the maximum total food weight allowed in grams\",\n  \"min_distinct_vegetables\": \"$$K$$, the minimum number of different vegetable types that must be selected\",\n  \"variable_domains\": {\n    \"protein_purchase\": \"$$x_p \\\\ge 0$$ for all $$p \\\\in \\\\mathcal{P}$$\",\n    \"vegetable_purchase\": \"$$z_v \\\\in \\\\mathbb{Z}_{\\\\ge 0}$$ for all $$v \\\\in \\\\mathcal{V}$$\",\n    \"vegetable_selected\": \"$$y_v \\\\in \\\\{0,1\\\\}$$ for all $$v \\\\in \\\\mathcal{V}$$\"\n  }\n}\n\nOutput Format\n{\n  \"protein_purchase\": \"array of length $$|\\\\mathcal{P}|$$, where entry $$x_p$$ is the chosen purchase quantity of protein item $$p \\\\in \\\\mathcal{P}$$ in units of $$100\\\\text{g}$$\",\n  \"vegetable_purchase\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$z_v$$ is the chosen number of packs of vegetable item $$v \\\\in \\\\mathcal{V}$$\",\n  \"vegetable_selected\": \"array of length $$|\\\\mathcal{V}|$$, where entry $$y_v$$ indicates whether vegetable item $$v \\\\in \\\\mathcal{V}$$ is selected\",\n  \"total_protein\": \"$$Z$$, the total protein obtained by the selected meal plan\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"time_horizon\": {\n    \"periods\": 1\n  },\n  \"protein_items\": {\n    \"count\": 3,\n    \"names\": [\"chicken\", \"salmon\", \"tofu\"],\n    \"protein_per_unit_g\": [23, 20, 8],\n    \"cost_per_unit\": [3.0, 5.0, 1.5],\n    \"weight_per_unit_g\": [100, 100, 100]\n  },\n  \"vegetable_items\": {\n    \"count\": 5,\n    \"names\": [\"broccoli\", \"carrots\", \"spinach\", \"bell_pepper\", \"mushrooms\"],\n    \"protein_per_pack_g\": [2.8, 0.9, 2.9, 1.0, 3.1],\n    \"cost_per_pack\": [1.2, 0.8, 1.5, 1.0, 2.0],\n    \"weight_per_pack_g\": [100, 100, 100, 100, 100]\n  },\n  \"budget\": 20,\n  \"max_total_weight_g\": 800,\n  \"min_distinct_vegetables\": 3\n}",
+    "problem": "Problem description\n- There is a finite set of crops $$\\mathcal{C}$$, indexed by $$c \\in \\mathcal{C}$$, that can be allocated land on a farm.\n- The farm has a land capacity parameter $$L$$ measured in acres.\n- Each crop $$c \\in \\mathcal{C}$$ has a unit profit parameter $$\\pi_c$$, measured as profit per acre.\n- The planning horizon is a static horizon $$\\mathcal{T}$$, and the decision is a one-stage land allocation over that horizon.\n- A set of proportional land-allocation rules $$\\mathcal{R}$$ may be present; each rule links two crops and specifies a minimum acreage ratio between them.\n- The planning goal is to maximize the total profit obtained from allocating acres to crops.\n\n- The total acreage assigned to all crops must not exceed the available land capacity $$L$$.\n- The acreage assigned to each crop must be nonnegative.\n- Every proportional rule in $$\\mathcal{R}$$ must be respected in the land allocation.\n- For each rule, the designated left crop must receive at least the specified multiple of the acreage assigned to the designated right crop.\n- No additional costs, penalties, or demand requirements are imposed in this instance beyond the stated land-capacity and proportionality rules.\n- A solution is represented by:\n  - $$x_c$$: the acreage allocated to crop $$c \\in \\mathcal{C}$$.\n  - $$Z$$: the resulting total profit of the allocation.\n\nInput Format\n{\n  \"crops\": \"Set $$\\mathcal{C}$$ of crops, indexed by $$c \\in \\mathcal{C}$$.\",\n  \"available_land\": \"Total land capacity $$L$$ in acres.\",\n  \"profit_per_acre\": \"Profit vector $$\\pi$$, where $$\\pi_c$$ is the profit per acre for crop $$c \\in \\mathcal{C}$$.\",\n  \"proportional_rules\": \"Rule set $$\\mathcal{R}$$. Each rule $$r \\in \\mathcal{R}$$ contains left crop $$i_r \\in \\mathcal{C}$$, right crop $$j_r \\in \\mathcal{C}$$, and multiplier $$\\beta_r$$ meaning the acreage of $$i_r$$ must be at least $$\\beta_r$$ times the acreage of $$j_r$$.\",\n  \"planning_horizon\": \"Planning horizon $$\\mathcal{T}$$ for the allocation problem.\",\n  \"optional_demand_data\": \"Optional demand data $$d_{c,t}$$, if a generalized extension requires it; not used in this land-allocation instance.\"\n}\n\nOutput Format\n{\n  \"acreage_by_crop\": \"Allocation vector $$x$$ indexed by $$c \\in \\mathcal{C}$$, where $$x_c$$ is the acreage assigned to crop $$c$$.\",\n  \"total_profit\": \"Scalar $$Z$$ giving the achieved total profit.\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"crops\": [\"corn\", \"wheat\", \"soybeans\", \"sorghum\"],\n  \"available_land\": 100,\n  \"profit_per_acre\": {\n    \"corn\": 1500,\n    \"wheat\": 1200,\n    \"soybeans\": 1800,\n    \"sorghum\": 1600\n  },\n  \"proportional_rules\": [\n    {\n      \"left_crop\": \"corn\",\n      \"right_crop\": \"wheat\",\n      \"multiplier\": 2\n    },\n    {\n      \"left_crop\": \"soybeans\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 0.5\n    },\n    {\n      \"left_crop\": \"wheat\",\n      \"right_crop\": \"sorghum\",\n      \"multiplier\": 3\n    }\n  ]\n}",
     "parameters": [
         {
-            "name": "num_protein_items",
-            "symbol": "P",
+            "name": "num_crops",
+            "symbol": "C",
             "shape": [],
-            "description": "Number of protein items"
+            "description": "Number of crops in the finite crop set"
         },
         {
-            "name": "num_vegetable_items",
-            "symbol": "V",
+            "name": "num_rules",
+            "symbol": "R",
             "shape": [],
-            "description": "Number of vegetable items"
+            "description": "Number of proportional land-allocation rules"
         },
         {
-            "name": "time_horizon_periods",
-            "symbol": "T",
+            "name": "available_land",
+            "symbol": "L",
             "shape": [],
-            "description": "Number of planning periods in the meal-planning horizon"
+            "description": "Available land capacity in acres"
         },
         {
-            "name": "protein_yield_per_unit",
-            "symbol": "\\pi_p",
+            "name": "unit_profit_per_acre",
+            "symbol": "\\pi",
             "shape": [
-                "P"
+                "C"
             ],
-            "description": "Protein yield per unit for each protein item"
+            "description": "Unit profit per acre for each crop"
         },
         {
-            "name": "protein_cost_per_unit",
-            "symbol": "c_p",
+            "name": "left_crop_index",
+            "symbol": "i",
             "shape": [
-                "P"
+                "R"
             ],
-            "description": "Cost per unit for each protein item"
+            "description": "Left crop index for each proportional rule"
         },
         {
-            "name": "protein_weight_per_unit",
-            "symbol": "w_p",
+            "name": "right_crop_index",
+            "symbol": "j",
             "shape": [
-                "P"
+                "R"
             ],
-            "description": "Weight per unit for each protein item"
+            "description": "Right crop index for each proportional rule"
         },
         {
-            "name": "vegetable_protein_yield_per_pack",
-            "symbol": "\\pi_v",
+            "name": "min_acreage_multiplier",
+            "symbol": "\\beta",
             "shape": [
-                "V"
+                "R"
             ],
-            "description": "Protein yield per pack for each vegetable item"
+            "description": "Minimum acreage multiplier for each proportional rule"
         },
         {
-            "name": "vegetable_cost_per_pack",
-            "symbol": "c_v",
-            "shape": [
-                "V"
-            ],
-            "description": "Cost per pack for each vegetable item"
-        },
-        {
-            "name": "vegetable_weight_per_pack",
-            "symbol": "w_v",
-            "shape": [
-                "V"
-            ],
-            "description": "Weight per pack for each vegetable item"
-        },
-        {
-            "name": "budget",
-            "symbol": "B",
+            "name": "planning_horizon",
+            "symbol": "\\mathcal{T}",
             "shape": [],
-            "description": "Total spending limit for the meal plan"
-        },
-        {
-            "name": "max_total_weight",
-            "symbol": "W^{\\max}",
-            "shape": [],
-            "description": "Maximum total purchased food weight"
-        },
-        {
-            "name": "min_distinct_vegetables",
-            "symbol": "K",
-            "shape": [],
-            "description": "Minimum number of distinct vegetable types to select"
+            "description": "Static one-stage planning horizon descriptor"
         }
     ],
     "variables": [
         {
-            "name": "protein_purchase_quantity",
-            "symbol": "x_p",
+            "name": "acreage_allocated",
+            "symbol": "x",
             "shape": [
-                "P"
+                "C"
             ],
             "domain": "continuous",
-            "description": "Purchased quantity of each protein item in units of 100g"
+            "description": "Acreage allocated to each crop"
         },
         {
-            "name": "vegetable_purchase_packs",
-            "symbol": "z_v",
-            "shape": [
-                "V"
-            ],
-            "domain": "integer",
-            "description": "Purchased number of packs of each vegetable item"
-        },
-        {
-            "name": "vegetable_selected",
-            "symbol": "y_v",
-            "shape": [
-                "V"
-            ],
-            "domain": "binary",
-            "description": "Binary indicator equal to 1 if the vegetable item is selected, 0 otherwise"
-        },
-        {
-            "name": "total_protein",
+            "name": "total_profit",
             "symbol": "Z",
             "shape": [],
             "domain": "continuous",
-            "description": "Total protein achieved by the meal plan"
+            "description": "Total profit of the land allocation"
         }
     ],
-    "auxiliary_variables": [
-        {
-            "name": "vegetable_big_m",
-            "symbol": "M_v",
-            "shape": [
-                "V"
-            ],
-            "domain": "continuous",
-            "description": "Item-specific upper bound for vegetable purchases used to linearize purchase-implies-selection"
-        }
-    ],
+    "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "nonnegative_protein_purchase",
-            "description": "Protein purchase quantities must be nonnegative",
-            "formula": "x_p \\ge 0",
+            "name": "land_capacity_limit",
+            "description": "Total acreage allocated across all crops cannot exceed available land capacity",
+            "formula": "\\sum_{c=0}^{C-1} x_c \\leq L",
             "parameters": [
-                "num_protein_items"
+                "available_land"
             ],
             "variables": [
-                "protein_purchase_quantity"
+                "acreage_allocated"
             ]
         },
         {
-            "name": "nonnegative_vegetable_purchase",
-            "description": "Vegetable purchase quantities must be nonnegative integers",
-            "formula": "z_v \\in \\mathbb{Z}_{\\ge 0}",
+            "name": "proportional_rule_enforcement",
+            "description": "For each proportional rule, the acreage of the left crop must be at least the required multiplier times the acreage of the right crop",
+            "formula": "x_{i_r} \\geq \\beta_r x_{j_r} \\quad \\forall r=0,\\dots,R-1",
             "parameters": [
-                "num_vegetable_items"
+                "left_crop_index",
+                "right_crop_index",
+                "min_acreage_multiplier"
             ],
             "variables": [
-                "vegetable_purchase_packs"
+                "acreage_allocated"
             ]
         },
         {
-            "name": "binary_vegetable_selection",
-            "description": "Vegetable selection indicators must be binary",
-            "formula": "y_v \\in \\{0,1\\}",
+            "name": "nonnegative_acreage",
+            "description": "No crop acreage may be negative",
+            "formula": "x_c \\geq 0 \\quad \\forall c=0,\\dots,C-1",
+            "parameters": [],
+            "variables": [
+                "acreage_allocated"
+            ]
+        },
+        {
+            "name": "valid_rule_indices",
+            "description": "Each proportional rule references valid crop indices within the crop set",
+            "formula": "0 \\leq i_r < C,\\; 0 \\leq j_r < C \\quad \\forall r=0,\u0000dots,R-1",
             "parameters": [
-                "num_vegetable_items"
+                "num_crops",
+                "left_crop_index",
+                "right_crop_index"
+            ],
+            "variables": []
+        },
+        {
+            "name": "parameter_domain_constraints",
+            "description": "Basic parameter validity conditions including nonnegative counts, nonnegative land capacity, nonnegative multipliers, and real-valued profits",
+            "formula": "C \\in \\mathbb{Z}_{\\geq 0},\\; R \\in \\mathbb{Z}_{\\geq 0},\\; L \\geq 0,\\; \\beta_r \\geq 0 \\quad \\forall r=0,\\dots,R-1",
+            "parameters": [
+                "num_crops",
+                "num_rules",
+                "available_land",
+                "unit_profit_per_acre",
+                "min_acreage_multiplier"
+            ],
+            "variables": []
+        },
+        {
+            "name": "planning_horizon_static",
+            "description": "The planning horizon is finite and static with no additional time-indexed decision structure used in this instance",
+            "formula": "\\mathcal{T}\\text{ is a static one-stage descriptor}",
+            "parameters": [
+                "planning_horizon"
+            ],
+            "variables": []
+        },
+        {
+            "name": "total_profit_definition",
+            "description": "The total profit variable equals the sum of crop acreages times their unit profits",
+            "formula": "Z = \\sum_{c=0}^{C-1} \\pi_c x_c",
+            "parameters": [
+                "unit_profit_per_acre"
             ],
             "variables": [
-                "vegetable_selected"
-            ]
-        },
-        {
-            "name": "nonnegative_total_protein",
-            "description": "Total protein must be nonnegative",
-            "formula": "Z \\ge 0",
-            "variables": [
-                "total_protein"
-            ]
-        },
-        {
-            "name": "budget_limit",
-            "description": "Total spending must not exceed the available budget",
-            "formula": "\\sum_{p=1}^{P} c_p x_p + \\sum_{v=1}^{V} c_v z_v \\le B",
-            "parameters": [
-                "budget",
-                "protein_cost_per_unit",
-                "vegetable_cost_per_pack"
-            ],
-            "variables": [
-                "protein_purchase_quantity",
-                "vegetable_purchase_packs"
-            ]
-        },
-        {
-            "name": "weight_limit",
-            "description": "Total purchased food weight must not exceed the maximum total weight",
-            "formula": "\\sum_{p=1}^{P} w_p x_p + \\sum_{v=1}^{V} w_v z_v \\le W^{\\max}",
-            "parameters": [
-                "max_total_weight",
-                "protein_weight_per_unit",
-                "vegetable_weight_per_pack"
-            ],
-            "variables": [
-                "protein_purchase_quantity",
-                "vegetable_purchase_packs"
-            ]
-        },
-        {
-            "name": "minimum_vegetable_diversity",
-            "description": "At least the required number of distinct vegetable types must be selected",
-            "formula": "\\sum_v y_v \\ge K",
-            "parameters": [
-                "min_distinct_vegetables"
-            ],
-            "variables": [
-                "vegetable_selected"
-            ]
-        },
-        {
-            "name": "purchase_requires_selection",
-            "description": "A vegetable item may be purchased only if it is selected",
-            "formula": "z_v \\le M_v y_v \\quad \\forall v \\in \\{1,\\dots,V\\}",
-            "parameters": [
-                "num_vegetable_items"
-            ],
-            "variables": [
-                "vegetable_purchase_packs",
-                "vegetable_selected"
-            ]
-        },
-        {
-            "name": "single_period_horizon",
-            "description": "The planning horizon consists of a single period, so there is no intertemporal coupling",
-            "formula": "\\mathcal{T} = \\{1\\}",
-            "parameters": [
-                "time_horizon_periods"
-            ]
-        },
-        {
-            "name": "total_protein_definition",
-            "description": "Defines total protein as the sum of protein contributions from purchased protein items and vegetables.",
-            "formula": "Z = \\sum_{p=1}^{P} \\pi_p x_p + \\sum_{v=1}^{V} \\pi_v z_v",
-            "parameters": [
-                "protein_yield_per_unit",
-                "vegetable_protein_yield_per_pack"
-            ],
-            "variables": [
-                "protein_purchase_quantity",
-                "vegetable_purchase_packs",
-                "total_protein"
+                "acreage_allocated",
+                "total_profit"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "total_protein_maximization",
-            "description": "maximize total protein intake achieved by the meal plan",
+            "name": "total_profit_maximization",
+            "description": "Maximize the total profit from the land allocation",
             "sense": "maximize"
         }
     ],
     "final_objective": {
-        "description": "Maximize total protein intake of the meal plan. This is a single-objective MILP, so the original objective is used directly without combination.",
+        "description": "Maximize the total profit from the land allocation by maximizing the profit-defining variable Z, which is linked linearly to acreages and per-acre profits.",
         "objective_combination_method": "one_objective",
         "sense": "maximize",
         "formula": "Z",
         "parameters": [],
         "variables": [
-            "total_protein"
+            "total_profit"
         ]
     }
 }

@@ -1,157 +1,174 @@
 {
-    "problem": "Problem description\n- There is a finite set of children indexed by $$i \\in \\mathcal{I}$$.\n- Each child $$i$$ has a selection cost $$c_i$$.\n- The planning horizon is a single decision period, so the decision is whether each child is included in the trip or not.\n- The planning goal is to choose a subset of children that minimizes total selection cost while satisfying all family rules and trip-size limits.\n- A child-selection decision is represented by:\n  - $$x_i$$: a binary variable that equals $$1$$ if child $$i$$ is taken on the trip and $$0$$ otherwise.\n  - The selected set is the collection of all children with $$x_i = 1$$.\n  - The total trip cost is the sum of the costs of all selected children.\n- Mandatory participation rules:\n  - Some children may be required to be included in every feasible plan.\n- Capacity rules:\n  - The total number of selected children may not exceed an upper limit $$U$$.\n  - The total number of selected children must be at least a lower limit $$L$$.\n- Compatibility rules:\n  - If one child is selected, certain other children must not be selected together with that child.\n- Precedence or dependency rules:\n  - If one child is selected, one or more other children must also be selected.\n- The objective is to minimize the total cost of the selected children subject to the mandatory, capacity, compatibility, and dependency rules.\n- A solution is represented by:\n  - $$x_i$$ for each $$i \\in \\mathcal{I}$$, indicating whether each child is selected.\n  - The resulting selected subset of children.\n  - The total minimized trip cost.\n\nInput Format\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Set of children indexed by $$i$$.\",\n      \"size\": \"$$n$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"description\": \"Selection cost of child $$i$$.\",\n      \"shape\": [\"$$n$$\"]\n    },\n    \"$$U$$\": {\n      \"description\": \"Maximum number of children that may be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$L$$\": {\n      \"description\": \"Minimum number of children that must be selected.\",\n      \"type\": \"integer\"\n    },\n    \"$$\\\\mathcal{M}$$\": {\n      \"description\": \"Set of mandatory children that must be selected.\",\n      \"type\": \"set of indices\"\n    },\n    \"$$\\\\mathcal{P}$$\": {\n      \"description\": \"Set of ordered dependency rules where selecting one child requires selecting another child or group of children.\",\n      \"type\": \"list of rules\"\n    },\n    \"$$\\\\mathcal{Q}$$\": {\n      \"description\": \"Set of incompatibility rules where selecting one child forbids selecting another child or group of children together.\",\n      \"type\": \"list of rules\"\n    }\n  }\n}\n\nOutput Format\n{\n  \"decision_variables\": {\n    \"$$x_i$$\": {\n      \"description\": \"Binary selection variable for child $$i$$.\",\n      \"shape\": [\"$$n$$\"],\n      \"values\": [\"$$0$$\", \"$$1$$\"]\n    }\n  },\n  \"selected_children\": {\n    \"description\": \"The set of children with $$x_i = 1$$.\",\n    \"type\": \"list of indices\"\n  },\n  \"total_cost\": {\n    \"description\": \"The minimized total selection cost of the chosen children.\",\n    \"type\": \"number\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"sets\": {\n    \"$$\\\\mathcal{I}$$\": {\n      \"description\": \"Children\",\n      \"elements\": [\"$$\\\\text{Harry}$$\", \"$$\\\\text{Hermione}$$\", \"$$\\\\text{Ron}$$\", \"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\", \"$$\\\\text{Ginny}$$\"],\n      \"size\": \"$$6$$\"\n    }\n  },\n  \"parameters\": {\n    \"$$c_i$$\": {\n      \"$$\\\\text{Harry}$$\": \"$$1200$$\",\n      \"$$\\\\text{Hermione}$$\": \"$$1650$$\",\n      \"$$\\\\text{Ron}$$\": \"$$750$$\",\n      \"$$\\\\text{Fred}$$\": \"$$800$$\",\n      \"$$\\\\text{George}$$\": \"$$800$$\",\n      \"$$\\\\text{Ginny}$$\": \"$$1500$$\"\n    },\n    \"$$U$$\": \"$$4$$\",\n    \"$$L$$\": \"$$3$$\",\n    \"$$\\\\mathcal{M}$$\": [\"$$\\\\text{Ginny}$$\"],\n    \"$$\\\\mathcal{P}$$\": [\n      {\n        \"if\": \"$$\\\\text{George}$$\",\n        \"then\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{Hermione}$$\"]\n      }\n    ],\n    \"$$\\\\mathcal{Q}$$\": [\n      {\n        \"if\": \"$$\\\\text{Harry}$$\",\n        \"forbid\": [\"$$\\\\text{Fred}$$\", \"$$\\\\text{George}$$\"]\n      }\n    ]\n  }\n}",
+    "problem": "Problem description\n- There is a daily staffing planning problem for a periodic service over a horizon of $$T$$ consecutive time periods, indexed by $$t \\in \\{1,\\dots,T\\}$$.\n- The service requires a minimum number of active personnel in each period, given by the demand vector $$d_t$$ for each period $$t$$.\n- Each worker starts at the beginning of one allowed start period and works continuously for a fixed shift length of $$L$$ periods.\n- A worker assigned to a start period contributes coverage to every period within that shift window, including periods that wrap around the end of the daily horizon if the schedule is cyclic.\n- The planning objective is to choose the smallest feasible staffing plan, meaning the minimum total number of scheduled workers, while meeting all period-by-period demand requirements.\n- The model may use a uniform staffing cost $$c$$ per scheduled worker, or period-dependent start costs $$c_t$$ if differentiated costs are needed.\n- Each active worker contributes coverage capacity $$q$$ per covered period, with the standard case being a single unit of coverage per worker per period.\n- Required business constraints:\n  - Every time period must have enough active workers to meet or exceed the required demand in that period.\n  - Workers can only start at permitted start periods.\n  - Each worker follows the fixed shift length $$L$$ once scheduled.\n  - Shift coverage must be counted consistently across the daily cycle, including any wrap-around periods.\n  - Staffing quantities must be nonnegative integers.\n- A solution is represented by:\n  - $$x_t$$: the number of workers whose shifts start at the beginning of period $$t$$.\n  - $$z$$: the total number of workers scheduled over the day, used as the objective value.\n  - Optionally, a coverage summary by period may be reported as a derived result from $$x_t$$.\n\nInput Format\n{\n  \"T\": \"Integer parameter denoting the number of planning periods in the daily horizon, written as $$T$$.\",\n  \"L\": \"Integer parameter denoting the fixed shift length in periods, written as $$L$$.\",\n  \"demand\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of integers\",\n    \"meaning\": \"The required staffing level in each period, where element $$d_t$$ is the demand for period $$t$$.\"\n  },\n  \"start_cost\": {\n    \"shape\": \"scalar or [$$T$$]\",\n    \"type\": \"numeric\",\n    \"meaning\": \"Optional staffing cost parameter, written as $$c$$ or $$c_t$$, for starting one worker in a period.\"\n  },\n  \"coverage_capacity\": {\n    \"shape\": \"scalar\",\n    \"type\": \"numeric\",\n    \"meaning\": \"Coverage contributed by one active worker in a covered period, written as $$q$$.\"\n  },\n  \"cyclic_horizon\": {\n    \"shape\": \"scalar\",\n    \"type\": \"boolean\",\n    \"meaning\": \"Indicates whether shifts that extend past the last period wrap around to the beginning of the next daily cycle.\"\n  },\n  \"periods\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of objects\",\n    \"meaning\": \"Optional descriptive labels for each period, including the period index $$t$$ and its time window.\"\n  }\n}\n\nOutput Format\n{\n  \"start_counts\": {\n    \"shape\": \"[$$T$$]\",\n    \"type\": \"array of nonnegative integers\",\n    \"meaning\": \"The number of workers starting at each period, denoted by $$x_t$$.\"\n  },\n  \"total_workers\": {\n    \"shape\": \"scalar\",\n    \"type\": \"integer\",\n    \"meaning\": \"The total number of scheduled workers over the planning horizon, denoted by $$z$$.\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"T\": 6,\n  \"L\": 2,\n  \"demand\": [60, 70, 60, 50, 20, 30],\n  \"coverage_capacity\": 1,\n  \"cyclic_horizon\": true,\n  \"periods\": [\n    { \"index\": 1, \"time\": \"06:00-10:00\", \"required_staff\": 60 },\n    { \"index\": 2, \"time\": \"10:00-14:00\", \"required_staff\": 70 },\n    { \"index\": 3, \"time\": \"14:00-18:00\", \"required_staff\": 60 },\n    { \"index\": 4, \"time\": \"18:00-22:00\", \"required_staff\": 50 },\n    { \"index\": 5, \"time\": \"22:00-02:00\", \"required_staff\": 20 },\n    { \"index\": 6, \"time\": \"02:00-06:00\", \"required_staff\": 30 }\n  ]\n}",
     "parameters": [
         {
-            "name": "selection_cost",
-            "symbol": "c",
+            "name": "periods",
+            "symbol": "\u0002",
             "shape": [
-                "n"
+                "T"
             ],
-            "description": "Selection cost of each child $i \\in \\mathcal{I}$"
+            "description": "Optional descriptive objects for period t, including index and time window"
         },
         {
-            "name": "max_selected_children",
-            "symbol": "U",
+            "name": "planning_periods",
+            "symbol": "T",
             "shape": [],
-            "description": "Maximum number of selected children"
+            "description": "Integer number of planning periods in the cyclic horizon"
         },
         {
-            "name": "min_selected_children",
+            "name": "shift_length",
             "symbol": "L",
             "shape": [],
-            "description": "Minimum number of selected children"
+            "description": "Fixed shift length in periods"
         },
         {
-            "name": "mandatory_children",
-            "symbol": "\\mathcal{M}",
+            "name": "demand",
+            "symbol": "d",
             "shape": [
-                "-"
+                "T"
             ],
-            "description": "Set of mandatory children"
+            "description": "Required staffing level in each period"
         },
         {
-            "name": "precedence_rules",
-            "symbol": "\\mathcal{P}",
-            "shape": [
-                "-"
-            ],
-            "description": "List of precedence or dependency rules"
+            "name": "coverage_capacity",
+            "symbol": "q",
+            "shape": [],
+            "description": "Coverage capacity contributed by one active worker in a covered period"
         },
         {
-            "name": "incompatibility_rules",
-            "symbol": "\\mathcal{Q}",
+            "name": "uniform_start_cost",
+            "symbol": "c",
+            "shape": [],
+            "description": "Optional uniform cost per scheduled worker"
+        },
+        {
+            "name": "start_cost",
+            "symbol": "c_t",
             "shape": [
-                "-"
+                "T"
             ],
-            "description": "List of incompatibility rules"
+            "description": "Optional period-dependent start cost for starting one worker in period t"
+        },
+        {
+            "name": "cyclic_horizon",
+            "symbol": "\u0001",
+            "shape": [],
+            "description": "Boolean indicating whether shift coverage wraps around the end of the horizon"
         }
     ],
     "variables": [
         {
-            "name": "child_selected",
+            "name": "start_counts",
             "symbol": "x",
             "shape": [
-                "n"
+                "T"
             ],
-            "domain": "binary",
-            "description": "Binary selection variable for child $i$, where 1 indicates the child is selected"
+            "domain": "integer",
+            "description": "Nonnegative integer number of workers whose shifts start at each period"
+        },
+        {
+            "name": "total_workers",
+            "symbol": "z",
+            "shape": [],
+            "domain": "integer",
+            "description": "Total number of workers scheduled over the planning horizon"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "selection_cardinality_bounds",
-            "description": "The number of selected children must be between the minimum and maximum trip sizes.",
-            "formula": "L \\le \\sum_{i \\in \\mathcal{I}} x_i \\le U",
+            "name": "nonnegative_integer_start_counts",
+            "description": "Start counts must be nonnegative integers for each planning period",
+            "formula": "x[t]",
             "parameters": [
-                "min_selected_children",
-                "max_selected_children"
+                "planning_periods"
             ],
             "variables": [
-                "child_selected"
+                "start_counts"
             ]
         },
         {
-            "name": "mandatory_child_inclusion",
-            "description": "Every mandatory child must be selected.",
-            "formula": "x_i = 1 \\quad \\forall i \\in \\mathcal{M}",
-            "parameters": [
-                "mandatory_children"
-            ],
+            "name": "nonnegative_integer_total_workers",
+            "description": "Total workers must be a nonnegative integer",
+            "formula": "z",
+            "parameters": [],
             "variables": [
-                "child_selected"
+                "total_workers"
             ]
         },
         {
-            "name": "precedence_dependency_rules",
-            "description": "If a child triggers a precedence rule, all listed dependent children must also be selected.",
-            "formula": "x_a \\le x_b \\quad \\forall (a,b) \\in \\mathcal{P}",
+            "name": "period_demand_coverage",
+            "description": "Each period t must have total active coverage at least the required demand, with explicit linear cyclic indexing",
+            "formula": "\\sum_{k=0}^{L-1} q\\,x_{(t-k)\\bmod T} \\ge d_t \\quad \\forall t \\in \\{0,\\dots,T-1\\}",
             "parameters": [
-                "precedence_rules"
+                "planning_periods",
+                "shift_length",
+                "demand",
+                "coverage_capacity",
+                "cyclic_horizon"
             ],
             "variables": [
-                "child_selected"
+                "start_counts"
             ]
         },
         {
-            "name": "incompatibility_rules",
-            "description": "If a child triggers an incompatibility rule, none of the listed forbidden children may be selected together with it.",
-            "formula": "x_a + x_b \\le 1 \\quad \\forall (a,b) \\in \\mathcal{Q}",
+            "name": "fixed_length_shift_assignment",
+            "description": "Redundant semantic statement that each scheduled worker starts in exactly one period and works a fixed contiguous shift of length L; retained as a modeling note only",
+            "formula": "x_t \\ge 0,\\ x_t \\in \\mathbb{Z} \\quad \\forall t \\in \\{0,\\dots,T-1\\}",
             "parameters": [
-                "incompatibility_rules"
+                "planning_periods",
+                "shift_length"
             ],
             "variables": [
-                "child_selected"
+                "start_counts"
             ]
         },
         {
-            "name": "binary_selection_variables",
-            "description": "Each child selection decision is binary.",
-            "formula": "x_i \\in \\{0,1\\} \\quad \\forall i \\in \\mathcal{I}",
+            "name": "cyclic_wraparound_coverage",
+            "description": "Coverage indices wrap around the horizon when the horizon is cyclic; this is already embedded in the explicit coverage family",
+            "formula": "x_{(t-k)\\bmod T} \\text{ for } k=0,\\dots,L-1",
+            "parameters": [
+                "planning_periods",
+                "shift_length",
+                "cyclic_horizon"
+            ],
             "variables": [
-                "child_selected"
+                "start_counts"
             ]
         },
         {
-            "name": "selection_cardinality_bounds_lower",
-            "description": "The number of selected children must be at least the minimum trip size.",
-            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\ge L",
+            "name": "total_workers_derived_from_starts",
+            "description": "The total number of scheduled workers equals the sum of all start counts",
+            "formula": "z = \\sum_{t=0}^{T-1} x_t",
             "parameters": [
-                "min_selected_children"
+                "planning_periods"
             ],
             "variables": [
-                "child_selected"
-            ]
-        },
-        {
-            "name": "selection_cardinality_bounds_upper",
-            "description": "The number of selected children must not exceed the maximum trip size.",
-            "formula": "\\sum_{i \\in \\mathcal{I}} x_i \\le U",
-            "parameters": [
-                "max_selected_children"
-            ],
-            "variables": [
-                "child_selected"
+                "start_counts",
+                "total_workers"
             ]
         }
     ],
     "objectives": [
         {
-            "name": "minimize_total_selection_cost",
-            "description": "Minimize the total selection cost of the chosen children.",
+            "name": "minimize_total_scheduled_workers",
+            "description": "Minimize the total number of scheduled workers over the planning horizon",
+            "sense": "minimize"
+        },
+        {
+            "name": "minimize_total_staffing_cost",
+            "description": "If differentiated start costs are used, minimize the total staffing cost based on uniform or period-dependent start costs while satisfying all demand requirements",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize the total selection cost of the chosen children in the single-period child selection problem.",
+        "description": "Minimize the total number of scheduled workers over the planning horizon, using the derived aggregate total_workers.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "\\sum_{i \\in \\mathcal{I}} c_i x_i",
-        "parameters": [
-            "selection_cost"
-        ],
+        "formula": "z",
+        "parameters": [],
         "variables": [
-            "child_selected"
+            "total_workers"
         ]
     }
 }

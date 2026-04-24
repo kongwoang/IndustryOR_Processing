@@ -1,308 +1,264 @@
 {
-    "problem": "Problem description\n- There is a single-period transportation planning problem with a set of supply locations $$\\mathcal{I}$$ indexed by $$i$$ and a set of destination ports $$\\mathcal{J}$$ indexed by $$j$$.\n- Each warehouse $$i \\in \\mathcal{I}$$ has an available inventory of empty containers denoted by $$s_i$$.\n- Each port $$j \\in \\mathcal{J}$$ has a required container demand denoted by $$d_j$$ that must be fulfilled.\n- The transportation distance between warehouse $$i$$ and port $$j$$ is denoted by $$\\ell_{ij}$$.\n- Transportation cost is linear in shipped containers and distance, with a common cost rate denoted by $$\\rho$$ per kilometer per container.\n- Transportation is carried out by whole trucks, each with a maximum carrying capacity denoted by $$u$$ containers.\n- The planning goal is to choose a minimum-cost shipping policy that allocates containers from warehouses to ports and determines the needed truck usage on each lane.\n- Business constraints are:\n  - Only containers available in the warehouse network may be shipped.\n  - Every port demand must be satisfied.\n  - Shipments are assigned to exactly one destination port per container.\n  - Truck usage on any lane must be sufficient to carry the containers assigned to that lane, respecting the truck capacity $$u$$.\n  - Container quantities and truck counts are integral.\n  - Any excess inventory may remain unused at warehouses if total supply exceeds total demand.\n- A solution is represented by:\n  - $$x_{ij}$$: the number of containers shipped from warehouse $$i$$ to port $$j$$.\n  - $$y_{ij}$$: the number of trucks deployed on the route from warehouse $$i$$ to port $$j$$.\n  - $$r_i$$: the number of containers left unused at warehouse $$i$$ after the transportation plan.\n\nInput Format\n{\n  \"warehouses\": \"array of labels for the set $$\\\\mathcal{I}$$\",\n  \"ports\": \"array of labels for the set $$\\\\mathcal{J}$$\",\n  \"supply\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"available inventory vector $$s$$, where $$s_i$$ is the number of containers at warehouse $$i$$\"\n  },\n  \"demand\": {\n    \"shape\": \"$$|\\\\mathcal{J}|$$\",\n    \"meaning\": \"required demand vector $$d$$, where $$d_j$$ is the number of containers required at port $$j$$\"\n  },\n  \"distance\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"distance matrix $$\\\\ell$$, where $$\\\\ell_{ij}$$ is the distance from warehouse $$i$$ to port $$j$$\"\n  },\n  \"cost_rate\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"transport cost rate $$\\\\rho$$ per kilometer per container\"\n  },\n  \"truck_capacity\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"truck capacity $$u$$ measured in containers per truck\"\n  }\n}\n\nOutput Format\n{\n  \"shipments\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"shipment matrix $$x$$, where $$x_{ij}$$ is the number of containers sent from warehouse $$i$$ to port $$j$$\"\n  },\n  \"trucks\": {\n    \"shape\": \"$$|\\\\mathcal{I}| \\\\times |\\\\mathcal{J}|$$\",\n    \"meaning\": \"truck matrix $$y$$, where $$y_{ij}$$ is the number of trucks used on route $$i \\\\to j$$\"\n  },\n  \"unused_inventory\": {\n    \"shape\": \"$$|\\\\mathcal{I}|$$\",\n    \"meaning\": \"remaining inventory vector $$r$$, where $$r_i$$ is the number of containers left at warehouse $$i$$\"\n  },\n  \"objective_value\": {\n    \"shape\": \"$$1$$\",\n    \"meaning\": \"minimum total transportation cost achieved by the plan\"\n  }\n}\n\nExample(s)\n\nInput 1\n{\n  \"warehouses\": [\"Verona\", \"Perugia\", \"Rome\", \"Pescara\", \"Taranto\", \"Lamezia\"],\n  \"ports\": [\"Genoa\", \"Venice\", \"Ancona\", \"Naples\", \"Bari\"],\n  \"supply\": [10, 12, 20, 24, 18, 40],\n  \"demand\": [20, 15, 25, 33, 21],\n  \"distance\": [\n    [290, 115, 355, 715, 810],\n    [380, 340, 165, 380, 610],\n    [505, 530, 285, 220, 450],\n    [655, 450, 155, 240, 315],\n    [1010, 840, 550, 305, 95],\n    [1072, 1097, 747, 372, 333]\n  ],\n  \"cost_rate\": 30,\n  \"truck_capacity\": 2\n}",
+    "problem": "Problem description\n- There are $$P$$ products indexed by $$p\\in\\mathcal{P}$$ and $$T$$ planning periods indexed by $$t\\in\\mathcal{T}$$, where the periods represent the quarterly planning horizon.\n- For each product and period, the reservation demand is given by $$D_{p,t}$$.\n- Each product has a unit processing time requirement of $$h_p$$ production hours, and each period has an available production capacity of $$H_t$$ hours.\n- Product availability may vary by period through the parameter $$A_{p,t}$$, where unavailable product-period combinations cannot be produced.\n- The initial inventory is given by $$S_p^{0}$$, and each product must end the planning horizon with at least $$S_p^{\\mathrm{req}}$$ units in stock.\n- If a reserved unit is not delivered in its reservation period, it becomes delayed demand and incurs a per-unit delay compensation of $$\\pi_p$$ for each period of delay until it is delivered.\n- Any unit produced earlier than its delivery period and carried forward in stock incurs an inventory holding cost of $$c_p^{\\mathrm{inv}}$$ per unit per period.\n- The planning goal is to choose a feasible production and delivery policy over all periods so that total delay compensation and total inventory holding cost are minimized.\n- The required business rules are:\n  - Demand reservations must be satisfied over time using production and available inventory.\n  - Production in each period must not exceed the available machine-hour capacity of that period.\n  - Products may only be produced in periods where availability is allowed.\n  - Inventory cannot be negative.\n  - Delayed demand may be carried forward across periods and is penalized until it is fulfilled.\n  - The ending inventory for each product must meet the required terminal stock level.\n- A solution is represented by:\n  - the production quantity plan $$x_{p,t}$$, where $$x_{p,t}$$ is the amount of product $$p$$ produced in period $$t$$,\n  - the end-of-period inventory level $$s_{p,t}$$, where $$s_{p,t}$$ is the remaining stock of product $$p$$ after period $$t$$,\n  - the delayed demand level $$b_{p,t}$$, where $$b_{p,t}$$ is the amount of product $$p$$ still undelivered after period $$t$$,\n  - the total cost value $$Z$$, representing the sum of all delay compensation and inventory holding costs.\n\nInput Format\n{\n  \"P\": \"$$P$$, the number of products\",\n  \"T\": \"$$T$$, the number of planning periods\",\n  \"products_index\": \"$$\\\\mathcal{P}=\\\\{1,2,\\\\ldots,P\\\\}$$\",\n  \"periods_index\": \"$$\\\\mathcal{T}=\\\\{1,2,\\\\ldots,T\\\\}$$\",\n  \"demand\": \"$$D\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$D_{p,t}$$ is the reservation demand of product $$p$$ in period $$t$$\",\n  \"initial_inventory\": \"$$S^{0}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$S^{0}_{p}$$ is the initial stock of product $$p$$\",\n  \"target_final_inventory\": \"$$S^{\\\\mathrm{req}}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$S^{\\\\mathrm{req}}_{p}$$ is the required ending stock of product $$p$$\",\n  \"capacity_hours\": \"$$H\\\\in\\\\mathbb{R}_{+}^{T}$$, where $$H_{t}$$ is the available production-hour capacity in period $$t$$\",\n  \"processing_hours\": \"$$h\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$h_{p}$$ is the production-hour requirement per unit of product $$p$$\",\n  \"availability\": \"$$A\\\\in\\\\{0,1\\\\}^{P\\\\times T}$$, where $$A_{p,t}=1$$ means product $$p$$ may be produced in period $$t$$ and $$A_{p,t}=0$$ means it may not\",\n  \"delay_penalty\": \"$$\\\\pi\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$\\\\pi_{p}$$ is the delay compensation per unit per period for product $$p$$\",\n  \"inventory_holding_cost\": \"$$c^{\\\\mathrm{inv}}\\\\in\\\\mathbb{R}_{+}^{P}$$, where $$c^{\\\\mathrm{inv}}_{p}$$ is the inventory holding cost per unit per period for product $$p$$\"\n}\n\nOutput Format\n{\n  \"production_plan\": \"$$X\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$X_{p,t}$$ is the planned production quantity of product $$p$$ in period $$t$$\",\n  \"ending_inventory\": \"$$S\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$S_{p,t}$$ is the inventory level of product $$p$$ at the end of period $$t$$\",\n  \"delayed_demand\": \"$$B\\\\in\\\\mathbb{R}_{+}^{P\\\\times T}$$, where $$B_{p,t}$$ is the amount of product $$p$$ demand still delayed after period $$t$$\",\n  \"total_cost\": \"$$Z\\\\in\\\\mathbb{R}_{+}$$, the minimized total cost of delay compensation and inventory holding\"\n}\n\nExample(s)\n\nInput 1\n{\n  \"P\": 3,\n  \"T\": 4,\n  \"products\": [\"I\", \"II\", \"III\"],\n  \"periods\": [1, 2, 3, 4],\n  \"demand\": [\n    [1500, 1000, 2000, 1200],\n    [1500, 1500, 1200, 1500],\n    [1000, 2000, 1500, 2500]\n  ],\n  \"initial_inventory\": [0, 0, 0],\n  \"target_final_inventory\": [150, 150, 150],\n  \"capacity_hours\": [15000, 15000, 15000, 15000],\n  \"processing_hours\": [2, 4, 3],\n  \"availability\": [\n    [1, 0, 1, 1],\n    [1, 1, 1, 1],\n    [1, 1, 1, 1]\n  ],\n  \"delay_penalty\": [20, 20, 10],\n  \"inventory_holding_cost\": [5, 5, 5]\n}",
     "parameters": [
         {
-            "name": "warehouses",
-            "symbol": "\\mathcal{I}",
-            "shape": [
-                "M"
-            ],
-            "description": "Labels of warehouses indexed by i"
-        },
-        {
-            "name": "ports",
-            "symbol": "\\mathcal{J}",
-            "shape": [
-                "N"
-            ],
-            "description": "Labels of destination ports indexed by j"
-        },
-        {
-            "name": "supply",
-            "symbol": "s",
-            "shape": [
-                "M"
-            ],
-            "description": "Available inventory of empty containers at each warehouse"
-        },
-        {
-            "name": "demand",
-            "symbol": "d",
-            "shape": [
-                "N"
-            ],
-            "description": "Required container demand at each port"
-        },
-        {
-            "name": "distance",
-            "symbol": "\\ell",
-            "shape": [
-                "M",
-                "N"
-            ],
-            "description": "Distance from each warehouse to each port"
-        },
-        {
-            "name": "cost_rate",
-            "symbol": "\\rho",
+            "name": "num_products",
+            "symbol": "P",
             "shape": [],
-            "description": "Transportation cost rate per kilometer per container"
+            "description": "Number of products"
         },
         {
-            "name": "truck_capacity",
-            "symbol": "u",
+            "name": "num_periods",
+            "symbol": "T",
             "shape": [],
-            "description": "Truck capacity in containers per truck"
+            "description": "Number of planning periods"
+        },
+        {
+            "name": "reservation_demand",
+            "symbol": "D",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Reservation demand of product p in period t"
+        },
+        {
+            "name": "machine_hours_per_unit",
+            "symbol": "h",
+            "shape": [
+                "P"
+            ],
+            "description": "Machine-hour requirement per unit of product p"
+        },
+        {
+            "name": "available_hours",
+            "symbol": "H",
+            "shape": [
+                "T"
+            ],
+            "description": "Available production-hour capacity in period t"
+        },
+        {
+            "name": "availability",
+            "symbol": "A",
+            "shape": [
+                "P",
+                "T"
+            ],
+            "description": "Indicator whether product p may be produced in period t"
+        },
+        {
+            "name": "initial_inventory",
+            "symbol": "S^0",
+            "shape": [
+                "P"
+            ],
+            "description": "Initial inventory of product p"
+        },
+        {
+            "name": "required_ending_inventory",
+            "symbol": "S^{req}",
+            "shape": [
+                "P"
+            ],
+            "description": "Required ending inventory of product p"
+        },
+        {
+            "name": "delay_compensation",
+            "symbol": "\\pi",
+            "shape": [
+                "P"
+            ],
+            "description": "Delay compensation per unit per period for product p"
+        },
+        {
+            "name": "inventory_holding_cost",
+            "symbol": "c^{inv}",
+            "shape": [
+                "P"
+            ],
+            "description": "Inventory holding cost per unit per period for product p"
         }
     ],
     "variables": [
         {
-            "name": "shipments",
+            "name": "production_quantity",
             "symbol": "x",
             "shape": [
-                "M",
-                "N"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of containers shipped from warehouse i to port j"
+            "domain": "continuous",
+            "description": "Production quantity of product p in period t"
         },
         {
-            "name": "trucks",
-            "symbol": "y",
+            "name": "ending_inventory",
+            "symbol": "s",
             "shape": [
-                "M",
-                "N"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of trucks deployed on route from warehouse i to port j"
+            "domain": "continuous",
+            "description": "End-of-period inventory of product p after period t"
         },
         {
-            "name": "unused_inventory",
-            "symbol": "r",
+            "name": "delayed_demand",
+            "symbol": "b",
             "shape": [
-                "M"
+                "P",
+                "T"
             ],
-            "domain": "integer",
-            "description": "Number of containers left unused at each warehouse after the plan"
+            "domain": "continuous",
+            "description": "Delayed demand of product p remaining after period t"
+        },
+        {
+            "name": "total_cost",
+            "symbol": "Z",
+            "shape": [],
+            "domain": "continuous",
+            "description": "Total cost"
         }
     ],
     "auxiliary_variables": [],
     "constraints": [
         {
-            "name": "supply_balance",
-            "description": "Total shipped containers from each warehouse plus unused inventory cannot exceed available supply",
-            "formula": "\\sum_{j=1}^{N} x_{ij} + r_i = s_i \\quad \\forall i=1,\\dots,M",
-            "parameters": [
-                "supply"
-            ],
+            "name": "nonnegative_production",
+            "description": "Production quantities must be nonnegative",
+            "formula": "x[p][t] \\ge 0",
             "variables": [
-                "shipments",
-                "unused_inventory"
+                "production_quantity"
             ]
         },
         {
-            "name": "demand_satisfaction",
-            "description": "Every port demand must be satisfied exactly by incoming shipments",
-            "formula": "\\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j=1,\\dots,N",
-            "parameters": [
-                "demand"
-            ],
+            "name": "nonnegative_inventory",
+            "description": "Ending inventory levels must be nonnegative",
+            "formula": "s[p][t] \\ge 0",
             "variables": [
-                "shipments"
+                "ending_inventory"
             ]
         },
         {
-            "name": "truck_capacity_route",
-            "description": "Truck count on each route must be sufficient to carry the shipped containers within capacity",
-            "formula": "x_{ij} \\le u\\,y_{ij} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [
-                "truck_capacity"
-            ],
+            "name": "nonnegative_delayed_demand",
+            "description": "Delayed demand remaining after each period must be nonnegative",
+            "formula": "b[p][t] \\ge 0",
             "variables": [
-                "shipments",
-                "trucks"
+                "delayed_demand"
             ]
         },
         {
-            "name": "nonnegativity_shipments",
-            "description": "Shipment quantities must be nonnegative integers.",
-            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
+            "name": "nonnegative_total_cost",
+            "description": "Total cost must be nonnegative",
+            "formula": "Z \\ge 0",
+            "variables": [
+                "total_cost"
+            ]
+        },
+        {
+            "name": "production_capacity",
+            "description": "Production in each period must respect available machine-hour capacity",
+            "formula": "h_p\\,x_{p,t} \\le H_t",
+            "parameters": [
+                "machine_hours_per_unit",
+                "available_hours"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "product_availability",
+            "description": "Production of a product in a period is allowed only when the availability indicator permits it, with capacity-scaled upper bound",
+            "formula": "x_{p,t} \\le A_{p,t}\\, H_t",
+            "parameters": [
+                "availability",
+                "available_hours"
+            ],
+            "variables": [
+                "production_quantity"
+            ]
+        },
+        {
+            "name": "terminal_inventory_requirement",
+            "description": "Ending inventory for each product must meet the required terminal stock level",
+            "formula": "s_{p,T} \\ge S^{req}_p",
+            "parameters": [
+                "required_ending_inventory"
+            ],
+            "variables": [
+                "ending_inventory"
+            ]
+        },
+        {
+            "name": "delayed_demand_carryover",
+            "description": "Delayed demand remaining after each period equals prior unmet demand plus current reservation demand minus demand served in the current period",
+            "formula": "b_{p,t} = \\begin{cases} D_{p,t} - \\left(s_{p,t} - S^0_p - x_{p,t}\\right), & t=1 \\\\ b_{p,t-1} + D_{p,t} - \\left(s_{p,t} - s_{p,t-1} - x_{p,t}\\right), & t=2,\\ldots,T \\end{cases}",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "inventory_balance",
+            "description": "Inventory evolves across periods based on production and demand fulfillment, with backlog carried from the prior period",
+            "formula": "s_{p,t} = \\begin{cases} S^0_p + x_{p,t} - \\left(D_{p,t} - b_{p,t}\\right), & t=1 \\\\ s_{p,t-1} + x_{p,t} - \\left(D_{p,t} - b_{p,t}\\right), & t=2,\\ldots,T \\end{cases}",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "initial_inventory_link",
+            "description": "Inventory balance in the first period uses the initial inventory level",
+            "formula": "s_{p,1} = S^0_p + x_{p,1} - (D_{p,1} - b_{p,1})",
+            "parameters": [
+                "initial_inventory",
+                "reservation_demand"
+            ],
+            "variables": [
+                "production_quantity",
+                "ending_inventory",
+                "delayed_demand"
+            ]
+        },
+        {
+            "name": "initial_delayed_demand",
+            "description": "No demand is delayed before the first period, so initial backlog is zero",
+            "formula": "b_{p,0}=0",
             "parameters": [],
             "variables": [
-                "shipments"
+                "delayed_demand"
             ]
-        },
-        {
-            "name": "nonnegativity_trucks",
-            "description": "Truck counts must be nonnegative integers.",
-            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [],
-            "variables": [
-                "trucks"
-            ]
-        },
-        {
-            "name": "nonnegativity_unused_inventory",
-            "description": "Unused inventory must be nonnegative integers.",
-            "formula": "r_i \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M",
-            "parameters": [],
-            "variables": [
-                "unused_inventory"
-            ]
-        },
-        {
-            "name": "warehouse_inventory_balance",
-            "description": "All inventory at each warehouse is either shipped to ports or left unused.",
-            "formula": "\\sum_{j=1}^{N} x_{ij} + r_i = s_i \\quad \\forall i=1,\\dots,M",
-            "parameters": [
-                "supply"
-            ],
-            "variables": [
-                "shipments",
-                "unused_inventory"
-            ]
-        },
-        {
-            "name": "port_demand_satisfaction",
-            "description": "Each port demand must be met exactly by incoming shipments.",
-            "formula": "\\sum_{i=1}^{M} x_{ij} = d_j \\quad \\forall j=1,\\dots,N",
-            "parameters": [
-                "demand"
-            ],
-            "variables": [
-                "shipments"
-            ]
-        },
-        {
-            "name": "route_truck_capacity",
-            "description": "The number of trucks assigned to a route must be sufficient to carry the containers shipped on that route.",
-            "formula": "x_{ij} \\le u\\,y_{ij} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [
-                "truck_capacity"
-            ],
-            "variables": [
-                "shipments",
-                "trucks"
-            ]
-        },
-        {
-            "name": "shipment_integrality",
-            "description": "Shipment quantities must be nonnegative integers.",
-            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [],
-            "variables": [
-                "shipments"
-            ]
-        },
-        {
-            "name": "truck_integrality",
-            "description": "Truck counts must be nonnegative integers.",
-            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [],
-            "variables": [
-                "trucks"
-            ]
-        },
-        {
-            "name": "unused_inventory_integrality",
-            "description": "Unused inventory must be nonnegative integers.",
-            "formula": "r_i \\in \\mathbb{Z}_{\n{\\ge 0}} \\quad \\forall i=1,\\dots,M",
-            "parameters": [],
-            "variables": [
-                "unused_inventory"
-            ]
-        },
-        {
-            "name": "integrality_and_nonnegativity_shipments",
-            "description": "Shipment quantities must be nonnegative integers.",
-            "formula": "x_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [],
-            "variables": [
-                "shipments"
-            ]
-        },
-        {
-            "name": "integrality_and_nonnegativity_trucks",
-            "description": "Truck counts must be nonnegative integers.",
-            "formula": "y_{ij} \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [],
-            "variables": [
-                "trucks"
-            ]
-        },
-        {
-            "name": "integrality_and_nonnegativity_unused_inventory",
-            "description": "Unused inventory must be nonnegative integers.",
-            "formula": "r_i \\in \\mathbb{Z}_{\\ge 0} \\quad \\forall i=1,\\dots,M",
-            "parameters": [],
-            "variables": [
-                "unused_inventory"
-            ]
-        },
-        {
-            "name": "supply_nonnegativity",
-            "description": "Supply is a nonnegative integer parameter.",
-            "formula": "s_i \\ge 0 \\quad \\forall i=1,\\dots,M",
-            "parameters": [
-                "supply"
-            ],
-            "variables": []
-        },
-        {
-            "name": "demand_nonnegativity",
-            "description": "Demand is a nonnegative integer parameter.",
-            "formula": "d_j \\ge 0 \\quad \\forall j=1,\\dots,N",
-            "parameters": [
-                "demand"
-            ],
-            "variables": []
-        },
-        {
-            "name": "distance_nonnegativity",
-            "description": "Distances are nonnegative real parameters.",
-            "formula": "\\ell_{ij} \\ge 0 \\quad \\forall i=1,\\dots,M,\\ \\forall j=1,\\dots,N",
-            "parameters": [
-                "distance"
-            ],
-            "variables": []
-        },
-        {
-            "name": "cost_rate_nonnegativity",
-            "description": "Transportation cost rate is a nonnegative scalar parameter.",
-            "formula": "\\rho \\ge 0",
-            "parameters": [
-                "cost_rate"
-            ],
-            "variables": []
-        },
-        {
-            "name": "truck_capacity_positivity",
-            "description": "Truck capacity is a positive scalar parameter.",
-            "formula": "u > 0",
-            "parameters": [
-                "truck_capacity"
-            ],
-            "variables": []
         }
     ],
     "objectives": [
         {
-            "name": "transportation_cost_minimization",
-            "description": "Minimize total transportation cost for shipping containers from warehouses to ports",
+            "name": "total_cost_minimization",
+            "description": "Minimize total cost consisting of delay compensation and inventory holding cost over the planning horizon",
             "sense": "minimize"
         }
     ],
     "final_objective": {
-        "description": "Minimize total transportation cost for all shipped containers, using the per-container route cost \\(\\rho\\,\\ell_{ij}\\) multiplied by shipment quantity \\(x_{ij}\\).",
+        "description": "Minimize total cost consisting of total delay compensation across all products and periods plus total inventory holding cost across all products and periods.",
         "objective_combination_method": "one_objective",
         "sense": "minimize",
-        "formula": "\\sum_{i=1}^{M}\\sum_{j=1}^{N} \\rho\\,\\ell_{ij}\\,x_{ij}",
+        "formula": "Z = \\sum_{p=1}^{P}\\sum_{t=1}^{T} \\left( \\pi_p \\, b_{p,t} + c^{inv}_p \\, s_{p,t} \\right)",
         "parameters": [
-            "cost_rate",
-            "distance"
+            "delay_compensation",
+            "inventory_holding_cost"
         ],
         "variables": [
-            "shipments"
+            "delayed_demand",
+            "ending_inventory"
         ]
     }
 }
