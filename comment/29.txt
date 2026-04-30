@@ -1,13 +1,9 @@
-COMMENT cho math_formula/29.json (Index 29 — Goal programming Jieli)
-====================================================================
-
-[1] LỖI nhỏ về sense:
+1. lỗi nhỏ về sense:
     - "objectives[0].sense" = "feasibility"
     - "final_objective.sense" = "minimize" (preemption_optimization)
     Mâu thuẫn nội bộ. Đúng ra phải là "minimize" với 3 mức ưu tiên.
-    Markdown đã viết đúng dạng lex-min(sum u, v2, v3).
 
-[2] LỖI / THIẾU về domain biến:
+2. THIẾU về domain biến:
     JSON ghi:
       - x: integer
       - u: continuous
@@ -15,24 +11,9 @@ COMMENT cho math_formula/29.json (Index 29 — Goal programming Jieli)
     Bài toán đếm người, nên u, v_2, v_3 phải là số NGUYÊN không âm.
     Vì các ràng buộc liên kết u với x (nguyên) và d (nguyên), về mặt nghiệm tối ưu
     thì u sẽ tự nhiên nhận giá trị nguyên. Tuy nhiên về mặt khai báo nên dùng integer.
-    Markdown đã ghi domain integer cho cả u, v2, v3.
 
-[3] LỖI: Trùng / dư ràng buộc:
+
+3. Trùng ràng buộc:
     - "lexicographic_priority_order" với formula "p_1 ≻ p_2 ≻ p_3" KHÔNG phải ràng buộc
-      mà là CHIẾN LƯỢC tối ưu. Đã chuyển vào phần objective trong markdown.
+      mà là CHIẾN LƯỢC tối ưu.
 
-[4] Diễn giải đúng:
-    - Trong (C3): sum_t x_{t,r,s} + u_{r,s} = d_{r,s} (đẳng thức)
-      hàm ý không có "overstaffing" (không tuyển dư vào pos đó). Khớp với JSON.
-    - Mục tiêu p2/p3 là TỐI ĐA hóa số khớp ưa thích, viết dưới dạng deviation
-      "+v_k = Q_k" với mục tiêu min v_k. Khớp với JSON.
-
-[5] Câu trả lời cho câu hỏi của đề ("ít nhất bao nhiêu người không đáp ứng p3"):
-    chính là giá trị tối ưu của v_3 ở giai đoạn 3 của preemptive.
-    Đáp án số cụ thể nằm ngoài phạm vi mô hình hoá; tham chiếu answers.csv hoặc giải
-    bằng solver theo 3 bước lex.
-
-[6] Tham số / shape khớp với đề bài (R=2, S=3, T=6, Q2=Q3=8000).
-
-KẾT LUẬN: JSON về mặt logic đúng; chỉ có lỗi mâu thuẫn sense và domain của deviation.
-Markdown đã chuẩn hóa.

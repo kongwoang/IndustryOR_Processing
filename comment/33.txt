@@ -1,36 +1,17 @@
-COMMENT cho math_formula/33.json (Index 33 — Inheritance partition)
-====================================================================
-
-[1] LỖI: Trùng tên ràng buộc.
+1. LỖI: Trùng tên ràng buộc.
     "exactly_one_recipient_per_asset" xuất hiện 2 lần:
       - Lần 1 (id #1): formula = "asset assignment is binary and exclusive across recipients"
         => văn xuôi, không phải công thức toán.
       - Lần 2 (id #6): formula = "sum_r x_{i,r} = 1 forall i" => đúng.
     "bundle_integrity" cũng xuất hiện 2 lần (văn xuôi vs công thức).
-    Markdown đã giữ duy nhất phiên bản công thức, bỏ phiên bản văn xuôi.
 
-[2] LỖI / DƯ: ràng buộc "recipient_total_value_definition" có 2 entry:
+2. DƯ: ràng buộc "recipient_total_value_definition" có 2 entry:
       - Entry trống "no time index is used in the model" => không phải ràng buộc.
       - Entry đúng "V_r = sum_i v_i x_{ir}".
-    Markdown chỉ giữ phiên bản đúng.
 
-[3] LỖI / DƯ: ràng buộc "imbalance_absolute_gap_definition" viết hai chiều:
+3. DƯ: ràng buộc "imbalance_absolute_gap_definition" viết hai chiều:
       Δ ≥ V_r − V_{r'} VÀ Δ ≥ V_{r'} − V_r forall r, r'.
     Khi r,r' chạy hết các cặp có thứ tự, chỉ một bất phương trình
       Δ ≥ V_r − V_{r'} forall r, r'
     đã bao gồm cả chiều ngược (đảo r↔r'). Viết hai chiều là DƯ THỪA (không sai),
-    chỉ làm tăng số ràng buộc của LP. Markdown gọn lại còn 1 dòng.
-
-[4] LƯU Ý: cách hiểu ∆.
-    Với R = 2 (đề bài), maxdiff(V_1, V_2) = |V_1 - V_2|. Mô hình đúng.
-    Với R ≥ 3, ∆ = max_{r,r'} (V_r - V_{r'}) = max_r V_r - min_r V_r (range).
-
-[5] DỮ LIỆU: tổng giá trị 25+5+20+40+12*3+3+3*2+10+15+10+13 = 183 (nghìn USD).
-    Vì 183 lẻ, không thể chia đôi chính xác bằng nhau theo nghìn,
-    nhưng do giá trị có bậc 1000 chia hết, ∆ tối thiểu sẽ là 1000 hoặc lớn hơn,
-    tuỳ subset-sum. (Chi tiết phụ thuộc solver, ngoài phạm vi mô hình.)
-
-[6] Hàm mục tiêu trong final_objective: "min Δ". Đúng.
-
-KẾT LUẬN: JSON đúng về bản chất, có lỗi cosmetic (lặp ràng buộc, một số formula
-là văn xuôi, vế ngược dư thừa). Markdown đã làm sạch.
+    chỉ làm tăng số ràng buộc của LP.

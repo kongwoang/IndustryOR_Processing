@@ -1,44 +1,30 @@
-COMMENT cho math_formula/35.json (Index 35 — Permutation flow shop)
-====================================================================
-
-[1] LỖI rõ ràng về sense:
+1. LỖI rõ ràng về sense:
     - "objectives[0].sense" = "maximize"   <-- SAI
     - "objectives[0].description" = "minimize the completion time of the last finished batch"
     - "final_objective.sense" = "minimize"
-    Hướng tối ưu phải là MINIMIZE makespan. Markdown đã sửa.
+    Hướng tối ưu phải là MINIMIZE makespan.
 
-[2] LỖI: nhiều ràng buộc chỉ là VĂN XUÔI, không phải công thức toán:
+2. nhiều ràng buộc chỉ là VĂN XUÔI, không phải công thức toán:
     - "fixed_vat_order" formula = "j-1 -> j"
     - "nonpreemptive_processing" formula = "non-preemptive processing"
     - "single_batch_per_vat" formula = "No overlap of batches on any vat consistent with the common permutation π"
     - "single_vat_per_batch" formula = "Implied by s[i,j] >= c[i,j-1]..."
-    Các phát biểu này chưa đủ cho một MILP có thể chạy được. Markdown đã thay
-    bằng công thức tuyến tính hoặc disjunctive (BigM).
 
-[3] THIẾU NGHIÊM TRỌNG: ràng buộc non-overlap trên cùng một vat KHÔNG ĐƯỢC TUYẾN TÍNH HOÁ.
+
+3. ràng buộc non-overlap trên cùng một vat KHÔNG ĐƯỢC TUYẾN TÍNH HOÁ.
     JSON chỉ ghi "no overlap consistent with permutation π", nhưng không đưa
     biến thứ tự / disjunctive constraint cụ thể. Một LP/MILP solver KHÔNG thể chạy
     với phát biểu này.
-    Markdown đã thêm:
-      - biến nhị phân z[i,i'] cho i<i' (cùng cho mọi vat -> permutation).
-      - cặp ràng buộc disjunctive với BigM cho mọi cặp (i,i') và mọi vat j.
 
-[4] LỖI / DƯ: "all_batches_completed" và "makespan_definition" đều là Cmax >= c[i,j],
+
+4. DƯ: "all_batches_completed" và "makespan_definition" đều là Cmax >= c[i,j],
     đặt 2 lần. Chỉ cần 1.
 
-[5] LỖI / DƯ: "precedence_within_batch" và "within_batch_vat_order" đều là
+5. DƯ: "precedence_within_batch" và "within_batch_vat_order" đều là
     s[i,j] >= c[i,j-1] cho j>=2. Đặt 2 lần.
 
-[6] BIẾN sequence π trong JSON khai báo "integer" với shape [N], nhưng KHÔNG có
+6. BIẾN sequence π trong JSON khai báo "integer" với shape [N], nhưng KHÔNG có
     ràng buộc viết bằng công thức để buộc π là hoán vị (permutation_sequence chỉ ghi
     "π in Perm(I)" dưới dạng văn xuôi).
-    Trong markdown, không cần biến π riêng — chuỗi thứ tự được suy ra từ z[i,i'].
-    Đây là cách viết MILP chuẩn cho permutation flow shop.
 
-[7] Các tham số (N, M, p[i,j]) khớp với đề (5 batches, 3 vats, ma trận như trong đề).
 
-KẾT LUẬN: JSON có nhiều lỗi lớn:
-  - Sai sense (maximize thay vì minimize).
-  - Thiếu công thức cho non-overlap (ràng buộc cốt lõi nhất của bài).
-  - Trùng ràng buộc.
-Markdown đã viết lại MILP đầy đủ và có thể nạp vào solver (ví dụ Gurobi/COPT) để chạy.
