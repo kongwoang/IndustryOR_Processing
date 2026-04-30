@@ -1,0 +1,34 @@
+COMMENT cho math_formula/28.json (Index 28 — Multi-period investment)
+====================================================================
+
+[1] LỖI off-by-one ở capital_carry_forward và terminal_capital_reporting:
+    - JSON viết: h_t = h_{t-1} - sum x_{j,t-1} + sum_{tau<t, tau+d_j=t} rho_j x_{j,tau}
+                forall t = 1..T, h_0 = C_0, Z_T = h_T.
+    - Tại t=1 ta cần x_{j,0} (không tồn tại nếu t bắt đầu từ 1).
+    - Quan trọng hơn: với T=3, lãi từ project 4 (đầu năm 3, d=1) đáo hạn cuối năm 3,
+      tức tại "h_4". Nếu Z_T = h_T = h_3 thì BỊ MẤT khoản lãi này.
+    - Sửa: dùng h_t với t=1..T+1, h_1=C_0, cân bằng cho t=1..T,
+      h_{t+1} = h_t - sum_j x_{j,t} + sum_{tau, tau+d_j = t+1} rho_j x_{j,tau},
+      Z = h_{T+1}.
+    Markdown đã viết theo phiên bản đúng này.
+
+[2] LỖI: Trùng ràng buộc.
+    - "open_period_restriction" và "opportunity_opening_restriction" cùng diễn đạt
+      "x_{j,t} = 0 nếu t ∉ A_j".
+    Markdown đã gộp về 1 ràng buộc (C4).
+
+[3] LỖI: "maturity_release" KHÔNG phải ràng buộc độc lập.
+    Nó chỉ là số hạng đáo hạn đã có trong phương trình cân bằng dòng vốn.
+    Để như một ràng buộc riêng là dư thừa. Markdown đã gộp.
+
+[4] LƯU Ý: Trong JSON U_j có thể là null (không giới hạn). Khi dịch sang code:
+    chỉ thêm constraint "sum_t x_{j,t} <= U_j" khi U_j != null.
+
+[5] LƯU Ý: rho_j là HỆ SỐ TRẢ GỘP (gross return multiplier), gồm cả gốc + lãi.
+    Đề bài ghi "lãi 20%" -> rho = 1.2. Đề ghi "150%" -> rho = 1.5.
+
+[6] Hàm mục tiêu trong JSON là "Z_T", final_objective formula = "Z_T", sense = maximize.
+    Đúng tinh thần. Chỉ cần sửa lại Z_T = h_{T+1} (không phải h_T) như nêu ở [1].
+
+KẾT LUẬN: Mô hình JSON có off-by-one và trùng ràng buộc, dễ dẫn đến tính sai
+khoản đáo hạn cuối kỳ. Markdown đã viết phiên bản chuẩn lại.

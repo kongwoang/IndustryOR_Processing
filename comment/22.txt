@@ -1,0 +1,26 @@
+COMMENT cho math_formula/22.json (Index 22 — Production Planning)
+====================================================================
+
+[1] LỖI: Trùng lặp 3 ràng buộc cùng nội dung.
+    - "activation_required_for_production": x_{p,t} <= Q_p * y_{p,t}
+    - "daily_quota_when_activated":         x_{p,t} <= Q_p * y_{p,t}
+    - "zero_production_when_inactive":      x_{p,t} <= Q_p * y_{p,t}
+    Cả 3 đều cùng một bất phương trình. Trong markdown đã gộp thành (C1) duy nhất.
+    Lý do gộp được: nếu y=0 thì x<=0, kết hợp x>=0 cho x=0 (xử lý được "zero when inactive").
+                    Nếu y=1 thì x<=Q (xử lý được cả "activation required" và "quota when active").
+
+[2] Ràng buộc minimum_batch_when_activated viết đúng:
+    x_{p,t} >= B_p * y_{p,t}
+    Khi y=0 thành x>=0 (vô hiệu); khi y=1 thành x>=B (kích hoạt).
+
+[3] Hàm mục tiêu trong final_objective viết đúng:
+    sum_{p,t} ((S_p - C_p) * x_{p,t} - F_p * y_{p,t}), sense=maximize.
+
+[4] Tham số / biến trong JSON khớp với đề bài về shape, ý nghĩa.
+
+[5] Có thể siết chặt mô hình (tùy chọn, không bắt buộc) bằng cách thêm:
+        sum_t y_{p,t} >= 1  (nếu muốn buộc sản phẩm phải sản xuất ít nhất 1 ngày)
+    Đề KHÔNG yêu cầu nên không bổ sung.
+
+KẾT LUẬN: Mô hình JSON đúng về bản chất; chỉ có lỗi cosmetic là 3 ràng buộc trùng.
+File markdown đã sửa lại bằng cách gộp 3 ràng buộc trùng thành 1.
