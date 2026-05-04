@@ -1,0 +1,17 @@
+1. LỖI: Trùng tên ràng buộc.
+    "exactly_one_recipient_per_asset" xuất hiện 2 lần:
+      - Lần 1 (id #1): formula = "asset assignment is binary and exclusive across recipients"
+        => văn xuôi, không phải công thức toán.
+      - Lần 2 (id #6): formula = "sum_r x_{i,r} = 1 forall i" => đúng.
+    "bundle_integrity" cũng xuất hiện 2 lần (văn xuôi vs công thức).
+
+2. DƯ: ràng buộc "recipient_total_value_definition" có 2 entry:
+      - Entry trống "no time index is used in the model" => không phải ràng buộc.
+      - Entry đúng "V_r = sum_i v_i x_{ir}".
+
+3. DƯ: ràng buộc "imbalance_absolute_gap_definition" viết hai chiều:
+      Δ ≥ V_r − V_{r'} VÀ Δ ≥ V_{r'} − V_r forall r, r'.
+    Khi r,r' chạy hết các cặp có thứ tự, chỉ một bất phương trình
+      Δ ≥ V_r − V_{r'} forall r, r'
+    đã bao gồm cả chiều ngược (đảo r↔r'). Viết hai chiều là DƯ THỪA (không sai),
+    chỉ làm tăng số ràng buộc của LP.

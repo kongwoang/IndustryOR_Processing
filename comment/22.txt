@@ -1,0 +1,6 @@
+Trùng lặp 3 ràng buộc cùng nội dung.
+    - "activation_required_for_production": x_{p,t} <= Q_p * y_{p,t}
+    - "daily_quota_when_activated":         x_{p,t} <= Q_p * y_{p,t}
+    - "zero_production_when_inactive":      x_{p,t} <= Q_p * y_{p,t}
+Cả 3 đều cùng một bất phương trình.
+

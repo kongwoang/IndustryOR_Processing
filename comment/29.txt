@@ -1,0 +1,19 @@
+1. lỗi nhỏ về sense:
+    - "objectives[0].sense" = "feasibility"
+    - "final_objective.sense" = "minimize" (preemption_optimization)
+    Mâu thuẫn nội bộ. Đúng ra phải là "minimize" với 3 mức ưu tiên.
+
+2. THIẾU về domain biến:
+    JSON ghi:
+      - x: integer
+      - u: continuous
+      - v_2, v_3: continuous
+    Bài toán đếm người, nên u, v_2, v_3 phải là số NGUYÊN không âm.
+    Vì các ràng buộc liên kết u với x (nguyên) và d (nguyên), về mặt nghiệm tối ưu
+    thì u sẽ tự nhiên nhận giá trị nguyên. Tuy nhiên về mặt khai báo nên dùng integer.
+
+
+3. Trùng ràng buộc:
+    - "lexicographic_priority_order" với formula "p_1 ≻ p_2 ≻ p_3" KHÔNG phải ràng buộc
+      mà là CHIẾN LƯỢC tối ưu.
+

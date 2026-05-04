@@ -1,0 +1,30 @@
+1. LỖI rõ ràng về sense:
+    - "objectives[0].sense" = "maximize"   <-- SAI
+    - "objectives[0].description" = "minimize the completion time of the last finished batch"
+    - "final_objective.sense" = "minimize"
+    Hướng tối ưu phải là MINIMIZE makespan.
+
+2. nhiều ràng buộc chỉ là VĂN XUÔI, không phải công thức toán:
+    - "fixed_vat_order" formula = "j-1 -> j"
+    - "nonpreemptive_processing" formula = "non-preemptive processing"
+    - "single_batch_per_vat" formula = "No overlap of batches on any vat consistent with the common permutation π"
+    - "single_vat_per_batch" formula = "Implied by s[i,j] >= c[i,j-1]..."
+
+
+3. ràng buộc non-overlap trên cùng một vat KHÔNG ĐƯỢC TUYẾN TÍNH HOÁ.
+    JSON chỉ ghi "no overlap consistent with permutation π", nhưng không đưa
+    biến thứ tự / disjunctive constraint cụ thể. Một LP/MILP solver KHÔNG thể chạy
+    với phát biểu này.
+
+
+4. DƯ: "all_batches_completed" và "makespan_definition" đều là Cmax >= c[i,j],
+    đặt 2 lần. Chỉ cần 1.
+
+5. DƯ: "precedence_within_batch" và "within_batch_vat_order" đều là
+    s[i,j] >= c[i,j-1] cho j>=2. Đặt 2 lần.
+
+6. BIẾN sequence π trong JSON khai báo "integer" với shape [N], nhưng KHÔNG có
+    ràng buộc viết bằng công thức để buộc π là hoán vị (permutation_sequence chỉ ghi
+    "π in Perm(I)" dưới dạng văn xuôi).
+
+
